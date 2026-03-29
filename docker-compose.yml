@@ -1,0 +1,115 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: studyquest-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-studyquest}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-studyquest_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-studyquest}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-studyquest} -d ${POSTGRES_DB:-studyquest}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - studyquest-net
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: studyquest-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD:-redispass}
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redispass}", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - studyquest-net
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: studyquest-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-studyquest}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-studyquest_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-studyquest}
+      TYPEORM_SYNC: "true"
+      TYPEORM_LOGGING: "false"
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redispass}
+      JWT_SECRET: ${JWT_SECRET:-changeme}
+      JWT_EXPIRES_IN: 7d
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-1.5-flash}
+      CORS_ORIGIN: http://localhost:5173
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - uploads_data:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: npm run start:dev
+    networks:
+      - studyquest-net
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: studyquest-web
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_URL: http://localhost:3000
+      VITE_WS_URL: ws://localhost:3000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - api
+    networks:
+      - studyquest-net
+
+volumes:
+  postgres_data:
+  redis_data:
+  uploads_data:
+
+networks:
+  studyquest-net:
+    driver: bridge
