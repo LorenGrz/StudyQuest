@@ -27,6 +27,7 @@ import { User } from '../../modules/users/user.entity';
 import { Subject } from '../../modules/subjects/subject.entity';
 import { Party } from '../../modules/parties/party.entity';
 import { PartyMember } from '../../modules/parties/party-member.entity';
+import { ChatMessage } from '../../modules/parties/chat-message.entity';
 
 // ─── Conexión ──────────────────────────────────────────────────────────────────
 const AppDataSource = new DataSource({
@@ -36,7 +37,7 @@ const AppDataSource = new DataSource({
   username: process.env.POSTGRES_USER     ?? 'studyquest',
   password: process.env.POSTGRES_PASSWORD ?? 'studyquest_pass',
   database: process.env.POSTGRES_DB       ?? 'studyquest',
-  entities: [User, Subject, Party, PartyMember],
+  entities: [User, Subject, Party, PartyMember, ChatMessage],
   synchronize: false,
   logging: false,
 });

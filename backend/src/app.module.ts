@@ -11,7 +11,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { extname, resolve } from 'path';
 import { v4 as uuid } from 'uuid';
 
 import { UsersModule } from './modules/users/users.module';
@@ -24,7 +24,7 @@ import { MatchmakingModule } from './gateways/matchmaking/matchmaking.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: resolve(__dirname, '../.env') }),
 
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
