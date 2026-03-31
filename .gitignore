@@ -46,3 +46,4 @@ docker-data/
 # =========================
 *.local
 *.cache
+.agent/
