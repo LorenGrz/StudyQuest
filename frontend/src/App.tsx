@@ -7,6 +7,9 @@ import MatchmakingPage from './pages/MatchmakingPage'
 import PartyRoomPage from './pages/PartyRoomPage'
 import QuizPage from './pages/QuizPage'
 
+import PartiesPage from './pages/PartiesPage'
+import ProfilePage from './pages/ProfilePage'
+
 function App() {
   return (
     <Routes>
@@ -21,6 +24,8 @@ function App() {
       <Route path="/subjects" element={<ProtectedRoute><SubjectExplorerPage /></ProtectedRoute>} />
       <Route path="/matchmaking" element={<ProtectedRoute><MatchmakingPage /></ProtectedRoute>} />
       <Route path="/party/:partyId" element={<ProtectedRoute><PartyRoomPage /></ProtectedRoute>} />
+      <Route path="/parties" element={<ProtectedRoute><PartiesPage /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="/quiz/:questId" element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
 
       {/* 404 → auth */}
