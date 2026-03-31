@@ -28,6 +28,10 @@ import { Subject } from '../../modules/subjects/subject.entity';
 import { Party } from '../../modules/parties/party.entity';
 import { PartyMember } from '../../modules/parties/party-member.entity';
 import { ChatMessage } from '../../modules/parties/chat-message.entity';
+import { Quest } from '../../modules/quests/quest.entity';
+import { QuizQuestion } from '../../modules/quests/quiz-question.entity';
+import { QuizOption } from '../../modules/quests/quiz-option.entity';
+import { PlayerResult } from '../../modules/quests/player-result.entity';
 
 // ─── Conexión ──────────────────────────────────────────────────────────────────
 const AppDataSource = new DataSource({
@@ -37,7 +41,10 @@ const AppDataSource = new DataSource({
   username: process.env.POSTGRES_USER     ?? 'studyquest',
   password: process.env.POSTGRES_PASSWORD ?? 'studyquest_pass',
   database: process.env.POSTGRES_DB       ?? 'studyquest',
-  entities: [User, Subject, Party, PartyMember, ChatMessage],
+  entities: [
+    User, Subject, Party, PartyMember, ChatMessage,
+    Quest, QuizQuestion, QuizOption, PlayerResult
+  ],
   synchronize: false,
   logging: false,
 });
