@@ -71,6 +71,7 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   const nextStep = () => {
     if (step === 1) {
       if (!form.email || !form.password) { setLocalError('Completá todos los campos'); return }
+      if (form.password.length < 8) { setLocalError('La contraseña debe tener al menos 8 caracteres'); return }
       if (form.password !== form.confirmPassword) { setLocalError('Las contraseñas no coinciden'); return }
     }
     if (step === 2) {

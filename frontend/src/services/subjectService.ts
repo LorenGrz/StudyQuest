@@ -10,8 +10,8 @@ export interface SubjectQuery {
 
 export const subjectService = {
   async findAll(query: SubjectQuery = {}): Promise<Subject[]> {
-    const { data } = await api.get<Subject[]>('/subjects', { params: query })
-    return data
+    const { data } = await api.get<any>('/subjects', { params: query })
+    return data.items || data
   },
 
   async findById(id: string): Promise<Subject> {
