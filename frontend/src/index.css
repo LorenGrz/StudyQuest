@@ -185,7 +185,7 @@ input, textarea, select { font-family: inherit; }
   align-items: center;
   justify-content: center;
   background: radial-gradient(ellipse at center, rgba(124,58,237,0.1) 0%, var(--bg-base) 70%);
-  padding: 24px;
+  padding: 24px 24px 94px 24px;
 }
 
 /* ─── Auth Forms ─────────────────────────────────────────────── */

@@ -70,6 +70,7 @@ export function FullscreenLayout({ children }: Props) {
   return (
     <div className="fullscreen-layout">
       {children}
+      <BottomNav />
     </div>
   )
 }
