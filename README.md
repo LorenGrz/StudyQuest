@@ -1,7 +1,7 @@
 # StudyQuest 🎮📚
 
 Plataforma de estudio colaborativo con matchmaking y quizzes generados por IA.
-**Esta versión usa PostgreSQL 16 + TypeORM** en lugar de MongoDB + Mongoose.
+**Esta versión usa PostgreSQL 16 + TypeORM**.
 
 ---
 
