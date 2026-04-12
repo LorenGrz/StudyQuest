@@ -15,6 +15,7 @@ export interface PartyMember {
   partyXp: number
   isOnline: boolean
   joinedAt: string
+  role: 'leader' | 'member'
   user: Pick<User, 'id' | 'username' | 'displayName' | 'avatarUrl' | 'stats'>
 }
 
@@ -32,11 +33,12 @@ export interface PartyQuest {
 
 export interface Party {
   id: string
+  name?: string
   subjectId: string
   subject: PartySubject
   members: PartyMember[]
   maxMembers: number
-  status: 'forming' | 'active' | 'closed'
+  status: 'forming' | 'active' | 'closed' | 'waiting'
   quests: PartyQuest[]
   createdAt: string
   updatedAt: string

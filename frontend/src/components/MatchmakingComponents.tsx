@@ -1,6 +1,3 @@
-import { useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
-import type { Socket } from 'socket.io-client'
 import type { User } from '../services/userService'
 import { Button } from './UI'
 
