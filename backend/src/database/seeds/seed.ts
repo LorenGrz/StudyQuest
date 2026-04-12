@@ -17,7 +17,7 @@
 //   1. config()           → carga .env en process.env
 //   2. new DataSource(…)  → lee process.env ya cargado ✅
 import { config } from 'dotenv';
-config(); // carga el .env que esté en el directorio desde donde se corre el script
+config({ path: '../.env' }); // carga el .env desde la raíz del proyecto
 
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';

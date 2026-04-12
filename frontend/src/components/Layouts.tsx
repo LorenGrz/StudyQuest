@@ -14,12 +14,12 @@ export function MobileLayout({ children }: Props) {
   )
 }
 
-function BottomNav() {
+export function BottomNav() {
   const { pathname } = useLocation()
 
   const tabs = [
     { path: '/dashboard', label: 'Inicio', icon: '🏠' },
-    { path: '/matchmaking', label: 'Match', icon: '⚔️' },
+    { path: '/match', label: 'Match', icon: '⚔️' },
     { path: '/parties', label: 'Partys', icon: '🛡️' },
     { path: '/profile', label: 'Perfil', icon: '👤' },
   ]

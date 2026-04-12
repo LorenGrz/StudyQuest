@@ -10,9 +10,9 @@ export function PartyHeader({ party }: { party: Party | null }) {
   return (
     <div className="party-header">
       <div className="party-header-info">
-        <h1 className="party-header-name">{party.name}</h1>
+        <h1 className="party-header-name">{party.name ?? party.subject?.name ?? 'Party'}</h1>
         <span className={`party-status party-status-${party.status}`}>
-          {party.status === 'active' ? '🟢 Activa' : party.status === 'waiting' ? '🟡 Esperando' : '⚫ Finalizada'}
+          {party.status === 'active' ? '🟢 Activa' : party.status === 'waiting' ? '🟡 Esperando' : party.status === 'forming' ? '🟡 Armando' : '⚫ Finalizada'}
         </span>
       </div>
       <span className="party-members-count">

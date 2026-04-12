@@ -24,7 +24,7 @@ import { MatchmakingModule } from './gateways/matchmaking/matchmaking.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: resolve(__dirname, '../.env') }),
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: resolve(__dirname, '../../.env') }),
 
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],

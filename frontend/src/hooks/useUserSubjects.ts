@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type { Subject } from '../services/userService'
 import { userService } from '../services/userService'
 import { useAuthStore } from '../store/authStore'
@@ -10,7 +10,7 @@ export function useUserSubjects() {
 
   const subjects: Subject[] = user?.enrolledSubjects ?? []
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     setIsLoading(true)
     try {
       const updated = await userService.getMe()
@@ -20,11 +20,11 @@ export function useUserSubjects() {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [setUser])
 
   useEffect(() => {
     if (!user) refresh()
-  }, [])
+  }, [user, refresh])
 
   return { subjects, isLoading, error, refresh }
 }
