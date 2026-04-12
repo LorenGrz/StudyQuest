@@ -47,8 +47,9 @@ const MatchmakingPage = () => {
 
   const startSearch = () => {
     socket.emit('match:join-queue', {
-      userId: user?.id,
       subjectIds: user?.enrolledSubjects?.map((s) => s.id) ?? [],
+      availability: [],
+      preferredPartySize: 4,
     })
     setState('searching')
   }

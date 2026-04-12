@@ -66,7 +66,7 @@ export function SearchAnimation() {
 // ─── PartyPreview ──────────────────────────────────────────────────────────────
 interface PartyPreviewProps {
   onAccept: () => void
-  party?: { members: Array<{ username: string; displayName: string }> }
+  party?: { members: Array<{ username?: string; displayName?: string; userId?: string }> }
 }
 
 export function PartyPreview({ onAccept, party }: PartyPreviewProps) {
@@ -76,12 +76,16 @@ export function PartyPreview({ onAccept, party }: PartyPreviewProps) {
       <div className="party-preview-icon">🎉</div>
       <h2 className="party-preview-title">¡Party encontrada!</h2>
       <div className="party-preview-members">
-        {members.map((m) => (
-          <div key={m.username} className="party-preview-member">
-            <div className="avatar-placeholder">{m.displayName[0]}</div>
-            <p>{m.displayName}</p>
-          </div>
-        ))}
+        {members.map((m, i) => {
+          const name = m.displayName ?? `Jugador ${i + 1}`;
+          const key = m.username ?? m.userId ?? i;
+          return (
+            <div key={key} className="party-preview-member">
+              <div className="avatar-placeholder">{name[0]}</div>
+              <p>{name}</p>
+            </div>
+          )
+        })}
       </div>
       <Button size="lg" onClick={onAccept}>✅ Aceptar</Button>
     </div>

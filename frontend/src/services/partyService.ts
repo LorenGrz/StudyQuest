@@ -11,23 +11,50 @@ export interface ChatMessage {
 
 export interface PartyMember {
   id: string
-  user: Pick<User, 'id' | 'username' | 'displayName' | 'avatarUrl' | 'stats'>
-  role: 'leader' | 'member'
+  userId: string
+  partyXp: number
+  isOnline: boolean
   joinedAt: string
+  user: Pick<User, 'id' | 'username' | 'displayName' | 'avatarUrl' | 'stats'>
+}
+
+export interface PartySubject {
+  id: string
+  name: string
+  code: string
+}
+
+export interface PartyQuest {
+  id: string
+  title: string
+  status: string
 }
 
 export interface Party {
   id: string
-  name: string
-  subjectIds: string[]
+  subjectId: string
+  subject: PartySubject
   members: PartyMember[]
-  status: 'waiting' | 'active' | 'finished'
+  maxMembers: number
+  status: 'forming' | 'active' | 'closed'
+  quests: PartyQuest[]
   createdAt: string
+  updatedAt: string
 }
 
 export const partyService = {
   async getMine(): Promise<Party[]> {
     const { data } = await api.get<Party[]>('/parties/mine')
+    return data
+  },
+
+  async discover(): Promise<Party[]> {
+    const { data } = await api.get<Party[]>('/parties/discover')
+    return data
+  },
+
+  async join(partyId: string): Promise<Party> {
+    const { data } = await api.post<Party>(`/parties/${partyId}/join`)
     return data
   },
 
