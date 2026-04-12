@@ -66,6 +66,9 @@ const USERS_DATA = [
   { email: 'bob@studyquest.dev',   username: 'bobby_b',    displayName: 'Bob Martínez',   password: 'Password123!', semester: 3 },
   { email: 'carol@studyquest.dev', username: 'carol_dev',  displayName: 'Carol López',    password: 'Password123!', semester: 5 },
   { email: 'dave@studyquest.dev',  username: 'dave_code',  displayName: 'Dave Rodríguez', password: 'Password123!', semester: 4 },
+  { email: 'eve@studyquest.dev',   username: 'eve_hacker', displayName: 'Eve Fernández',  password: 'Password123!', semester: 2 },
+  { email: 'frank@studyquest.dev', username: 'frank_tank', displayName: 'Frank Gómez',    password: 'Password123!', semester: 3 },
+  { email: 'grace@studyquest.dev', username: 'grace_hopp', displayName: 'Grace Hopper',   password: 'Password123!', semester: 4 },
 ];
 
 // ─── Main ──────────────────────────────────────────────────────────────────────
@@ -127,8 +130,8 @@ async function seed() {
 
   // ── 3. Inscribir usuarios en materias ────────────────────────────────────────
   console.log('\n📝  Inscribiendo usuarios en materias...');
-  const [alice, bob, carol, dave] = savedUsers;
-  const [, aed, bd, , rc] = savedSubjects;
+  const [alice, bob, carol, dave, eve, frank, grace] = savedUsers;
+  const [am2, aed, bd, so, rc] = savedSubjects;
 
   // CORRECTO: AppDataSource.createQueryBuilder().relation(...)
   // INCORRECTO (bug original): subjectRepo.createQueryBuilder().relation(...)
@@ -136,10 +139,15 @@ async function seed() {
   //   → AppDataSource.createQueryBuilder().relation() devuelve RelationQueryBuilder ✅
   const rel = () => AppDataSource.createQueryBuilder().relation(User, 'enrolledSubjects');
 
+  // Dave se inscribe en todas para probar el feed completo
+  await rel().of(dave.id).add([am2.id, aed.id, bd.id, so.id, rc.id]).catch(() => { /* duplicado, ignorar */ });
+  
   await rel().of(alice.id).add([aed.id, bd.id]).catch(() => { /* duplicado, ignorar */ });
-  await rel().of(bob.id).add([aed.id, bd.id]).catch(() => { /* duplicado, ignorar */ });
-  await rel().of(carol.id).add([rc.id]).catch(() => { /* duplicado, ignorar */ });
-  await rel().of(dave.id).add([bd.id]).catch(() => { /* duplicado, ignorar */ });
+  await rel().of(bob.id).add([aed.id, bd.id, so.id]).catch(() => { /* duplicado, ignorar */ });
+  await rel().of(carol.id).add([rc.id, so.id]).catch(() => { /* duplicado, ignorar */ });
+  await rel().of(eve.id).add([am2.id, aed.id]).catch(() => { /* duplicado, ignorar */ });
+  await rel().of(frank.id).add([so.id, rc.id]).catch(() => { /* duplicado, ignorar */ });
+  await rel().of(grace.id).add([bd.id, so.id, aed.id]).catch(() => { /* duplicado, ignorar */ });
 
   console.log('   ✔  Inscripciones realizadas');
 
@@ -152,24 +160,63 @@ async function seed() {
     partyBD = await partyRepo.save(
       partyRepo.create({ subjectId: bd.id, status: 'forming', maxMembers: 4 }),
     );
-    await memberRepo.save(memberRepo.create({ partyId: partyBD.id, userId: alice.id }));
+    await memberRepo.save(memberRepo.create({ partyId: partyBD.id, userId: alice.id, role: 'leader' }));
     await memberRepo.save(memberRepo.create({ partyId: partyBD.id, userId: bob.id }));
     console.log('   ✔  Party "Bases de Datos" (alice + bob)');
   } else {
     console.log('   ⚠️  Party BD ya existe — omitida');
   }
 
-  // Party 2: Redes de Computadoras — carol + dave
+  // Party 2: Redes de Computadoras — carol + frank
   let partyRC = await partyRepo.findOne({ where: { subjectId: rc.id, status: 'forming' } });
   if (!partyRC) {
     partyRC = await partyRepo.save(
       partyRepo.create({ subjectId: rc.id, status: 'forming', maxMembers: 4 }),
     );
-    await memberRepo.save(memberRepo.create({ partyId: partyRC.id, userId: carol.id }));
-    await memberRepo.save(memberRepo.create({ partyId: partyRC.id, userId: dave.id }));
-    console.log('   ✔  Party "Redes de Computadoras" (carol + dave)');
+    await memberRepo.save(memberRepo.create({ partyId: partyRC.id, userId: carol.id, role: 'leader' }));
+    await memberRepo.save(memberRepo.create({ partyId: partyRC.id, userId: frank.id }));
+    console.log('   ✔  Party "Redes de Computadoras" (carol + frank)');
   } else {
     console.log('   ⚠️  Party RC ya existe — omitida');
+  }
+
+  // Party 3: Algoritmos y Estructuras de Datos — eve + grace
+  let partyAED = await partyRepo.findOne({ where: { subjectId: aed.id, status: 'forming' } });
+  if (!partyAED) {
+    partyAED = await partyRepo.save(
+      partyRepo.create({ subjectId: aed.id, status: 'forming', maxMembers: 3 }),
+    );
+    await memberRepo.save(memberRepo.create({ partyId: partyAED.id, userId: eve.id, role: 'leader' }));
+    await memberRepo.save(memberRepo.create({ partyId: partyAED.id, userId: grace.id }));
+    console.log('   ✔  Party "Algoritmos y Estructuras" (eve + grace)');
+  } else {
+    console.log('   ⚠️  Party AED ya existe — omitida');
+  }
+
+  // Party 4: Sistemas Operativos — grace + bob + carol
+  let partySO = await partyRepo.findOne({ where: { subjectId: so.id, status: 'forming' } });
+  if (!partySO) {
+    partySO = await partyRepo.save(
+      partyRepo.create({ subjectId: so.id, status: 'forming', maxMembers: 5 }),
+    );
+    await memberRepo.save(memberRepo.create({ partyId: partySO.id, userId: grace.id, role: 'leader' }));
+    await memberRepo.save(memberRepo.create({ partyId: partySO.id, userId: bob.id }));
+    await memberRepo.save(memberRepo.create({ partyId: partySO.id, userId: carol.id }));
+    console.log('   ✔  Party "Sistemas Operativos" (grace + bob + carol)');
+  } else {
+    console.log('   ⚠️  Party SO ya existe — omitida');
+  }
+
+  // Party 5: Análisis Matemático II — eve
+  let partyAM2 = await partyRepo.findOne({ where: { subjectId: am2.id, status: 'forming' } });
+  if (!partyAM2) {
+    partyAM2 = await partyRepo.save(
+      partyRepo.create({ subjectId: am2.id, status: 'forming', maxMembers: 2 }),
+    );
+    await memberRepo.save(memberRepo.create({ partyId: partyAM2.id, userId: eve.id, role: 'leader' }));
+    console.log('   ✔  Party "Análisis Matemático II" (eve)');
+  } else {
+    console.log('   ⚠️  Party AM2 ya existe — omitida');
   }
 
   // ── Resumen ──────────────────────────────────────────────────────────────────

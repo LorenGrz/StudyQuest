@@ -82,66 +82,112 @@ export function ProgressBar({ pct }: { pct: number }) {
   )
 }
 
-// ─── PartyCard ────────────────────────────────────────────────────────────────
+// ─── PartyCard (Issue 3) ──────────────────────────────────────────────────────
 
-const COVER_PALETTES = [
-  'linear-gradient(135deg,#0f2027,#203a43,#2c5364)',
-  'linear-gradient(135deg,#1a0533,#3b0f6b,#1a0533)',
-  'linear-gradient(135deg,#0d1b2a,#1b3a4b,#0d1b2a)',
-  'linear-gradient(135deg,#1c1c2e,#2d2d44,#1a1a2e)',
-  'linear-gradient(135deg,#0f3460,#16213e,#0f3460)',
-]
+// Seed determinístico → imagen de cover única por party
+function getCoverImageUrl(partyId: string): string {
+  const seed = partyId
+    .split('')
+    .reduce((acc, c) => acc + c.charCodeAt(0), 0)
+  // Picsum da fotos reales con seed; 640×360 formato landscape
+  return `https://picsum.photos/seed/${seed}/640/360`
+}
+
+// Ícono emoji según nombre de materia
+function getSubjectIcon(name?: string | null): string {
+  if (!name) return '📚'
+  const n = name.toLowerCase()
+  if (n.includes('matemát') || n.includes('cálculo') || n.includes('álgebra')) return '📐'
+  if (n.includes('física'))   return '⚛️'
+  if (n.includes('química'))  return '🧪'
+  if (n.includes('program') || n.includes('soft') || n.includes('datos')) return '💻'
+  if (n.includes('inglés') || n.includes('lengua') || n.includes('escrit')) return '📝'
+  if (n.includes('historia') || n.includes('sociol')) return '🏛️'
+  if (n.includes('bio'))      return '🧬'
+  if (n.includes('económ') || n.includes('contab') || n.includes('admin')) return '📊'
+  if (n.includes('derecho'))  return '⚖️'
+  return '📚'
+}
 
 export function PartyCard({ party }: { party: Party }) {
-  const quest = getActiveQuest(party)
-  const members = party.members ?? []
-  const host = members[0]
-  const slotsLeft = getSlotsRemaining(party)
-  const coverIdx = party.id ? party.id.charCodeAt(0) % COVER_PALETTES.length : 0
+  const quest      = getActiveQuest(party)
+  const members    = party.members ?? []
+  const host       = members.find((m) => m.role === 'leader') ?? members[0]
+  const slotsLeft  = getSlotsRemaining(party)
+  const coverUrl   = getCoverImageUrl(party.id)
+  const subjectIcon = getSubjectIcon(party.subject?.name)
+
+  // Progreso heurístico: rondas completadas / totales (placeholder hasta backend real)
+  const progressPct = quest ? Math.min(95, Math.max(10,
+    (party.members?.length ?? 1) * 15
+  )) : 0
 
   return (
     <div className="mc-card">
-      {/* Cover */}
-      <div className="mc-card-cover" style={{ background: COVER_PALETTES[coverIdx] }}>
-        <div className="mc-cover-orb mc-cover-orb-1" />
-        <div className="mc-cover-orb mc-cover-orb-2" />
+
+      {/* ── Cover con imagen real ──────────────────────────────── */}
+      <div className="mc-card-cover">
+        <img
+          className="mc-cover-img"
+          src={coverUrl}
+          alt={party.subject?.name ?? 'Party cover'}
+          loading="lazy"
+        />
+        {/* Overlay de degradado para legibilidad */}
+        <div className="mc-cover-overlay" />
+
+        {/* Chip de materia con ícono */}
         <div className="mc-cover-chip">
           <span className="mc-cover-chip-dot" />
+          <span className="mc-cover-chip-icon">{subjectIcon}</span>
           {party.subject?.code ?? party.subject?.name ?? 'SQUAD'}
         </div>
+
+        {/* Badge de slots */}
+        <div className="mc-cover-slots-badge">
+          {slotsLeft > 0 ? `${slotsLeft} libre${slotsLeft !== 1 ? 's' : ''}` : 'COMPLETO'}
+        </div>
+
+        {/* Fade al body */}
         <div className="mc-card-cover-fade" />
       </div>
 
-      {/* Body */}
+      {/* ── Body con glassmorphism ────────────────────────────── */}
       <div className="mc-card-body">
-        {/* Host */}
+
+        {/* Host row */}
         <div className="mc-host-row">
           <div className="mc-host-avatar-wrap">
             {host ? (
-              <MemberAvatar member={host} size={48} />
+              <MemberAvatar member={host} size={50} />
             ) : (
-              <div className="mc-avatar-placeholder" style={{ width: 48, height: 48, fontSize: 20 }}>?</div>
+              <div className="mc-avatar-placeholder" style={{ width: 50, height: 50, fontSize: 20 }}>?</div>
             )}
             <div className="mc-host-online-dot" />
           </div>
           <div className="mc-host-info">
-            <span className="mc-host-name">{host?.user?.username ?? 'Sin líder'}</span>
+            <div className="mc-host-name-row">
+              <span className="mc-host-name">{host?.user?.username ?? 'Sin líder'}</span>
+              {host?.role === 'leader' && (
+                <span className="mc-leader-badge">👑 Líder</span>
+              )}
+            </div>
             <span className="mc-host-subject">{party.subject?.name ?? 'Materia'}</span>
           </div>
-          <div className="mc-host-lvl">
-            LV {host?.user?.stats?.level ?? 0}
-          </div>
+          <div className="mc-host-lvl">LV {host?.user?.stats?.level ?? 0}</div>
         </div>
 
         <div className="mc-divider" />
 
-        {/* Quest */}
+        {/* Quest block */}
         <div className="mc-quest-block">
           <p className="mc-quest-title">
             {quest?.title ?? party.subject?.name ?? 'Party de estudio'}
           </p>
-          {party.subject?.name && (
-            <p className="mc-quest-sub">{party.subject.name}</p>
+          {quest && (
+            <p className="mc-quest-sub">
+              {party.subject?.name}
+            </p>
           )}
         </div>
 
@@ -150,17 +196,17 @@ export function PartyCard({ party }: { party: Party }) {
           <div className="mc-progress-labels">
             <span className="mc-progress-label">QUEST PROGRESS</span>
             <span className="mc-progress-pct">
-              {quest ? '60% COMPLETE' : 'SIN QUEST'}
+              {quest ? `${progressPct}% COMPLETE` : 'SIN QUEST ACTIVA'}
             </span>
           </div>
-          <ProgressBar pct={quest ? 60 : 0} />
+          <ProgressBar pct={progressPct} />
         </div>
 
         {/* Footer */}
         <div className="mc-card-footer">
           <AvatarStack members={members} />
           <span className="mc-slots-label">
-            {slotsLeft} slot{slotsLeft !== 1 ? 's' : ''} remaining
+            {members.length}/{party.maxMembers ?? 4} miembros
           </span>
         </div>
       </div>
