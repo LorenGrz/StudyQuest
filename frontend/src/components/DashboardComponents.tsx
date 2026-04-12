@@ -1,3 +1,4 @@
+import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { User } from '../services/userService'
 import type { Party } from '../services/partyService'
@@ -41,7 +42,7 @@ export function ActivePartyBanner({ party }: { party: Party | null }) {
         <span className="party-banner-dot" />
         <div>
           <p className="party-banner-label">Party Activa</p>
-          <p className="party-banner-name">{party.name}</p>
+          <p className="party-banner-name">{party.name ?? party.subject?.name ?? 'Party activa'}</p>
         </div>
       </div>
       <Button size="sm" variant="primary">Ir →</Button>

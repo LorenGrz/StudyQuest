@@ -84,10 +84,10 @@ export class MatchmakingGateway
     const candidate: QueueCandidate = {
       userId: conn.userId,
       socketId: socket.id,
-      subjectIds: dto.subjectIds,
-      availability: dto.availability,
+      subjectIds: dto.subjectIds ?? [],
+      availability: dto.availability ?? [],
       career: '',
-      preferredPartySize: dto.preferredPartySize,
+      preferredPartySize: dto.preferredPartySize ?? 4,
       joinedAt: new Date(),
       threshold: 0.5,
     };

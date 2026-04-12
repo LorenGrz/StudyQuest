@@ -5,9 +5,10 @@ import { PartyMember } from './party-member.entity';
 import { ChatMessage } from './chat-message.entity';
 import { PartiesService } from './parties.service';
 import { PartiesController } from './parties.controller';
+import { User } from '../users/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Party, PartyMember, ChatMessage])],
+  imports: [TypeOrmModule.forFeature([Party, PartyMember, ChatMessage, User])],
   controllers: [PartiesController],
   providers: [PartiesService],
   exports: [PartiesService, TypeOrmModule],

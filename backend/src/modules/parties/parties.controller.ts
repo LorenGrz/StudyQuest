@@ -8,7 +8,7 @@ import {
   Request,
   Query,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PartiesService } from './parties.service';
 import { SendChatMessageDto } from '../../common/dto';
@@ -19,6 +19,12 @@ import { SendChatMessageDto } from '../../common/dto';
 @Controller('parties')
 export class PartiesController {
   constructor(private readonly partiesService: PartiesService) {}
+
+  @Get('discover')
+  @ApiOperation({ summary: 'Parties abiertas en materias del usuario (async discovery)' })
+  discover(@Request() req: any) {
+    return this.partiesService.discover(req.user.userId);
+  }
 
   @Get('mine')
   getMyParties(@Request() req: any) {
@@ -42,5 +48,11 @@ export class PartiesController {
     @Body() dto: SendChatMessageDto,
   ) {
     return this.partiesService.addChatMessage(id, req.user.userId, dto.text);
+  }
+
+  @Post(':id/join')
+  @ApiOperation({ summary: 'Unirse a una party existente (async discovery)' })
+  join(@Param('id') id: string, @Request() req: any) {
+    return this.partiesService.joinParty(id, req.user.userId);
   }
 }

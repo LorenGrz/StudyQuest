@@ -2,12 +2,15 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Party } from './party.entity';
 import { PartyMember } from './party-member.entity';
 import { ChatMessage } from './chat-message.entity';
+import { User } from '../users/user.entity';
 
 @Injectable()
 export class PartiesService {
@@ -18,6 +21,8 @@ export class PartiesService {
     private readonly memberRepo: Repository<PartyMember>,
     @InjectRepository(ChatMessage)
     private readonly chatRepo: Repository<ChatMessage>,
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -118,5 +123,92 @@ export class PartiesService {
       take: limit,
     });
     return msgs.reverse();
+  }
+
+  /**
+   * Devuelve parties abiertas (forming/active con slots libres) que compartan
+   * al menos una materia con el usuario autenticado, excluyendo aquellas en las
+   * que ya es miembro.
+   */
+  async discover(userId: string): Promise<Party[]> {
+    const user = await this.userRepo.findOne({
+      where: { id: userId },
+      relations: ['enrolledSubjects'],
+    });
+    if (!user || !user.enrolledSubjects?.length) return [];
+
+    const subjectIds = user.enrolledSubjects.map((s) => s.id);
+
+    // Parties en las materias del usuario donde ya es miembro
+    const memberOfIds = await this.memberRepo
+      .createQueryBuilder('pm')
+      .select('pm.party_id', 'partyId')
+      .where('pm.user_id = :userId', { userId })
+      .getRawMany();
+    const excludeIds = memberOfIds.map((r) => r.partyId);
+
+    const qb = this.partyRepo
+      .createQueryBuilder('p')
+      .leftJoinAndSelect('p.subject', 'subject')
+      .leftJoinAndSelect('p.members', 'members')
+      .leftJoinAndSelect('members.user', 'memberUser')
+      .leftJoinAndSelect('p.quests', 'quests')
+      .where('p.subject_id IN (:...subjectIds)', { subjectIds })
+      .andWhere("p.status IN ('forming', 'active')")
+      .orderBy('p.createdAt', 'DESC')
+      .take(50);
+
+    if (excludeIds.length) {
+      qb.andWhere('p.id NOT IN (:...excludeIds)', { excludeIds });
+    }
+
+    const parties = await qb.getMany();
+
+    // Filtrar solo las que aun tienen slots libres
+    return parties.filter(
+      (p) => p.members.length < p.maxMembers,
+    );
+  }
+
+  /**
+   * Une al usuario autenticado a una party existente si hay slots disponibles.
+   */
+  async joinParty(partyId: string, userId: string): Promise<Party> {
+    return this.dataSource.transaction(async (em) => {
+      const party = await em.findOne(Party, {
+        where: { id: partyId },
+        relations: ['members'],
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!party) throw new NotFoundException('Party no encontrada');
+      if (party.status === 'closed')
+        throw new BadRequestException('La party ya está cerrada');
+
+      const alreadyMember = party.members.some((m) => m.userId === userId);
+      if (alreadyMember)
+        throw new ConflictException('Ya sos miembro de esta party');
+
+      if (party.members.length >= party.maxMembers)
+        throw new BadRequestException('La party está llena');
+
+      const member = em.create(PartyMember, {
+        partyId,
+        userId,
+        isOnline: true,
+      });
+      await em.save(member);
+
+      // Si la party se llenó, pasarla a active
+      if (party.members.length + 1 >= party.maxMembers) {
+        await em.update(Party, partyId, { status: 'active' });
+      }
+
+      const updated = await em.findOne(Party, {
+        where: { id: partyId },
+        relations: ['subject', 'members', 'members.user', 'quests'],
+      });
+      if (!updated) throw new NotFoundException('Party no encontrada tras unirse');
+      return updated;
+    });
   }
 }

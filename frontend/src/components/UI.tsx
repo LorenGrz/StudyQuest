@@ -1,3 +1,4 @@
+import React from 'react'
 import type { ReactNode, ButtonHTMLAttributes } from 'react'
 
 // ─── Button ──────────────────────────────────────────────────────────────────
