@@ -155,7 +155,7 @@ export class PartiesService {
       .leftJoinAndSelect('p.quests', 'quests')
       .where('p.subject_id IN (:...subjectIds)', { subjectIds })
       .andWhere("p.status IN ('forming', 'active')")
-      .orderBy('p.created_at', 'DESC')
+      .orderBy('p.createdAt', 'DESC')
       .take(50);
 
     if (excludeIds.length) {

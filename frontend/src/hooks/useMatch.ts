@@ -1,11 +1,11 @@
 import { useState, useCallback } from 'react'
 import { partyService, type Party } from '../services/partyService'
 
-export type DiscoveryStatus = 'idle' | 'loading' | 'ready' | 'empty' | 'error'
+export type MatchStatus = 'idle' | 'loading' | 'ready' | 'empty' | 'error'
 
-export function usePartySlide() {
+export function useMatch() {
   const [parties, setParties] = useState<Party[]>([])
-  const [status, setStatus] = useState<DiscoveryStatus>('idle')
+  const [status, setStatus] = useState<MatchStatus>('idle')
   const [error, setError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
