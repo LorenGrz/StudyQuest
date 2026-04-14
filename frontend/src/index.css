@@ -1,11 +1,11 @@
-/* ============================================================
-   StudyQuest — Design System
-   Dark gaming aesthetic · Mobile-first
+﻿/* ============================================================
+   StudyQuest â€” Design System
+   Dark gaming aesthetic Â· Mobile-first
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* ─── CSS Variables ──────────────────────────────────────────── */
+/* â”€â”€â”€ CSS Variables â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 :root {
   /* Colors */
   --bg-base: #0d0d18;
@@ -73,7 +73,7 @@ a { color: var(--accent-light); text-decoration: none; }
 button { cursor: pointer; font-family: inherit; border: none; background: none; }
 input, textarea, select { font-family: inherit; }
 
-/* ─── Layouts ────────────────────────────────────────────────── */
+/* â”€â”€â”€ Layouts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .mobile-layout {
   width: 100%;
   max-width: 480px;
@@ -87,7 +87,7 @@ input, textarea, select { font-family: inherit; }
 
 .mobile-main { flex: 1; display: flex; flex-direction: column; gap: 12px; padding: 0 16px; }
 
-/* ─── Bottom Navigation ──────────────────────────────────────── */
+/* â”€â”€â”€ Bottom Navigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -188,17 +188,17 @@ input, textarea, select { font-family: inherit; }
   padding: 24px 24px 94px 24px;
 }
 
-/* ─── Auth Forms ─────────────────────────────────────────────── */
+/* â”€â”€â”€ Auth Forms â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .auth-form { display: flex; flex-direction: column; gap: 16px; }
 .auth-form-title { font-size: 22px; font-weight: 700; }
 .auth-form-actions { display: flex; gap: 10px; }
-.auth-stepper { display: flex; justify-content: center; gap: 8px; }
+.auth-stepper { display: flex; justify-content: center; align-items: stretch; height: 100%; padding-bottom: 8px; gap: 8px; }
 .step-dot { width: 8px; height: 8px; border-radius: var(--radius-full); background: var(--border); transition: background 0.2s, transform 0.2s; }
 .step-dot-active { background: var(--accent); transform: scale(1.3); }
 .auth-switch { font-size: 13px; color: var(--text-secondary); text-align: center; }
 .link-btn { color: var(--accent-light); font-size: inherit; text-decoration: underline; }
 
-/* ─── Inputs ─────────────────────────────────────────────────── */
+/* â”€â”€â”€ Inputs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .input-group { display: flex; flex-direction: column; gap: 6px; }
 .input-label { font-size: 13px; font-weight: 500; color: var(--text-secondary); }
 .input {
@@ -218,7 +218,7 @@ input, textarea, select { font-family: inherit; }
 .input-textarea { resize: vertical; min-height: 96px; }
 .input-select { appearance: none; }
 
-/* ─── Buttons ────────────────────────────────────────────────── */
+/* â”€â”€â”€ Buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -249,7 +249,7 @@ input, textarea, select { font-family: inherit; }
 .w-full { width: 100%; }
 .flex-1 { flex: 1; }
 
-/* ─── Badges ─────────────────────────────────────────────────── */
+/* â”€â”€â”€ Badges â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .badge {
   display: inline-flex;
   align-items: center;
@@ -266,7 +266,7 @@ input, textarea, select { font-family: inherit; }
 .badge-danger { background: var(--red-bg); color: var(--red); }
 .badge-neutral { background: var(--bg-elevated); color: var(--text-secondary); }
 
-/* ─── Spinners ───────────────────────────────────────────────── */
+/* â”€â”€â”€ Spinners â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 @keyframes spin { to { transform: rotate(360deg); } }
 .spinner {
   border-radius: var(--radius-full);
@@ -278,18 +278,18 @@ input, textarea, select { font-family: inherit; }
 .spinner-md { width: 32px; height: 32px; }
 .spinner-lg { width: 48px; height: 48px; }
 .spinner-sm { display: inline-block; }
-.center-spinner { display: flex; justify-content: center; align-items: center; min-height: 200px; }
+.center-spinner { display: flex; justify-content: center; align-items: stretch; height: 100%; padding-bottom: 8px; align-items: center; min-height: 200px; }
 
-/* ─── Alerts ─────────────────────────────────────────────────── */
+/* â”€â”€â”€ Alerts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .alert { padding: 12px 16px; border-radius: var(--radius-md); font-size: 14px; }
 .alert-danger { background: var(--red-bg); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
 .alert-success { background: var(--green-bg); color: var(--green); }
 
-/* ─── Section Title ──────────────────────────────────────────── */
+/* â”€â”€â”€ Section Title â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .section-title { font-size: 16px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; padding: 16px 0 4px; }
 .page-title { font-size: 24px; font-weight: 800; padding: 20px 0 8px; }
 
-/* ─── Dashboard ──────────────────────────────────────────────── */
+/* â”€â”€â”€ Dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .greeting-header {
   display: flex;
   align-items: center;
@@ -313,7 +313,7 @@ input, textarea, select { font-family: inherit; }
 .party-banner {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(16,185,129,0.1));
   border: 1px solid rgba(16,185,129,0.3);
   border-radius: var(--radius-lg);
@@ -375,7 +375,7 @@ input, textarea, select { font-family: inherit; }
 .empty-text { font-size: 18px; font-weight: 600; color: var(--text-primary); }
 .empty-sub { font-size: 14px; color: var(--text-muted); margin-top: 6px; }
 
-/* ─── Subject Explorer ───────────────────────────────────────── */
+/* â”€â”€â”€ Subject Explorer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .search-bar { display: flex; align-items: center; gap: 10px; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 14px; }
 .search-icon { font-size: 16px; }
 .search-input { flex: 1; background: none; border: none; outline: none; color: var(--text-primary); font-size: 15px; }
@@ -405,7 +405,7 @@ input, textarea, select { font-family: inherit; }
 .subject-list-desc { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
 .subject-list-action { flex-shrink: 0; }
 
-/* ─── Matchmaking ────────────────────────────────────────────── */
+/* â”€â”€â”€ Matchmaking â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .matchmaking-idle { display: flex; flex-direction: column; align-items: center; gap: 24px; max-width: 360px; width: 100%; text-align: center; }
 .matchmaking-hero { display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .matchmaking-hero-icon { font-size: 64px; }
@@ -447,8 +447,8 @@ input, textarea, select { font-family: inherit; }
 .waiting-dot-done { background: var(--green); border-color: var(--green); box-shadow: 0 0 8px var(--green); }
 .waiting-sub { color: var(--text-secondary); }
 
-/* ─── Party Room ─────────────────────────────────────────────── */
-.party-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 16px 8px; }
+/* â”€â”€â”€ Party Room â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.party-header { display: flex; align-items: center; justify-content: flex-start; padding: 20px 16px 8px; }
 .party-header-info { display: flex; flex-direction: column; gap: 4px; }
 .party-header-name { font-size: 20px; font-weight: 800; }
 .party-status { font-size: 12px; font-weight: 600; }
@@ -511,7 +511,7 @@ input, textarea, select { font-family: inherit; }
 .quest-card-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 .quest-status { font-size: 20px; flex-shrink: 0; }
 
-/* ─── Quiz ───────────────────────────────────────────────────── */
+/* â”€â”€â”€ Quiz â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .score-header {
   background: var(--bg-surface);
   padding: 12px 16px;
@@ -591,20 +591,17 @@ input, textarea, select { font-family: inherit; }
 .mc-page {
   display: flex;
   flex-direction: column;
-  min-height: 100dvh;
+  height: 100dvh;
   max-width: 480px;
   margin: 0 auto;
   width: 100%;
   background: var(--bg-base);
   padding-bottom: 70px;
+  overflow: hidden;
 }
 
 .mc-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 22px 20px 10px;
-  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between; padding: 22px 20px 10px; flex-shrink: 0;
 }
 .mc-header-title { font-size: 22px; font-weight: 800; letter-spacing: -0.3px; }
 .mc-filter-btn {
@@ -618,7 +615,15 @@ input, textarea, select { font-family: inherit; }
 }
 .mc-filter-btn:hover { border-color: var(--accent); color: var(--accent-light); }
 
-.mc-deck { flex: 1; display: flex; align-items: center; justify-content: center; padding: 12px 20px; }
+/* Deck: ocupa todo el espacio restante entre header y botonera */
+.mc-deck {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  padding: 30px 56px 20px; overflow: hidden;
+}
 
 .mc-state-screen { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; padding: 24px 16px; }
 .mc-state-icon { font-size: 52px; line-height: 1; }
@@ -628,9 +633,34 @@ input, textarea, select { font-family: inherit; }
 @keyframes mc-spin { to { transform: rotate(360deg); } }
 .mc-state-spinner { width: 44px; height: 44px; border-radius: 50%; border: 3px solid var(--border); border-top-color: var(--accent); animation: mc-spin 0.75s linear infinite; }
 
-.mc-card { width: 100%; max-width: 340px; border-radius: 24px; background: var(--bg-surface); border: 1px solid rgba(255,255,255,0.07); overflow: hidden; box-shadow: 0 24px 64px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04) inset; user-select: none; }
+/* Swipe wrapper: contiene la card, no tiene posicion absoluta */
+.mc-swipe-wrap {
+  width: 100%;
+  max-width: 440px;
+  height: 100%;
+  will-change: transform;
+  cursor: grab;
+  touch-action: none;
+  display: flex;
+  flex-direction: column;
+}
+.mc-swipe-wrap:active { cursor: grabbing; }
 
-.mc-card-cover { height: 200px; position: relative; overflow: hidden; }
+/* Card: siempre un tamanio fijo y limpio */
+.mc-card {
+  width: 100%;
+  height: 100%;
+  border-radius: 24px;
+  background: var(--bg-surface);
+  border: 1px solid rgba(255,255,255,0.07);
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset;
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.mc-card-cover { flex: 1; min-height: 180px; position: relative; overflow: hidden; }
 .mc-cover-orb { position: absolute; border-radius: 50%; filter: blur(40px); opacity: 0.5; }
 .mc-cover-orb-1 { width: 160px; height: 160px; top: -40px; left: -30px; background: rgba(124,58,237,0.6); }
 .mc-cover-orb-2 { width: 120px; height: 120px; bottom: 0; right: -20px; background: rgba(37,99,235,0.5); }
@@ -638,30 +668,32 @@ input, textarea, select { font-family: inherit; }
 .mc-cover-chip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 1.5s ease-in-out infinite; flex-shrink: 0; }
 .mc-card-cover-fade { position: absolute; bottom: 0; left: 0; right: 0; height: 80px; background: linear-gradient(to bottom, transparent, var(--bg-surface)); }
 
-.mc-card-body { padding: 0 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.mc-card-body { padding: 12px 16px 18px; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; }
 
-.mc-host-row { display: flex; align-items: center; gap: 11px; margin-top: -20px; }
-.mc-host-avatar-wrap { position: relative; flex-shrink: 0; }
+.mc-host-row { display: flex; align-items: center; gap: 11px; }
+.mc-host-avatar-wrap { position: relative; flex-shrink: 0; z-index: 10; }
 .mc-host-online-dot { position: absolute; bottom: 1px; right: 1px; width: 10px; height: 10px; background: var(--green); border-radius: 50%; border: 2px solid var(--bg-surface); box-shadow: 0 0 6px var(--green); }
 .mc-host-info { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mc-host-name-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .mc-host-name { font-weight: 700; font-size: 15px; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mc-host-subject { font-size: 12px; color: var(--green); font-weight: 500; }
 .mc-host-lvl { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.35); border-radius: var(--radius-full); padding: 3px 10px; font-size: 11px; font-weight: 700; color: var(--green); flex-shrink: 0; white-space: nowrap; }
+.mc-leader-badge { font-size: 10px; font-weight: 700; color: var(--yellow); background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); border-radius: var(--radius-full); padding: 1px 7px; white-space: nowrap; }
 
-.mc-divider { height: 1px; background: var(--border); margin: 0 -4px; }
+.mc-divider { height: 1px; background: var(--border); margin: 0; }
 
 .mc-quest-block { display: flex; flex-direction: column; gap: 3px; }
 .mc-quest-title { font-size: 17px; font-weight: 700; color: var(--text-primary); line-height: 1.3; }
 .mc-quest-sub { font-size: 13px; color: var(--text-secondary); }
 
 .mc-progress-section { display: flex; flex-direction: column; gap: 6px; }
-.mc-progress-labels { display: flex; justify-content: space-between; align-items: center; }
+.mc-progress-labels { display: flex; justify-content: flex-start; align-items: center; }
 .mc-progress-label { font-size: 10px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.8px; text-transform: uppercase; }
 .mc-progress-pct { font-size: 10px; font-weight: 700; color: var(--blue); letter-spacing: 0.4px; }
 .mc-progress-track { height: 5px; background: var(--bg-elevated); border-radius: 99px; overflow: hidden; }
 .mc-progress-fill { height: 100%; background: linear-gradient(90deg, var(--blue), var(--accent)); border-radius: 99px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
 
-.mc-card-footer { display: flex; align-items: center; justify-content: space-between; }
+.mc-card-footer { display: flex; align-items: center; justify-content: flex-start; }
 .mc-slots-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
 
 .mc-avatar-stack { display: flex; align-items: center; }
@@ -671,7 +703,8 @@ input, textarea, select { font-family: inherit; }
 .mc-avatar-placeholder { border-radius: 50%; background: linear-gradient(135deg, var(--accent), #2563eb); display: flex; align-items: center; justify-content: center; font-weight: 800; color: #fff; }
 .mc-avatar-extra { background: var(--bg-elevated) !important; color: var(--text-secondary) !important; font-size: 10px; font-weight: 700; }
 
-.mc-actions { display: flex; justify-content: center; align-items: center; gap: 20px; padding: 18px 20px; flex-shrink: 0; opacity: 0.3; pointer-events: none; transition: opacity 0.35s ease; }
+/* Botonera: siempre justo debajo de la card */
+.mc-actions { display: flex; justify-content: center; align-items: center; gap: 20px; padding: 16px 20px; flex-shrink: 0; opacity: 0.3; pointer-events: none; transition: opacity 0.35s ease; }
 .mc-actions-active { opacity: 1; pointer-events: all; }
 .mc-action-btn { border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; border: 2px solid; transition: all 0.2s ease; flex-shrink: 0; }
 .mc-action-btn:not(:disabled):active { transform: scale(0.88); }
@@ -691,20 +724,6 @@ input, textarea, select { font-family: inherit; }
 .mc-footer-text { flex: 1; font-size: 13px; color: var(--text-secondary); }
 .mc-footer-cta { font-size: 12px; font-weight: 800; color: var(--blue); letter-spacing: 0.4px; transition: color 0.15s; white-space: nowrap; }
 .mc-footer-cta:hover { color: #60a5fa; }
-
-/* ─── Party Status: forming ──────────────────────────────────── */
-.party-status-forming { color: var(--yellow); }
-
-/* ─── Radar Sweep ─────────────────────────────────────────────── */
-@keyframes radar-rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-.radar-sweep {
-  position: absolute;
-  width: 100%; height: 100%;
-  border-radius: 50%;
-  background: conic-gradient(from 0deg, transparent 70%, rgba(124,58,237,0.4) 100%);
-  animation: radar-rotate 2s linear infinite;
-}
-
 /* --- PartyCard Issue 3 additions ----------------------------- */
 
 /* Cover image real */
@@ -731,7 +750,7 @@ input, textarea, select { font-family: inherit; }
   );
 }
 
-/* �cono en el chip de materia */
+/* Ícono en el chip de materia */
 .mc-cover-chip-icon { font-size: 13px; }
 
 /* Badge de slots libres (esquina inferior izquierda) */
@@ -749,7 +768,7 @@ input, textarea, select { font-family: inherit; }
   color: rgba(255,255,255,0.9);
 }
 
-/* Host name row con badge de l�der */
+/* Host name row con badge de líder */
 .mc-host-name-row {
   display: flex;
   align-items: center;
@@ -765,3 +784,23 @@ input, textarea, select { font-family: inherit; }
   padding: 1px 7px;
   white-space: nowrap;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

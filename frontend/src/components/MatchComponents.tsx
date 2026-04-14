@@ -84,13 +84,33 @@ export function ProgressBar({ pct }: { pct: number }) {
 
 // ─── PartyCard (Issue 3) ──────────────────────────────────────────────────────
 
-// Seed determinístico → imagen de cover única por party
-function getCoverImageUrl(partyId: string): string {
-  const seed = partyId
-    .split('')
-    .reduce((acc, c) => acc + c.charCodeAt(0), 0)
-  // Picsum da fotos reales con seed; 640×360 formato landscape
-  return `https://picsum.photos/seed/${seed}/640/360`
+// Mapa de keywords por tipo de materia → Unsplash portrait temático
+function getCoverImageUrl(subjectName?: string | null, partyId?: string): string {
+  const n = (subjectName ?? '').toLowerCase()
+  // Fotos portrait (400×600) temáticas por materia desde Unsplash
+  if (n.includes('matemát') || n.includes('cálculo') || n.includes('álgebra'))
+    return 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=600&fit=crop&q=80'
+  if (n.includes('algoritmo') || n.includes('estructura') || n.includes('datos') && n.includes('base'))
+    return 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=400&h=600&fit=crop&q=80'
+  if (n.includes('datos') || n.includes('base'))
+    return 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400&h=600&fit=crop&q=80'
+  if (n.includes('redes') || n.includes('computador') || n.includes('network'))
+    return 'https://images.unsplash.com/photo-1573164713988-8665fc963095?w=400&h=600&fit=crop&q=80'
+  if (n.includes('sistem') || n.includes('operat'))
+    return 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&h=600&fit=crop&q=80'
+  if (n.includes('física'))  return 'https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?w=400&h=600&fit=crop&q=80'
+  if (n.includes('química')) return 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=400&h=600&fit=crop&q=80'
+  if (n.includes('biolog'))  return 'https://images.unsplash.com/photo-1530026405186-ed1f139313f8?w=400&h=600&fit=crop&q=80'
+  if (n.includes('program') || n.includes('softw'))
+    return 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=600&fit=crop&q=80'
+  if (n.includes('económ') || n.includes('admin'))
+    return 'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=400&h=600&fit=crop&q=80'
+  if (n.includes('derecho')) return 'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=400&h=600&fit=crop&q=80'
+  if (n.includes('inglés') || n.includes('lengua'))
+    return 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=400&h=600&fit=crop&q=80'
+  // Fallback con seed basado en partyId para que sea consistente
+  const seed = (partyId ?? 'study').split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
+  return `https://picsum.photos/seed/${seed}/400/600`
 }
 
 // Ícono emoji según nombre de materia
@@ -100,7 +120,10 @@ function getSubjectIcon(name?: string | null): string {
   if (n.includes('matemát') || n.includes('cálculo') || n.includes('álgebra')) return '📐'
   if (n.includes('física'))   return '⚛️'
   if (n.includes('química'))  return '🧪'
-  if (n.includes('program') || n.includes('soft') || n.includes('datos')) return '💻'
+  if (n.includes('program') || n.includes('softw')) return '💻'
+  if (n.includes('datos') || n.includes('base') || n.includes('algoritmo')) return '🗄️'
+  if (n.includes('redes') || n.includes('computador') || n.includes('network')) return '🌐'
+  if (n.includes('sistem') || n.includes('operat')) return '⚙️'
   if (n.includes('inglés') || n.includes('lengua') || n.includes('escrit')) return '📝'
   if (n.includes('historia') || n.includes('sociol')) return '🏛️'
   if (n.includes('bio'))      return '🧬'
@@ -114,7 +137,7 @@ export function PartyCard({ party }: { party: Party }) {
   const members    = party.members ?? []
   const host       = members.find((m) => m.role === 'leader') ?? members[0]
   const slotsLeft  = getSlotsRemaining(party)
-  const coverUrl   = getCoverImageUrl(party.id)
+  const coverUrl   = getCoverImageUrl(party.subject?.name, party.id)
   const subjectIcon = getSubjectIcon(party.subject?.name)
 
   // Progreso heurístico: rondas completadas / totales (placeholder hasta backend real)
@@ -152,16 +175,16 @@ export function PartyCard({ party }: { party: Party }) {
         <div className="mc-card-cover-fade" />
       </div>
 
-      {/* ── Body con glassmorphism ────────────────────────────── */}
+      {/* ── Body ──────────────────────────────────────────────── */}
       <div className="mc-card-body">
 
         {/* Host row */}
         <div className="mc-host-row">
           <div className="mc-host-avatar-wrap">
             {host ? (
-              <MemberAvatar member={host} size={50} />
+              <MemberAvatar member={host} size={46} />
             ) : (
-              <div className="mc-avatar-placeholder" style={{ width: 50, height: 50, fontSize: 20 }}>?</div>
+              <div className="mc-avatar-placeholder" style={{ width: 46, height: 46, fontSize: 18 }}>?</div>
             )}
             <div className="mc-host-online-dot" />
           </div>
@@ -179,17 +202,16 @@ export function PartyCard({ party }: { party: Party }) {
 
         <div className="mc-divider" />
 
-        {/* Quest block */}
+        {/* Quest / descripción */}
         <div className="mc-quest-block">
           <p className="mc-quest-title">
             {quest?.title ?? party.subject?.name ?? 'Party de estudio'}
           </p>
           {quest && (
-            <p className="mc-quest-sub">
-              {party.subject?.name}
-            </p>
+            <p className="mc-quest-sub">{party.subject?.name}</p>
           )}
         </div>
+
 
         {/* Progress */}
         <div className="mc-progress-section">
