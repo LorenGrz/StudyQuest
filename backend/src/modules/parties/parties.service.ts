@@ -175,11 +175,18 @@ export class PartiesService {
    */
   async joinParty(partyId: string, userId: string): Promise<Party> {
     return this.dataSource.transaction(async (em) => {
+      // Obtenemos la party con exclusividad (lock) pero SIN JOINs para no romper FOR UPDATE
       const party = await em.findOne(Party, {
         where: { id: partyId },
-        relations: ['members'],
         lock: { mode: 'pessimistic_write' },
       });
+      if (!party) throw new NotFoundException('Party no encontrada');
+
+      // Ahora obtenemos los miembros
+      const members = await em.find(PartyMember, {
+        where: { partyId },
+      });
+      party.members = members;
       if (!party) throw new NotFoundException('Party no encontrada');
       if (party.status === 'closed')
         throw new BadRequestException('La party ya está cerrada');

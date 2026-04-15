@@ -38,6 +38,9 @@ export class PartyMember {
   @Column({ name: 'is_online', default: false })
   isOnline: boolean;
 
+  @Column({ type: 'varchar', default: 'member' })
+  role: 'leader' | 'member';
+
   @CreateDateColumn({ name: 'joined_at', type: 'timestamptz' })
   joinedAt: Date;
 }

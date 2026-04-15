@@ -7,6 +7,7 @@ import {
   UseGuards,
   Request,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -52,7 +53,14 @@ export class PartiesController {
 
   @Post(':id/join')
   @ApiOperation({ summary: 'Unirse a una party existente (async discovery)' })
-  join(@Param('id') id: string, @Request() req: any) {
-    return this.partiesService.joinParty(id, req.user.userId);
+  async join(@Param('id') id: string, @Request() req: any) {
+    try {
+      return await this.partiesService.joinParty(id, req.user.userId);
+    } catch (error: any) {
+      throw new BadRequestException(error.message + ' ||| STACK: ' + error.stack);
+    }
   }
 }
+
+
+
