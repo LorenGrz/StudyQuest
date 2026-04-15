@@ -109,13 +109,17 @@ export class MatchmakingGateway
   @SubscribeMessage('match:accept')
   async handleAccept(
     @ConnectedSocket() socket: Socket,
-    @MessageBody() { matchId }: { matchId: string },
+    @MessageBody() body?: { matchId?: string },
   ) {
     const conn = this.connections.get(socket.id);
     if (!conn) return;
+    const matchId = body?.matchId;
+    if (!matchId) return;
 
-    const { allAccepted, subjectId } =
+    const { allAccepted, subjectId, acceptedCount } =
       this.matchmakingService.acceptConfirmation(matchId, conn.userId);
+
+    this.server.to(matchId).emit('match:confirmed', { count: acceptedCount });
 
     if (allAccepted) {
       const sockets = await this.server.in(matchId).fetchSockets();
@@ -144,8 +148,10 @@ export class MatchmakingGateway
   @SubscribeMessage('match:reject')
   handleReject(
     @ConnectedSocket() _socket: Socket,
-    @MessageBody() { matchId }: { matchId: string },
+    @MessageBody() body?: { matchId?: string },
   ) {
+    const matchId = body?.matchId;
+    if (!matchId) return;
     this.matchmakingService.rejectConfirmation(matchId);
     this.server.to(matchId).emit('match:timeout', {
       message: 'El match fue rechazado.',
@@ -194,10 +200,21 @@ export class MatchmakingGateway
       conn.userId,
       dto.text,
     );
-    this.server.to(dto.partyId).emit('party:message', {
-      userId: conn.userId,
+    this.server.to(dto.partyId).emit('chat:message', {
+      id: message.id,
       text: message.text,
-      sentAt: message.createdAt,
+      userId: message.userId,
+      user: message.user
+        ? {
+            id: message.user.id,
+            username: message.user.username,
+            displayName: message.user.displayName,
+            avatarUrl: message.user.avatarUrl,
+          }
+        : undefined,
+      createdAt: message.createdAt instanceof Date
+        ? message.createdAt.toISOString()
+        : message.createdAt,
     });
   }
 

@@ -155,16 +155,18 @@ export class MatchmakingService {
   acceptConfirmation(
     matchId: string,
     userId: string,
-  ): { allAccepted: boolean; subjectId: string } {
+  ): { allAccepted: boolean; subjectId: string; acceptedCount: number; total: number } {
     const p = this.pending.get(matchId);
-    if (!p) return { allAccepted: false, subjectId: '' };
+    if (!p) return { allAccepted: false, subjectId: '', acceptedCount: 0, total: 0 };
     p.accepted.add(userId);
+    const acceptedCount = p.accepted.size;
+    const total = p.members.length;
     if (p.accepted.size === p.members.length) {
       clearTimeout(p.timeoutId);
       this.pending.delete(matchId);
-      return { allAccepted: true, subjectId: p.subjectId };
+      return { allAccepted: true, subjectId: p.subjectId, acceptedCount, total };
     }
-    return { allAccepted: false, subjectId: p.subjectId };
+    return { allAccepted: false, subjectId: p.subjectId, acceptedCount, total };
   }
 
   rejectConfirmation(matchId: string): string[] {

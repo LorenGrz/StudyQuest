@@ -472,6 +472,8 @@ input, textarea, select { font-family: inherit; }
 .chat-input-row { display: flex; gap: 10px; padding: 12px 16px; border-top: 1px solid var(--border); }
 .chat-input { flex: 1; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 14px; color: var(--text-primary); font-size: 14px; outline: none; }
 .chat-input:focus { border-color: var(--accent); }
+.chat-message-own { align-self: flex-end; background: var(--accent-bg); border-color: var(--accent-glow); }
+.chat-empty { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-size: 14px; text-align: center; padding: 20px; }
 
 .member-list { display: flex; flex-direction: column; gap: 10px; padding: 16px; }
 .member-item { display: flex; align-items: center; gap: 12px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px 14px; }

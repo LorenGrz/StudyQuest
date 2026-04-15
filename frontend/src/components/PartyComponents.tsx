@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import type { Party, ChatMessage, PartyMember } from '../services/partyService'
 import type { Quest } from '../services/questService'
 import { Button, Spinner } from './UI'
@@ -46,28 +46,49 @@ export function TabBar<T extends string>({ tabs, active, onChange }: TabBarProps
 }
 
 // ─── ChatBox ─────────────────────────────────────────────────────────────────
-export function ChatBox({ messages, onSend }: { messages: ChatMessage[]; onSend: (text: string) => void }) {
+interface ChatBoxProps {
+  messages: ChatMessage[]
+  onSend: (text: string) => void
+  currentUserId?: string
+}
+
+export function ChatBox({ messages, onSend, currentUserId = '' }: ChatBoxProps) {
   const [text, setText] = useState('')
   const endRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages.length])
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!text.trim()) return
     onSend(text.trim())
     setText('')
-    setTimeout(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), 50)
   }
 
   return (
     <div className="chat-box">
       <div className="chat-messages">
-        {messages.map((m) => (
-          <div key={m.id} className="chat-message">
-            <span className="chat-username">{m.user?.displayName ?? m.userId.slice(0, 8)}</span>
-            <p className="chat-text">{m.text}</p>
-            <span className="chat-time">{new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+        {messages.length === 0 && (
+          <div className="chat-empty">
+            <p>Sin mensajes todavía. ¡Sé el primero! 💬</p>
           </div>
-        ))}
+        )}
+        {messages.map((m) => {
+          const isOwn = Boolean(currentUserId) && m.userId === currentUserId
+          return (
+            <div key={m.id} className={`chat-message${isOwn ? ' chat-message-own' : ''}`}>
+              {!isOwn && (
+                <span className="chat-username">{m.user?.displayName ?? m.userId.slice(0, 8)}</span>
+              )}
+              <p className="chat-text">{m.text}</p>
+              <span className="chat-time">
+                {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+          )
+        })}
         <div ref={endRef} />
       </div>
       <form className="chat-input-row" onSubmit={submit}>

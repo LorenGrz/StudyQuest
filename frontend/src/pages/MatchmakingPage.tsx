@@ -17,6 +17,7 @@ type MatchState = 'idle' | 'searching' | 'found' | 'confirming' | 'ready'
 const MatchmakingPage = () => {
   const [state, setState] = useState<MatchState>('idle')
   const [foundParty, setFoundParty] = useState<any>(null)
+  const [matchId, setMatchId] = useState<string>('')
   const [confirmed, setConfirmed] = useState(0)
   const { socket } = useSocket()
   const { user } = useAuthStore()
@@ -26,6 +27,7 @@ const MatchmakingPage = () => {
   useEffect(() => {
     socket.on('match:found', (party: any) => {
       setFoundParty(party)
+      setMatchId(party?.matchId ?? '')
       setState('found')
     })
 
@@ -33,9 +35,12 @@ const MatchmakingPage = () => {
       setConfirmed(count)
     })
 
-    socket.on('match:ready', (party: Party) => {
+    socket.on('match:ready', (payload: any) => {
+      const party: Party = payload?.party ?? payload
+      const partyId: string = payload?.partyId ?? party?.id
+      if (!partyId) return
       setActiveParty(party)
-      navigate(`/party/${party.id}`)
+      navigate(`/party/${partyId}`)
     })
 
     return () => {
@@ -76,13 +81,13 @@ const MatchmakingPage = () => {
         <PartyPreview
           party={foundParty}
           onAccept={() => {
-            socket.emit('match:accept')
+            socket.emit('match:accept', { matchId })
             setState('confirming')
           }}
         />
       )}
       {state === 'confirming' && (
-        <WaitingForAll confirmed={confirmed} total={foundParty?.members?.length ?? 4} />
+        <WaitingForAll confirmed={confirmed} total={foundParty?.memberCount ?? foundParty?.members?.length ?? 4} />
       )}
     </FullscreenLayout>
   )
