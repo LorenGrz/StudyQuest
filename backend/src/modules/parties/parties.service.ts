@@ -112,7 +112,8 @@ export class PartiesService {
     text: string,
   ): Promise<ChatMessage> {
     const msg = this.chatRepo.create({ partyId, userId, text: text.trim() });
-    return this.chatRepo.save(msg);
+    const saved = await this.chatRepo.save(msg);
+    return this.chatRepo.findOne({ where: { id: saved.id }, relations: ['user'] }) as Promise<ChatMessage>;
   }
 
   async getChatHistory(partyId: string, limit = 100): Promise<ChatMessage[]> {

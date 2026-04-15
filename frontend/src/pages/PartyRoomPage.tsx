@@ -18,7 +18,7 @@ type ActiveTab = 'quests' | 'chat' | 'members'
 const PartyRoomPage = () => {
   const { partyId } = useParams<{ partyId: string }>()
   const [activeTab, setActiveTab] = useState<ActiveTab>('quests')
-  const { party, messages, sendMessage, isLoading } = useParty(partyId ?? '')
+  const { party, messages, sendMessage, isLoading, currentUserId } = useParty(partyId ?? '')
   const { quests, uploadNote, isGenerating } = useQuests(partyId ?? '')
 
   const tabs: Array<{ id: ActiveTab; label: string }> = [
@@ -55,7 +55,7 @@ const PartyRoomPage = () => {
       )}
 
       {activeTab === 'chat' && (
-        <ChatBox messages={messages} onSend={sendMessage} />
+        <ChatBox messages={messages} onSend={sendMessage} currentUserId={currentUserId} />
       )}
 
       {activeTab === 'members' && (
