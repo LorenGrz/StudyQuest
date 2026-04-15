@@ -15,10 +15,19 @@ export function useQuiz(questId: string) {
 
   useEffect(() => {
     if (!questId) return
-    questService.getForPlay(questId).then((q) => {
-      setQuest(q)
-      setIsLoading(false)
-    })
+
+    if (import.meta.env.DEV) {
+      // Mock temporal — sacar cuando el backend esté listo
+      import('../services/mock/questService.mock').then(({ mockQuest }) => {
+        setQuest(mockQuest)
+        setIsLoading(false)
+      })
+      return
+    }
+
+    questService.getForPlay(questId)
+      .then((q) => { setQuest(q); setIsLoading(false) })
+      .catch(() => setIsLoading(false))
   }, [questId])
 
   // Timer por pregunta
@@ -44,10 +53,26 @@ export function useQuiz(questId: string) {
     clearInterval(timerRef.current!)
     const elapsedMs = Date.now() - startTimeRef.current
 
+    if (import.meta.env.DEV) {
+      // Mock temporal — sacar cuando el backend esté listo
+      const { mockAnswerResult } = await import('../services/mock/questService.mock')
+      const correctId = currentQ.options[2].id  // asume correctIndex=2 para el mock
+      const res = mockAnswerResult(optionId, correctId)
+      setResult(res)
+      setTimeout(() => {
+        setResult(null)
+        if (quest && currentIndex + 1 < quest.questions.length) {
+          setCurrentIndex((i) => i + 1)
+        } else {
+          setIsFinished(true)
+        }
+      }, 2500)
+      return
+    }
+
     const res = await questService.submitAnswer(currentQ.id, optionId, elapsedMs)
     setResult(res)
 
-    // Avanzar a la siguiente pregunta tras 2 segundos
     setTimeout(() => {
       setResult(null)
       if (quest && currentIndex + 1 < quest.questions.length) {
