@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    StudyQuest â€” Design System
    Dark gaming aesthetic Â· Mobile-first
    ============================================================ */
@@ -328,6 +328,28 @@ input, textarea, select { font-family: inherit; }
 .party-banner-label { font-size: 11px; color: var(--green); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
 .party-banner-name { font-size: 15px; font-weight: 700; }
 
+.party-list { display: flex; flex-direction: column; gap: 12px; }
+.party-list-item { 
+  display: flex; 
+  align-items: center; 
+  gap: 14px; 
+  background: var(--bg-surface); 
+  border: 1px solid var(--border); 
+  border-radius: var(--radius-lg); 
+  padding: 16px; 
+  cursor: pointer; 
+  transition: all 0.2s; 
+}
+.party-list-item:hover { 
+  background: var(--bg-elevated); 
+  border-color: var(--accent); 
+  transform: translateY(-2px); 
+  box-shadow: var(--shadow-sm); 
+}
+.party-list-info { flex: 1; }
+.party-list-name { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+.party-list-meta { font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+.party-list-arrow { color: var(--text-muted); font-size: 20px; }
 .subject-grid { display: flex; flex-direction: column; gap: 10px; }
 .subject-card {
   display: flex;

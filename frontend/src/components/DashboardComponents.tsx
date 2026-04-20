@@ -96,7 +96,7 @@ export function SubjectCardGrid({ subjects }: { subjects: Subject[] }) {
 export function QuickActions() {
   const navigate = useNavigate()
   return (
-    <div className="quick-actions">
+    <div className="quick-actions" style={{ flexWrap: 'wrap' }}>
       <button className="quick-btn quick-btn-match" onClick={() => navigate('/matchmaking')}>
         <span className="quick-btn-icon">🎮</span>
         <span>Find Party</span>
@@ -104,6 +104,17 @@ export function QuickActions() {
       <button className="quick-btn quick-btn-explore" onClick={() => navigate('/subjects')}>
         <span className="quick-btn-icon">🔍</span>
         <span>Explorar</span>
+      </button>
+      <button 
+        className="quick-btn" 
+        style={{ 
+          background: 'linear-gradient(135deg, rgba(236,72,153,0.15), rgba(219,39,119,0.1))', 
+          borderColor: 'rgba(236,72,153,0.25)' 
+        }} 
+        onClick={() => navigate('/parties')}
+      >
+        <span className="quick-btn-icon">👥</span>
+        <span>Mis Parties</span>
       </button>
     </div>
   )
