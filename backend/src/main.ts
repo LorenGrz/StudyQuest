@@ -15,11 +15,15 @@ async function bootstrap() {
     ? corsOriginRaw.split(',').map((o) => o.trim())
     : corsOriginRaw;
 
-  app.use(helmet());
+  // CORS debe ir ANTES de helmet para que no sobreescriba las cabeceras
   app.enableCors({
-    origin: 'http://localhost:5173', // El puerto de tu frontend
+    origin: corsOrigin,
     credentials: true,
-  }); app.useGlobalPipes(
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
+  app.use(helmet({ crossOriginResourcePolicy: false }));
+  app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,

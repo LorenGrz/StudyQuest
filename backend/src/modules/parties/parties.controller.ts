@@ -21,8 +21,10 @@ import { SendChatMessageDto, CreatePartyDto } from '../../common/dto';
 export class PartiesController {
   constructor(private readonly partiesService: PartiesService) {}
 
+  // ─── Rutas sin parámetro :id primero (evitar conflictos de orden) ────────────
+
   @Get('discover')
-  @ApiOperation({ summary: 'Parties abiertas en materias del usuario (async discovery)' })
+  @ApiOperation({ summary: 'Parties abiertas en materias del usuario' })
   discover(@Request() req: any) {
     return this.partiesService.discover(req.user.userId);
   }
@@ -33,7 +35,7 @@ export class PartiesController {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Crear una party nueva (solo vos como líder)' })
+  @ApiOperation({ summary: 'Crear una party nueva (vos como líder)' })
   createParty(@Request() req: any, @Body() dto: CreatePartyDto) {
     return this.partiesService.createForUser(
       req.user.userId,
@@ -41,9 +43,29 @@ export class PartiesController {
       dto.maxMembers ?? 4,
     );
   }
+
+  @Post('join-invite/:token')
+  @ApiOperation({ summary: 'Unirse a una party mediante link de invitación' })
+  async joinByInvite(@Param('token') token: string, @Request() req: any) {
+    try {
+      return await this.partiesService.joinByInviteToken(token, req.user.userId);
+    } catch (error: any) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  // ─── Rutas con :id ───────────────────────────────────────────────────────────
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.partiesService.findById(id);
+  }
+
+  @Post(':id/invite')
+  @ApiOperation({ summary: 'Generar link de invitación (cualquier miembro)' })
+  async generateInvite(@Param('id') id: string, @Request() req: any) {
+    const token = await this.partiesService.generateInviteToken(id, req.user.userId);
+    return { token, expiresInHours: 24 };
   }
 
   @Get(':id/chat')
@@ -61,7 +83,7 @@ export class PartiesController {
   }
 
   @Post(':id/join')
-  @ApiOperation({ summary: 'Unirse a una party existente (async discovery)' })
+  @ApiOperation({ summary: 'Unirse a una party existente (discovery)' })
   async join(@Param('id') id: string, @Request() req: any) {
     try {
       return await this.partiesService.joinParty(id, req.user.userId);
@@ -70,6 +92,3 @@ export class PartiesController {
     }
   }
 }
-
-
-

@@ -57,6 +57,12 @@ export class Party {
   })
   closedAt: Date | null;
 
+  @Column({ name: 'invite_token', type: 'varchar', nullable: true, default: null })
+  inviteToken: string | null;
+
+  @Column({ name: 'invite_expires_at', type: 'timestamptz', nullable: true, default: null })
+  inviteExpiresAt: Date | null;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

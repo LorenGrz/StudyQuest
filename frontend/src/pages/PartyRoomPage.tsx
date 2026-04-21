@@ -59,7 +59,7 @@ const PartyRoomPage = () => {
       )}
 
       {activeTab === 'members' && (
-        <MemberList members={party?.members ?? []} />
+        <MemberList members={party?.members ?? []} partyId={partyId ?? ''} />
       )}
     </MobileLayout>
   )
