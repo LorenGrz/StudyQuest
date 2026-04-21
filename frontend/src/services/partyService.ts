@@ -77,6 +77,16 @@ export const partyService = {
     return data
   },
 
+  async generateInvite(partyId: string): Promise<{ token: string; expiresInHours: number }> {
+    const { data } = await api.post<{ token: string; expiresInHours: number }>(`/parties/${partyId}/invite`)
+    return data
+  },
+
+  async joinByInvite(token: string): Promise<Party> {
+    const { data } = await api.post<Party>(`/parties/join-invite/${token}`)
+    return data
+  },
+
   async sendMessage(partyId: string, text: string): Promise<ChatMessage> {
     const { data } = await api.post<ChatMessage>(`/parties/${partyId}/chat`, {
       text,

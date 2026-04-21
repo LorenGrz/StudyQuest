@@ -6,7 +6,8 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, MoreThan } from 'typeorm';
+import { v4 as uuid } from 'uuid';
 import { Party } from './party.entity';
 import { PartyMember } from './party-member.entity';
 import { ChatMessage } from './chat-message.entity';
@@ -25,6 +26,40 @@ export class PartiesService {
     private readonly userRepo: Repository<User>,
     private readonly dataSource: DataSource,
   ) {}
+
+  // ─── Invite Link (≥PostgreSQL, sin Redis) ────────────────────────────────────
+
+  /** Genera token de invitación válido 24hs y lo persiste en la party */
+  async generateInviteToken(partyId: string, requestingUserId: string): Promise<string> {
+    const isMember = await this.memberRepo.findOne({
+      where: { partyId, userId: requestingUserId },
+    });
+    if (!isMember) throw new ForbiddenException('No sos miembro de esta party');
+
+    // Reusar el token si todavía es válido
+    const existing = await this.partyRepo.findOne({ where: { id: partyId } });
+    if (existing?.inviteToken && existing.inviteExpiresAt && existing.inviteExpiresAt > new Date()) {
+      return existing.inviteToken;
+    }
+
+    const token = uuid().replace(/-/g, '').slice(0, 16);
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await this.partyRepo.update(partyId, { inviteToken: token, inviteExpiresAt: expiresAt });
+    return token;
+  }
+
+  /** Valida el token y une al usuario a la party */
+  async joinByInviteToken(token: string, userId: string): Promise<Party> {
+    const party = await this.partyRepo.findOne({
+      where: {
+        inviteToken: token,
+        inviteExpiresAt: MoreThan(new Date()),
+      },
+    });
+    if (!party) throw new NotFoundException('El enlace de invitación es inválido o expiró');
+
+    return this.joinParty(party.id, userId);
+  }
 
   async createParty(
     subjectId: string,

@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react'
 import type { Party, ChatMessage, PartyMember } from '../services/partyService'
+import { partyService } from '../services/partyService'
 import type { Quest } from '../services/questService'
 import { Button, Spinner } from './UI'
 import { useNavigate } from 'react-router-dom'
@@ -105,30 +106,129 @@ export function ChatBox({ messages, onSend, currentUserId = '' }: ChatBoxProps) 
 }
 
 // ─── MemberList ──────────────────────────────────────────────────────────────
-export function MemberList({ members }: { members: PartyMember[] }) {
+interface MemberListProps {
+  members: PartyMember[]
+  partyId: string
+}
+
+export function MemberList({ members, partyId }: MemberListProps) {
+  const [showInvite, setShowInvite] = useState(false)
+
   return (
-    <div className="member-list">
-      {members.map((m) => (
-        <div key={m.id} className="member-item">
-          <div className="member-avatar">
-            {m.user.avatarUrl
-              ? <img src={m.user.avatarUrl} alt={m.user.displayName} className="avatar-sm" />
-              : <div className="avatar-placeholder-sm">{m.user.displayName[0]}</div>
-            }
+    <>
+      <div className="member-list">
+        <button
+          className="invite-btn"
+          onClick={() => setShowInvite(true)}
+        >
+          <span>🔗</span>
+          <span>Invitar miembros</span>
+        </button>
+        {members.map((m) => (
+          <div key={m.id} className="member-item">
+            <div className="member-avatar">
+              {m.user.avatarUrl
+                ? <img src={m.user.avatarUrl} alt={m.user.displayName} className="avatar-sm" />
+                : <div className="avatar-placeholder-sm">{m.user.displayName[0]}</div>
+              }
+            </div>
+            <div className="member-info">
+              <p className="member-name">{m.user.displayName}</p>
+              <p className="member-username">@{m.user.username}</p>
+            </div>
+            <div className="member-stats">
+              <span className="member-xp">⚡{m.user.stats?.xp ?? 0}</span>
+              {m.role === 'leader' && <span className="member-leader">👑</span>}
+            </div>
           </div>
-          <div className="member-info">
-            <p className="member-name">{m.user.displayName}</p>
-            <p className="member-username">@{m.user.username}</p>
+        ))}
+      </div>
+      {showInvite && (
+        <InviteSheet partyId={partyId} onClose={() => setShowInvite(false)} />
+      )}
+    </>
+  )
+}
+
+// ─── InviteSheet ──────────────────────────────────────────────────────────────
+interface InviteSheetProps {
+  partyId: string
+  onClose: () => void
+}
+
+export function InviteSheet({ partyId, onClose }: InviteSheetProps) {
+  const [link, setLink] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setIsLoading(true)
+    partyService.generateInvite(partyId)
+      .then(({ token }) => {
+        const base = window.location.origin
+        setLink(`${base}/join/${token}`)
+      })
+      .catch(() => setError('No se pudo generar el link'))
+      .finally(() => setIsLoading(false))
+  }, [partyId])
+
+  const handleCopy = () => {
+    if (!link) return
+    navigator.clipboard.writeText(link).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
+  const handleShare = () => {
+    if (!link || !navigator.share) return
+    navigator.share({ title: 'Únete a mi Party en StudyQuest', url: link })
+  }
+
+  return (
+    <div className="invite-overlay" onClick={onClose}>
+      <div className="invite-sheet" onClick={(e) => e.stopPropagation()}>
+        <div className="invite-sheet-handle" />
+        <h2 className="invite-title">🔗 Invitar a la Party</h2>
+        <p className="invite-sub">Compartí este link — expira en 24 horas</p>
+
+        {isLoading && (
+          <div className="center-spinner" style={{ minHeight: '80px' }}>
+            <Spinner size="md" />
           </div>
-          <div className="member-stats">
-            <span className="member-xp">⚡{m.user.stats?.xp ?? 0}</span>
-            {m.role === 'leader' && <span className="member-leader">👑</span>}
-          </div>
-        </div>
-      ))}
+        )}
+
+        {error && (
+          <p style={{ color: 'var(--red)', fontSize: '14px', textAlign: 'center' }}>{error}</p>
+        )}
+
+        {link && !isLoading && (
+          <>
+            <div className="invite-link-box">
+              <span className="invite-link-text">{link}</span>
+              <button className="invite-copy-btn" onClick={handleCopy}>
+                {copied ? '✓' : '📋'}
+              </button>
+            </div>
+            {copied && <p className="invite-copied">¡Copiado al portapapeles!</p>}
+            {'share' in navigator && (
+              <Button variant="secondary" className="w-full" style={{ marginTop: '8px' }} onClick={handleShare}>
+                📤 Compartir
+              </Button>
+            )}
+          </>
+        )}
+
+        <Button variant="ghost" className="w-full" style={{ marginTop: '12px' }} onClick={onClose}>
+          Cerrar
+        </Button>
+      </div>
     </div>
   )
 }
+
+
 
 // ─── UploadNoteCard ───────────────────────────────────────────────────────────
 interface UploadNoteCardProps {

@@ -9,6 +9,7 @@ import QuizPage from './pages/QuizPage'
 import MatchPage from './pages/MatchPage'
 import PartiesPage from './pages/PartiesPage'
 import ProfilePage from './pages/ProfilePage'
+import JoinPartyPage from './pages/JoinPartyPage'
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
       <Route path="/parties" element={<ProtectedRoute><PartiesPage /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="/quiz/:questId" element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
+      <Route path="/join/:token" element={<ProtectedRoute><JoinPartyPage /></ProtectedRoute>} />
 
       {/* 404 → auth */}
       <Route path="*" element={<Navigate to="/auth" replace />} />
