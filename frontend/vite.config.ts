@@ -8,4 +8,15 @@ export default defineConfig({
     react(),
     babel({ presets: [reactCompilerPreset()] })
   ],
+  server: {
+    host: '0.0.0.0',
+    port: 5173,
+    watch: {
+      // Necesario en Windows con Docker: el bind mount no propaga
+      // eventos inotify al contenedor Linux, así que usamos polling
+      usePolling: true,
+      interval: 1000,
+    },
+  },
 })
+

@@ -72,6 +72,11 @@ export const partyService = {
     return data
   },
 
+  async create(subjectId?: string, maxMembers = 4): Promise<Party> {
+    const { data } = await api.post<Party>('/parties', { subjectId, maxMembers })
+    return data
+  },
+
   async sendMessage(partyId: string, text: string): Promise<ChatMessage> {
     const { data } = await api.post<ChatMessage>(`/parties/${partyId}/chat`, {
       text,

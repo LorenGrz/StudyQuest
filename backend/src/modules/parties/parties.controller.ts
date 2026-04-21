@@ -12,7 +12,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PartiesService } from './parties.service';
-import { SendChatMessageDto } from '../../common/dto';
+import { SendChatMessageDto, CreatePartyDto } from '../../common/dto';
 
 @ApiTags('parties')
 @ApiBearerAuth()
@@ -32,6 +32,15 @@ export class PartiesController {
     return this.partiesService.findByUser(req.user.userId);
   }
 
+  @Post()
+  @ApiOperation({ summary: 'Crear una party nueva (solo vos como líder)' })
+  createParty(@Request() req: any, @Body() dto: CreatePartyDto) {
+    return this.partiesService.createForUser(
+      req.user.userId,
+      dto.subjectId,
+      dto.maxMembers ?? 4,
+    );
+  }
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.partiesService.findById(id);

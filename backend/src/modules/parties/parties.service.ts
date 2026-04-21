@@ -51,6 +51,51 @@ export class PartiesService {
     });
   }
 
+  async createForUser(
+    userId: string,
+    subjectId?: string,
+    maxMembers = 4,
+  ): Promise<Party> {
+    // Si no se pasa subjectId, usamos la primera materia inscripta del usuario
+    let resolvedSubjectId = subjectId;
+    if (!resolvedSubjectId) {
+      const user = await this.userRepo.findOne({
+        where: { id: userId },
+        relations: ['enrolledSubjects'],
+      });
+      if (!user?.enrolledSubjects?.length) {
+        throw new BadRequestException(
+          'Necesitás tener al menos una materia inscripta para crear una party',
+        );
+      }
+      resolvedSubjectId = user.enrolledSubjects[0].id;
+    }
+
+    return this.dataSource.transaction(async (em) => {
+      const party = em.create(Party, {
+        subjectId: resolvedSubjectId,
+        maxMembers,
+        status: 'forming',
+      });
+      await em.save(party);
+
+      const leader = em.create(PartyMember, {
+        partyId: party.id,
+        userId,
+        isOnline: true,
+        role: 'leader',
+      });
+      await em.save(leader);
+
+      const result = await em.findOne(Party, {
+        where: { id: party.id },
+        relations: ['subject', 'members', 'members.user'],
+      });
+      if (!result) throw new NotFoundException('Error al crear la party');
+      return result;
+    });
+  }
+
   async findById(id: string): Promise<Party> {
     const party = await this.partyRepo.findOne({
       where: { id },

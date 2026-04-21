@@ -105,7 +105,7 @@ export default function MatchPage() {
           )}
           {status === 'empty' && (
             <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <EmptyState onCreateParty={() => navigate('/matchmaking')} />
+              <EmptyState onCreateParty={() => navigate('/parties')} />
             </motion.div>
           )}
           {showCard && top && (
@@ -136,7 +136,7 @@ export default function MatchPage() {
         disabled={!showCard}
       />
 
-      <CreatePartyBar onPress={() => navigate('/matchmaking')} />
+      <CreatePartyBar onPress={() => navigate('/parties')} />
 
       <BottomNav />
     </div>

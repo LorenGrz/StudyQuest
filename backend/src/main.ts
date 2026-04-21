@@ -16,8 +16,10 @@ async function bootstrap() {
     : corsOriginRaw;
 
   app.use(helmet());
-  app.enableCors({ origin: corsOrigin, credentials: true });
-  app.useGlobalPipes(
+  app.enableCors({
+    origin: 'http://localhost:5173', // El puerto de tu frontend
+    credentials: true,
+  }); app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,

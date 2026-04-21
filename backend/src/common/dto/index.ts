@@ -121,6 +121,11 @@ export class SendChatMessageDto {
   @IsString() @MinLength(1) @MaxLength(2000) text: string;
 }
 
+export class CreatePartyDto {
+  @IsOptional() @IsUUID() subjectId?: string;
+  @IsOptional() @IsNumber() @Min(2) @Max(8) maxMembers?: number;
+}
+
 // ─── Quests ───────────────────────────────────────────────────────────────────
 
 export class CreateQuestDto {
