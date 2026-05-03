@@ -30,8 +30,8 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  refresh(@Body() dto: RefreshTokenDto, @Request() req: any) {
-    return this.authService.refresh(req.user?.userId ?? '', dto.refreshToken);
+  refresh(@Body() dto: RefreshTokenDto) {
+    return this.authService.refresh(dto.refreshToken);
   }
 
   @UseGuards(JwtAuthGuard)

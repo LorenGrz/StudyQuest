@@ -7,19 +7,20 @@ import {
   UseGuards,
   Request,
   Query,
+  Patch,
   BadRequestException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PartiesService } from './parties.service';
-import { SendChatMessageDto, CreatePartyDto } from '../../common/dto';
+import { SendChatMessageDto, CreatePartyDto, UpdatePartyVisibilityDto } from '../../common/dto';
 
 @ApiTags('parties')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('parties')
 export class PartiesController {
-  constructor(private readonly partiesService: PartiesService) {}
+  constructor(private readonly partiesService: PartiesService) { }
 
   // ─── Rutas sin parámetro :id primero (evitar conflictos de orden) ────────────
 
@@ -41,6 +42,7 @@ export class PartiesController {
       req.user.userId,
       dto.subjectId,
       dto.maxMembers ?? 4,
+      dto.isPrivate ?? false,
     );
   }
 
@@ -71,6 +73,16 @@ export class PartiesController {
   @Get(':id/chat')
   getChat(@Param('id') id: string, @Query('limit') limit = 100) {
     return this.partiesService.getChatHistory(id, +limit);
+  }
+
+  @Patch(':id/visibility')
+  @ApiOperation({ summary: 'Cambiar visibilidad de la party (solo líder)' })
+  updateVisibility(
+    @Param('id') id: string,
+    @Request() req: any,
+    @Body() dto: UpdatePartyVisibilityDto,
+  ) {
+    return this.partiesService.updateVisibility(id, req.user.userId, dto.isPrivate);
   }
 
   @Post(':id/chat')

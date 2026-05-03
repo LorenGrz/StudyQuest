@@ -58,5 +58,5 @@ export function useParty(partyId: string) {
     }
   }, [partyId, socket, user])
 
-  return { party, messages, sendMessage, isLoading, currentUserId: user?.id ?? '' }
+  return { party, setParty, messages, sendMessage, isLoading, currentUserId: user?.id ?? '' }
 }

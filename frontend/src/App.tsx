@@ -3,7 +3,7 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import AuthPage from './pages/AuthPage'
 import DashboardPage from './pages/dashboard'
 import SubjectExplorerPage from './pages/SubjectExplorerPage'
-import MatchmakingPage from './pages/MatchmakingPage'
+
 import PartyRoomPage from './pages/PartyRoomPage'
 import QuizPage from './pages/QuizPage'
 import MatchPage from './pages/MatchPage'
@@ -23,7 +23,7 @@ function App() {
       {/* Protegidas */}
       <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
       <Route path="/subjects" element={<ProtectedRoute><SubjectExplorerPage /></ProtectedRoute>} />
-      <Route path="/matchmaking" element={<ProtectedRoute><MatchmakingPage /></ProtectedRoute>} />
+
       <Route path="/match" element={<ProtectedRoute><MatchPage /></ProtectedRoute>} />
       <Route path="/party/:partyId" element={<ProtectedRoute><PartyRoomPage /></ProtectedRoute>} />
       <Route path="/parties" element={<ProtectedRoute><PartiesPage /></ProtectedRoute>} />

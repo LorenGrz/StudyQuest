@@ -90,6 +90,7 @@ export class PartiesService {
     userId: string,
     subjectId?: string,
     maxMembers = 4,
+    isPrivate = false,
   ): Promise<Party> {
     // Si no se pasa subjectId, usamos la primera materia inscripta del usuario
     let resolvedSubjectId = subjectId;
@@ -110,6 +111,7 @@ export class PartiesService {
       const party = em.create(Party, {
         subjectId: resolvedSubjectId,
         maxMembers,
+        isPrivate,
         status: 'forming',
       });
       await em.save(party);
@@ -186,6 +188,14 @@ export class PartiesService {
     });
   }
 
+  async updateVisibility(partyId: string, userId: string, isPrivate: boolean): Promise<void> {
+    const leader = await this.memberRepo.findOne({
+      where: { partyId, userId, role: 'leader' },
+    });
+    if (!leader) throw new ForbiddenException('Solo el líder puede cambiar la visibilidad de la party');
+    await this.partyRepo.update(partyId, { isPrivate });
+  }
+
   async addChatMessage(
     partyId: string,
     userId: string,
@@ -236,6 +246,7 @@ export class PartiesService {
       .leftJoinAndSelect('p.quests', 'quests')
       .where('p.subject_id IN (:...subjectIds)', { subjectIds })
       .andWhere("p.status IN ('forming', 'active')")
+      .andWhere('p.is_private = false')
       .orderBy('p.createdAt', 'DESC')
       .take(50);
 

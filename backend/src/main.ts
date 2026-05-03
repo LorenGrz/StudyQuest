@@ -47,6 +47,7 @@ async function bootstrap() {
     );
   }
 
+  app.enableShutdownHooks();
   await app.listen(port);
   console.log(`🚀 API corriendo en http://localhost:${port}/api/v1`);
   console.log(`📚 Swagger en http://localhost:${port}/docs`);

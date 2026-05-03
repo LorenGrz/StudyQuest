@@ -12,13 +12,14 @@ import {
 import { Spinner } from '../components/UI'
 import { useParty } from '../hooks/useParty'
 import { useQuests } from '../hooks/useQuests'
+import { partyService } from '../services/partyService'
 
 type ActiveTab = 'quests' | 'chat' | 'members'
 
 const PartyRoomPage = () => {
   const { partyId } = useParams<{ partyId: string }>()
   const [activeTab, setActiveTab] = useState<ActiveTab>('quests')
-  const { party, messages, sendMessage, isLoading, currentUserId } = useParty(partyId ?? '')
+  const { party, setParty, messages, sendMessage, isLoading, currentUserId } = useParty(partyId ?? '')
   const { quests, uploadNote, isGenerating } = useQuests(partyId ?? '')
 
   const tabs: Array<{ id: ActiveTab; label: string }> = [
@@ -59,7 +60,18 @@ const PartyRoomPage = () => {
       )}
 
       {activeTab === 'members' && (
-        <MemberList members={party?.members ?? []} partyId={partyId ?? ''} />
+        <MemberList 
+          members={party?.members ?? []} 
+          partyId={partyId ?? ''} 
+          isPrivate={party?.isPrivate ?? false}
+          currentUserId={currentUserId}
+          onVisibilityChange={(isPrivate) => {
+            if (!party) return
+            partyService.updateVisibility(party.id, isPrivate).then(() => {
+              setParty({ ...party, isPrivate })
+            }).catch(console.error)
+          }}
+        />
       )}
     </MobileLayout>
   )

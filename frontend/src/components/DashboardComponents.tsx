@@ -97,13 +97,13 @@ export function QuickActions() {
   const navigate = useNavigate()
   return (
     <div className="quick-actions" style={{ flexWrap: 'wrap' }}>
-      <button className="quick-btn quick-btn-match" onClick={() => navigate('/matchmaking')}>
+      <button className="quick-btn quick-btn-match" onClick={() => navigate('/match')}>
         <span className="quick-btn-icon">🎮</span>
         <span>Find Party</span>
       </button>
       <button className="quick-btn quick-btn-explore" onClick={() => navigate('/subjects')}>
-        <span className="quick-btn-icon">🔍</span>
-        <span>Explorar</span>
+        <span className="quick-btn-icon">📚</span>
+        <span>Materias</span>
       </button>
       <button 
         className="quick-btn" 
