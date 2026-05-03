@@ -12,9 +12,14 @@ export function PartyHeader({ party }: { party: Party | null }) {
     <div className="party-header">
       <div className="party-header-info">
         <h1 className="party-header-name">{party.name ?? party.subject?.name ?? 'Party'}</h1>
-        <span className={`party-status party-status-${party.status}`}>
-          {party.status === 'active' ? '🟢 Activa' : party.status === 'waiting' ? '🟡 Esperando' : party.status === 'forming' ? '🟡 Armando' : '⚫ Finalizada'}
-        </span>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <span className={`party-status party-status-${party.status}`}>
+            {party.status === 'active' ? '🟢 Activa' : party.status === 'waiting' ? '🟡 Esperando' : party.status === 'forming' ? '🟡 Armando' : '⚫ Finalizada'}
+          </span>
+          <span style={{ fontSize: '11px', background: 'rgba(0,0,0,0.3)', padding: '2px 8px', borderRadius: '12px', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}>
+            {party.isPrivate ? '🔒 Privada' : '🌎 Pública'}
+          </span>
+        </div>
       </div>
       <span className="party-members-count">
         👥 {party.members?.length ?? 0}
@@ -109,10 +114,14 @@ export function ChatBox({ messages, onSend, currentUserId = '' }: ChatBoxProps) 
 interface MemberListProps {
   members: PartyMember[]
   partyId: string
+  isPrivate: boolean
+  currentUserId: string
+  onVisibilityChange: (isPrivate: boolean) => void
 }
 
-export function MemberList({ members, partyId }: MemberListProps) {
+export function MemberList({ members, partyId, isPrivate, currentUserId, onVisibilityChange }: MemberListProps) {
   const [showInvite, setShowInvite] = useState(false)
+  const isLeader = members.some((m) => m.userId === currentUserId && m.role === 'leader')
 
   return (
     <>
@@ -124,6 +133,22 @@ export function MemberList({ members, partyId }: MemberListProps) {
           <span>🔗</span>
           <span>Invitar miembros</span>
         </button>
+
+        {isLeader && (
+          <div className="input-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px', cursor: 'pointer', background: 'var(--bg-surface)', padding: '12px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', marginTop: '8px' }} onClick={() => onVisibilityChange(!isPrivate)}>
+            <input 
+              type="checkbox" 
+              checked={isPrivate} 
+              onChange={() => onVisibilityChange(!isPrivate)}
+              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+            />
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <span style={{ fontSize: '15px', fontWeight: 600 }}>Party Privada 🔒</span>
+              <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Ocultar la party en Matchmaking.</span>
+            </div>
+          </div>
+        )}
+
         {members.map((m) => (
           <div key={m.id} className="member-item">
             <div className="member-avatar">

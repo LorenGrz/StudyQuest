@@ -40,6 +40,9 @@ export class Party {
   @Column({ name: 'max_members', type: 'smallint', default: 4 })
   maxMembers: number;
 
+  @Column({ name: 'is_private', default: false })
+  isPrivate: boolean;
+
   @OneToMany(() => PartyMember, (pm) => pm.party, { cascade: true })
   members: PartyMember[];
 

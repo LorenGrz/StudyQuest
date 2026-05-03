@@ -40,6 +40,7 @@ export interface Party {
   maxMembers: number
   status: 'forming' | 'active' | 'closed' | 'waiting'
   quests: PartyQuest[]
+  isPrivate: boolean
   createdAt: string
   updatedAt: string
 }
@@ -72,9 +73,13 @@ export const partyService = {
     return data
   },
 
-  async create(subjectId?: string, maxMembers = 4): Promise<Party> {
-    const { data } = await api.post<Party>('/parties', { subjectId, maxMembers })
+  async create(subjectId?: string, maxMembers = 4, isPrivate = false): Promise<Party> {
+    const { data } = await api.post<Party>('/parties', { subjectId, maxMembers, isPrivate })
     return data
+  },
+
+  async updateVisibility(partyId: string, isPrivate: boolean): Promise<void> {
+    await api.patch(`/parties/${partyId}/visibility`, { isPrivate })
   },
 
   async generateInvite(partyId: string): Promise<{ token: string; expiresInHours: number }> {

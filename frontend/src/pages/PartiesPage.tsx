@@ -13,6 +13,7 @@ const PartiesPage = () => {
   const [isCreating, setIsCreating] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>('')
+  const [isPrivate, setIsPrivate] = useState(false)
 
   const subjects = user?.enrolledSubjects ?? []
 
@@ -35,7 +36,7 @@ const PartiesPage = () => {
   const handleCreate = async () => {
     setIsCreating(true)
     try {
-      const newParty = await partyService.create(selectedSubjectId || undefined)
+      const newParty = await partyService.create(selectedSubjectId || undefined, 4, isPrivate)
       navigate(`/party/${newParty.id}`)
     } catch (err) {
       console.error('Error al crear party', err)
@@ -109,6 +110,19 @@ const PartiesPage = () => {
               </p>
             )}
 
+            <div className="input-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => setIsPrivate(!isPrivate)}>
+              <input 
+                type="checkbox" 
+                checked={isPrivate} 
+                onChange={() => setIsPrivate(!isPrivate)}
+                style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+              />
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '15px', fontWeight: 600 }}>Party Privada 🔒</span>
+                <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>No aparecerá en Match. Solo se unen con link.</span>
+              </div>
+            </div>
+
             <div style={{ display: 'flex', gap: '10px' }}>
               <Button
                 variant="secondary"
@@ -140,9 +154,9 @@ const PartiesPage = () => {
         <div className="empty-state">
           <p className="empty-icon">👥</p>
           <p className="empty-text">Aún no tenés parties</p>
-          <p className="empty-sub">Creá una nueva o buscá desde Matchmaking</p>
+          <p className="empty-sub">Creá una nueva o buscá desde Match</p>
           <div style={{ display: 'flex', gap: '10px', marginTop: '16px', justifyContent: 'center' }}>
-            <Button variant="secondary" onClick={() => navigate('/matchmaking')}>Buscar Party</Button>
+            <Button variant="secondary" onClick={() => navigate('/match')}>Buscar Party</Button>
             <Button variant="primary" onClick={() => setShowModal(true)}>+ Crear</Button>
           </div>
         </div>

@@ -6,6 +6,7 @@ import {
   IsNumber,
   IsArray,
   IsOptional,
+  IsBoolean,
   IsUUID,
   Min,
   Max,
@@ -72,6 +73,8 @@ export class AvailabilitySlotDto {
 export class UpdateProfileDto {
   @IsOptional() @IsString() @MaxLength(60) displayName?: string;
   @IsOptional() @IsString() avatarUrl?: string;
+  @IsOptional() @IsString() university?: string;
+  @IsOptional() @IsString() career?: string;
   @IsOptional() @IsNumber() @Min(1) @Max(8) semester?: number;
   @IsOptional()
   @IsArray()
@@ -124,6 +127,11 @@ export class SendChatMessageDto {
 export class CreatePartyDto {
   @IsOptional() @IsUUID() subjectId?: string;
   @IsOptional() @IsNumber() @Min(2) @Max(8) maxMembers?: number;
+  @IsOptional() @IsBoolean() isPrivate?: boolean;
+}
+
+export class UpdatePartyVisibilityDto {
+  @IsBoolean() isPrivate: boolean;
 }
 
 // ─── Quests ───────────────────────────────────────────────────────────────────

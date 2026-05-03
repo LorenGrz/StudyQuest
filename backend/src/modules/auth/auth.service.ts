@@ -24,11 +24,17 @@ export class AuthService {
     return this.buildTokens(user.id, user.email, user.username);
   }
 
-  async refresh(userId: string, token: string) {
-    const valid = await this.usersService.validateRefreshToken(userId, token);
-    if (!valid) throw new UnauthorizedException('Refresh token inválido');
-    const user = await this.usersService.findById(userId);
-    return this.buildTokens(user.id, user.email, user.username);
+  async refresh(token: string) {
+    try {
+      const payload = await this.jwtService.verifyAsync(token);
+      const userId = payload.sub;
+      const valid = await this.usersService.validateRefreshToken(userId, token);
+      if (!valid) throw new UnauthorizedException('Refresh token inválido');
+      const user = await this.usersService.findById(userId);
+      return this.buildTokens(user.id, user.email, user.username);
+    } catch {
+      throw new UnauthorizedException('Refresh token inválido');
+    }
   }
 
   async logout(userId: string, refreshToken: string) {
