@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import type { User } from '../services/userService'
 import type { Party } from '../services/partyService'
 import type { Subject } from '../services/userService'
-import { Button, SectionTitle } from './UI'
+import { Button } from './UI'
 
 // ─── GreetingHeader ──────────────────────────────────────────────────────────
 export function GreetingHeader({ user }: { user: User | null }) {
@@ -68,6 +68,15 @@ function SubjectCard({ subject }: { subject: Subject }) {
       <div className="subject-card-info">
         <p className="subject-card-name">{subject.name}</p>
         <p className="subject-card-meta">Sem. {subject.semester}</p>
+        <button
+          className="subject-skill-link"
+          onClick={(event) => {
+            event.stopPropagation()
+            navigate(`/subjects/${subject.id}/skill-tree`)
+          }}
+        >
+          🌳 Ver habilidades
+        </button>
       </div>
       <div className="subject-card-arrow">›</div>
     </div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { questService, type Quest, type QuizQuestion, type AnswerResult } from '../services/questService'
+import { skillTreeService } from '../services/skillTreeService'
 
 const QUESTION_TIME_MS = 20000
 
@@ -8,6 +9,7 @@ export function useQuiz(questId: string) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [timeLeft, setTimeLeft] = useState(QUESTION_TIME_MS / 1000)
   const [result, setResult] = useState<AnswerResult | null>(null)
+  const [newlyUnlockedNames, setNewlyUnlockedNames] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isFinished, setIsFinished] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -52,6 +54,8 @@ export function useQuiz(questId: string) {
     if (!currentQ || result) return
     clearInterval(timerRef.current!)
     const elapsedMs = Date.now() - startTimeRef.current
+    const selectedOption = currentQ.options.findIndex((option) => option.id === optionId)
+    if (selectedOption < 0) return
 
     if (import.meta.env.DEV) {
       // Mock temporal — sacar cuando el backend esté listo
@@ -59,6 +63,7 @@ export function useQuiz(questId: string) {
       const correctId = currentQ.options[2].id  // asume correctIndex=2 para el mock
       const res = mockAnswerResult(optionId, correctId)
       setResult(res)
+      setNewlyUnlockedNames([])
       setTimeout(() => {
         setResult(null)
         if (quest && currentIndex + 1 < quest.questions.length) {
@@ -70,7 +75,27 @@ export function useQuiz(questId: string) {
       return
     }
 
-    const res = await questService.submitAnswer(currentQ.id, optionId, elapsedMs)
+    const res = await questService.submitAnswer(
+      questId,
+      currentIndex,
+      selectedOption,
+      elapsedMs,
+    )
+
+    if (quest?.subjectId && res.newlyUnlockedNodeIds?.length) {
+      try {
+        const tree = await skillTreeService.getTree(quest.subjectId)
+        const names = tree
+          .filter((node) => res.newlyUnlockedNodeIds?.includes(node.id))
+          .map((node) => node.name)
+        setNewlyUnlockedNames(names)
+      } catch {
+        setNewlyUnlockedNames(['Nueva habilidad'])
+      }
+    } else {
+      setNewlyUnlockedNames([])
+    }
+
     setResult(res)
 
     setTimeout(() => {
@@ -84,5 +109,16 @@ export function useQuiz(questId: string) {
     }, 2500)
   }, [currentQ, result, currentIndex, quest, questId])
 
-  return { quest, currentQ, answer, result, timeLeft, isLoading, isFinished, currentIndex }
+  return {
+    quest,
+    currentQ,
+    answer,
+    result,
+    timeLeft,
+    isLoading,
+    isFinished,
+    currentIndex,
+    newlyUnlockedNames,
+    clearNewlyUnlocked: () => setNewlyUnlockedNames([]),
+  }
 }

@@ -14,6 +14,7 @@ import { PlayerResult } from './player-result.entity';
 import { AiService } from '../ai/ai.service';
 import { PartiesService } from '../parties/parties.service';
 import { UsersService } from '../users/users.service';
+import { SkillTreeService } from '../skill-tree/skill-tree.service';
 import { CreateQuestDto, SubmitAnswerDto } from '../../common/dto';
 
 const XP_CORRECT_BASE = 100;
@@ -37,6 +38,7 @@ export class QuestsService {
     private readonly aiService: AiService,
     private readonly partiesService: PartiesService,
     private readonly usersService: UsersService,
+    private readonly skillTreeService: SkillTreeService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -157,6 +159,7 @@ export class QuestsService {
         'q.id',
         'q.title',
         'q.status',
+        'q.subjectId',
         'q.startedAt',
         'qq.id',
         'qq.text',
@@ -195,7 +198,7 @@ export class QuestsService {
   async submitAnswer(dto: SubmitAnswerDto, userId: string) {
     const question = await this.questionRepo.findOne({
       where: { questId: dto.questId, position: dto.questionIndex },
-      select: ['id', 'correctIndex', 'explanation'],
+      select: ['id', 'correctIndex', 'explanation', 'topic'],
     });
     if (!question) throw new BadRequestException('Pregunta inválida');
 
@@ -204,6 +207,23 @@ export class QuestsService {
       ? XP_CORRECT_BASE +
         (dto.timeSpentMs < XP_SPEED_FAST_MS ? XP_SPEED_BONUS : 0)
       : 0;
+
+    let newlyUnlockedNodeIds: string[] = [];
+    if (isCorrect && question.topic) {
+      const quest = await this.questRepo.findOne({
+        where: { id: dto.questId },
+        select: ['id', 'subjectId'],
+      });
+
+      if (quest?.subjectId) {
+        newlyUnlockedNodeIds = await this.skillTreeService.awardTopicXp(
+          userId,
+          quest.subjectId,
+          question.topic,
+          xpEarned,
+        );
+      }
+    }
 
     const existing = await this.resultRepo.findOne({
       where: { questId: dto.questId, userId },
@@ -232,6 +252,7 @@ export class QuestsService {
       correctIndex: question.correctIndex,
       explanation: question.explanation,
       xpEarned,
+      newlyUnlockedNodeIds,
     };
   }
 

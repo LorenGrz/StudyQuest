@@ -16,6 +16,7 @@ export interface QuizQuestion {
 export interface Quest {
   id: string
   partyId: string
+  subjectId: string
   title: string
   status: 'pending' | 'active' | 'completed'
   leaderboard: Array<{ userId: string; username: string; score: number }>
@@ -28,6 +29,7 @@ export interface AnswerResult {
   correctIndex: number
   explanation: string
   xpEarned: number
+  newlyUnlockedNodeIds?: string[]
 }
 
 export interface CreateQuestPayload {
@@ -67,14 +69,16 @@ export const questService = {
   },
 
   async submitAnswer(
-    questionId: string,
-    optionId: string,
-    timeMs: number,
+    questId: string,
+    questionIndex: number,
+    selectedOption: number,
+    timeSpentMs: number,
   ): Promise<AnswerResult> {
     const { data } = await api.post<AnswerResult>('/quests/answer', {
-      questionId,
-      optionId,
-      timeMs,
+      questId,
+      questionIndex,
+      selectedOption,
+      timeSpentMs,
     })
     return data
   },

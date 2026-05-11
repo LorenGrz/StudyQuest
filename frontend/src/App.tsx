@@ -10,6 +10,7 @@ import MatchPage from './pages/MatchPage'
 import PartiesPage from './pages/PartiesPage'
 import ProfilePage from './pages/ProfilePage'
 import JoinPartyPage from './pages/JoinPartyPage'
+import SkillTreePage from './pages/SkillTreePage'
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="/quiz/:questId" element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
       <Route path="/join/:token" element={<ProtectedRoute><JoinPartyPage /></ProtectedRoute>} />
+      <Route path="/subjects/:subjectId/skill-tree" element={<ProtectedRoute><SkillTreePage /></ProtectedRoute>} />
 
       {/* 404 → auth */}
       <Route path="*" element={<Navigate to="/auth" replace />} />

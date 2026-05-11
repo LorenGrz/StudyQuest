@@ -11,7 +11,7 @@ const SubjectExplorerPage = () => {
     career: '',
     semester: null,
   })
-  const { subjects, isEnrolled, enroll, unenroll, isLoading } = useSubjectExplorer(
+  const { subjects, isEnrolled, enroll, unenroll } = useSubjectExplorer(
     filters,
     search,
   )

@@ -9,12 +9,23 @@ import {
 } from '../components/QuizComponents'
 import { Spinner, Button } from '../components/UI'
 import { useQuiz } from '../hooks/useQuiz'
+import { SkillUnlockToast } from '../components/SkillTreeComponents'
 
 const QuizPage = () => {
   const { questId } = useParams<{ questId: string }>()
   const navigate = useNavigate()
-  const { quest, currentQ, answer, result, timeLeft, isLoading, isFinished, currentIndex } =
-    useQuiz(questId ?? '')
+  const {
+    quest,
+    currentQ,
+    answer,
+    result,
+    timeLeft,
+    isLoading,
+    isFinished,
+    currentIndex,
+    newlyUnlockedNames,
+    clearNewlyUnlocked,
+  } = useQuiz(questId ?? '')
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined)
 
   const handleAnswer = (optionId: string) => {
@@ -75,6 +86,7 @@ const QuizPage = () => {
       {result && (
         <FeedbackOverlay correct={result.isCorrect} explanation={result.explanation} />
       )}
+      <SkillUnlockToast nodeNames={newlyUnlockedNames} onDismiss={clearNewlyUnlocked} />
     </GameLayout>
   )
 }
