@@ -188,6 +188,82 @@ export class PartiesService {
     });
   }
 
+  /** Cierra la party — solo el líder puede hacerlo */
+  async closePartyAsHost(partyId: string, requesterId: string): Promise<void> {
+    const leader = await this.memberRepo.findOne({
+      where: { partyId, userId: requesterId, role: 'leader' },
+    });
+    if (!leader) throw new ForbiddenException('Solo el líder puede cerrar la party');
+    await this.closeParty(partyId);
+  }
+
+  /**
+   * Remueve a un miembro de la party.
+   * Reglas:
+   *  - El solicitante debe ser líder.
+   *  - El líder no puede removerse a sí mismo (debe usar leaveParty o closePartyAsHost).
+   */
+  async removeMember(
+    partyId: string,
+    requesterId: string,
+    targetUserId: string,
+  ): Promise<void> {
+    const requester = await this.memberRepo.findOne({
+      where: { partyId, userId: requesterId },
+    });
+    if (!requester || requester.role !== 'leader')
+      throw new ForbiddenException('Solo el líder puede remover miembros');
+    if (requesterId === targetUserId)
+      throw new BadRequestException(
+        'No podés removerte a vos mismo. Usá "Salir de la party" o "Cerrar party".',
+      );
+    const target = await this.memberRepo.findOne({
+      where: { partyId, userId: targetUserId },
+    });
+    if (!target) throw new NotFoundException('El miembro no pertenece a esta party');
+    await this.memberRepo.remove(target);
+  }
+
+  /**
+   * Sale de la party.
+   * Reglas:
+   *  - Si es member → solo se elimina su registro.
+   *  - Si es leader y hay otros miembros → promueve al miembro con joinedAt más antiguo.
+   *  - Si es leader y está solo → cierra la party.
+   */
+  async leaveParty(partyId: string, userId: string): Promise<void> {
+    return this.dataSource.transaction(async (em) => {
+      const memberRecord = await em.findOne(PartyMember, {
+        where: { partyId, userId },
+      });
+      if (!memberRecord) throw new NotFoundException('No sos miembro de esta party');
+
+      if (memberRecord.role !== 'leader') {
+        await em.remove(memberRecord);
+        return;
+      }
+
+      // Es el líder — buscar otros miembros
+      const others = await em.find(PartyMember, {
+        where: { partyId },
+        order: { joinedAt: 'ASC' },
+      });
+      const rest = others.filter((m) => m.userId !== userId);
+
+      if (rest.length === 0) {
+        // Estaba solo → cerrar party
+        await em.remove(memberRecord);
+        await em.update(Party, partyId, { status: 'closed', closedAt: new Date() });
+        return;
+      }
+
+      // Promover al miembro más antiguo y eliminar al líder saliente
+      const newLeader = rest[0];
+      await em.update(PartyMember, { id: newLeader.id }, { role: 'leader' });
+      await em.remove(memberRecord);
+    });
+  }
+
   async updateVisibility(partyId: string, userId: string, isPrivate: boolean): Promise<void> {
     const leader = await this.memberRepo.findOne({
       where: { partyId, userId, role: 'leader' },

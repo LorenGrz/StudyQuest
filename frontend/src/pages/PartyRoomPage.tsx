@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { MobileLayout } from '../components/Layouts'
 import {
   PartyHeader,
@@ -18,6 +18,7 @@ type ActiveTab = 'quests' | 'chat' | 'members'
 
 const PartyRoomPage = () => {
   const { partyId } = useParams<{ partyId: string }>()
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<ActiveTab>('quests')
   const { party, setParty, messages, sendMessage, isLoading, currentUserId } = useParty(partyId ?? '')
   const { quests, uploadNote, isGenerating } = useQuests(partyId ?? '')
@@ -27,6 +28,39 @@ const PartyRoomPage = () => {
     { id: 'chat', label: '💬 Chat' },
     { id: 'members', label: '👥 Miembros' },
   ]
+
+  const handleLeave = async () => {
+    if (!party) return
+    try {
+      await partyService.leaveParty(party.id)
+      navigate('/parties')
+    } catch (err) {
+      console.error('Error al salir de la party:', err)
+    }
+  }
+
+  const handleRemoveMember = async (targetUserId: string) => {
+    if (!party) return
+    try {
+      await partyService.removeMember(party.id, targetUserId)
+      setParty({
+        ...party,
+        members: party.members.filter((m) => m.userId !== targetUserId),
+      })
+    } catch (err) {
+      console.error('Error al remover miembro:', err)
+    }
+  }
+
+  const handleCloseParty = async () => {
+    if (!party) return
+    try {
+      await partyService.closeParty(party.id)
+      navigate('/parties')
+    } catch (err) {
+      console.error('Error al cerrar la party:', err)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -71,6 +105,9 @@ const PartyRoomPage = () => {
               setParty({ ...party, isPrivate })
             }).catch(console.error)
           }}
+          onLeave={handleLeave}
+          onRemoveMember={handleRemoveMember}
+          onCloseParty={handleCloseParty}
         />
       )}
     </MobileLayout>

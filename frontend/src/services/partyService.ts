@@ -92,6 +92,18 @@ export const partyService = {
     return data
   },
 
+  async leaveParty(partyId: string): Promise<void> {
+    await api.post(`/parties/${partyId}/leave`)
+  },
+
+  async removeMember(partyId: string, targetUserId: string): Promise<void> {
+    await api.delete(`/parties/${partyId}/members/${targetUserId}`)
+  },
+
+  async closeParty(partyId: string): Promise<void> {
+    await api.delete(`/parties/${partyId}`)
+  },
+
   async sendMessage(partyId: string, text: string): Promise<ChatMessage> {
     const { data } = await api.post<ChatMessage>(`/parties/${partyId}/chat`, {
       text,
