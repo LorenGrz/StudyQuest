@@ -30,14 +30,29 @@ export function useParty(partyId: string) {
     })
 
     socket.emit('party:join', { partyId })
+
     socket.on('chat:message', (msg: ChatMessage) => {
       setMessages((prev) => [...prev, msg])
+    })
+
+    // Actualiza el estado de presencia de un miembro sin recargar toda la party
+    socket.on('party:member-online', ({ userId, isOnline }: { userId: string; isOnline: boolean }) => {
+      setParty((prev) => {
+        if (!prev) return prev
+        return {
+          ...prev,
+          members: prev.members.map((m) =>
+            m.userId === userId ? { ...m, isOnline } : m
+          ),
+        }
+      })
     })
 
     return () => {
       cancelled = true
       socket.emit('party:leave', partyId)
       socket.off('chat:message')
+      socket.off('party:member-online')
     }
   }, [partyId, socket])
 

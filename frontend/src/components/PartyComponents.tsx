@@ -154,20 +154,39 @@ export function MemberList({ members, partyId, isPrivate, currentUserId, onVisib
         )}
 
         {members.map((m) => (
-          <div key={m.id} className="member-item">
-            <div className="member-avatar">
+          <div
+            key={m.id}
+            className={`member-item${m.role === 'leader' ? ' member-item-leader' : ''}`}
+          >
+            {/* Avatar con indicador de presencia superpuesto */}
+            <div className="member-avatar" style={{ position: 'relative' }}>
               {m.user.avatarUrl
                 ? <img src={m.user.avatarUrl} alt={m.user.displayName} className="avatar-sm" />
                 : <div className="avatar-placeholder-sm">{m.user.displayName[0]}</div>
               }
+              <span
+                className={`presence-dot presence-dot-${m.isOnline ? 'online' : 'offline'}`}
+                title={m.isOnline ? 'En línea' : 'Desconectado'}
+              />
             </div>
+
             <div className="member-info">
-              <p className="member-name">{m.user.displayName}</p>
+              <p className="member-name">
+                {m.user.displayName}
+                {/* Etiqueta de líder junto al nombre para que sea inmediatamente visible */}
+                {m.role === 'leader' && (
+                  <span className="member-leader-badge">👑 Líder</span>
+                )}
+              </p>
               <p className="member-username">@{m.user.username}</p>
             </div>
+
             <div className="member-stats">
               <span className="member-xp">⚡{m.user.stats?.xp ?? 0}</span>
-              {m.role === 'leader' && <span className="member-leader">👑</span>}
+              {/* Texto de estado de presencia */}
+              <span className={`member-presence-label member-presence-label-${m.isOnline ? 'online' : 'offline'}`}>
+                {m.isOnline ? 'En línea' : 'Desconectado'}
+              </span>
               {isLeader && m.userId !== currentUserId && (
                 <button
                   className="member-remove-btn"
