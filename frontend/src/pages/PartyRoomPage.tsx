@@ -8,13 +8,15 @@ import {
   MemberList,
   UploadNoteCard,
   QuestCard,
+  ActivityFeed,
 } from '../components/PartyComponents'
 import { Spinner } from '../components/UI'
 import { useParty } from '../hooks/useParty'
 import { useQuests } from '../hooks/useQuests'
+import { useActivity } from '../hooks/useActivity'
 import { partyService } from '../services/partyService'
 
-type ActiveTab = 'quests' | 'chat' | 'members'
+type ActiveTab = 'quests' | 'chat' | 'members' | 'activity'
 
 const PartyRoomPage = () => {
   const { partyId } = useParams<{ partyId: string }>()
@@ -22,11 +24,13 @@ const PartyRoomPage = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('quests')
   const { party, setParty, messages, sendMessage, isLoading, currentUserId } = useParty(partyId ?? '')
   const { quests, uploadNote, isGenerating } = useQuests(partyId ?? '')
+  const { activities, isLoading: activityLoading } = useActivity(partyId ?? '')
 
   const tabs: Array<{ id: ActiveTab; label: string }> = [
     { id: 'quests', label: '⚡ Quests' },
     { id: 'chat', label: '💬 Chat' },
     { id: 'members', label: '👥 Miembros' },
+    { id: 'activity', label: '📊 Historial' },
   ]
 
   const handleLeave = async () => {
@@ -109,6 +113,12 @@ const PartyRoomPage = () => {
           onRemoveMember={handleRemoveMember}
           onCloseParty={handleCloseParty}
         />
+      )}
+
+      {activeTab === 'activity' && (
+        <div className="tab-content">
+          <ActivityFeed activities={activities} isLoading={activityLoading} />
+        </div>
       )}
     </MobileLayout>
   )

@@ -7,10 +7,12 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, MoreThan } from 'typeorm';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { v4 as uuid } from 'uuid';
 import { Party } from './party.entity';
 import { PartyMember } from './party-member.entity';
 import { ChatMessage } from './chat-message.entity';
+import { PartyActivity, ActivityType } from './party-activity.entity';
 import { User } from '../users/user.entity';
 
 @Injectable()
@@ -22,9 +24,12 @@ export class PartiesService {
     private readonly memberRepo: Repository<PartyMember>,
     @InjectRepository(ChatMessage)
     private readonly chatRepo: Repository<ChatMessage>,
+    @InjectRepository(PartyActivity)
+    private readonly activityRepo: Repository<PartyActivity>,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly dataSource: DataSource,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   // ─── Invite Link (≥PostgreSQL, sin Redis) ────────────────────────────────────
@@ -129,6 +134,15 @@ export class PartiesService {
         relations: ['subject', 'members', 'members.user'],
       });
       if (!result) throw new NotFoundException('Error al crear la party');
+
+      // Log que se creó la party después de la transacción
+      await this.logActivity(
+        party.id,
+        'member_joined',
+        userId,
+        'Creó la party (como líder)',
+      );
+
       return result;
     });
   }
@@ -186,6 +200,13 @@ export class PartiesService {
       status: 'closed',
       closedAt: new Date(),
     });
+    await this.logActivity(
+      partyId,
+      'party_status_changed',
+      undefined,
+      'Party cerrada',
+      { oldStatus: 'active', newStatus: 'closed' },
+    );
   }
 
   /** Cierra la party — solo el líder puede hacerlo */
@@ -222,6 +243,14 @@ export class PartiesService {
     });
     if (!target) throw new NotFoundException('El miembro no pertenece a esta party');
     await this.memberRepo.remove(target);
+
+    await this.logActivity(
+      partyId,
+      'member_removed',
+      requesterId,
+      `Removió a un miembro`,
+      { targetUserId },
+    );
   }
 
   /**
@@ -240,6 +269,12 @@ export class PartiesService {
 
       if (memberRecord.role !== 'leader') {
         await em.remove(memberRecord);
+        await this.logActivity(
+          partyId,
+          'member_left',
+          userId,
+          'Salió de la party',
+        );
         return;
       }
 
@@ -254,6 +289,13 @@ export class PartiesService {
         // Estaba solo → cerrar party
         await em.remove(memberRecord);
         await em.update(Party, partyId, { status: 'closed', closedAt: new Date() });
+        await this.logActivity(
+          partyId,
+          'party_status_changed',
+          userId,
+          'Party cerrada (líder se fue y no había otros miembros)',
+          { oldStatus: 'active', newStatus: 'closed' },
+        );
         return;
       }
 
@@ -261,6 +303,19 @@ export class PartiesService {
       const newLeader = rest[0];
       await em.update(PartyMember, { id: newLeader.id }, { role: 'leader' });
       await em.remove(memberRecord);
+
+      await this.logActivity(
+        partyId,
+        'member_left',
+        userId,
+        'Salió de la party (era líder)',
+      );
+      await this.logActivity(
+        partyId,
+        'member_promoted',
+        newLeader.userId,
+        `Fue promovido a líder`,
+      );
     });
   }
 
@@ -269,7 +324,21 @@ export class PartiesService {
       where: { partyId, userId, role: 'leader' },
     });
     if (!leader) throw new ForbiddenException('Solo el líder puede cambiar la visibilidad de la party');
+
+    const currentParty = await this.partyRepo.findOne({ where: { id: partyId } });
+    const oldVisibility = currentParty?.isPrivate ?? false;
+
     await this.partyRepo.update(partyId, { isPrivate });
+
+    if (oldVisibility !== isPrivate) {
+      await this.logActivity(
+        partyId,
+        'party_visibility_changed',
+        userId,
+        `Cambió la visibilidad de la party a ${isPrivate ? 'privada' : 'pública'}`,
+        { oldVisibility, newVisibility: isPrivate },
+      );
+    }
   }
 
   async addChatMessage(
@@ -290,6 +359,48 @@ export class PartiesService {
       take: limit,
     });
     return msgs.reverse();
+  }
+
+  // ─── Activity Logging ──────────────────────────────────────────────────────────
+
+  /**
+   * Registra una actividad en la party (miembro se unió, quest completado, etc)
+   */
+  async logActivity(
+    partyId: string,
+    type: ActivityType,
+    userId?: string,
+    description?: string,
+    metadata?: any,
+  ): Promise<PartyActivity> {
+    const activity = this.activityRepo.create({
+      partyId,
+      type,
+      userId,
+      description,
+      metadata,
+    });
+    const saved = await this.activityRepo.save(activity);
+
+    // Emitir evento para que el gateway lo transmita via WebSocket
+    this.eventEmitter.emit('party.activity', {
+      partyId,
+      activity: saved,
+    });
+
+    return saved;
+  }
+
+  /**
+   * Obtiene el historial de actividades de una party
+   */
+  async getActivityHistory(partyId: string, limit = 50): Promise<PartyActivity[]> {
+    return this.activityRepo.find({
+      where: { partyId },
+      relations: ['user'],
+      order: { createdAt: 'DESC' },
+      take: limit,
+    });
   }
 
   /**
@@ -373,9 +484,11 @@ export class PartiesService {
       });
       await em.save(member);
 
+      let statusChanged = false;
       // Si la party se llenó, pasarla a active
       if (party.members.length + 1 >= party.maxMembers) {
         await em.update(Party, partyId, { status: 'active' });
+        statusChanged = true;
       }
 
       const updated = await em.findOne(Party, {
@@ -383,6 +496,25 @@ export class PartiesService {
         relations: ['subject', 'members', 'members.user', 'quests'],
       });
       if (!updated) throw new NotFoundException('Party no encontrada tras unirse');
+
+      // Log activity después de la transacción
+      await this.logActivity(
+        partyId,
+        'member_joined',
+        userId,
+        `Se unió a la party`,
+      );
+
+      if (statusChanged) {
+        await this.logActivity(
+          partyId,
+          'party_status_changed',
+          undefined,
+          'Party se llenó y pasó a activa',
+          { oldStatus: 'forming', newStatus: 'active' },
+        );
+      }
+
       return updated;
     });
   }

@@ -9,6 +9,15 @@ export interface ChatMessage {
   createdAt: string
 }
 
+export interface Activity {
+  id: string
+  type: string
+  description: string
+  user?: Pick<User, 'id' | 'username' | 'displayName' | 'avatarUrl'>
+  createdAt: string
+  metadata?: any
+}
+
 export interface PartyMember {
   id: string
   userId: string
@@ -107,6 +116,13 @@ export const partyService = {
   async sendMessage(partyId: string, text: string): Promise<ChatMessage> {
     const { data } = await api.post<ChatMessage>(`/parties/${partyId}/chat`, {
       text,
+    })
+    return data
+  },
+
+  async getActivity(partyId: string, limit = 50): Promise<Activity[]> {
+    const { data } = await api.get<Activity[]>(`/parties/${partyId}/activity`, {
+      params: { limit },
     })
     return data
   },

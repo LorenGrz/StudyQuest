@@ -3,12 +3,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Party } from './party.entity';
 import { PartyMember } from './party-member.entity';
 import { ChatMessage } from './chat-message.entity';
+import { PartyActivity } from './party-activity.entity';
 import { PartiesService } from './parties.service';
 import { PartiesController } from './parties.controller';
 import { User } from '../users/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Party, PartyMember, ChatMessage, User])],
+  imports: [TypeOrmModule.forFeature([Party, PartyMember, ChatMessage, PartyActivity, User])],
   controllers: [PartiesController],
   providers: [PartiesService],
   exports: [PartiesService, TypeOrmModule],
