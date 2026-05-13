@@ -9,6 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { User } from './user.entity';
 import { Subject } from '../subjects/subject.entity';
 import { RegisterDto, UpdateProfileDto } from '../../common/dto';
+import { DEFAULT_ELO } from '../../common/leagues';
 
 @Injectable()
 export class UsersService {
@@ -136,6 +137,62 @@ export class UsersService {
       })
       .where('id = :id', { id: userId })
       .execute();
+  }
+
+  async updateElo(userId: string, delta: number): Promise<void> {
+    // Clamp so ELO never goes below 0
+    await this.userRepo
+      .createQueryBuilder()
+      .update()
+      .set({
+        stats: () =>
+          `jsonb_set(stats, '{elo}', to_jsonb(GREATEST(0, COALESCE((stats->>'elo')::int, ${DEFAULT_ELO}) + ${delta})))`,
+      })
+      .where('id = :id', { id: userId })
+      .execute();
+  }
+
+  async getElo(userId: string): Promise<number> {
+    const user = await this.userRepo
+      .createQueryBuilder('u')
+      .select(`COALESCE((u.stats->>'elo')::int, ${DEFAULT_ELO})`, 'elo')
+      .where('u.id = :id', { id: userId })
+      .getRawOne<{ elo: number }>();
+    return user?.elo ?? DEFAULT_ELO;
+  }
+
+  async getLeaderboard(
+    subjectId: string,
+    limit = 20,
+  ): Promise<
+    {
+      rank: number;
+      userId: string;
+      username: string;
+      displayName: string;
+      avatarUrl: string | null;
+      elo: number;
+    }[]
+  > {
+    const rows = await this.userRepo
+      .createQueryBuilder('u')
+      .innerJoin('u.enrolledSubjects', 's', 's.id = :subjectId', { subjectId })
+      .select('u.id', 'userId')
+      .addSelect('u.username', 'username')
+      .addSelect('u.display_name', 'displayName')
+      .addSelect('u.avatar_url', 'avatarUrl')
+      .addSelect(`COALESCE((u.stats->>'elo')::int, ${DEFAULT_ELO})`, 'elo')
+      .orderBy('elo', 'DESC')
+      .limit(limit)
+      .getRawMany<{
+        userId: string;
+        username: string;
+        displayName: string;
+        avatarUrl: string | null;
+        elo: number;
+      }>();
+
+    return rows.map((row, index) => ({ rank: index + 1, ...row }));
   }
 
   async saveRefreshToken(userId: string, hashedToken: string): Promise<void> {

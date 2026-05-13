@@ -3,7 +3,6 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import AuthPage from './pages/AuthPage'
 import DashboardPage from './pages/dashboard'
 import SubjectExplorerPage from './pages/SubjectExplorerPage'
-
 import PartyRoomPage from './pages/PartyRoomPage'
 import QuizPage from './pages/QuizPage'
 import MatchPage from './pages/MatchPage'
@@ -11,6 +10,7 @@ import PartiesPage from './pages/PartiesPage'
 import ProfilePage from './pages/ProfilePage'
 import JoinPartyPage from './pages/JoinPartyPage'
 import SkillTreePage from './pages/SkillTreePage'
+import LeaderboardPage from './pages/LeaderboardPage'
 
 function App() {
   return (
@@ -29,6 +29,7 @@ function App() {
       <Route path="/party/:partyId" element={<ProtectedRoute><PartyRoomPage /></ProtectedRoute>} />
       <Route path="/parties" element={<ProtectedRoute><PartiesPage /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+      <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
       <Route path="/quiz/:questId" element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
       <Route path="/join/:token" element={<ProtectedRoute><JoinPartyPage /></ProtectedRoute>} />
       <Route path="/subjects/:subjectId/skill-tree" element={<ProtectedRoute><SkillTreePage /></ProtectedRoute>} />

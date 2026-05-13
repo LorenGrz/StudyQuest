@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { DEFAULT_ELO } from '../../common/leagues';
 
 export interface QueueCandidate {
   userId: string;
@@ -6,9 +7,11 @@ export interface QueueCandidate {
   subjectIds: string[];
   availability: { day: number; hour: number }[];
   career: string;
+  elo: number;
   preferredPartySize: number;
   joinedAt: Date;
   threshold: number;
+  eloRange: number; // max allowed ELO gap, expands over time
 }
 
 export interface MatchGroup {
@@ -22,8 +25,8 @@ export class MatchmakingService {
   private queue = new Map<string, QueueCandidate>();
 
   addToQueue(c: QueueCandidate): void {
-    this.queue.set(c.userId, { ...c, threshold: 0.5 });
-    this.logger.log(`[Queue] +${c.userId} | total: ${this.queue.size}`);
+    this.queue.set(c.userId, { ...c, threshold: 0.5, eloRange: 300 });
+    this.logger.log(`[Queue] +${c.userId} elo=${c.elo} | total: ${this.queue.size}`);
   }
 
   removeFromQueue(userId: string): void {
@@ -42,11 +45,17 @@ export class MatchmakingService {
     const common = a.subjectIds.filter((s) => b.subjectIds.includes(s));
     if (common.length === 0) return 0;
 
-    const subjectScore = Math.min(common.length / 3, 1) * 0.5;
+    const subjectScore = Math.min(common.length / 3, 1) * 0.4;
     const scheduleScore =
-      this.overlapScore(a.availability, b.availability) * 0.3;
-    const careerScore = (a.career === b.career ? 1 : 0) * 0.2;
-    return subjectScore + scheduleScore + careerScore;
+      this.overlapScore(a.availability, b.availability) * 0.2;
+    const careerScore = (a.career === b.career ? 1 : 0) * 0.1;
+
+    // ELO proximity: full score when gap=0, 0 when gap >= max of both eloRanges
+    const eloDiff = Math.abs(a.elo - b.elo);
+    const allowedRange = Math.max(a.eloRange, b.eloRange);
+    const eloScore = Math.max(0, 1 - eloDiff / allowedRange) * 0.3;
+
+    return subjectScore + scheduleScore + careerScore + eloScore;
   }
 
   private overlapScore(
@@ -66,8 +75,13 @@ export class MatchmakingService {
     const now = Date.now();
     for (const c of candidates) {
       const waitMs = now - c.joinedAt.getTime();
-      if (waitMs > 120_000) c.threshold = 0.25;
-      else if (waitMs > 60_000) c.threshold = 0.35;
+      if (waitMs > 120_000) {
+        c.threshold = 0.2;
+        c.eloRange = 800; // very relaxed after 2 min
+      } else if (waitMs > 60_000) {
+        c.threshold = 0.3;
+        c.eloRange = 500; // relaxed after 1 min
+      }
     }
 
     const matched = new Set<string>();

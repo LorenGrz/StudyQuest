@@ -28,6 +28,7 @@ import { Subject } from '../../modules/subjects/subject.entity';
 import { Party } from '../../modules/parties/party.entity';
 import { PartyMember } from '../../modules/parties/party-member.entity';
 import { ChatMessage } from '../../modules/parties/chat-message.entity';
+import { PartyActivity } from '../../modules/parties/party-activity.entity';
 import { Quest } from '../../modules/quests/quest.entity';
 import { QuizQuestion } from '../../modules/quests/quiz-question.entity';
 import { QuizOption } from '../../modules/quests/quiz-option.entity';
@@ -42,7 +43,7 @@ const AppDataSource = new DataSource({
   password: process.env.POSTGRES_PASSWORD ?? 'studyquest_pass',
   database: process.env.POSTGRES_DB       ?? 'studyquest',
   entities: [
-    User, Subject, Party, PartyMember, ChatMessage,
+    User, Subject, Party, PartyMember, ChatMessage, PartyActivity,
     Quest, QuizQuestion, QuizOption, PlayerResult
   ],
   synchronize: false,
@@ -119,7 +120,7 @@ async function seed() {
       semester:     ud.semester,
       passwordHash,
       stats: {
-        xp: 0, level: 0, quizzesPlayed: 0, quizzesWon: 0,
+        xp: 0, level: 0, elo: 1200, quizzesPlayed: 0, quizzesWon: 0,
         currentStreak: 0, longestStreak: 0, lastPlayedAt: null,
       },
       availability: [],

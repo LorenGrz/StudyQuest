@@ -10,6 +10,7 @@ import { Subject } from '../../modules/subjects/subject.entity';
 import { Party } from '../../modules/parties/party.entity';
 import { PartyMember } from '../../modules/parties/party-member.entity';
 import { ChatMessage } from '../../modules/parties/chat-message.entity';
+import { PartyActivity } from '../../modules/parties/party-activity.entity';
 import { Quest } from '../../modules/quests/quest.entity';
 import { QuizQuestion } from '../../modules/quests/quiz-question.entity';
 import { QuizOption } from '../../modules/quests/quiz-option.entity';
@@ -29,6 +30,7 @@ const AppDataSource = new DataSource({
     Party,
     PartyMember,
     ChatMessage,
+    PartyActivity,
     Quest,
     QuizQuestion,
     QuizOption,
