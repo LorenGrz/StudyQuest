@@ -15,6 +15,7 @@ import { ChatMessage } from './chat-message.entity';
 import { Quest } from '../quests/quest.entity';
 
 export type PartyStatus = 'forming' | 'active' | 'closed';
+export type PartyType = 'quiz' | 'study';
 
 @Entity('parties')
 export class Party {
@@ -36,6 +37,14 @@ export class Party {
   })
   @Index()
   status: PartyStatus;
+
+  @Column({
+    type: 'enum',
+    enum: ['quiz', 'study'],
+    default: 'quiz',
+  })
+  @Index()
+  type: PartyType;
 
   @Column({ name: 'max_members', type: 'smallint', default: 4 })
   maxMembers: number;

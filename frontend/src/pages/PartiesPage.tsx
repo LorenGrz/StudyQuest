@@ -14,6 +14,7 @@ const PartiesPage = () => {
   const [showModal, setShowModal] = useState(false)
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>('')
   const [isPrivate, setIsPrivate] = useState(false)
+  const [partyType, setPartyType] = useState<'quiz' | 'study'>('quiz')
 
   const subjects = user?.enrolledSubjects ?? []
 
@@ -36,7 +37,7 @@ const PartiesPage = () => {
   const handleCreate = async () => {
     setIsCreating(true)
     try {
-      const newParty = await partyService.create(selectedSubjectId || undefined, 4, isPrivate)
+      const newParty = await partyService.create(selectedSubjectId || undefined, 4, isPrivate, partyType)
       navigate(`/party/${newParty.id}`)
     } catch (err) {
       console.error('Error al crear party', err)
@@ -110,6 +111,26 @@ const PartiesPage = () => {
               </p>
             )}
 
+            <div className="input-group">
+              <label className="input-label">Modo de la Party</label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <Button 
+                  variant={partyType === 'quiz' ? 'primary' : 'secondary'} 
+                  onClick={() => setPartyType('quiz')}
+                  className="flex-1"
+                >
+                  ⚡ Quiz
+                </Button>
+                <Button 
+                  variant={partyType === 'study' ? 'primary' : 'secondary'} 
+                  onClick={() => setPartyType('study')}
+                  className="flex-1"
+                >
+                  ⏱️ Study Room
+                </Button>
+              </div>
+            </div>
+
             <div className="input-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => setIsPrivate(!isPrivate)}>
               <input 
                 type="checkbox" 
@@ -173,6 +194,8 @@ const PartiesPage = () => {
                   {party.subject?.name ?? 'Party'}
                 </div>
                 <div className="party-list-meta">
+                  <span>{party.type === 'study' ? '⏱️ Study Room' : '⚡ Quiz'}</span>
+                  <span>•</span>
                   <span>👥 {party.members?.length || 0}/{party.maxMembers} miembros</span>
                   <span>•</span>
                   {getStatusBadge(party.status)}

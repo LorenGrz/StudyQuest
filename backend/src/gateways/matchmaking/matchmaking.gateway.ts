@@ -29,6 +29,16 @@ export class MatchmakingGateway
   private readonly logger = new Logger(MatchmakingGateway.name);
   private connections = new Map<string, { userId: string; partyId?: string }>();
 
+  // Pomodoro state per party
+  private pomodoros = new Map<string, {
+    isRunning: boolean;
+    timeLeft: number;
+    mode: 'work' | 'break';
+    workDuration: number;
+    breakDuration: number;
+    lastTick: number;
+  }>();
+
   constructor(
     private readonly matchmakingService: MatchmakingService,
     private readonly partiesService: PartiesService,
@@ -172,6 +182,12 @@ export class MatchmakingGateway
       userId: conn.userId,
       isOnline: true,
     });
+
+    // Enviar estado actual del pomodoro si existe
+    const pomodoro = this.pomodoros.get(partyId);
+    if (pomodoro) {
+      socket.emit('pomodoro:sync', pomodoro);
+    }
   }
 
   @SubscribeMessage('party:leave')
@@ -216,6 +232,88 @@ export class MatchmakingGateway
         ? message.createdAt.toISOString()
         : message.createdAt,
     });
+  }
+
+  // ─── Pomodoro ─────────────────────────────────────────────────────────────
+
+  private initPomodoro(partyId: string) {
+    if (!this.pomodoros.has(partyId)) {
+      this.pomodoros.set(partyId, {
+        isRunning: false,
+        timeLeft: 25 * 60, // 25 minutes default
+        mode: 'work',
+        workDuration: 25 * 60,
+        breakDuration: 5 * 60,
+        lastTick: Date.now(),
+      });
+    }
+    return this.pomodoros.get(partyId)!;
+  }
+
+  @SubscribeMessage('pomodoro:start')
+  handlePomodoroStart(@ConnectedSocket() socket: Socket, @MessageBody() dto: { partyId: string }) {
+    const pomodoro = this.initPomodoro(dto.partyId);
+    pomodoro.isRunning = true;
+    pomodoro.lastTick = Date.now();
+    this.server.to(dto.partyId).emit('pomodoro:sync', pomodoro);
+  }
+
+  @SubscribeMessage('pomodoro:pause')
+  handlePomodoroPause(@ConnectedSocket() socket: Socket, @MessageBody() dto: { partyId: string }) {
+    const pomodoro = this.pomodoros.get(dto.partyId);
+    if (pomodoro) {
+      pomodoro.isRunning = false;
+      this.server.to(dto.partyId).emit('pomodoro:sync', pomodoro);
+    }
+  }
+
+  @SubscribeMessage('pomodoro:reset')
+  handlePomodoroReset(@ConnectedSocket() socket: Socket, @MessageBody() dto: { partyId: string }) {
+    const pomodoro = this.initPomodoro(dto.partyId);
+    pomodoro.isRunning = false;
+    pomodoro.mode = 'work';
+    pomodoro.timeLeft = pomodoro.workDuration;
+    this.server.to(dto.partyId).emit('pomodoro:sync', pomodoro);
+  }
+
+  @SubscribeMessage('pomodoro:config')
+  handlePomodoroConfig(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() dto: { partyId: string; workDuration: number; breakDuration: number },
+  ) {
+    const pomodoro = this.initPomodoro(dto.partyId);
+    pomodoro.workDuration = dto.workDuration * 60;
+    pomodoro.breakDuration = dto.breakDuration * 60;
+    if (!pomodoro.isRunning) {
+      pomodoro.timeLeft = pomodoro.mode === 'work' ? pomodoro.workDuration : pomodoro.breakDuration;
+    }
+    this.server.to(dto.partyId).emit('pomodoro:sync', pomodoro);
+  }
+
+  @Cron('*/1 * * * * *') // Every second
+  runPomodoroTick() {
+    const now = Date.now();
+    for (const [partyId, pomodoro] of this.pomodoros.entries()) {
+      if (pomodoro.isRunning) {
+        const delta = Math.floor((now - pomodoro.lastTick) / 1000);
+        if (delta >= 1) {
+          pomodoro.timeLeft -= delta;
+          pomodoro.lastTick = now;
+
+          if (pomodoro.timeLeft <= 0) {
+            // Switch mode
+            pomodoro.mode = pomodoro.mode === 'work' ? 'break' : 'work';
+            pomodoro.timeLeft = pomodoro.mode === 'work' ? pomodoro.workDuration : pomodoro.breakDuration;
+            pomodoro.isRunning = false; // Auto-pause on mode switch
+            this.server.to(partyId).emit('pomodoro:sync', pomodoro);
+            this.server.to(partyId).emit('pomodoro:finished', { mode: pomodoro.mode });
+          } else if (pomodoro.timeLeft % 5 === 0) {
+            // Sync every 5 seconds to correct drift
+            this.server.to(partyId).emit('pomodoro:sync', pomodoro);
+          }
+        }
+      }
+    }
   }
 
   @Cron(CronExpression.EVERY_5_SECONDS)

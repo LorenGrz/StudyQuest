@@ -11,6 +11,8 @@ import { v4 as uuid } from 'uuid';
 import { Party } from './party.entity';
 import { PartyMember } from './party-member.entity';
 import { ChatMessage } from './chat-message.entity';
+import { PartyTodo } from './party-todo.entity';
+import { User } from '../users/user.entity';
 import { User } from '../users/user.entity';
 
 @Injectable()
@@ -22,6 +24,8 @@ export class PartiesService {
     private readonly memberRepo: Repository<PartyMember>,
     @InjectRepository(ChatMessage)
     private readonly chatRepo: Repository<ChatMessage>,
+    @InjectRepository(PartyTodo)
+    private readonly todoRepo: Repository<PartyTodo>,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly dataSource: DataSource,
@@ -65,11 +69,13 @@ export class PartiesService {
     subjectId: string,
     memberIds: string[],
     maxMembers = 4,
+    type: 'quiz' | 'study' = 'quiz',
   ): Promise<Party | null> {
     return this.dataSource.transaction(async (em) => {
       const party = em.create(Party, {
         subjectId,
         maxMembers,
+        type,
         status: 'active',
       });
       await em.save(party);
@@ -91,6 +97,7 @@ export class PartiesService {
     subjectId?: string,
     maxMembers = 4,
     isPrivate = false,
+    type: 'quiz' | 'study' = 'quiz',
   ): Promise<Party> {
     // Si no se pasa subjectId, usamos la primera materia inscripta del usuario
     let resolvedSubjectId = subjectId;
@@ -112,6 +119,7 @@ export class PartiesService {
         subjectId: resolvedSubjectId,
         maxMembers,
         isPrivate,
+        type,
         status: 'forming',
       });
       await em.save(party);
@@ -290,6 +298,44 @@ export class PartiesService {
       take: limit,
     });
     return msgs.reverse();
+  }
+
+  // ─── To-Dos (Study Rooms) ───────────────────────────────────────────────────
+
+  async getTodos(partyId: string): Promise<PartyTodo[]> {
+    return this.todoRepo.find({
+      where: { partyId },
+      relations: ['user'],
+      order: { createdAt: 'ASC' },
+    });
+  }
+
+  async addTodo(partyId: string, userId: string, text: string): Promise<PartyTodo> {
+    const todo = this.todoRepo.create({ partyId, userId, text: text.trim() });
+    const saved = await this.todoRepo.save(todo);
+    return this.todoRepo.findOne({ where: { id: saved.id }, relations: ['user'] }) as Promise<PartyTodo>;
+  }
+
+  async toggleTodo(partyId: string, todoId: string, userId: string, isCompleted: boolean): Promise<PartyTodo> {
+    // Validate if the user is in the party
+    const isMember = await this.memberRepo.findOne({ where: { partyId, userId } });
+    if (!isMember) throw new ForbiddenException('No sos miembro de esta party');
+
+    const todo = await this.todoRepo.findOne({ where: { id: todoId, partyId } });
+    if (!todo) throw new NotFoundException('To-Do no encontrado');
+
+    todo.isCompleted = isCompleted;
+    return this.todoRepo.save(todo);
+  }
+
+  async deleteTodo(partyId: string, todoId: string, userId: string): Promise<void> {
+    const isMember = await this.memberRepo.findOne({ where: { partyId, userId } });
+    if (!isMember) throw new ForbiddenException('No sos miembro de esta party');
+
+    const todo = await this.todoRepo.findOne({ where: { id: todoId, partyId } });
+    if (!todo) throw new NotFoundException('To-Do no encontrado');
+
+    await this.todoRepo.remove(todo);
   }
 
   /**

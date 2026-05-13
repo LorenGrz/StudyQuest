@@ -31,6 +31,17 @@ export interface PartyQuest {
   status: string
 }
 
+export interface PartyTodo {
+  id: string
+  partyId: string
+  userId: string
+  text: string
+  isCompleted: boolean
+  createdAt: string
+  updatedAt: string
+  user?: Pick<User, 'id' | 'username' | 'displayName' | 'avatarUrl'>
+}
+
 export interface Party {
   id: string
   name?: string
@@ -39,7 +50,9 @@ export interface Party {
   members: PartyMember[]
   maxMembers: number
   status: 'forming' | 'active' | 'closed' | 'waiting'
+  type: 'quiz' | 'study'
   quests: PartyQuest[]
+  todos?: PartyTodo[]
   isPrivate: boolean
   createdAt: string
   updatedAt: string
@@ -73,8 +86,8 @@ export const partyService = {
     return data
   },
 
-  async create(subjectId?: string, maxMembers = 4, isPrivate = false): Promise<Party> {
-    const { data } = await api.post<Party>('/parties', { subjectId, maxMembers, isPrivate })
+  async create(subjectId?: string, maxMembers = 4, isPrivate = false, type: 'quiz' | 'study' = 'quiz'): Promise<Party> {
+    const { data } = await api.post<Party>('/parties', { subjectId, maxMembers, isPrivate, type })
     return data
   },
 
@@ -109,5 +122,26 @@ export const partyService = {
       text,
     })
     return data
+  },
+
+  // ─── To-Dos ─────────────────────────────────────────────────────────────────
+
+  async getTodos(partyId: string): Promise<PartyTodo[]> {
+    const { data } = await api.get<PartyTodo[]>(`/parties/${partyId}/todos`)
+    return data
+  },
+
+  async addTodo(partyId: string, text: string): Promise<PartyTodo> {
+    const { data } = await api.post<PartyTodo>(`/parties/${partyId}/todos`, { text })
+    return data
+  },
+
+  async toggleTodo(partyId: string, todoId: string, isCompleted: boolean): Promise<PartyTodo> {
+    const { data } = await api.patch<PartyTodo>(`/parties/${partyId}/todos/${todoId}`, { isCompleted })
+    return data
+  },
+
+  async deleteTodo(partyId: string, todoId: string): Promise<void> {
+    await api.delete(`/parties/${partyId}/todos/${todoId}`)
   },
 }

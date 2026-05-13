@@ -164,6 +164,7 @@ export function PartyCard({ party }: { party: Party }) {
           <span className="mc-cover-chip-dot" />
           <span className="mc-cover-chip-icon">{subjectIcon}</span>
           {party.subject?.code ?? party.subject?.name ?? 'SQUAD'}
+          {party.type === 'study' && <span className="ml-1 opacity-80">(⏱️ Study Room)</span>}
         </div>
 
         {/* Badge de slots */}
@@ -205,9 +206,9 @@ export function PartyCard({ party }: { party: Party }) {
         {/* Quest / descripción */}
         <div className="mc-quest-block">
           <p className="mc-quest-title">
-            {quest?.title ?? party.subject?.name ?? 'Party de estudio'}
+            {party.type === 'study' ? '⏱️ Sala de Estudio' : (quest?.title ?? party.subject?.name ?? 'Party de estudio')}
           </p>
-          {quest && (
+          {quest && party.type !== 'study' && (
             <p className="mc-quest-sub">{party.subject?.name}</p>
           )}
         </div>

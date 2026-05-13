@@ -46,6 +46,7 @@ export class PartiesController {
       dto.subjectId,
       dto.maxMembers ?? 4,
       dto.isPrivate ?? false,
+      dto.type ?? 'quiz',
     );
   }
 
@@ -105,6 +106,45 @@ export class PartiesController {
     } catch (error: any) {
       throw new BadRequestException(error.message + ' ||| STACK: ' + error.stack);
     }
+  }
+
+  // ─── To-Dos ─────────────────────────────────────────────────────────────────
+
+  @Get(':id/todos')
+  @ApiOperation({ summary: 'Obtener la lista de tareas (To-Dos) de la party' })
+  getTodos(@Param('id') id: string) {
+    return this.partiesService.getTodos(id);
+  }
+
+  @Post(':id/todos')
+  @ApiOperation({ summary: 'Agregar un To-Do a la party' })
+  addTodo(
+    @Param('id') id: string,
+    @Request() req: any,
+    @Body() dto: { text: string },
+  ) {
+    return this.partiesService.addTodo(id, req.user.userId, dto.text);
+  }
+
+  @Patch(':id/todos/:todoId')
+  @ApiOperation({ summary: 'Marcar To-Do como completado o no' })
+  toggleTodo(
+    @Param('id') id: string,
+    @Param('todoId') todoId: string,
+    @Request() req: any,
+    @Body() dto: { isCompleted: boolean },
+  ) {
+    return this.partiesService.toggleTodo(id, todoId, req.user.userId, dto.isCompleted);
+  }
+
+  @Delete(':id/todos/:todoId')
+  @ApiOperation({ summary: 'Eliminar un To-Do' })
+  deleteTodo(
+    @Param('id') id: string,
+    @Param('todoId') todoId: string,
+    @Request() req: any,
+  ) {
+    return this.partiesService.deleteTodo(id, todoId, req.user.userId);
   }
 
   // ─── Acciones administrativas ─────────────────────────────────────────────

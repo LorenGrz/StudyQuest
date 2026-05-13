@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { MobileLayout } from '../components/Layouts'
 import {
@@ -12,9 +12,11 @@ import {
 import { Spinner } from '../components/UI'
 import { useParty } from '../hooks/useParty'
 import { useQuests } from '../hooks/useQuests'
+import { usePomodoro } from '../hooks/usePomodoro'
+import { PomodoroTimer, SharedTodoList } from '../components/PomodoroComponents'
 import { partyService } from '../services/partyService'
 
-type ActiveTab = 'quests' | 'chat' | 'members'
+type ActiveTab = 'quests' | 'chat' | 'members' | 'pomodoro'
 
 const PartyRoomPage = () => {
   const { partyId } = useParams<{ partyId: string }>()
@@ -22,12 +24,28 @@ const PartyRoomPage = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('quests')
   const { party, setParty, messages, sendMessage, isLoading, currentUserId } = useParty(partyId ?? '')
   const { quests, uploadNote, isGenerating } = useQuests(partyId ?? '')
+  const { state: pomodoroState, start, pause, reset, updateConfig } = usePomodoro(partyId ?? '')
 
-  const tabs: Array<{ id: ActiveTab; label: string }> = [
-    { id: 'quests', label: '⚡ Quests' },
-    { id: 'chat', label: '💬 Chat' },
-    { id: 'members', label: '👥 Miembros' },
-  ]
+  // Set default tab based on party type
+  useEffect(() => {
+    if (party?.type === 'study' && activeTab === 'quests') {
+      setActiveTab('pomodoro')
+    }
+  }, [party?.type])
+
+  const tabs: Array<{ id: ActiveTab; label: string }> = party?.type === 'study' 
+    ? [
+        { id: 'pomodoro', label: '⏱️ Focus' },
+        { id: 'chat', label: '💬 Chat' },
+        { id: 'members', label: '👥 Miembros' },
+      ]
+    : [
+        { id: 'quests', label: '⚡ Quests' },
+        { id: 'chat', label: '💬 Chat' },
+        { id: 'members', label: '👥 Miembros' },
+      ]
+
+  const isLeader = party?.members.find(m => m.userId === currentUserId)?.role === 'leader'
 
   const handleLeave = async () => {
     if (!party) return
@@ -74,6 +92,22 @@ const PartyRoomPage = () => {
     <MobileLayout>
       <PartyHeader party={party} />
       <TabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
+
+      {activeTab === 'pomodoro' && (
+        <div className="tab-content">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <PomodoroTimer
+              state={pomodoroState}
+              onStart={start}
+              onPause={pause}
+              onReset={reset}
+              onConfigChange={updateConfig}
+              isLeader={!!isLeader}
+            />
+            <SharedTodoList partyId={partyId ?? ''} currentUserId={currentUserId ?? ''} />
+          </div>
+        </div>
+      )}
 
       {activeTab === 'quests' && (
         <div className="tab-content">

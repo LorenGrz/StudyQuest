@@ -127,7 +127,13 @@ export class SendChatMessageDto {
 export class CreatePartyDto {
   @IsOptional() @IsUUID() subjectId?: string;
   @IsOptional() @IsNumber() @Min(2) @Max(8) maxMembers?: number;
-  @IsOptional() @IsBoolean() isPrivate?: boolean;
+  @IsOptional()
+  @IsBoolean()
+  isPrivate?: boolean;
+
+  @IsOptional()
+  @IsString()
+  type?: 'quiz' | 'study';
 }
 
 export class UpdatePartyVisibilityDto {
