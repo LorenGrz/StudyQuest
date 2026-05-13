@@ -790,7 +790,39 @@ input, textarea, select { font-family: inherit; }
 .member-username { font-size: 12px; color: var(--text-muted); }
 .member-stats { display: flex; align-items: center; gap: 8px; }
 .member-xp { font-size: 13px; font-weight: 700; color: var(--accent-light); }
-.member-leader { font-size: 16px; }
+/* Filas de miembro: el líder tiene un borde izquierdo dorado para distinguirse */
+.member-item-leader { border-left: 3px solid var(--accent-light); }
+
+/* Punto de presencia superpuesto sobre el avatar */
+.presence-dot {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--bg-base, #0f0f17);
+}
+.presence-dot-online  { background: #22c55e; }
+.presence-dot-offline { background: #6b7280; }
+
+/* Etiqueta de texto de presencia dentro de .member-stats */
+.member-presence-label { font-size: 11px; font-weight: 600; }
+.member-presence-label-online  { color: #22c55e; }
+.member-presence-label-offline { color: var(--text-muted); }
+
+/* Etiqueta de "Líder" junto al nombre */
+.member-leader-badge {
+  margin-left: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent-light);
+  background: rgba(var(--accent-rgb, 139,92,246), 0.15);
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  vertical-align: middle;
+}
+
 .member-remove-btn {
   width: 26px; height: 26px;
   border-radius: var(--radius-full);
