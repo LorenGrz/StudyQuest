@@ -152,3 +152,74 @@ export class SubmitAnswerDto {
   @IsNumber() @Min(0) @Max(3) selectedOption: number;
   @IsNumber() @Min(0) timeSpentMs: number;
 }
+
+// ─── Skill Tree ───────────────────────────────────────────────────────────────
+
+export class CreateSkillNodeDto {
+  @ApiPropertyOptional({ example: 'f4f65fd7-f71c-4d66-aa5b-7d6f44ab34e8' })
+  @IsOptional()
+  @IsUUID()
+  subjectId?: string;
+
+  @ApiProperty({ example: 'Derivadas' })
+  @IsString()
+  @MaxLength(200)
+  topic: string;
+
+  @ApiProperty({ example: 'Cálculo Diferencial' })
+  @IsString()
+  @MaxLength(200)
+  name: string;
+
+  @ApiPropertyOptional({ example: 'Reglas de derivación y aplicaciones.' })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiPropertyOptional({ example: 'sigma' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  iconKey?: string;
+
+  @ApiProperty({ example: 150 })
+  @IsNumber()
+  @Min(1)
+  xpThreshold: number;
+
+  @ApiPropertyOptional({ type: [String], example: [] })
+  @IsOptional()
+  @IsArray()
+  @IsUUID(undefined, { each: true })
+  prerequisiteIds?: string[];
+
+  @ApiPropertyOptional({ example: 0 })
+  @IsOptional()
+  @IsNumber()
+  col?: number;
+
+  @ApiPropertyOptional({ example: 0 })
+  @IsOptional()
+  @IsNumber()
+  row?: number;
+}
+
+export interface SkillNodeWithProgress {
+  id: string;
+  subjectId: string;
+  topic: string;
+  name: string;
+  description: string | null;
+  iconKey: string;
+  xpThreshold: number;
+  prerequisiteIds: string[];
+  col: number;
+  row: number;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  topicXp: number;
+  unlocked: boolean;
+  progressPercent: number;
+  prerequisitesMet: boolean;
+}

@@ -1,0 +1,51 @@
+[
+  {
+    "topic": "Límites",
+    "name": "Límites",
+    "description": "Conceptos y reglas de límites.",
+    "iconKey": "target",
+    "xpThreshold": 80,
+    "col": 2,
+    "row": 0
+  },
+  {
+    "topic": "Continuidad",
+    "name": "Continuidad",
+    "description": "Continuidad y discontinuidades típicas.",
+    "iconKey": "link",
+    "xpThreshold": 100,
+    "col": 1,
+    "row": 1,
+    "dependsOn": ["Límites"]
+  },
+  {
+    "topic": "Derivadas",
+    "name": "Derivadas",
+    "description": "Reglas de derivación y aplicaciones.",
+    "iconKey": "trending-up",
+    "xpThreshold": 120,
+    "col": 3,
+    "row": 1,
+    "dependsOn": ["Límites"]
+  },
+  {
+    "topic": "Integrales",
+    "name": "Integrales",
+    "description": "Integración y técnicas básicas.",
+    "iconKey": "sigma",
+    "xpThreshold": 150,
+    "col": 3,
+    "row": 2,
+    "dependsOn": ["Derivadas"]
+  },
+  {
+    "topic": "Aplicaciones",
+    "name": "Aplicaciones",
+    "description": "Problemas de optimización y modelado.",
+    "iconKey": "rocket",
+    "xpThreshold": 180,
+    "col": 2,
+    "row": 3,
+    "dependsOn": ["Derivadas", "Integrales"]
+  }
+]

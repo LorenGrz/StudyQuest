@@ -1,5 +1,4 @@
 import type { Subject } from '../services/userService'
-import { Button, Badge } from './UI'
 
 // ─── SearchBar ────────────────────────────────────────────────────────────────
 export function SearchBar({ value, onChange }: { value: string; onChange: (v: string) => void }) {

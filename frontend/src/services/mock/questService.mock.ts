@@ -3,6 +3,7 @@ import type { Quest, AnswerResult } from '../questService'
 export const mockQuest: Quest = {
   id: 'mock-1',
   partyId: 'party-1',
+  subjectId: 'subject-1',
   title: 'Computer Science Basics',
   status: 'active',
   createdAt: new Date().toISOString(),

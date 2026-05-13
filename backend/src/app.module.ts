@@ -20,6 +20,7 @@ import { SubjectsModule } from './modules/subjects/subjects.module';
 import { PartiesModule } from './modules/parties/parties.module';
 import { QuestsModule } from './modules/quests/quests.module';
 import { AiModule } from './modules/ai/ai.module';
+import { SkillTreeModule } from './modules/skill-tree/skill-tree.module';
 import { MatchmakingModule } from './gateways/matchmaking/matchmaking.module';
 
 @Module({
@@ -66,6 +67,7 @@ import { MatchmakingModule } from './gateways/matchmaking/matchmaking.module';
     PartiesModule,
     QuestsModule,
     AiModule,
+    SkillTreeModule,
     MatchmakingModule,
   ],
 })

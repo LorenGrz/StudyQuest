@@ -1,4 +1,4 @@
-import type { Quest, QuizQuestion, QuizOption, AnswerResult } from '../services/questService'
+import type { Quest, QuizOption } from '../services/questService'
 
 // ─── ScoreHeader ─────────────────────────────────────────────────────────────
 interface ScoreHeaderProps {

@@ -7,7 +7,7 @@ import { useAuthStore } from '../store/authStore'
 export function useAuth() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const { setTokens, setUser, logout: storeLogout, accessToken, refreshToken } = useAuthStore()
+  const { setTokens, setUser, logout: storeLogout, refreshToken } = useAuthStore()
   const navigate = useNavigate()
 
   const login = async (payload: LoginPayload) => {
