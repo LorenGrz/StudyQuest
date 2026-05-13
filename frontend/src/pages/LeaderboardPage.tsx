@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react'
 import { MobileLayout } from '../components/Layouts'
 import { Spinner } from '../components/UI'
 import { useAuthStore } from '../store/authStore'
-import { userService, LeaderboardEntry } from '../services/userService'
+import { userService } from '../services/userService'
+import type { LeaderboardEntry } from '../services/userService'
+
 import { getLeague, DEFAULT_ELO } from '../utils/leagues'
 
 export default function LeaderboardPage() {
