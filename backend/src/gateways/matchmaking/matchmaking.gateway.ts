@@ -11,6 +11,7 @@ import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { JwtService } from '@nestjs/jwt';
+import { OnEvent } from '@nestjs/event-emitter';
 import { v4 as uuid } from 'uuid';
 import { MatchmakingService, QueueCandidate } from './matchmaking.service';
 import { PartiesService } from '../../modules/parties/parties.service';
@@ -250,5 +251,15 @@ export class MatchmakingGateway
         },
       );
     }
+  }
+
+  // ─── Activity Events ──────────────────────────────────────────────────────────
+
+  @OnEvent('party.activity')
+  handlePartyActivity(payload: { partyId: string; activity: any }) {
+    this.logger.debug(`Activity en party ${payload.partyId}: ${payload.activity.type}`);
+    this.server.to(payload.partyId).emit('party:activity', {
+      activity: payload.activity,
+    });
   }
 }

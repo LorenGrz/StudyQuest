@@ -13,6 +13,7 @@ import { Subject } from '../subjects/subject.entity';
 import { PartyMember } from './party-member.entity';
 import { ChatMessage } from './chat-message.entity';
 import { Quest } from '../quests/quest.entity';
+import { PartyActivity } from './party-activity.entity';
 
 export type PartyStatus = 'forming' | 'active' | 'closed';
 
@@ -51,6 +52,9 @@ export class Party {
 
   @OneToMany(() => Quest, (q) => q.party)
   quests: Quest[];
+
+  @OneToMany(() => PartyActivity, (pa) => pa.party, { cascade: true })
+  activities: PartyActivity[];
 
   @Column({
     name: 'closed_at',

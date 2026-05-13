@@ -406,3 +406,88 @@ export function QuestCard({ quest }: { quest: Quest }) {
     </div>
   )
 }
+
+// ─── ActivityFeed ────────────────────────────────────────────────────────────
+export interface Activity {
+  id: string
+  type: string
+  description: string
+  user?: { id: string; displayName: string; avatarUrl?: string }
+  createdAt: string
+  metadata?: any
+}
+
+interface ActivityFeedProps {
+  activities: Activity[]
+  isLoading?: boolean
+}
+
+const getActivityEmoji = (type: string): string => {
+  const emojis: Record<string, string> = {
+    member_joined: '👋',
+    member_left: '👋',
+    member_removed: '🚫',
+    quest_created: '✨',
+    quest_started: '▶️',
+    quest_completed: '✅',
+    party_status_changed: '🔄',
+    party_visibility_changed: '🔒',
+    member_promoted: '👑',
+  }
+  return emojis[type] || '📌'
+}
+
+const getActivityColor = (type: string): string => {
+  const colors: Record<string, string> = {
+    member_joined: '#4ade80',
+    member_left: '#64748b',
+    member_removed: '#ef4444',
+    quest_created: '#06b6d4',
+    quest_started: '#f59e0b',
+    quest_completed: '#10b981',
+    party_status_changed: '#8b5cf6',
+    party_visibility_changed: '#ec4899',
+    member_promoted: '#f59e0b',
+  }
+  return colors[type] || '#94a3b8'
+}
+
+export function ActivityFeed({ activities, isLoading }: ActivityFeedProps) {
+  if (isLoading) {
+    return (
+      <div style={{ padding: '16px', textAlign: 'center' }}>
+        <Spinner size="sm" />
+      </div>
+    )
+  }
+
+  if (activities.length === 0) {
+    return (
+      <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '14px' }}>
+        <p>Sin actividad todavía</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="activity-feed">
+      {activities.map((activity) => (
+        <div key={activity.id} className="activity-item">
+          <div className="activity-dot" style={{ backgroundColor: getActivityColor(activity.type) }} />
+          <div className="activity-content">
+            <div className="activity-header">
+              <span className="activity-emoji">{getActivityEmoji(activity.type)}</span>
+              {activity.user && (
+                <span className="activity-user">{activity.user.displayName}</span>
+              )}
+            </div>
+            <p className="activity-description">{activity.description}</p>
+            <span className="activity-time">
+              {new Date(activity.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}

@@ -78,6 +78,12 @@ export class PartiesController {
     return this.partiesService.getChatHistory(id, +limit);
   }
 
+  @Get(':id/activity')
+  @ApiOperation({ summary: 'Historial de actividades de la party' })
+  getActivity(@Param('id') id: string, @Query('limit') limit = 50) {
+    return this.partiesService.getActivityHistory(id, +limit);
+  }
+
   @Patch(':id/visibility')
   @ApiOperation({ summary: 'Cambiar visibilidad de la party (solo líder)' })
   updateVisibility(
