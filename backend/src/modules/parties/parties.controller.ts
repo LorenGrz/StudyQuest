@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Delete,
   Param,
   Body,
   UseGuards,
@@ -9,6 +10,8 @@ import {
   Query,
   Patch,
   BadRequestException,
+  ForbiddenException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -101,6 +104,48 @@ export class PartiesController {
       return await this.partiesService.joinParty(id, req.user.userId);
     } catch (error: any) {
       throw new BadRequestException(error.message + ' ||| STACK: ' + error.stack);
+    }
+  }
+
+  // ─── Acciones administrativas ─────────────────────────────────────────────
+
+  @Post(':id/leave')
+  @ApiOperation({ summary: 'Salir de la party (cualquier miembro)' })
+  async leaveParty(@Param('id') id: string, @Request() req: any) {
+    try {
+      await this.partiesService.leaveParty(id, req.user.userId);
+      return { message: 'Saliste de la party' };
+    } catch (error: any) {
+      if (error instanceof ForbiddenException || error instanceof NotFoundException) throw error;
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Delete(':id/members/:userId')
+  @ApiOperation({ summary: 'Remover miembro de la party (solo líder)' })
+  async removeMember(
+    @Param('id') id: string,
+    @Param('userId') targetUserId: string,
+    @Request() req: any,
+  ) {
+    try {
+      await this.partiesService.removeMember(id, req.user.userId, targetUserId);
+      return { message: 'Miembro removido' };
+    } catch (error: any) {
+      if (error instanceof ForbiddenException || error instanceof NotFoundException) throw error;
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Cerrar la party (solo líder)' })
+  async closeParty(@Param('id') id: string, @Request() req: any) {
+    try {
+      await this.partiesService.closePartyAsHost(id, req.user.userId);
+      return { message: 'Party cerrada' };
+    } catch (error: any) {
+      if (error instanceof ForbiddenException || error instanceof NotFoundException) throw error;
+      throw new BadRequestException(error.message);
     }
   }
 }

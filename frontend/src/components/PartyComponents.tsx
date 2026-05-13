@@ -117,10 +117,14 @@ interface MemberListProps {
   isPrivate: boolean
   currentUserId: string
   onVisibilityChange: (isPrivate: boolean) => void
+  onLeave: () => void
+  onRemoveMember: (targetUserId: string) => void
+  onCloseParty: () => void
 }
 
-export function MemberList({ members, partyId, isPrivate, currentUserId, onVisibilityChange }: MemberListProps) {
+export function MemberList({ members, partyId, isPrivate, currentUserId, onVisibilityChange, onLeave, onRemoveMember, onCloseParty }: MemberListProps) {
   const [showInvite, setShowInvite] = useState(false)
+  const [confirmClose, setConfirmClose] = useState(false)
   const isLeader = members.some((m) => m.userId === currentUserId && m.role === 'leader')
 
   return (
@@ -164,10 +168,55 @@ export function MemberList({ members, partyId, isPrivate, currentUserId, onVisib
             <div className="member-stats">
               <span className="member-xp">⚡{m.user.stats?.xp ?? 0}</span>
               {m.role === 'leader' && <span className="member-leader">👑</span>}
+              {isLeader && m.userId !== currentUserId && (
+                <button
+                  className="member-remove-btn"
+                  title="Remover miembro"
+                  onClick={() => onRemoveMember(m.userId)}
+                >
+                  ✕
+                </button>
+              )}
             </div>
           </div>
         ))}
       </div>
+
+      {/* ─ Acciones del miembro ─ */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
+        <button
+          className="party-leave-btn"
+          onClick={onLeave}
+        >
+          🚪 Salir de la party
+        </button>
+
+        {isLeader && (
+          confirmClose ? (
+            <div className="party-close-confirm">
+              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0 }}>
+                ¿Cerrás la party para todos?
+              </p>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button className="party-close-confirm-btn" onClick={onCloseParty}>
+                  Sí, cerrar
+                </button>
+                <button className="party-close-cancel-btn" onClick={() => setConfirmClose(false)}>
+                  Cancelar
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              className="party-close-btn"
+              onClick={() => setConfirmClose(true)}
+            >
+              🔒 Cerrar party
+            </button>
+          )
+        )}
+      </div>
+
       {showInvite && (
         <InviteSheet partyId={partyId} onClose={() => setShowInvite(false)} />
       )}
