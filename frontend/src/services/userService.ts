@@ -25,6 +25,28 @@ export interface Subject {
   description?: string
 }
 
+export interface DashboardStudyPoint {
+  day: string
+  minutes: number
+  totalTimeMs: number
+}
+
+export interface DashboardSubjectPerformance {
+  subjectId: string
+  subjectName: string
+  accuracy: number
+  totalQuestions: number
+  correctAnswers: number
+  totalStudyMinutes: number
+  quizzesPlayed: number
+}
+
+export interface DashboardStats {
+  totalStudyMinutes: number
+  weeklyStudy: DashboardStudyPoint[]
+  subjectPerformance: DashboardSubjectPerformance[]
+}
+
 export interface User {
   id: string
   email: string
@@ -59,6 +81,11 @@ export const userService = {
 
   async updateMe(payload: UpdateProfilePayload): Promise<User> {
     const { data } = await api.patch<User>('/users/me', payload)
+    return data
+  },
+
+  async getDashboardStats(): Promise<DashboardStats> {
+    const { data } = await api.get<DashboardStats>('/users/me/stats')
     return data
   },
 

@@ -8,6 +8,7 @@ import PartyRoomPage from './pages/PartyRoomPage'
 import QuizPage from './pages/QuizPage'
 import MatchPage from './pages/MatchPage'
 import PartiesPage from './pages/PartiesPage'
+import FriendsPage from './pages/FriendsPage'
 import ProfilePage from './pages/ProfilePage'
 import JoinPartyPage from './pages/JoinPartyPage'
 import SkillTreePage from './pages/SkillTreePage'
@@ -28,6 +29,7 @@ function App() {
       <Route path="/match" element={<ProtectedRoute><MatchPage /></ProtectedRoute>} />
       <Route path="/party/:partyId" element={<ProtectedRoute><PartyRoomPage /></ProtectedRoute>} />
       <Route path="/parties" element={<ProtectedRoute><PartiesPage /></ProtectedRoute>} />
+      <Route path="/friends" element={<ProtectedRoute><FriendsPage /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="/quiz/:questId" element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
       <Route path="/join/:token" element={<ProtectedRoute><JoinPartyPage /></ProtectedRoute>} />

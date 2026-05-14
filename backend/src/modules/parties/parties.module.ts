@@ -4,12 +4,17 @@ import { Party } from './party.entity';
 import { PartyMember } from './party-member.entity';
 import { ChatMessage } from './chat-message.entity';
 import { PartyActivity } from './party-activity.entity';
+import { PartyInvitation } from './party-invitation.entity';
 import { PartiesService } from './parties.service';
 import { PartiesController } from './parties.controller';
 import { User } from '../users/user.entity';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Party, PartyMember, ChatMessage, PartyActivity, User])],
+  imports: [
+    TypeOrmModule.forFeature([Party, PartyMember, ChatMessage, PartyActivity, PartyInvitation, User]),
+    UsersModule,
+  ],
   controllers: [PartiesController],
   providers: [PartiesService],
   exports: [PartiesService, TypeOrmModule],

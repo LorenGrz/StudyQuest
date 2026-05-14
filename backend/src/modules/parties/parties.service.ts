@@ -12,8 +12,10 @@ import { v4 as uuid } from 'uuid';
 import { Party } from './party.entity';
 import { PartyMember } from './party-member.entity';
 import { ChatMessage } from './chat-message.entity';
+import { PartyInvitation } from './party-invitation.entity';
 import { PartyActivity, ActivityType } from './party-activity.entity';
 import { User } from '../users/user.entity';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class PartiesService {
@@ -26,10 +28,13 @@ export class PartiesService {
     private readonly chatRepo: Repository<ChatMessage>,
     @InjectRepository(PartyActivity)
     private readonly activityRepo: Repository<PartyActivity>,
+    @InjectRepository(PartyInvitation)
+    private readonly invitationRepo: Repository<PartyInvitation>,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly dataSource: DataSource,
     private readonly eventEmitter: EventEmitter2,
+    private readonly usersService: UsersService,
   ) {}
 
   // ─── Invite Link (≥PostgreSQL, sin Redis) ────────────────────────────────────
@@ -64,6 +69,107 @@ export class PartiesService {
     if (!party) throw new NotFoundException('El enlace de invitación es inválido o expiró');
 
     return this.joinParty(party.id, userId);
+  }
+
+  async inviteFriendToParty(
+    partyId: string,
+    inviterId: string,
+    inviteeId: string,
+  ): Promise<PartyInvitation> {
+    if (inviterId === inviteeId) {
+      throw new BadRequestException('No podés invitarte a vos mismo');
+    }
+
+    const party = await this.partyRepo.findOne({
+      where: { id: partyId },
+      relations: ['members'],
+    });
+    if (!party) throw new NotFoundException('Party no encontrada');
+
+    const inviterMember = party.members?.find((m) => m.userId === inviterId);
+    if (!inviterMember) {
+      throw new ForbiddenException('Solo los miembros pueden invitar a amigos');
+    }
+
+    if (party.members.some((m) => m.userId === inviteeId)) {
+      throw new BadRequestException('El usuario ya forma parte de la party');
+    }
+
+    const areFriends = await this.usersService.areFriends(inviterId, inviteeId);
+    if (!areFriends) {
+      throw new BadRequestException('Solo podés invitar amigos directos');
+    }
+
+    const existing = await this.invitationRepo.findOne({
+      where: { partyId, inviteeId },
+    });
+    if (existing?.status === 'pending') return existing;
+    if (existing?.status === 'accepted') {
+      throw new ConflictException('La invitación ya fue aceptada');
+    }
+
+    const invitation = this.invitationRepo.create({
+      partyId,
+      inviterId,
+      inviteeId,
+      status: 'pending',
+    });
+    return this.invitationRepo.save(invitation);
+  }
+
+  async getPartyInvitations(userId: string): Promise<PartyInvitation[]> {
+    return this.invitationRepo.find({
+      where: { inviteeId: userId, status: 'pending' },
+      relations: ['party', 'inviter'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async acceptPartyInvitation(invitationId: string, userId: string): Promise<Party> {
+    const invitation = await this.invitationRepo.findOne({
+      where: { id: invitationId },
+      relations: ['party'],
+    });
+    if (!invitation) throw new NotFoundException('Invitación no encontrada');
+    if (invitation.inviteeId !== userId) {
+      throw new ForbiddenException('No podés aceptar esta invitación');
+    }
+    if (invitation.status !== 'pending') {
+      throw new BadRequestException('La invitación ya fue respondida');
+    }
+
+    const joinedParty = await this.joinParty(invitation.partyId, userId);
+    await this.invitationRepo.update(invitationId, {
+      status: 'accepted',
+      respondedAt: new Date(),
+    });
+    await this.logActivity(
+      invitation.partyId,
+      'member_joined',
+      userId,
+      'Aceptó invitación directa a la party',
+      { inviterId: invitation.inviterId },
+    );
+
+    return joinedParty;
+  }
+
+  async rejectPartyInvitation(invitationId: string, userId: string): Promise<void> {
+    const invitation = await this.invitationRepo.findOne({
+      where: { id: invitationId },
+    });
+    if (!invitation) throw new NotFoundException('Invitación no encontrada');
+    if (invitation.inviteeId !== userId) {
+      throw new ForbiddenException('No podés rechazar esta invitación');
+    }
+    if (invitation.status !== 'pending') {
+      throw new BadRequestException('La invitación ya fue respondida');
+    }
+
+    await this.invitationRepo.update(invitationId, {
+      status: 'rejected',
+      respondedAt: new Date(),
+    });
   }
 
   async createParty(

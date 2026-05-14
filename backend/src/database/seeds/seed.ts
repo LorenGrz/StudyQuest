@@ -24,6 +24,7 @@ import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 import { User } from '../../modules/users/user.entity';
+import { FriendRequest } from '../../modules/users/friend-request.entity';
 import { Subject } from '../../modules/subjects/subject.entity';
 import { Party } from '../../modules/parties/party.entity';
 import { PartyMember } from '../../modules/parties/party-member.entity';
@@ -32,6 +33,7 @@ import { Quest } from '../../modules/quests/quest.entity';
 import { QuizQuestion } from '../../modules/quests/quiz-question.entity';
 import { QuizOption } from '../../modules/quests/quiz-option.entity';
 import { PlayerResult } from '../../modules/quests/player-result.entity';
+import { PartyInvitation } from '../../modules/parties/party-invitation.entity';
 
 // ─── Conexión ──────────────────────────────────────────────────────────────────
 const AppDataSource = new DataSource({
@@ -42,8 +44,8 @@ const AppDataSource = new DataSource({
   password: process.env.POSTGRES_PASSWORD ?? 'studyquest_pass',
   database: process.env.POSTGRES_DB       ?? 'studyquest',
   entities: [
-    User, Subject, Party, PartyMember, ChatMessage,
-    Quest, QuizQuestion, QuizOption, PlayerResult
+    User, FriendRequest, Subject, Party, PartyMember, ChatMessage,
+    Quest, QuizQuestion, QuizOption, PlayerResult, PartyInvitation
   ],
   synchronize: false,
   logging: false,
@@ -77,10 +79,11 @@ async function seed() {
   await AppDataSource.initialize();
   console.log('✅  Conexión exitosa\n');
 
-  const userRepo    = AppDataSource.getRepository(User);
-  const subjectRepo = AppDataSource.getRepository(Subject);
-  const partyRepo   = AppDataSource.getRepository(Party);
-  const memberRepo  = AppDataSource.getRepository(PartyMember);
+  const userRepo        = AppDataSource.getRepository(User);
+  const friendRequestRepo = AppDataSource.getRepository(FriendRequest);
+  const subjectRepo     = AppDataSource.getRepository(Subject);
+  const partyRepo       = AppDataSource.getRepository(Party);
+  const memberRepo      = AppDataSource.getRepository(PartyMember);
 
   // ── 1. Materias ──────────────────────────────────────────────────────────────
   console.log('📚  Creando materias...');
@@ -132,6 +135,21 @@ async function seed() {
   console.log('\n📝  Inscribiendo usuarios en materias...');
   const [alice, bob, carol, dave, eve, frank, grace] = savedUsers;
   const [am2, aed, bd, so, rc] = savedSubjects;
+
+  console.log('\n🤝  Creando amistades de prueba...');
+  await friendRequestRepo.save([
+    friendRequestRepo.create({
+      requesterId: alice.id,
+      requesteeId: bob.id,
+      status: 'accepted',
+    }),
+    friendRequestRepo.create({
+      requesterId: eve.id,
+      requesteeId: grace.id,
+      status: 'pending',
+    }),
+  ]);
+  console.log('   ✔  Solicitudes de amistad seeded');
 
   // CORRECTO: AppDataSource.createQueryBuilder().relation(...)
   // INCORRECTO (bug original): subjectRepo.createQueryBuilder().relation(...)

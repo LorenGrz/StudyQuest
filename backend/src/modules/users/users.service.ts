@@ -2,12 +2,15 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, In } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './user.entity';
 import { Subject } from '../subjects/subject.entity';
+import { FriendRequest } from './friend-request.entity';
 import { RegisterDto, UpdateProfileDto } from '../../common/dto';
 
 @Injectable()
@@ -17,6 +20,8 @@ export class UsersService {
     private readonly userRepo: Repository<User>,
     @InjectRepository(Subject)
     private readonly subjectRepo: Repository<Subject>,
+    @InjectRepository(FriendRequest)
+    private readonly friendRequestRepo: Repository<FriendRequest>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -49,6 +54,203 @@ export class UsersService {
       .addSelect('u.refreshTokens')
       .where('u.email = :email', { email })
       .getOne();
+  }
+
+  async getDashboardStats(userId: string) {
+    const totalResult = await this.dataSource.query(
+      `SELECT COALESCE(SUM(total_time_ms), 0) AS total_time_ms
+       FROM player_results
+       WHERE user_id = $1`,
+      [userId],
+    );
+
+    const subjectRows = await this.dataSource.query(
+      `SELECT
+         q.subject_id,
+         s.name AS subject_name,
+         SUM(pr.correct_answers)::int AS correct_answers,
+         SUM(qc.question_count)::int AS total_questions,
+         SUM(pr.total_time_ms)::int AS total_time_ms,
+         COUNT(pr.id)::int AS quizzes_played
+       FROM player_results pr
+       JOIN quests q ON q.id = pr.quest_id
+       JOIN subjects s ON s.id = q.subject_id
+       JOIN (
+         SELECT quest_id, COUNT(*) AS question_count
+         FROM quiz_questions
+         GROUP BY quest_id
+       ) qc ON qc.quest_id = q.id
+       WHERE pr.user_id = $1
+       GROUP BY q.subject_id, s.name
+       ORDER BY quizzes_played DESC`,
+      [userId],
+    );
+
+    const weeklyRows = await this.dataSource.query(
+      `SELECT
+         date_trunc('day', created_at)::date AS day,
+         SUM(total_time_ms)::int AS total_time_ms
+       FROM player_results
+       WHERE user_id = $1
+         AND created_at >= now() - interval '6 days'
+       GROUP BY day
+       ORDER BY day`,
+      [userId],
+    );
+
+    const days = Array.from({ length: 7 }, (_, index) => {
+      const date = new Date();
+      date.setHours(0, 0, 0, 0);
+      date.setDate(date.getDate() - (6 - index));
+      const iso = date.toISOString().slice(0, 10);
+      const row = weeklyRows.find((r: any) => String(r.day).slice(0, 10) === iso);
+      const minutes = row ? Math.round(row.total_time_ms / 60000) : 0;
+      return { day: iso, minutes, totalTimeMs: row?.total_time_ms ?? 0 };
+    });
+
+    return {
+      totalStudyMinutes: Math.round(totalResult[0]?.total_time_ms / 60000) || 0,
+      weeklyStudy: days,
+      subjectPerformance: subjectRows.map((row: any) => ({
+        subjectId: row.subject_id,
+        subjectName: row.subject_name,
+        accuracy:
+          row.total_questions > 0
+            ? Number((row.correct_answers / row.total_questions).toFixed(3))
+            : 0,
+        totalQuestions: row.total_questions,
+        correctAnswers: row.correct_answers,
+        totalStudyMinutes: Math.round(row.total_time_ms / 60000),
+        quizzesPlayed: row.quizzes_played,
+      })),
+    };
+  }
+
+  async createFriendRequest(requesterId: string, requesteeUsername: string): Promise<FriendRequest> {
+    if (requesterId === requesteeUsername) {
+      throw new BadRequestException('No podés enviarte una solicitud a vos mismo');
+    }
+
+    const targetUser = await this.userRepo.findOneBy({ username: requesteeUsername });
+    if (!targetUser) {
+      throw new NotFoundException('Usuario destino no encontrado');
+    }
+
+    const requesteeId = targetUser.id;
+
+    const existingAccepted = await this.friendRequestRepo.findOne({
+      where: [
+        { requesterId: requesterId, requesteeId, status: 'accepted' },
+        { requesterId: requesteeId, requesteeId: requesterId, status: 'accepted' },
+      ],
+    });
+    if (existingAccepted) {
+      throw new ConflictException('Ya son amigos');
+    }
+
+    const reverseRequest = await this.friendRequestRepo.findOne({
+      where: { requesterId: requesteeId, requesteeId: requesterId },
+    });
+    if (reverseRequest?.status === 'pending') {
+      reverseRequest.status = 'accepted';
+      reverseRequest.respondedAt = new Date();
+      return this.friendRequestRepo.save(reverseRequest);
+    }
+
+    const duplicate = await this.friendRequestRepo.findOne({
+      where: { requesterId, requesteeId },
+    });
+    if (duplicate) {
+      if (duplicate.status === 'pending') {
+        throw new ConflictException('Ya enviaste esta solicitud');
+      }
+      duplicate.status = 'pending';
+      duplicate.respondedAt = null;
+      return this.friendRequestRepo.save(duplicate);
+    }
+
+    const request = this.friendRequestRepo.create({
+      requesterId,
+      requesteeId,
+      status: 'pending',
+    });
+    return this.friendRequestRepo.save(request);
+  }
+
+  async getIncomingFriendRequests(userId: string): Promise<FriendRequest[]> {
+    return this.friendRequestRepo.find({
+      where: { requesteeId: userId, status: 'pending' },
+      relations: ['requester'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async getOutgoingFriendRequests(userId: string): Promise<FriendRequest[]> {
+    return this.friendRequestRepo.find({
+      where: { requesterId: userId, status: 'pending' },
+      relations: ['requestee'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async respondFriendRequest(requestId: string, userId: string, accept: boolean): Promise<FriendRequest> {
+    const request = await this.friendRequestRepo.findOne({
+      where: { id: requestId },
+      relations: ['requestee', 'requester'],
+    });
+    if (!request) {
+      throw new NotFoundException('Solicitud no encontrada');
+    }
+    if (request.requesteeId !== userId) {
+      throw new ForbiddenException('No podés responder esta solicitud');
+    }
+    if (request.status !== 'pending') {
+      throw new BadRequestException('La solicitud ya fue respondida');
+    }
+
+    request.status = accept ? 'accepted' : 'rejected';
+    request.respondedAt = new Date();
+    return this.friendRequestRepo.save(request);
+  }
+
+  async listFriends(userId: string): Promise<User[]> {
+    const acceptedRequests = await this.friendRequestRepo.find({
+      where: [
+        { requesterId: userId, status: 'accepted' },
+        { requesteeId: userId, status: 'accepted' },
+      ],
+    });
+
+    const friendIds = acceptedRequests.map((request) =>
+      request.requesterId === userId ? request.requesteeId : request.requesterId,
+    );
+    if (!friendIds.length) return [];
+
+    return this.userRepo.findBy({ id: In(friendIds) });
+  }
+
+  async removeFriend(userId: string, friendId: string): Promise<void> {
+    const existing = await this.friendRequestRepo.findOne({
+      where: [
+        { requesterId: userId, requesteeId: friendId, status: 'accepted' },
+        { requesterId: friendId, requesteeId: userId, status: 'accepted' },
+      ],
+    });
+    if (!existing) {
+      throw new NotFoundException('No existe esa amistad');
+    }
+    await this.friendRequestRepo.remove(existing);
+  }
+
+  async areFriends(userA: string, userB: string): Promise<boolean> {
+    if (userA === userB) return false;
+    const existing = await this.friendRequestRepo.findOne({
+      where: [
+        { requesterId: userA, requesteeId: userB, status: 'accepted' },
+        { requesterId: userB, requesteeId: userA, status: 'accepted' },
+      ],
+    });
+    return !!existing;
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDto): Promise<User> {
