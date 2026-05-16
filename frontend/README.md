@@ -35,8 +35,8 @@ Aplicación web mobile-first para la plataforma de estudio colaborativo StudyQue
 
 ```bash
 cd frontend
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 La app queda disponible en `http://localhost:5173`.
@@ -348,10 +348,10 @@ Fuente: **Space Grotesk** (cargada desde Google Fonts en `index.css`).
 ## Scripts disponibles
 
 ```bash
-npm run dev        # Dev server en http://localhost:5173
-npm run build      # Build de producción en dist/
-npm run preview    # Previsualizar el build
-npm run lint       # ESLint con autofix
+pnpm run dev        # Dev server en http://localhost:5173
+pnpm run build      # Build de producción en dist/
+pnpm run preview    # Previsualizar el build
+pnpm run lint       # ESLint con autofix
 ```
 
 ---
