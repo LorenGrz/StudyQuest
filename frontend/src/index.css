@@ -1414,9 +1414,185 @@ input, textarea, select { font-family: inherit; }
   color: var(--text-secondary);
 }
 
+/* ─── League System ──────────────────────────────────────────────────────────── */
 
+.league-banner {
+  margin: 0 16px 16px;
+  border-radius: var(--radius-xl);
+  padding: 20px 20px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+}
+.league-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+  border-radius: inherit;
+  pointer-events: none;
+}
+.league-banner-inner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+}
+.league-banner-icon {
+  font-size: 40px;
+  filter: drop-shadow(0 0 10px rgba(255,255,255,0.4));
+}
+.league-banner-info { display: flex; flex-direction: column; gap: 2px; }
+.league-banner-name {
+  font-size: 22px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  letter-spacing: -0.3px;
+}
+.league-banner-elo { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.8); }
 
+.league-progress-wrap { display: flex; flex-direction: column; gap: 6px; position: relative; }
+.league-progress-track { height: 8px; background: rgba(0,0,0,0.3); border-radius: 99px; overflow: hidden; }
+.league-progress-fill { height: 100%; border-radius: 99px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+.league-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: rgba(255,255,255,0.7);
+  font-weight: 600;
+}
 
+.league-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  letter-spacing: 0.3px;
+}
+
+.stat-box--elo { border-width: 2px; background: rgba(0,0,0,0.2); }
+
+.league-ladder { display: flex; flex-direction: column; gap: 6px; padding: 0 16px; }
+.league-ladder-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  transition: all 0.2s;
+}
+.league-ladder-row--active { border-width: 2px; transform: translateX(4px); }
+.league-ladder-icon { font-size: 20px; }
+.league-ladder-name { flex: 1; font-size: 14px; font-weight: 600; }
+.league-ladder-range { font-size: 12px; color: var(--text-muted); }
+.league-ladder-badge {
+  font-size: 11px; font-weight: 700; color: #fff;
+  background: var(--accent); border-radius: var(--radius-full); padding: 2px 8px;
+}
+
+/* ─── Leaderboard Page ───────────────────────────────────────────────────────── */
+
+.leaderboard-header { padding: 20px 16px 8px; }
+.leaderboard-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+
+.leaderboard-subject-tabs {
+  display: flex; gap: 8px; overflow-x: auto;
+  padding: 0 16px 12px; scrollbar-width: none;
+}
+.leaderboard-subject-tabs::-webkit-scrollbar { display: none; }
+
+.leaderboard-tab {
+  padding: 7px 16px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: 13px; font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.2s; cursor: pointer;
+}
+.leaderboard-tab:hover { border-color: var(--accent); color: var(--accent-light); }
+.leaderboard-tab--active {
+  background: var(--accent); border-color: var(--accent); color: #fff;
+  box-shadow: 0 0 12px rgba(124,58,237,0.4);
+}
+
+.leaderboard-list { display: flex; flex-direction: column; gap: 8px; padding: 0 16px 32px; }
+
+/* Podium */
+.leaderboard-podium {
+  display: flex; justify-content: center; align-items: flex-end;
+  gap: 8px; padding: 20px 0 24px;
+}
+.podium-card {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  border-radius: var(--radius-xl); border: 2px solid;
+  background: var(--bg-surface);
+  padding: 12px 10px 0;
+  transition: transform 0.2s;
+  overflow: hidden;
+  flex: 1; max-width: 120px;
+}
+.podium-card:hover { transform: translateY(-4px); }
+.podium-card--me { animation: pulse-border 2s ease-in-out infinite; }
+@keyframes pulse-border {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(124,58,237,0); }
+  50% { box-shadow: 0 0 0 4px rgba(124,58,237,0.3); }
+}
+.podium-medal { font-size: 22px; }
+.podium-avatar {
+  width: 48px; height: 48px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 800; color: #fff;
+}
+.podium-name {
+  font-size: 12px; font-weight: 700; text-align: center;
+  color: var(--text-primary); overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; max-width: 100px;
+}
+.podium-league { font-size: 11px; font-weight: 600; }
+.podium-elo { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+.podium-bar { width: 100%; margin-top: 8px; border-radius: 0 0 var(--radius-lg) var(--radius-lg); opacity: 0.6; }
+
+/* Leaderboard Row */
+.leaderboard-row {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 12px 14px;
+  transition: transform 0.2s, border-color 0.2s;
+  animation: lb-slide-in 0.35s ease both;
+}
+@keyframes lb-slide-in {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.leaderboard-row:hover { transform: translateX(4px); }
+.leaderboard-row--me { background: rgba(124,58,237,0.06); }
+
+.leaderboard-rank { font-size: 16px; font-weight: 800; color: var(--text-muted); width: 28px; text-align: center; flex-shrink: 0; }
+.leaderboard-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; font-weight: 800; color: #fff; flex-shrink: 0;
+}
+.leaderboard-info { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.leaderboard-name { font-size: 14px; font-weight: 700; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.leaderboard-username { font-size: 12px; color: var(--text-muted); }
+.leaderboard-you-badge { font-size: 11px; font-weight: 700; color: var(--accent-light); }
+
+.leaderboard-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
+.leaderboard-league-icon { font-size: 18px; }
+.leaderboard-elo { font-size: 14px; font-weight: 800; }
 
 
 

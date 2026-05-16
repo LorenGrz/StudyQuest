@@ -15,6 +15,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { v4 as uuid } from 'uuid';
 import { MatchmakingService, QueueCandidate } from './matchmaking.service';
 import { PartiesService } from '../../modules/parties/parties.service';
+import { UsersService } from '../../modules/users/users.service';
 import { JoinQueueDto, SendChatMessageDto } from '../../common/dto';
 
 @WebSocketGateway({
@@ -33,6 +34,7 @@ export class MatchmakingGateway
   constructor(
     private readonly matchmakingService: MatchmakingService,
     private readonly partiesService: PartiesService,
+    private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -70,7 +72,7 @@ export class MatchmakingGateway
   }
 
   @SubscribeMessage('match:join-queue')
-  handleJoinQueue(
+  async handleJoinQueue(
     @ConnectedSocket() socket: Socket,
     @MessageBody() dto: JoinQueueDto,
   ) {
@@ -82,20 +84,25 @@ export class MatchmakingGateway
       return;
     }
 
+    const elo = await this.usersService.getElo(conn.userId);
+
     const candidate: QueueCandidate = {
       userId: conn.userId,
       socketId: socket.id,
       subjectIds: dto.subjectIds ?? [],
       availability: dto.availability ?? [],
       career: '',
+      elo,
       preferredPartySize: dto.preferredPartySize ?? 4,
       joinedAt: new Date(),
       threshold: 0.5,
+      eloRange: 300,
     };
 
     this.matchmakingService.addToQueue(candidate);
     socket.emit('match:queued', {
       queueSize: this.matchmakingService.getQueueSize(),
+      elo,
     });
   }
 
