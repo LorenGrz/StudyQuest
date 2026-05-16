@@ -40,6 +40,18 @@ export interface PartyQuest {
   status: string
 }
 
+export interface PartyInvitation {
+  id: string
+  partyId: string
+  inviterId: string
+  inviteeId: string
+  status: 'pending' | 'accepted' | 'rejected'
+  createdAt: string
+  respondedAt: string | null
+  inviter?: Pick<User, 'id' | 'username' | 'displayName' | 'avatarUrl'>
+  party?: Party
+}
+
 export interface Party {
   id: string
   name?: string
@@ -99,6 +111,24 @@ export const partyService = {
   async joinByInvite(token: string): Promise<Party> {
     const { data } = await api.post<Party>(`/parties/join-invite/${token}`)
     return data
+  },
+
+  async inviteFriend(partyId: string, inviteeId: string): Promise<void> {
+    await api.post(`/parties/${partyId}/invite-friend`, { inviteeId })
+  },
+
+  async getInvitations(): Promise<PartyInvitation[]> {
+    const { data } = await api.get<PartyInvitation[]>('/parties/invitations')
+    return data
+  },
+
+  async acceptInvitation(invitationId: string): Promise<Party> {
+    const { data } = await api.post<Party>(`/parties/invitations/${invitationId}/accept`)
+    return data
+  },
+
+  async rejectInvitation(invitationId: string): Promise<void> {
+    await api.post(`/parties/invitations/${invitationId}/reject`)
   },
 
   async leaveParty(partyId: string): Promise<void> {

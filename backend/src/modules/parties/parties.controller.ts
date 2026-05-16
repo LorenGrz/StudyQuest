@@ -59,6 +59,24 @@ export class PartiesController {
     }
   }
 
+  @Get('invitations')
+  @ApiOperation({ summary: 'Invitaciones directas a parties que te hicieron' })
+  getInvitations(@Request() req: any) {
+    return this.partiesService.getPartyInvitations(req.user.userId);
+  }
+
+  @Post('invitations/:id/accept')
+  @ApiOperation({ summary: 'Aceptar invitación directa a una party' })
+  acceptInvitation(@Param('id') id: string, @Request() req: any) {
+    return this.partiesService.acceptPartyInvitation(id, req.user.userId);
+  }
+
+  @Post('invitations/:id/reject')
+  @ApiOperation({ summary: 'Rechazar invitación directa a una party' })
+  rejectInvitation(@Param('id') id: string, @Request() req: any) {
+    return this.partiesService.rejectPartyInvitation(id, req.user.userId);
+  }
+
   // ─── Rutas con :id ───────────────────────────────────────────────────────────
 
   @Get(':id')
@@ -71,6 +89,16 @@ export class PartiesController {
   async generateInvite(@Param('id') id: string, @Request() req: any) {
     const token = await this.partiesService.generateInviteToken(id, req.user.userId);
     return { token, expiresInHours: 24 };
+  }
+
+  @Post(':id/invite-friend')
+  @ApiOperation({ summary: 'Invitar a un amigo a la party' })
+  async inviteFriend(
+    @Param('id') id: string,
+    @Request() req: any,
+    @Body('inviteeId') inviteeId: string,
+  ) {
+    return this.partiesService.inviteFriendToParty(id, req.user.userId, inviteeId);
   }
 
   @Get(':id/chat')

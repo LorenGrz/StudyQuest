@@ -1,6 +1,8 @@
 import { useRef, useState, useEffect } from 'react'
 import type { Party, ChatMessage, PartyMember } from '../services/partyService'
 import { partyService } from '../services/partyService'
+import { friendService } from '../services/friendService'
+import type { User } from '../services/userService'
 import type { Quest } from '../services/questService'
 import { Button, Spinner } from './UI'
 import { useNavigate } from 'react-router-dom'
@@ -252,19 +254,65 @@ interface InviteSheetProps {
 export function InviteSheet({ partyId, onClose }: InviteSheetProps) {
   const [link, setLink] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [friends, setFriends] = useState<User[]>([])
+  const [inviteError, setInviteError] = useState<string | null>(null)
+  const [inviteSuccess, setInviteSuccess] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [isFriendsLoading, setIsFriendsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    setIsLoading(true)
-    partyService.generateInvite(partyId)
-      .then(({ token }) => {
+    let active = true
+
+    const loadInviteLink = async () => {
+      setIsLoading(true)
+      try {
+        const { token } = await partyService.generateInvite(partyId)
+        if (!active) return
         const base = window.location.origin
         setLink(`${base}/join/${token}`)
-      })
-      .catch(() => setError('No se pudo generar el link'))
-      .finally(() => setIsLoading(false))
+      } catch {
+        if (active) setError('No se pudo generar el link')
+      } finally {
+        if (active) setIsLoading(false)
+      }
+    }
+
+    loadInviteLink()
+    return () => { active = false }
   }, [partyId])
+
+  useEffect(() => {
+    let active = true
+
+    const loadFriends = async () => {
+      setIsFriendsLoading(true)
+      try {
+        const result = await friendService.getFriends()
+        if (active) setFriends(result)
+      } finally {
+        if (active) setIsFriendsLoading(false)
+      }
+    }
+
+    loadFriends()
+    return () => { active = false }
+  }, [])
+
+  const inviteFriend = async (friendId: string) => {
+    setInviteError(null)
+    setInviteSuccess(null)
+    try {
+      await partyService.inviteFriend(partyId, friendId)
+      setInviteSuccess('Invitación enviada a tu amigo.')
+    } catch (err: unknown) {
+      const message =
+        typeof err === 'object' && err !== null && 'response' in err
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined
+      setInviteError(message ?? 'No se pudo enviar la invitación')
+    }
+  }
 
   const handleCopy = () => {
     if (!link) return
@@ -310,6 +358,33 @@ export function InviteSheet({ partyId, onClose }: InviteSheetProps) {
                 📤 Compartir
               </Button>
             )}
+
+            <div style={{ marginTop: '20px' }}>
+              <h3 style={{ marginBottom: '10px' }}>Invitar a un amigo</h3>
+              {isFriendsLoading ? (
+                <div className="center-spinner" style={{ minHeight: '50px' }}>
+                  <Spinner size="md" />
+                </div>
+              ) : friends.length ? (
+                <div style={{ display: 'grid', gap: '10px' }}>
+                  {friends.map((friend) => (
+                    <div key={friend.id} className="invite-friend-row">
+                      <div>
+                        <strong>{friend.displayName}</strong>
+                        <p className="text-small">@{friend.username}</p>
+                      </div>
+                      <Button size="sm" variant="primary" onClick={() => inviteFriend(friend.id)}>
+                        Invitar
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="empty-sub">No tenés amigos para invitar. Agregá amigos para invitarlos directamente.</p>
+              )}
+              {inviteSuccess && <p className="invite-copied" style={{ marginTop: '8px' }}>{inviteSuccess}</p>}
+              {inviteError && <p style={{ color: 'var(--red)', fontSize: '14px', marginTop: '8px' }}>{inviteError}</p>}
+            </div>
           </>
         )}
 
@@ -412,9 +487,9 @@ export interface Activity {
   id: string
   type: string
   description: string
-  user?: { id: string; displayName: string; avatarUrl?: string }
+  user?: { id: string; displayName: string; avatarUrl?: string | null }
   createdAt: string
-  metadata?: any
+  metadata?: Record<string, unknown>
 }
 
 interface ActivityFeedProps {

@@ -14,6 +14,7 @@ import { PartyMember } from './party-member.entity';
 import { ChatMessage } from './chat-message.entity';
 import { Quest } from '../quests/quest.entity';
 import { PartyActivity } from './party-activity.entity';
+import { PartyInvitation } from './party-invitation.entity';
 
 export type PartyStatus = 'forming' | 'active' | 'closed';
 
@@ -46,6 +47,9 @@ export class Party {
 
   @OneToMany(() => PartyMember, (pm) => pm.party, { cascade: true })
   members: PartyMember[];
+
+  @OneToMany(() => PartyInvitation, (invitation) => invitation.party, { cascade: true })
+  invitations: PartyInvitation[];
 
   @OneToMany(() => ChatMessage, (cm) => cm.party, { cascade: true })
   chatMessages: ChatMessage[];

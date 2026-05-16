@@ -125,6 +125,17 @@ export function QuickActions() {
         <span className="quick-btn-icon">👥</span>
         <span>Mis Parties</span>
       </button>
+      <button
+        className="quick-btn"
+        style={{
+          background: 'linear-gradient(135deg, rgba(34,197,94,0.15), rgba(16,185,129,0.1))',
+          borderColor: 'rgba(34,197,94,0.25)',
+        }}
+        onClick={() => navigate('/friends')}
+      >
+        <span className="quick-btn-icon">🤝</span>
+        <span>Amigos</span>
+      </button>
     </div>
   )
 }

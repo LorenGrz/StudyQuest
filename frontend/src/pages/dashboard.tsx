@@ -6,6 +6,7 @@ import {
   SubjectCardGrid,
   QuickActions,
 } from '../components/DashboardComponents'
+import { DashboardAnalytics } from '../components/DashboardAnalytics'
 import { SectionTitle, Spinner } from '../components/UI'
 import { useAuthStore } from '../store/authStore'
 import { usePartyStore } from '../store/partyStore'
@@ -29,6 +30,7 @@ const DashboardPage = () => {
     <MobileLayout>
       <GreetingHeader user={user} />
       <ActivePartyBanner party={activeParty} />
+      <DashboardAnalytics />
       <SectionTitle>Mis Materias</SectionTitle>
       {isLoading ? (
         <div className="center-spinner">
