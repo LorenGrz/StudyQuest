@@ -3,6 +3,7 @@ import { api } from './api'
 export interface UserStats {
   xp: number
   level: number
+  elo: number
   quizzesPlayed: number
   quizzesWon: number
   currentStreak: number
@@ -73,6 +74,15 @@ export interface UpdateProfilePayload {
   availability?: AvailabilitySlot[]
 }
 
+export interface LeaderboardEntry {
+  rank: number
+  userId: string
+  username: string
+  displayName: string
+  avatarUrl: string | null
+  elo: number
+}
+
 export const userService = {
   async getMe(): Promise<User> {
     const { data } = await api.get<User>('/users/me')
@@ -96,4 +106,12 @@ export const userService = {
   async unenrollSubject(subjectId: string): Promise<void> {
     await api.delete(`/users/me/subjects/${subjectId}`)
   },
+
+  async getLeaderboard(subjectId: string, limit = 20): Promise<LeaderboardEntry[]> {
+    const { data } = await api.get<LeaderboardEntry[]>(
+      `/users/leaderboard/${subjectId}?limit=${limit}`,
+    )
+    return data
+  },
 }
+

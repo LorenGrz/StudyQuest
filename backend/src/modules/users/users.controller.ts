@@ -5,6 +5,7 @@ import {
   Post,
   Delete,
   Param,
+  Query,
   Body,
   UseGuards,
   Request,
@@ -29,6 +30,14 @@ export class UsersController {
   @Patch('me')
   updateMe(@Request() req: any, @Body() dto: UpdateProfileDto) {
     return this.usersService.updateProfile(req.user.userId, dto);
+  }
+
+  @Get('leaderboard/:subjectId')
+  getLeaderboard(
+    @Param('subjectId') subjectId: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.usersService.getLeaderboard(subjectId, limit ? parseInt(limit, 10) : 20);
   }
 
   @Get(':id')

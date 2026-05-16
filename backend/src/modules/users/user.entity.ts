@@ -9,6 +9,7 @@ import {
   OneToMany,
   Index,
 } from 'typeorm';
+import { DEFAULT_ELO } from '../../common/leagues';
 import { Subject } from '../subjects/subject.entity';
 import { PartyMember } from '../parties/party-member.entity';
 
@@ -20,6 +21,7 @@ export interface AvailabilitySlot {
 export interface UserStats {
   xp: number;
   level: number;
+  elo: number;
   quizzesPlayed: number;
   quizzesWon: number;
   currentStreak: number;
@@ -82,6 +84,7 @@ export class User {
     default: {
       xp: 0,
       level: 0,
+      elo: DEFAULT_ELO,
       quizzesPlayed: 0,
       quizzesWon: 0,
       currentStreak: 0,

@@ -16,6 +16,7 @@ import { PartiesService } from '../parties/parties.service';
 import { UsersService } from '../users/users.service';
 import { SkillTreeService } from '../skill-tree/skill-tree.service';
 import { CreateQuestDto, SubmitAnswerDto } from '../../common/dto';
+import { calculateEloDeltas, DEFAULT_ELO } from '../../common/leagues';
 
 const XP_CORRECT_BASE = 100;
 const XP_SPEED_BONUS = 50;
@@ -264,6 +265,19 @@ export class QuestsService {
 
     const totalQuestions = quest.questions.length;
 
+    // Fetch current ELO for all players in parallel
+    const playerElos = await Promise.all(
+      quest.results.map(async (result) => ({
+        userId: result.userId,
+        elo: await this.usersService.getElo(result.userId),
+        score: result.score,
+      })),
+    );
+
+    // Calculate ELO deltas based on quiz scores
+    const eloDeltas =
+      playerElos.length > 1 ? calculateEloDeltas(playerElos) : new Map<string, number>();
+
     await Promise.all(
       quest.results.map(async (result) => {
         const accuracy = result.correctAnswers / totalQuestions;
@@ -273,6 +287,11 @@ export class QuestsService {
         await this.resultRepo.update(result.id, { xpEarned: totalXp });
         await this.usersService.addXp(result.userId, totalXp);
         await this.usersService.updateStreak(result.userId);
+
+        const eloDelta = eloDeltas.get(result.userId) ?? 0;
+        if (eloDelta !== 0) {
+          await this.usersService.updateElo(result.userId, eloDelta);
+        }
       }),
     );
 
@@ -285,6 +304,7 @@ export class QuestsService {
     this.eventEmitter.emit('quest.completed', {
       questId,
       results: completed.results,
+      eloDeltas: Object.fromEntries(eloDeltas),
     });
     return completed;
   }
