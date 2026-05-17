@@ -124,6 +124,10 @@ export class SendChatMessageDto {
   @IsString() @MinLength(1) @MaxLength(2000) text: string;
 }
 
+export class UploadAudioMessageDto {
+  @IsNumber() @Min(1) @Max(120000) durationMs: number;
+}
+
 export class CreatePartyDto {
   @IsOptional() @IsUUID() subjectId?: string;
   @IsOptional() @IsNumber() @Min(2) @Max(8) maxMembers?: number;

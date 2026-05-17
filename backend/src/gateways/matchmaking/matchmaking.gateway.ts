@@ -203,27 +203,12 @@ export class MatchmakingGateway
   ) {
     const conn = this.connections.get(socket.id);
     if (!conn) return;
-    const message = await this.partiesService.addChatMessage(
+    const message = await this.partiesService.addTextChatMessage(
       dto.partyId,
       conn.userId,
       dto.text,
     );
-    this.server.to(dto.partyId).emit('chat:message', {
-      id: message.id,
-      text: message.text,
-      userId: message.userId,
-      user: message.user
-        ? {
-            id: message.user.id,
-            username: message.user.username,
-            displayName: message.user.displayName,
-            avatarUrl: message.user.avatarUrl,
-          }
-        : undefined,
-      createdAt: message.createdAt instanceof Date
-        ? message.createdAt.toISOString()
-        : message.createdAt,
-    });
+    this.server.to(dto.partyId).emit('chat:message', message);
   }
 
   @Cron(CronExpression.EVERY_5_SECONDS)
@@ -268,5 +253,10 @@ export class MatchmakingGateway
     this.server.to(payload.partyId).emit('party:activity', {
       activity: payload.activity,
     });
+  }
+
+  @OnEvent('party.chat_message')
+  handleChatMessageCreated(payload: { partyId: string; message: any }) {
+    this.server.to(payload.partyId).emit('chat:message', payload.message);
   }
 }

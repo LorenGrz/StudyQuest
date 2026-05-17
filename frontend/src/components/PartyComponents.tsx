@@ -1,11 +1,12 @@
-import { useRef, useState, useEffect } from 'react'
-import type { Party, ChatMessage, PartyMember } from '../services/partyService'
+import { useState, useEffect, useRef } from 'react'
+import type { Party, PartyMember, Activity } from '../services/partyService'
 import { partyService } from '../services/partyService'
 import { friendService } from '../services/friendService'
 import type { User } from '../services/userService'
 import type { Quest } from '../services/questService'
 import { Button, Spinner } from './UI'
 import { useNavigate } from 'react-router-dom'
+export { ChatBox } from './party-chat/ChatBox'
 
 // ─── PartyHeader ─────────────────────────────────────────────────────────────
 export function PartyHeader({ party }: { party: Party | null }) {
@@ -49,65 +50,6 @@ export function TabBar<T extends string>({ tabs, active, onChange }: TabBarProps
           {t.label}
         </button>
       ))}
-    </div>
-  )
-}
-
-// ─── ChatBox ─────────────────────────────────────────────────────────────────
-interface ChatBoxProps {
-  messages: ChatMessage[]
-  onSend: (text: string) => void
-  currentUserId?: string
-}
-
-export function ChatBox({ messages, onSend, currentUserId = '' }: ChatBoxProps) {
-  const [text, setText] = useState('')
-  const endRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages.length])
-
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!text.trim()) return
-    onSend(text.trim())
-    setText('')
-  }
-
-  return (
-    <div className="chat-box">
-      <div className="chat-messages">
-        {messages.length === 0 && (
-          <div className="chat-empty">
-            <p>Sin mensajes todavía. ¡Sé el primero! 💬</p>
-          </div>
-        )}
-        {messages.map((m) => {
-          const isOwn = Boolean(currentUserId) && m.userId === currentUserId
-          return (
-            <div key={m.id} className={`chat-message${isOwn ? ' chat-message-own' : ''}`}>
-              {!isOwn && (
-                <span className="chat-username">{m.user?.displayName ?? m.userId.slice(0, 8)}</span>
-              )}
-              <p className="chat-text">{m.text}</p>
-              <span className="chat-time">
-                {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </span>
-            </div>
-          )
-        })}
-        <div ref={endRef} />
-      </div>
-      <form className="chat-input-row" onSubmit={submit}>
-        <input
-          className="chat-input"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Escribí un mensaje..."
-        />
-        <Button type="submit" size="sm">Enviar</Button>
-      </form>
     </div>
   )
 }
@@ -483,15 +425,6 @@ export function QuestCard({ quest }: { quest: Quest }) {
 }
 
 // ─── ActivityFeed ────────────────────────────────────────────────────────────
-export interface Activity {
-  id: string
-  type: string
-  description: string
-  user?: { id: string; displayName: string; avatarUrl?: string | null }
-  createdAt: string
-  metadata?: Record<string, unknown>
-}
-
 interface ActivityFeedProps {
   activities: Activity[]
   isLoading?: boolean

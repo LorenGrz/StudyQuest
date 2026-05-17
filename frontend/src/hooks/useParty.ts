@@ -1,5 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
-import { partyService, type Party, type ChatMessage } from '../services/partyService'
+import {
+  partyService,
+  normalizeChatMessage,
+  type Party,
+  type ChatMessage,
+} from '../services/partyService'
 import { mockChatMessages } from '../services/mock/partyService.mock'
 import { useSocket } from './useSocket'
 import { useAuthStore } from '../store/authStore'
@@ -32,7 +37,7 @@ export function useParty(partyId: string) {
     socket.emit('party:join', { partyId })
 
     socket.on('chat:message', (msg: ChatMessage) => {
-      setMessages((prev) => [...prev, msg])
+      setMessages((prev) => [...prev, normalizeChatMessage(msg)])
     })
 
     // Actualiza el estado de presencia de un miembro sin recargar toda la party
@@ -56,22 +61,41 @@ export function useParty(partyId: string) {
     }
   }, [partyId, socket])
 
-  const sendMessage = useCallback((text: string) => {
+  const sendTextMessage = useCallback((text: string) => {
     if (socket.connected) {
       socket.emit('party:chat', { partyId, text })
     } else {
       const localMsg: ChatMessage = {
         id: `local-${Date.now()}`,
+        type: 'text',
         text,
         userId: user?.id ?? 'me',
         user: user
           ? { id: user.id, username: user.username, displayName: user.displayName, avatarUrl: user.avatarUrl }
           : undefined,
+        attachment: null,
         createdAt: new Date().toISOString(),
       }
       setMessages((prev) => [...prev, localMsg])
     }
   }, [partyId, socket, user])
 
-  return { party, setParty, messages, sendMessage, isLoading, currentUserId: user?.id ?? '' }
+  const sendFileMessage = useCallback(async (file: File) => {
+    await partyService.uploadFileMessage(partyId, file)
+  }, [partyId])
+
+  const sendAudioMessage = useCallback(async (file: File, durationMs: number) => {
+    await partyService.uploadAudioMessage(partyId, file, durationMs)
+  }, [partyId])
+
+  return {
+    party,
+    setParty,
+    messages,
+    sendTextMessage,
+    sendFileMessage,
+    sendAudioMessage,
+    isLoading,
+    currentUserId: user?.id ?? '',
+  }
 }

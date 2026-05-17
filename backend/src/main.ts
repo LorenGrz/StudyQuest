@@ -4,6 +4,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
+import express from 'express';
+import { join } from 'path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -23,6 +25,7 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
   app.use(helmet({ crossOriginResourcePolicy: false }));
+  app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

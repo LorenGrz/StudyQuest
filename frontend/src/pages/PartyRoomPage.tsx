@@ -4,12 +4,12 @@ import { MobileLayout } from '../components/Layouts'
 import {
   PartyHeader,
   TabBar,
-  ChatBox,
   MemberList,
   UploadNoteCard,
   QuestCard,
   ActivityFeed,
 } from '../components/PartyComponents'
+import { ChatBox } from '../components/party-chat/ChatBox'
 import { Spinner } from '../components/UI'
 import { useParty } from '../hooks/useParty'
 import { useQuests } from '../hooks/useQuests'
@@ -22,7 +22,16 @@ const PartyRoomPage = () => {
   const { partyId } = useParams<{ partyId: string }>()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<ActiveTab>('quests')
-  const { party, setParty, messages, sendMessage, isLoading, currentUserId } = useParty(partyId ?? '')
+  const {
+    party,
+    setParty,
+    messages,
+    sendTextMessage,
+    sendFileMessage,
+    sendAudioMessage,
+    isLoading,
+    currentUserId,
+  } = useParty(partyId ?? '')
   const { quests, uploadNote, isGenerating } = useQuests(partyId ?? '')
   const { activities, isLoading: activityLoading } = useActivity(partyId ?? '')
 
@@ -94,7 +103,13 @@ const PartyRoomPage = () => {
       )}
 
       {activeTab === 'chat' && (
-        <ChatBox messages={messages} onSend={sendMessage} currentUserId={currentUserId} />
+        <ChatBox
+          messages={messages}
+          onSendText={sendTextMessage}
+          onSendFile={sendFileMessage}
+          onSendAudio={sendAudioMessage}
+          currentUserId={currentUserId}
+        />
       )}
 
       {activeTab === 'members' && (

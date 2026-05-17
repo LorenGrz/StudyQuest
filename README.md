@@ -83,6 +83,16 @@ El portal cargará e iniciará disponible desde tu navegador.
 - **Portal URL**: [http://localhost:5173](http://localhost:5173)
 - **API URL (Base)**: [http://localhost:3000/api/v1](http://localhost:3000/api/v1)
 
+### Estado actual del chat de party
+
+El chat de party ahora soporta:
+
+- mensajes de texto
+- adjuntos `PDF`, `TXT`, `DOC` y `DOCX`
+- notas de voz reproducibles inline
+
+Los archivos binarios se suben por endpoints REST autenticados y luego se emiten en tiempo real a la sala mediante Socket.IO.
+
 ---
 
 ## Aspectos Técnicos
