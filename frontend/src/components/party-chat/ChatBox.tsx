@@ -5,13 +5,14 @@ import { ChatMessageItem } from './ChatMessageItem'
 
 type Props = {
   messages: ChatMessage[]
+  error?: string | null
   currentUserId?: string
   onSendText: (text: string) => void
   onSendFile: (file: File) => Promise<void>
   onSendAudio: (file: File, durationMs: number) => Promise<void>
 }
 
-export function ChatBox({ messages, currentUserId = '', onSendText, onSendFile, onSendAudio }: Props) {
+export function ChatBox({ messages, error, currentUserId = '', onSendText, onSendFile, onSendAudio }: Props) {
   const endRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -21,7 +22,9 @@ export function ChatBox({ messages, currentUserId = '', onSendText, onSendFile, 
   return (
     <div className="chat-box">
       <div className="chat-messages">
-        {messages.length === 0 ? (
+        {error ? (
+          <div className="chat-empty"><p>{error}</p></div>
+        ) : messages.length === 0 ? (
           <div className="chat-empty"><p>Sin mensajes todavía. ¡Sé el primero! 💬</p></div>
         ) : (
           messages.map((message) => (

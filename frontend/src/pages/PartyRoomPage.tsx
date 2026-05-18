@@ -30,6 +30,7 @@ const PartyRoomPage = () => {
     sendFileMessage,
     sendAudioMessage,
     isLoading,
+    loadError,
     currentUserId,
   } = useParty(partyId ?? '')
   const { quests, uploadNote, isGenerating } = useQuests(partyId ?? '')
@@ -105,6 +106,7 @@ const PartyRoomPage = () => {
       {activeTab === 'chat' && (
         <ChatBox
           messages={messages}
+          error={loadError}
           onSendText={sendTextMessage}
           onSendFile={sendFileMessage}
           onSendAudio={sendAudioMessage}

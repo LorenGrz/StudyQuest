@@ -5,7 +5,6 @@ import {
   type Party,
   type ChatMessage,
 } from '../services/partyService'
-import { mockChatMessages } from '../services/mock/partyService.mock'
 import { useSocket } from './useSocket'
 import { useAuthStore } from '../store/authStore'
 
@@ -15,6 +14,7 @@ export function useParty(partyId: string) {
   const [party, setParty] = useState<Party | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!partyId) return
@@ -27,9 +27,14 @@ export function useParty(partyId: string) {
       if (!cancelled) {
         setParty(p)
         setMessages(msgs)
+        setLoadError(null)
       }
     }).catch(() => {
-      if (!cancelled) setMessages(mockChatMessages)
+      if (!cancelled) {
+        setParty(null)
+        setMessages([])
+        setLoadError('No se pudo cargar la party o el chat.')
+      }
     }).finally(() => {
       if (!cancelled) setIsLoading(false)
     })
@@ -96,6 +101,7 @@ export function useParty(partyId: string) {
     sendFileMessage,
     sendAudioMessage,
     isLoading,
+    loadError,
     currentUserId: user?.id ?? '',
   }
 }

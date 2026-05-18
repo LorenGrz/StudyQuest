@@ -20,6 +20,20 @@ export function useQuests(partyId: string) {
 
   useEffect(() => { load() }, [load])
 
+  useEffect(() => {
+    const hasGeneratingQuest = quests.some(
+      (quest) => quest.status === 'generating' || quest.status === 'pending',
+    )
+
+    if (!hasGeneratingQuest) return
+
+    const timer = window.setInterval(() => {
+      void load()
+    }, 2500)
+
+    return () => window.clearInterval(timer)
+  }, [quests, load])
+
   const uploadNote = useCallback(async (
     title: string,
     file?: File,
@@ -31,7 +45,19 @@ export function useQuests(partyId: string) {
         { partyId, title, textContent },
         file,
       )
-      setQuests((prev) => [quest, ...prev])
+      setQuests((prev) => [
+        {
+          ...quest,
+          sourceType: file ? 'pdf' : 'text',
+          questionCount: 0,
+          myBestScore: null,
+          myLastScore: null,
+          myStatus: 'never_started',
+          leaderboard: [],
+          questions: [],
+        },
+        ...prev,
+      ])
       return quest
     } catch (error) {
       if (error instanceof AxiosError) {

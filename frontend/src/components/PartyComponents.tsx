@@ -430,14 +430,48 @@ export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
 // ─── QuestCard ───────────────────────────────────────────────────────────────
 export function QuestCard({ quest }: { quest: Quest }) {
   const navigate = useNavigate()
+  const questionCount = quest.questionCount ?? quest.questions?.length ?? 0
+  const sourceLabel = quest.sourceType === 'pdf' || quest.sourcePdfUrl ? 'PDF adjunto' : 'Texto'
+  const isGenerating = quest.status === 'generating' || quest.status === 'pending'
+  const isFailed = quest.status === 'failed'
+  const canPlay = !isGenerating && !isFailed
+  const statusLabel = isGenerating
+    ? 'Generando con IA...'
+    : isFailed
+      ? 'Falló la generación'
+      : quest.myStatus === 'in_progress'
+        ? 'En curso'
+        : quest.myBestScore != null
+          ? `Mejor puntaje: ${quest.myBestScore}`
+          : quest.myStatus === 'completed'
+            ? 'Completada'
+            : 'Lista para jugar'
+  const statusHint = isGenerating
+    ? 'Volvé a esta party en unos segundos para empezar.'
+    : isFailed
+      ? 'Abrila más tarde o generá una nueva quest.'
+      : null
+
+  const handleOpenQuest = () => {
+    if (!canPlay) return
+    navigate(`/quiz/${quest.id}`)
+  }
+
   return (
-    <div className="quest-card" onClick={() => navigate(`/quiz/${quest.id}`)}>
+    <div
+      className="quest-card"
+      onClick={handleOpenQuest}
+      style={{ cursor: canPlay ? 'pointer' : 'default', opacity: isFailed ? 0.8 : 1 }}
+      aria-disabled={!canPlay}
+    >
       <div className="quest-card-info">
         <p className="quest-card-title">{quest.title}</p>
         <p className="quest-card-meta">
-          {quest.questions?.length ?? 0} preguntas
-          {quest.sourcePdfUrl ? ' • PDF adjunto' : ' • Texto'}
+          {questionCount} preguntas
+          {` • ${sourceLabel}`}
         </p>
+        {statusLabel && <p className="quest-card-link">{statusLabel}</p>}
+        {statusHint && <p className="text-small">{statusHint}</p>}
         {quest.sourcePdfUrl && (
           <a
             className="quest-card-link"
@@ -451,7 +485,7 @@ export function QuestCard({ quest }: { quest: Quest }) {
         )}
       </div>
       <span className={`quest-status quest-status-${quest.status}`}>
-        {quest.status === 'pending' || quest.status === 'generating'
+        {isGenerating
           ? '⏳'
           : quest.status === 'active'
             ? '▶'

@@ -18,9 +18,20 @@ import { PartiesService } from '../../modules/parties/parties.service';
 import { UsersService } from '../../modules/users/users.service';
 import { JoinQueueDto, SendChatMessageDto } from '../../common/dto';
 
+const corsOriginRaw = process.env.CORS_ORIGIN ?? 'http://localhost:5173';
+const corsOrigins = Array.from(
+  new Set(
+    corsOriginRaw
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter(Boolean)
+      .concat(['http://localhost:5173', 'http://localhost:5174']),
+  ),
+);
+
 @WebSocketGateway({
   cors: {
-    origin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
+    origin: corsOrigins,
     credentials: true,
   },
 })
