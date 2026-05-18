@@ -37,7 +37,10 @@ There is no monorepo workspace manager configured. `backend/` and `frontend/` ar
 - Socket.IO via Nest websockets
 - JWT auth
 - Multer for file uploads
-- Google Gemini integration via `@google/generative-ai`
+- AI provider abstraction for quiz generation
+- Gemini provider via `@google/generative-ai`
+- OpenAI-compatible providers via configurable backend adapter
+- Anthropic provider via direct Messages API integration
 - Jest for tests
 
 Primary backend areas:
@@ -141,7 +144,16 @@ Root `.env.example` currently defines:
 - PostgreSQL credentials
 - Redis password
 - JWT secret
+- AI provider selection
 - Gemini API key and model
+- OpenAI API key and model
+
+AI provider notes:
+
+- `AI_PROVIDER` controls the default quiz provider globally
+- supported values: `gemini`, `openai`, `anthropic`, `groq`, `mock`
+- `QuestsService` talks to the AI facade, not to a provider SDK directly
+- provider override is internal to backend code for now; there is no public API switch yet
 
 Backend defaults and important runtime settings:
 

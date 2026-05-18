@@ -4,6 +4,8 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common';
+import { readFile } from 'node:fs/promises';
+import { basename } from 'node:path';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -55,6 +57,8 @@ export class QuestsService {
       throw new BadRequestException('Debés proporcionar texto o un PDF');
     }
 
+    const pdfBuffer = await this.resolvePdfBuffer(file);
+
     const quest = await this.questRepo.save(
       this.questRepo.create({
         title: dto.title,
@@ -62,11 +66,11 @@ export class QuestsService {
         subjectId: party.subjectId as string,
         createdBy: userId,
         status: 'generating',
-        sourcePdfUrl: file ? `/uploads/${file.filename}` : null,
+        sourcePdfUrl: file ? `/uploads/${this.resolveUploadedFilename(file)}` : null,
       }),
     );
 
-    this.generateInBackground(quest.id, dto.textContent, file?.buffer).catch(
+    this.generateInBackground(quest.id, dto.textContent, pdfBuffer, dto.title).catch(
       (err) =>
         this.logger.error(`Fallo generación quest ${quest.id}: ${err.message}`),
     );
@@ -78,11 +82,24 @@ export class QuestsService {
     questId: string,
     textContent?: string,
     pdfBuffer?: Buffer,
+    questTitle?: string,
   ): Promise<void> {
     try {
+      const generationOptions = {
+        metadata: {
+          questTitle,
+          sourceType: pdfBuffer ? ('pdf' as const) : ('text' as const),
+        },
+      };
       const rawQuestions = pdfBuffer
-        ? await this.aiService.generateQuestionsFromPdf(pdfBuffer)
-        : await this.aiService.generateQuestionsFromText(textContent!);
+        ? await this.aiService.generateQuestionsFromPdf(
+            pdfBuffer,
+            generationOptions,
+          )
+        : await this.aiService.generateQuestionsFromText(
+            textContent!,
+            generationOptions,
+          );
 
       await this.dataSource.transaction(async (em) => {
         for (let i = 0; i < rawQuestions.length; i++) {
@@ -126,6 +143,22 @@ export class QuestsService {
     }
   }
 
+  private async resolvePdfBuffer(
+    file?: Express.Multer.File,
+  ): Promise<Buffer | undefined> {
+    if (!file) return undefined;
+    if (file.buffer) return file.buffer;
+    if (file.path) return readFile(file.path);
+    return undefined;
+  }
+
+  private resolveUploadedFilename(file: Express.Multer.File): string {
+    if (file.filename) return file.filename;
+    if (file.path) return basename(file.path);
+    if (file.originalname) return file.originalname;
+    return 'upload.bin';
+  }
+
   async findById(id: string): Promise<Quest> {
     const quest = await this.questRepo.findOne({
       where: { id },
@@ -142,6 +175,7 @@ export class QuestsService {
         'id',
         'title',
         'status',
+        'sourcePdfUrl',
         'createdAt',
         'startedAt',
         'completedAt',

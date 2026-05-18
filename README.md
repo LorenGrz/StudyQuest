@@ -9,7 +9,7 @@ Plataforma de estudio colaborativo con matchmaking y quizzes generados por IA.
 
 El proyecto está dividido en componentes principales diseñados siguiendo heurísticas limpias (separación de responsabilidades):
 
-- **`backend/`**: API RESTful y WebSockets construida con NestJS. Maneja la lógica de dominio, matchmaking, IA (OpenAI) y persistencia usando el patrón Repository a través de TypeORM.
+- **`backend/`**: API RESTful y WebSockets construida con NestJS. Maneja la lógica de dominio, matchmaking, quizzes generados por IA y persistencia usando el patrón Repository a través de TypeORM.
 - **`frontend/`**: Aplicación de Single Page Application (SPA) construida con React 18 y TypeScript. Utiliza una arquitectura orientada a componentes, estilos de Tailwind CSS y manejo de estado centralizado (Zustand).
 - **`docker-compose.yml`**: Orquestación contenida de la infraestructura de las bases de datos externas que garantizan la fácil portabilidad del proyecto en fase de desarrollo.
 
@@ -36,6 +36,27 @@ Asegúrate de copiar el archivo `environment` de ejemplo para que los servicios 
 ```bash
 cp .env.example .env
 ```
+
+La capa de IA ahora admite multiples proveedores para generacion de quizzes:
+
+- `AI_PROVIDER=gemini|openai|anthropic|groq|mock`
+- `gemini` mantiene compatibilidad con el flujo actual
+- `openai` permite cambiar proveedor segun costo o calidad
+- `anthropic` permite probar Claude sin tocar la logica de quests
+- `groq` agrega una opcion OpenAI-compatible orientada a latencia/costo
+- `mock` sirve para desarrollo y tests sin credenciales externas
+
+Variables soportadas:
+
+- `AI_PROVIDER`
+- `GEMINI_API_KEY`
+- `GEMINI_MODEL`
+- `OPENAI_API_KEY`
+- `OPENAI_MODEL`
+- `ANTHROPIC_API_KEY`
+- `ANTHROPIC_MODEL`
+- `GROQ_API_KEY`
+- `GROQ_MODEL`
 
 ### 2. Levantar la Infraestructura (Bases de Datos con Docker)
 
