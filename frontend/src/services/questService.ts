@@ -18,7 +18,8 @@ export interface Quest {
   partyId: string
   subjectId: string
   title: string
-  status: 'pending' | 'active' | 'completed'
+  status: 'pending' | 'generating' | 'ready' | 'active' | 'completed' | 'failed'
+  sourcePdfUrl?: string | null
   leaderboard: Array<{ userId: string; username: string; score: number }>
   questions: QuizQuestion[]
   createdAt: string
@@ -35,8 +36,7 @@ export interface AnswerResult {
 export interface CreateQuestPayload {
   partyId: string
   title: string
-  subjectId: string
-  noteText?: string
+  textContent?: string
 }
 
 export const questService = {
@@ -44,8 +44,7 @@ export const questService = {
     const form = new FormData()
     form.append('partyId', payload.partyId)
     form.append('title', payload.title)
-    form.append('subjectId', payload.subjectId)
-    if (payload.noteText) form.append('noteText', payload.noteText)
+    if (payload.textContent) form.append('textContent', payload.textContent)
     if (file) form.append('file', file)
 
     const { data } = await api.post<Quest>('/quests', form, {

@@ -18,15 +18,6 @@ export function useQuiz(questId: string) {
   useEffect(() => {
     if (!questId) return
 
-    if (import.meta.env.DEV) {
-      // Mock temporal — sacar cuando el backend esté listo
-      import('../services/mock/questService.mock').then(({ mockQuest }) => {
-        setQuest(mockQuest)
-        setIsLoading(false)
-      })
-      return
-    }
-
     questService.getForPlay(questId)
       .then((q) => { setQuest(q); setIsLoading(false) })
       .catch(() => setIsLoading(false))
@@ -56,24 +47,6 @@ export function useQuiz(questId: string) {
     const elapsedMs = Date.now() - startTimeRef.current
     const selectedOption = currentQ.options.findIndex((option) => option.id === optionId)
     if (selectedOption < 0) return
-
-    if (import.meta.env.DEV) {
-      // Mock temporal — sacar cuando el backend esté listo
-      const { mockAnswerResult } = await import('../services/mock/questService.mock')
-      const correctId = currentQ.options[2].id  // asume correctIndex=2 para el mock
-      const res = mockAnswerResult(optionId, correctId)
-      setResult(res)
-      setNewlyUnlockedNames([])
-      setTimeout(() => {
-        setResult(null)
-        if (quest && currentIndex + 1 < quest.questions.length) {
-          setCurrentIndex((i) => i + 1)
-        } else {
-          setIsFinished(true)
-        }
-      }, 2500)
-      return
-    }
 
     const res = await questService.submitAnswer(
       questId,

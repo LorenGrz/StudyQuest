@@ -342,24 +342,43 @@ export function InviteSheet({ partyId, onClose }: InviteSheetProps) {
 
 // ─── UploadNoteCard ───────────────────────────────────────────────────────────
 interface UploadNoteCardProps {
-  onUpload: (title: string, subjectId: string, file?: File, noteText?: string) => Promise<void>
+  onUpload: (title: string, file?: File, textContent?: string) => Promise<unknown>
   isLoading: boolean
 }
 
 export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
   const [title, setTitle] = useState('')
-  const [subjectId, setSubjectId] = useState('')
   const [noteText, setNoteText] = useState('')
+  const [error, setError] = useState<string | null>(null)
   const [expanded, setExpanded] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     const file = fileRef.current?.files?.[0]
-    await onUpload(title, subjectId, file, noteText || undefined)
-    setTitle('')
-    setNoteText('')
-    setExpanded(false)
+    const trimmedText = noteText.trim()
+
+    if (!file && !trimmedText) {
+      setError('Pegá al menos 100 caracteres o subí un PDF.')
+      return
+    }
+
+    if (!file && trimmedText.length < 100) {
+      setError(`El texto es muy corto. Faltan ${100 - trimmedText.length} caracteres para generar la quest.`)
+      return
+    }
+
+    setError(null)
+
+    try {
+      await onUpload(title, file, trimmedText || undefined)
+      setTitle('')
+      setNoteText('')
+      setExpanded(false)
+      if (fileRef.current) fileRef.current.value = ''
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo generar la quest.')
+    }
   }
 
   if (!expanded) {
@@ -382,24 +401,24 @@ export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
         placeholder="Título del quiz..."
         required
       />
-      <input
-        className="input"
-        value={subjectId}
-        onChange={(e) => setSubjectId(e.target.value)}
-        placeholder="ID de la materia"
-        required
-      />
       <textarea
-        className="input input-textarea"
+        className={`input input-textarea ${error ? 'input-error' : ''}`}
         value={noteText}
-        onChange={(e) => setNoteText(e.target.value)}
+        onChange={(e) => {
+          setNoteText(e.target.value)
+          if (error) setError(null)
+        }}
         placeholder="Pegá el texto del apunte aquí (o subí un PDF)..."
         rows={4}
       />
+      <p className="upload-helper-text">
+        Si pegás texto, necesitás al menos 100 caracteres. Si subís PDF, el texto es opcional.
+      </p>
       <label className="upload-file-label">
         <input ref={fileRef} type="file" accept="application/pdf" hidden />
         📎 Subir PDF (opcional)
       </label>
+      {error && <p className="input-error-msg">{error}</p>}
       <div className="upload-actions">
         <Button type="button" variant="ghost" onClick={() => setExpanded(false)}>Cancelar</Button>
         <Button type="submit" isLoading={isLoading}>Generar Quest ⚡</Button>
@@ -415,10 +434,30 @@ export function QuestCard({ quest }: { quest: Quest }) {
     <div className="quest-card" onClick={() => navigate(`/quiz/${quest.id}`)}>
       <div className="quest-card-info">
         <p className="quest-card-title">{quest.title}</p>
-        <p className="quest-card-meta">{quest.questions?.length ?? 0} preguntas</p>
+        <p className="quest-card-meta">
+          {quest.questions?.length ?? 0} preguntas
+          {quest.sourcePdfUrl ? ' • PDF adjunto' : ' • Texto'}
+        </p>
+        {quest.sourcePdfUrl && (
+          <a
+            className="quest-card-link"
+            href={new URL(quest.sourcePdfUrl, 'http://localhost:3000').toString()}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(event) => event.stopPropagation()}
+          >
+            Ver PDF
+          </a>
+        )}
       </div>
       <span className={`quest-status quest-status-${quest.status}`}>
-        {quest.status === 'pending' ? '⏳' : quest.status === 'active' ? '▶' : '✅'}
+        {quest.status === 'pending' || quest.status === 'generating'
+          ? '⏳'
+          : quest.status === 'active'
+            ? '▶'
+            : quest.status === 'failed'
+              ? '⚠️'
+              : '✅'}
       </span>
     </div>
   )
