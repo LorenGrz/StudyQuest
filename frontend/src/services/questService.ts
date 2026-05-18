@@ -10,7 +10,20 @@ export interface QuizQuestion {
   text: string
   topic: string
   options: QuizOption[]
-  order: number
+  position: number
+}
+
+export interface QuestAttempt {
+  id: string
+  attemptNumber: number
+  status: 'in_progress' | 'completed' | 'abandoned'
+  answeredQuestionIndices: number[]
+  currentIndex: number
+  score: number
+  correctAnswers: number
+  totalQuestions: number
+  resumed?: boolean
+  completedAt?: string | null
 }
 
 export interface Quest {
@@ -20,12 +33,20 @@ export interface Quest {
   title: string
   status: 'pending' | 'generating' | 'ready' | 'active' | 'completed' | 'failed'
   sourcePdfUrl?: string | null
+  sourceType?: 'text' | 'pdf'
+  questionCount?: number
+  myBestScore?: number | null
+  myLastScore?: number | null
+  myStatus?: 'never_started' | 'in_progress' | 'completed'
+  activeAttempt?: QuestAttempt | null
+  latestAttempt?: QuestAttempt | null
   leaderboard: Array<{ userId: string; username: string; score: number }>
   questions: QuizQuestion[]
   createdAt: string
 }
 
 export interface AnswerResult {
+  attemptId?: string
   isCorrect: boolean
   correctIndex: number
   explanation: string
@@ -63,18 +84,21 @@ export const questService = {
     return data
   },
 
-  async start(questId: string): Promise<void> {
-    await api.post(`/quests/${questId}/start`)
+  async start(questId: string): Promise<QuestAttempt> {
+    const { data } = await api.post<QuestAttempt>(`/quests/${questId}/start`)
+    return data
   },
 
   async submitAnswer(
     questId: string,
+    attemptId: string,
     questionIndex: number,
     selectedOption: number,
     timeSpentMs: number,
   ): Promise<AnswerResult> {
     const { data } = await api.post<AnswerResult>('/quests/answer', {
       questId,
+      attemptId,
       questionIndex,
       selectedOption,
       timeSpentMs,
@@ -82,7 +106,8 @@ export const questService = {
     return data
   },
 
-  async complete(questId: string): Promise<void> {
-    await api.post(`/quests/${questId}/complete`)
+  async complete(questId: string): Promise<Quest> {
+    const { data } = await api.post<Quest>(`/quests/${questId}/complete`)
+    return data
   },
 }

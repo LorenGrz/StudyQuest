@@ -23,6 +23,7 @@ const QuizPage = () => {
     isLoading,
     isFinished,
     currentIndex,
+    loadError,
     newlyUnlockedNames,
     clearNewlyUnlocked,
   } = useQuiz(questId ?? '')
@@ -42,12 +43,44 @@ const QuizPage = () => {
     )
   }
 
-  if (isFinished || !quest) {
+  if (loadError || !quest) {
+    return (
+      <GameLayout>
+        <div className="quiz-finished">
+          <div className="quiz-finished-icon">⚠️</div>
+          <h1 className="quiz-finished-title">No se pudo abrir la quest</h1>
+          <p>{loadError ?? 'La quest no está disponible en este momento.'}</p>
+          <Button onClick={() => navigate(-1)}>Volver a la Party</Button>
+        </div>
+      </GameLayout>
+    )
+  }
+
+  if (isFinished) {
     return (
       <GameLayout>
         <div className="quiz-finished">
           <div className="quiz-finished-icon">🏆</div>
           <h1 className="quiz-finished-title">¡Quest completada!</h1>
+          <div className="quiz-leaderboard">
+            <div className="leaderboard-item">
+              <span className="leaderboard-rank">•</span>
+              <span className="leaderboard-name">Puntaje del intento</span>
+              <span className="leaderboard-score">{quest.latestAttempt?.score ?? quest.myLastScore ?? 0} pts</span>
+            </div>
+            <div className="leaderboard-item">
+              <span className="leaderboard-rank">•</span>
+              <span className="leaderboard-name">Aciertos</span>
+              <span className="leaderboard-score">
+                {quest.latestAttempt?.correctAnswers ?? 0}/{quest.questionCount ?? quest.questions.length}
+              </span>
+            </div>
+            <div className="leaderboard-item">
+              <span className="leaderboard-rank">•</span>
+              <span className="leaderboard-name">Mejor puntaje</span>
+              <span className="leaderboard-score">{quest.myBestScore ?? 0} pts</span>
+            </div>
+          </div>
           <div className="quiz-leaderboard">
             {quest?.leaderboard?.map((s, i) => (
               <div key={s.userId} className="leaderboard-item">
@@ -57,7 +90,10 @@ const QuizPage = () => {
               </div>
             ))}
           </div>
-          <Button onClick={() => navigate(-1)}>Volver a la Party</Button>
+          <div className="upload-actions" style={{ marginTop: '16px' }}>
+            <Button onClick={() => navigate(0)}>Volver a intentar</Button>
+            <Button variant="ghost" onClick={() => navigate(-1)}>Volver a la Party</Button>
+          </div>
         </div>
       </GameLayout>
     )
@@ -65,11 +101,17 @@ const QuizPage = () => {
 
   return (
     <GameLayout>
+      <div className="upload-actions" style={{ marginBottom: '12px', justifyContent: 'space-between' }}>
+        <Button variant="ghost" onClick={() => navigate(-1)}>← Volver</Button>
+        {quest.myStatus === 'in_progress' && (
+          <span className="text-small" style={{ color: 'var(--accent-light)' }}>Intento en curso</span>
+        )}
+      </div>
       <ScoreHeader
         scores={quest.leaderboard ?? []}
         timeLeft={timeLeft}
         currentIndex={currentIndex}
-        total={quest.questions.length}
+        total={quest.questionCount ?? quest.questions.length}
       />
       {currentQ && (
         <>
