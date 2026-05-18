@@ -50,10 +50,10 @@ describe('useParty', () => {
     const { result } = renderHook(() => useParty('party-1'))
 
     await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
+      expect(result.current.isPartyLoading).toBe(false)
     })
 
     expect(result.current.messages).toEqual([])
-    expect(result.current.loadError).toMatch(/chat|party/i)
+    expect(result.current.chatError).toMatch(/historial|chat/i)
   })
 })

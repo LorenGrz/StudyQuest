@@ -2,9 +2,11 @@ import { useEffect, useRef } from 'react'
 import type { ChatMessage } from '../../services/partyService'
 import { ChatComposer } from './ChatComposer'
 import { ChatMessageItem } from './ChatMessageItem'
+import { Spinner } from '../UI'
 
 type Props = {
   messages: ChatMessage[]
+  isLoading?: boolean
   error?: string | null
   currentUserId?: string
   onSendText: (text: string) => void
@@ -12,7 +14,7 @@ type Props = {
   onSendAudio: (file: File, durationMs: number) => Promise<void>
 }
 
-export function ChatBox({ messages, error, currentUserId = '', onSendText, onSendFile, onSendAudio }: Props) {
+export function ChatBox({ messages, isLoading, error, currentUserId = '', onSendText, onSendFile, onSendAudio }: Props) {
   const endRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -22,7 +24,9 @@ export function ChatBox({ messages, error, currentUserId = '', onSendText, onSen
   return (
     <div className="chat-box">
       <div className="chat-messages">
-        {error ? (
+        {isLoading ? (
+          <div className="chat-empty"><Spinner size="md" /></div>
+        ) : error ? (
           <div className="chat-empty"><p>{error}</p></div>
         ) : messages.length === 0 ? (
           <div className="chat-empty"><p>Sin mensajes todavía. ¡Sé el primero! 💬</p></div>
