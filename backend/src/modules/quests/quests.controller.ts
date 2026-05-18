@@ -46,18 +46,18 @@ export class QuestsController {
   }
 
   @Get('party/:partyId')
-  findByParty(@Param('partyId') partyId: string) {
-    return this.questsService.findByParty(partyId);
+  findByParty(@Param('partyId') partyId: string, @Request() req: any) {
+    return this.questsService.findByParty(partyId, req.user.userId);
   }
 
   @Get(':id/play')
-  getForPlay(@Param('id') id: string) {
-    return this.questsService.getQuestForPlay(id);
+  getForPlay(@Param('id') id: string, @Request() req: any) {
+    return this.questsService.getQuestForPlay(id, req.user.userId);
   }
 
   @Post(':id/start')
-  start(@Param('id') id: string) {
-    return this.questsService.startQuest(id);
+  start(@Param('id') id: string, @Request() req: any) {
+    return this.questsService.startQuest(id, req.user.userId);
   }
 
   @Post('answer')
@@ -66,7 +66,7 @@ export class QuestsController {
   }
 
   @Post(':id/complete')
-  complete(@Param('id') id: string) {
-    return this.questsService.completeQuest(id);
+  complete(@Param('id') id: string, @Request() req: any) {
+    return this.questsService.completeQuest(id, req.user.userId);
   }
 }

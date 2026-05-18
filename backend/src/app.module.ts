@@ -25,7 +25,15 @@ import { MatchmakingModule } from './gateways/matchmaking/matchmaking.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: resolve(__dirname, '../../.env') }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: [
+        resolve(process.cwd(), '.env'),
+        resolve(process.cwd(), '../.env'),
+        resolve(__dirname, '../.env'),
+        resolve(__dirname, '../../.env'),
+      ],
+    }),
 
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -55,7 +63,16 @@ import { MatchmakingModule } from './gateways/matchmaking/matchmaking.module';
           cb(null, `${uuid()}${extname(file.originalname)}`),
       }),
       fileFilter: (_req, file, cb) => {
-        const allowed = ['application/pdf', 'text/plain'];
+        const allowed = [
+          'application/pdf',
+          'text/plain',
+          'application/msword',
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          'audio/webm',
+          'audio/ogg',
+          'audio/mp4',
+          'audio/mpeg',
+        ];
         cb(null, allowed.includes(file.mimetype));
       },
       limits: { fileSize: 10 * 1024 * 1024 },

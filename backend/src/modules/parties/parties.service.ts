@@ -16,6 +16,8 @@ import { PartyInvitation } from './party-invitation.entity';
 import { PartyActivity, ActivityType } from './party-activity.entity';
 import { User } from '../users/user.entity';
 import { UsersService } from '../users/users.service';
+import { ChatAttachmentPayload } from './chat-message.types';
+import { presentChatMessage } from './chat-message.presenter';
 
 @Injectable()
 export class PartiesService {
@@ -447,24 +449,72 @@ export class PartiesService {
     }
   }
 
+  async addTextChatMessage(
+    partyId: string,
+    userId: string,
+    text: string,
+  ) {
+    const msg = this.chatRepo.create({
+      partyId,
+      userId,
+      type: 'text',
+      text: text.trim(),
+      attachmentUrl: null,
+      attachmentName: null,
+      attachmentMimeType: null,
+      attachmentSizeBytes: null,
+      attachmentDurationMs: null,
+    });
+    const saved = await this.chatRepo.save(msg);
+    const full = await this.chatRepo.findOne({
+      where: { id: saved.id },
+      relations: ['user'],
+    });
+    return presentChatMessage(full as ChatMessage);
+  }
+
+  async addBinaryChatMessage(
+    partyId: string,
+    userId: string,
+    attachment: ChatAttachmentPayload & { type: 'file' | 'audio' },
+  ) {
+    const msg = this.chatRepo.create({
+      partyId,
+      userId,
+      type: attachment.type,
+      text: null,
+      attachmentUrl: attachment.url,
+      attachmentName: attachment.name,
+      attachmentMimeType: attachment.mimeType,
+      attachmentSizeBytes: attachment.sizeBytes,
+      attachmentDurationMs: attachment.durationMs ?? null,
+    });
+    const saved = await this.chatRepo.save(msg);
+    const full = await this.chatRepo.findOne({
+      where: { id: saved.id },
+      relations: ['user'],
+    });
+    const response = presentChatMessage(full as ChatMessage);
+    this.eventEmitter.emit('party.chat_message', { partyId, message: response });
+    return response;
+  }
+
   async addChatMessage(
     partyId: string,
     userId: string,
     text: string,
-  ): Promise<ChatMessage> {
-    const msg = this.chatRepo.create({ partyId, userId, text: text.trim() });
-    const saved = await this.chatRepo.save(msg);
-    return this.chatRepo.findOne({ where: { id: saved.id }, relations: ['user'] }) as Promise<ChatMessage>;
+  ) {
+    return this.addTextChatMessage(partyId, userId, text);
   }
 
-  async getChatHistory(partyId: string, limit = 100): Promise<ChatMessage[]> {
+  async getChatHistory(partyId: string, limit = 100) {
     const msgs = await this.chatRepo.find({
       where: { partyId },
       relations: ['user'],
       order: { createdAt: 'DESC' },
       take: limit,
     });
-    return msgs.reverse();
+    return msgs.reverse().map(presentChatMessage);
   }
 
   // ─── Activity Logging ──────────────────────────────────────────────────────────

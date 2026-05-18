@@ -10,7 +10,20 @@ export interface QuizQuestion {
   text: string
   topic: string
   options: QuizOption[]
-  order: number
+  position: number
+}
+
+export interface QuestAttempt {
+  id: string
+  attemptNumber: number
+  status: 'in_progress' | 'completed' | 'abandoned'
+  answeredQuestionIndices: number[]
+  currentIndex: number
+  score: number
+  correctAnswers: number
+  totalQuestions: number
+  resumed?: boolean
+  completedAt?: string | null
 }
 
 export interface Quest {
@@ -18,13 +31,22 @@ export interface Quest {
   partyId: string
   subjectId: string
   title: string
-  status: 'pending' | 'active' | 'completed'
+  status: 'pending' | 'generating' | 'ready' | 'active' | 'completed' | 'failed'
+  sourcePdfUrl?: string | null
+  sourceType?: 'text' | 'pdf'
+  questionCount?: number
+  myBestScore?: number | null
+  myLastScore?: number | null
+  myStatus?: 'never_started' | 'in_progress' | 'completed'
+  activeAttempt?: QuestAttempt | null
+  latestAttempt?: QuestAttempt | null
   leaderboard: Array<{ userId: string; username: string; score: number }>
   questions: QuizQuestion[]
   createdAt: string
 }
 
 export interface AnswerResult {
+  attemptId?: string
   isCorrect: boolean
   correctIndex: number
   explanation: string
@@ -35,8 +57,7 @@ export interface AnswerResult {
 export interface CreateQuestPayload {
   partyId: string
   title: string
-  subjectId: string
-  noteText?: string
+  textContent?: string
 }
 
 export const questService = {
@@ -44,8 +65,7 @@ export const questService = {
     const form = new FormData()
     form.append('partyId', payload.partyId)
     form.append('title', payload.title)
-    form.append('subjectId', payload.subjectId)
-    if (payload.noteText) form.append('noteText', payload.noteText)
+    if (payload.textContent) form.append('textContent', payload.textContent)
     if (file) form.append('file', file)
 
     const { data } = await api.post<Quest>('/quests', form, {
@@ -64,18 +84,21 @@ export const questService = {
     return data
   },
 
-  async start(questId: string): Promise<void> {
-    await api.post(`/quests/${questId}/start`)
+  async start(questId: string): Promise<QuestAttempt> {
+    const { data } = await api.post<QuestAttempt>(`/quests/${questId}/start`)
+    return data
   },
 
   async submitAnswer(
     questId: string,
+    attemptId: string,
     questionIndex: number,
     selectedOption: number,
     timeSpentMs: number,
   ): Promise<AnswerResult> {
     const { data } = await api.post<AnswerResult>('/quests/answer', {
       questId,
+      attemptId,
       questionIndex,
       selectedOption,
       timeSpentMs,
@@ -83,7 +106,8 @@ export const questService = {
     return data
   },
 
-  async complete(questId: string): Promise<void> {
-    await api.post(`/quests/${questId}/complete`)
+  async complete(questId: string): Promise<Quest> {
+    const { data } = await api.post<Quest>(`/quests/${questId}/complete`)
+    return data
   },
 }

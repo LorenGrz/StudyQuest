@@ -1,11 +1,12 @@
-import { useRef, useState, useEffect } from 'react'
-import type { Party, ChatMessage, PartyMember } from '../services/partyService'
+import { useState, useEffect, useRef } from 'react'
+import type { Party, PartyMember, Activity } from '../services/partyService'
 import { partyService } from '../services/partyService'
 import { friendService } from '../services/friendService'
 import type { User } from '../services/userService'
 import type { Quest } from '../services/questService'
 import { Button, Spinner } from './UI'
 import { useNavigate } from 'react-router-dom'
+export { ChatBox } from './party-chat/ChatBox'
 
 // ─── PartyHeader ─────────────────────────────────────────────────────────────
 export function PartyHeader({ party }: { party: Party | null }) {
@@ -49,65 +50,6 @@ export function TabBar<T extends string>({ tabs, active, onChange }: TabBarProps
           {t.label}
         </button>
       ))}
-    </div>
-  )
-}
-
-// ─── ChatBox ─────────────────────────────────────────────────────────────────
-interface ChatBoxProps {
-  messages: ChatMessage[]
-  onSend: (text: string) => void
-  currentUserId?: string
-}
-
-export function ChatBox({ messages, onSend, currentUserId = '' }: ChatBoxProps) {
-  const [text, setText] = useState('')
-  const endRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages.length])
-
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!text.trim()) return
-    onSend(text.trim())
-    setText('')
-  }
-
-  return (
-    <div className="chat-box">
-      <div className="chat-messages">
-        {messages.length === 0 && (
-          <div className="chat-empty">
-            <p>Sin mensajes todavía. ¡Sé el primero! 💬</p>
-          </div>
-        )}
-        {messages.map((m) => {
-          const isOwn = Boolean(currentUserId) && m.userId === currentUserId
-          return (
-            <div key={m.id} className={`chat-message${isOwn ? ' chat-message-own' : ''}`}>
-              {!isOwn && (
-                <span className="chat-username">{m.user?.displayName ?? m.userId.slice(0, 8)}</span>
-              )}
-              <p className="chat-text">{m.text}</p>
-              <span className="chat-time">
-                {new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </span>
-            </div>
-          )
-        })}
-        <div ref={endRef} />
-      </div>
-      <form className="chat-input-row" onSubmit={submit}>
-        <input
-          className="chat-input"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder="Escribí un mensaje..."
-        />
-        <Button type="submit" size="sm">Enviar</Button>
-      </form>
     </div>
   )
 }
@@ -400,24 +342,43 @@ export function InviteSheet({ partyId, onClose }: InviteSheetProps) {
 
 // ─── UploadNoteCard ───────────────────────────────────────────────────────────
 interface UploadNoteCardProps {
-  onUpload: (title: string, subjectId: string, file?: File, noteText?: string) => Promise<void>
+  onUpload: (title: string, file?: File, textContent?: string) => Promise<unknown>
   isLoading: boolean
 }
 
 export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
   const [title, setTitle] = useState('')
-  const [subjectId, setSubjectId] = useState('')
   const [noteText, setNoteText] = useState('')
+  const [error, setError] = useState<string | null>(null)
   const [expanded, setExpanded] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     const file = fileRef.current?.files?.[0]
-    await onUpload(title, subjectId, file, noteText || undefined)
-    setTitle('')
-    setNoteText('')
-    setExpanded(false)
+    const trimmedText = noteText.trim()
+
+    if (!file && !trimmedText) {
+      setError('Pegá al menos 100 caracteres o subí un PDF.')
+      return
+    }
+
+    if (!file && trimmedText.length < 100) {
+      setError(`El texto es muy corto. Faltan ${100 - trimmedText.length} caracteres para generar la quest.`)
+      return
+    }
+
+    setError(null)
+
+    try {
+      await onUpload(title, file, trimmedText || undefined)
+      setTitle('')
+      setNoteText('')
+      setExpanded(false)
+      if (fileRef.current) fileRef.current.value = ''
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo generar la quest.')
+    }
   }
 
   if (!expanded) {
@@ -440,24 +401,24 @@ export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
         placeholder="Título del quiz..."
         required
       />
-      <input
-        className="input"
-        value={subjectId}
-        onChange={(e) => setSubjectId(e.target.value)}
-        placeholder="ID de la materia"
-        required
-      />
       <textarea
-        className="input input-textarea"
+        className={`input input-textarea ${error ? 'input-error' : ''}`}
         value={noteText}
-        onChange={(e) => setNoteText(e.target.value)}
+        onChange={(e) => {
+          setNoteText(e.target.value)
+          if (error) setError(null)
+        }}
         placeholder="Pegá el texto del apunte aquí (o subí un PDF)..."
         rows={4}
       />
+      <p className="upload-helper-text">
+        Si pegás texto, necesitás al menos 100 caracteres. Si subís PDF, el texto es opcional.
+      </p>
       <label className="upload-file-label">
         <input ref={fileRef} type="file" accept="application/pdf" hidden />
         📎 Subir PDF (opcional)
       </label>
+      {error && <p className="input-error-msg">{error}</p>}
       <div className="upload-actions">
         <Button type="button" variant="ghost" onClick={() => setExpanded(false)}>Cancelar</Button>
         <Button type="submit" isLoading={isLoading}>Generar Quest ⚡</Button>
@@ -469,29 +430,74 @@ export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
 // ─── QuestCard ───────────────────────────────────────────────────────────────
 export function QuestCard({ quest }: { quest: Quest }) {
   const navigate = useNavigate()
+  const questionCount = quest.questionCount ?? quest.questions?.length ?? 0
+  const sourceLabel = quest.sourceType === 'pdf' || quest.sourcePdfUrl ? 'PDF adjunto' : 'Texto'
+  const isGenerating = quest.status === 'generating' || quest.status === 'pending'
+  const isFailed = quest.status === 'failed'
+  const canPlay = !isGenerating && !isFailed
+  const statusLabel = isGenerating
+    ? 'Generando con IA...'
+    : isFailed
+      ? 'Falló la generación'
+      : quest.myStatus === 'in_progress'
+        ? 'En curso'
+        : quest.myBestScore != null
+          ? `Mejor puntaje: ${quest.myBestScore}`
+          : quest.myStatus === 'completed'
+            ? 'Completada'
+            : 'Lista para jugar'
+  const statusHint = isGenerating
+    ? 'Volvé a esta party en unos segundos para empezar.'
+    : isFailed
+      ? 'Abrila más tarde o generá una nueva quest.'
+      : null
+
+  const handleOpenQuest = () => {
+    if (!canPlay) return
+    navigate(`/quiz/${quest.id}`)
+  }
+
   return (
-    <div className="quest-card" onClick={() => navigate(`/quiz/${quest.id}`)}>
+    <div
+      className="quest-card"
+      onClick={handleOpenQuest}
+      style={{ cursor: canPlay ? 'pointer' : 'default', opacity: isFailed ? 0.8 : 1 }}
+      aria-disabled={!canPlay}
+    >
       <div className="quest-card-info">
         <p className="quest-card-title">{quest.title}</p>
-        <p className="quest-card-meta">{quest.questions?.length ?? 0} preguntas</p>
+        <p className="quest-card-meta">
+          {questionCount} preguntas
+          {` • ${sourceLabel}`}
+        </p>
+        {statusLabel && <p className="quest-card-link">{statusLabel}</p>}
+        {statusHint && <p className="text-small">{statusHint}</p>}
+        {quest.sourcePdfUrl && (
+          <a
+            className="quest-card-link"
+            href={new URL(quest.sourcePdfUrl, 'http://localhost:3000').toString()}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(event) => event.stopPropagation()}
+          >
+            Ver PDF
+          </a>
+        )}
       </div>
       <span className={`quest-status quest-status-${quest.status}`}>
-        {quest.status === 'pending' ? '⏳' : quest.status === 'active' ? '▶' : '✅'}
+        {isGenerating
+          ? '⏳'
+          : quest.status === 'active'
+            ? '▶'
+            : quest.status === 'failed'
+              ? '⚠️'
+              : '✅'}
       </span>
     </div>
   )
 }
 
 // ─── ActivityFeed ────────────────────────────────────────────────────────────
-export interface Activity {
-  id: string
-  type: string
-  description: string
-  user?: { id: string; displayName: string; avatarUrl?: string | null }
-  createdAt: string
-  metadata?: Record<string, unknown>
-}
-
 interface ActivityFeedProps {
   activities: Activity[]
   isLoading?: boolean
