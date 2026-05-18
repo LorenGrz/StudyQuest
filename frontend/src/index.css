@@ -88,7 +88,7 @@ input, textarea, select { font-family: inherit; }
   overflow-x: hidden;
 }
 
-.mobile-main { flex: 1; display: flex; flex-direction: column; gap: 12px; padding: 0 16px; }
+.mobile-main { flex: 1; display: flex; flex-direction: column; gap: 12px; padding: 0 16px; min-height: 0; }
 
 /* â”€â”€â”€ Bottom Navigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 .bottom-nav {
@@ -756,6 +756,16 @@ input, textarea, select { font-family: inherit; }
 .waiting-sub { color: var(--text-secondary); }
 
 /* â”€â”€â”€ Party Room â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+.party-room-shell { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.party-room-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: linear-gradient(180deg, rgba(11, 11, 24, 0.98), rgba(11, 11, 24, 0.94));
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.party-room-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
 .party-header { display: flex; align-items: center; justify-content: flex-start; padding: 20px 16px 8px; }
 .party-header-info { display: flex; flex-direction: column; gap: 4px; }
 .party-header-name { font-size: 20px; font-weight: 800; }
@@ -769,10 +779,10 @@ input, textarea, select { font-family: inherit; }
 .tab-item { flex: 1; padding: 12px 8px; font-size: 13px; font-weight: 600; color: var(--text-muted); transition: all 0.15s; border-bottom: 2px solid transparent; }
 .tab-active { color: var(--accent-light); border-bottom-color: var(--accent); }
 
-.tab-content { display: flex; flex-direction: column; gap: 12px; padding: 16px; }
+.tab-content { display: flex; flex-direction: column; gap: 12px; padding: 16px; overflow-y: auto; min-height: 0; }
 
 .chat-box { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-.chat-messages { flex: 1; overflow-y: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 12px; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
 .chat-message {
   background: var(--bg-surface);
   border: 1px solid var(--border);
@@ -1845,7 +1855,6 @@ input, textarea, select { font-family: inherit; }
     height: 22px;
   }
 }
-
 
 
 

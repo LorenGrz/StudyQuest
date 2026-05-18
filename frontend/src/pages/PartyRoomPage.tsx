@@ -86,57 +86,63 @@ const PartyRoomPage = () => {
 
   return (
     <MobileLayout>
-      <PartyHeader party={party} />
-      <TabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
+      <div className="party-room-shell">
+        <div className="party-room-topbar">
+          <PartyHeader party={party} />
+          <TabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
+        </div>
 
-      {activeTab === 'quests' && (
-        <div className="tab-content">
-          <UploadNoteCard onUpload={uploadNote} isLoading={isGenerating} />
-          {quests.map((q) => <QuestCard key={q.id} quest={q} />)}
-          {quests.length === 0 && !isGenerating && (
-            <div className="empty-state">
-              <p className="empty-icon">⚡</p>
-              <p className="empty-text">No hay quests todavía</p>
-              <p className="empty-sub">Subí un apunte para generar el primero</p>
+        <div className="party-room-panel">
+          {activeTab === 'quests' && (
+            <div className="tab-content">
+              <UploadNoteCard onUpload={uploadNote} isLoading={isGenerating} />
+              {quests.map((q) => <QuestCard key={q.id} quest={q} />)}
+              {quests.length === 0 && !isGenerating && (
+                <div className="empty-state">
+                  <p className="empty-icon">⚡</p>
+                  <p className="empty-text">No hay quests todavía</p>
+                  <p className="empty-sub">Subí un apunte para generar el primero</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'chat' && (
+            <ChatBox
+              messages={messages}
+              error={loadError}
+              onSendText={sendTextMessage}
+              onSendFile={sendFileMessage}
+              onSendAudio={sendAudioMessage}
+              currentUserId={currentUserId}
+            />
+          )}
+
+          {activeTab === 'members' && (
+            <MemberList 
+              members={party?.members ?? []} 
+              partyId={partyId ?? ''} 
+              isPrivate={party?.isPrivate ?? false}
+              currentUserId={currentUserId}
+              onVisibilityChange={(isPrivate) => {
+                if (!party) return
+                partyService.updateVisibility(party.id, isPrivate).then(() => {
+                  setParty({ ...party, isPrivate })
+                }).catch(console.error)
+              }}
+              onLeave={handleLeave}
+              onRemoveMember={handleRemoveMember}
+              onCloseParty={handleCloseParty}
+            />
+          )}
+
+          {activeTab === 'activity' && (
+            <div className="tab-content">
+              <ActivityFeed activities={activities} isLoading={activityLoading} />
             </div>
           )}
         </div>
-      )}
-
-      {activeTab === 'chat' && (
-        <ChatBox
-          messages={messages}
-          error={loadError}
-          onSendText={sendTextMessage}
-          onSendFile={sendFileMessage}
-          onSendAudio={sendAudioMessage}
-          currentUserId={currentUserId}
-        />
-      )}
-
-      {activeTab === 'members' && (
-        <MemberList 
-          members={party?.members ?? []} 
-          partyId={partyId ?? ''} 
-          isPrivate={party?.isPrivate ?? false}
-          currentUserId={currentUserId}
-          onVisibilityChange={(isPrivate) => {
-            if (!party) return
-            partyService.updateVisibility(party.id, isPrivate).then(() => {
-              setParty({ ...party, isPrivate })
-            }).catch(console.error)
-          }}
-          onLeave={handleLeave}
-          onRemoveMember={handleRemoveMember}
-          onCloseParty={handleCloseParty}
-        />
-      )}
-
-      {activeTab === 'activity' && (
-        <div className="tab-content">
-          <ActivityFeed activities={activities} isLoading={activityLoading} />
-        </div>
-      )}
+      </div>
     </MobileLayout>
   )
 }
