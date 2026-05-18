@@ -58,6 +58,49 @@ Variables soportadas:
 - `GROQ_API_KEY`
 - `GROQ_MODEL`
 
+Ejemplos rapidos para cambiar de proveedor en local:
+
+```env
+# Opcion 1: Gemini
+AI_PROVIDER=gemini
+GEMINI_API_KEY=tu_api_key
+GEMINI_MODEL=gemini-1.5-flash
+```
+
+```env
+# Opcion 2: OpenAI
+AI_PROVIDER=openai
+OPENAI_API_KEY=tu_api_key
+OPENAI_MODEL=gpt-4.1-mini
+```
+
+```env
+# Opcion 3: Anthropic
+AI_PROVIDER=anthropic
+ANTHROPIC_API_KEY=tu_api_key
+ANTHROPIC_MODEL=claude-3-5-sonnet-latest
+```
+
+```env
+# Opcion 4: Groq
+AI_PROVIDER=groq
+GROQ_API_KEY=tu_api_key
+GROQ_MODEL=llama-3.3-70b-versatile
+```
+
+```env
+# Opcion 5: Mock para desarrollo/test
+AI_PROVIDER=mock
+```
+
+Notas practicas:
+
+- La seleccion del provider se hace hoy desde el backend por `AI_PROVIDER`.
+- Las API keys van en el `.env` que usa el backend. En este repo se puede trabajar con el `.env` de raiz y/o `backend/.env` segun tu flujo local.
+- Si cambias `AI_PROVIDER` o cualquiera de las keys/modelos, reinicia el backend.
+- Frontend no necesita saber qué provider usas; el cambio queda encapsulado en backend.
+- Para validar que el provider activo quedó bien, podés mirar los logs del backend: la capa de IA informa qué provider está usando al generar quizzes.
+
 ### 2. Levantar la Infraestructura (Bases de Datos con Docker)
 
 Levantaremos las bases de datos base utilizando Docker. Ejecuta en la raíz del proyecto el siguiente comando:
