@@ -29,8 +29,9 @@ const PartyRoomPage = () => {
     sendTextMessage,
     sendFileMessage,
     sendAudioMessage,
-    isLoading,
-    loadError,
+    isPartyLoading,
+    isChatLoading,
+    chatError,
     currentUserId,
   } = useParty(partyId ?? '')
   const { quests, uploadNote, isGenerating } = useQuests(partyId ?? '')
@@ -76,7 +77,7 @@ const PartyRoomPage = () => {
     }
   }
 
-  if (isLoading) {
+  if (isPartyLoading) {
     return (
       <MobileLayout>
         <div className="center-spinner"><Spinner size="lg" /></div>
@@ -110,7 +111,8 @@ const PartyRoomPage = () => {
           {activeTab === 'chat' && (
             <ChatBox
               messages={messages}
-              error={loadError}
+              isLoading={isChatLoading}
+              error={chatError}
               onSendText={sendTextMessage}
               onSendFile={sendFileMessage}
               onSendAudio={sendAudioMessage}

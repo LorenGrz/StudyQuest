@@ -13,36 +13,59 @@ export function useParty(partyId: string) {
   const { user } = useAuthStore()
   const [party, setParty] = useState<Party | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [isPartyLoading, setIsPartyLoading] = useState(true)
+  const [isChatLoading, setIsChatLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [chatError, setChatError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!partyId) return
     let cancelled = false
 
-    Promise.all([
-      partyService.findById(partyId),
-      partyService.getChat(partyId),
-    ]).then(([p, msgs]) => {
-      if (!cancelled) {
-        setParty(p)
-        setMessages(msgs)
-        setLoadError(null)
-      }
-    }).catch(() => {
-      if (!cancelled) {
-        setParty(null)
-        setMessages([])
-        setLoadError('No se pudo cargar la party o el chat.')
-      }
-    }).finally(() => {
-      if (!cancelled) setIsLoading(false)
-    })
+    // Cargar party y chat de forma independiente
+    partyService.findById(partyId)
+      .then((p) => {
+        if (!cancelled) {
+          setParty(p)
+          setLoadError(null)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setParty(null)
+          setLoadError('No se pudo cargar la party.')
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setIsPartyLoading(false)
+      })
+
+    partyService.getChat(partyId)
+      .then((msgs) => {
+        if (!cancelled) {
+          setMessages(msgs)
+          setChatError(null)
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setMessages([])
+          setChatError('No se pudo cargar el historial de mensajes.')
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setIsChatLoading(false)
+      })
 
     socket.emit('party:join', { partyId })
 
+    // Deduplicación por ID para evitar doble render (el backend emite
+    // chat:message dos veces para mensajes file/audio)
     socket.on('chat:message', (msg: ChatMessage) => {
-      setMessages((prev) => [...prev, normalizeChatMessage(msg)])
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === msg.id)) return prev
+        return [...prev, normalizeChatMessage(msg)]
+      })
     })
 
     // Actualiza el estado de presencia de un miembro sin recargar toda la party
@@ -100,8 +123,10 @@ export function useParty(partyId: string) {
     sendTextMessage,
     sendFileMessage,
     sendAudioMessage,
-    isLoading,
+    isPartyLoading,
+    isChatLoading,
     loadError,
+    chatError,
     currentUserId: user?.id ?? '',
   }
 }
