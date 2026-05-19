@@ -21,6 +21,7 @@ import { PartiesModule } from './modules/parties/parties.module';
 import { QuestsModule } from './modules/quests/quests.module';
 import { AiModule } from './modules/ai/ai.module';
 import { SkillTreeModule } from './modules/skill-tree/skill-tree.module';
+import { AchievementsModule } from './modules/achievements/achievements.module';
 import { MatchmakingModule } from './gateways/matchmaking/matchmaking.module';
 
 @Module({
@@ -85,6 +86,7 @@ import { MatchmakingModule } from './gateways/matchmaking/matchmaking.module';
     QuestsModule,
     AiModule,
     SkillTreeModule,
+    AchievementsModule,
     MatchmakingModule,
   ],
 })

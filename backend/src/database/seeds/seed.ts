@@ -35,6 +35,7 @@ import { QuizQuestion } from '../../modules/quests/quiz-question.entity';
 import { QuizOption } from '../../modules/quests/quiz-option.entity';
 import { PlayerResult } from '../../modules/quests/player-result.entity';
 import { PartyInvitation } from '../../modules/parties/party-invitation.entity';
+import { Achievement } from '../../modules/achievements/achievement.entity';
 
 // ─── Conexión ──────────────────────────────────────────────────────────────────
 const AppDataSource = new DataSource({
@@ -46,7 +47,7 @@ const AppDataSource = new DataSource({
   database: process.env.POSTGRES_DB       ?? 'studyquest',
   entities: [
     User, FriendRequest, Subject, Party, PartyMember, ChatMessage, PartyActivity,
-    Quest, QuizQuestion, QuizOption, PlayerResult, PartyInvitation
+    Quest, QuizQuestion, QuizOption, PlayerResult, PartyInvitation, Achievement
   ],
   synchronize: false,
   logging: false,
@@ -65,6 +66,7 @@ const SUBJECTS_DATA = [
 ];
 
 const USERS_DATA = [
+  { email: 'admin@studyquest.dev', username: 'admin_sq',   displayName: 'Admin',           password: 'AdminPass123!', semester: 1, role: 'ADMIN' },
   { email: 'alice@studyquest.dev', username: 'alice_dev',  displayName: 'Alice García',   password: 'Password123!', semester: 4 },
   { email: 'bob@studyquest.dev',   username: 'bobby_b',    displayName: 'Bob Martínez',   password: 'Password123!', semester: 3 },
   { email: 'carol@studyquest.dev', username: 'carol_dev',  displayName: 'Carol López',    password: 'Password123!', semester: 5 },
@@ -72,6 +74,16 @@ const USERS_DATA = [
   { email: 'eve@studyquest.dev',   username: 'eve_hacker', displayName: 'Eve Fernández',  password: 'Password123!', semester: 2 },
   { email: 'frank@studyquest.dev', username: 'frank_tank', displayName: 'Frank Gómez',    password: 'Password123!', semester: 3 },
   { email: 'grace@studyquest.dev', username: 'grace_hopp', displayName: 'Grace Hopper',   password: 'Password123!', semester: 4 },
+];
+
+const ACHIEVEMENTS_DATA = [
+  { code: 'FIRST_QUEST',      name: 'Primera Quest',        icon: '🎯', category: 'academic',    description: 'Completaste tu primera quest.',          points: 50 },
+  { code: 'QUEST_STREAK_3',   name: 'En Racha',             icon: '🔥', category: 'academic',    description: 'Mantuviste una racha de 3 días.',         points: 100 },
+  { code: 'QUEST_STREAK_5',   name: 'Imparable',            icon: '⚡', category: 'academic',    description: 'Mantuviste una racha de 5 días.',         points: 200 },
+  { code: 'FIRST_PARTY',      name: 'Primera Party',        icon: '🎉', category: 'social',      description: 'Te uniste a tu primera party de estudio.', points: 50 },
+  { code: 'SOCIAL_BUTTERFLY', name: 'Alma de la Fiesta',    icon: '🦋', category: 'social',      description: 'Participaste en 5 parties diferentes.',    points: 150 },
+  { code: 'LEVEL_5',          name: 'Estudiante Aplicado',  icon: '📚', category: 'progression', description: 'Alcanzaste el nivel 5.',                    points: 100 },
+  { code: 'LEVEL_10',         name: 'Maestro del Estudio',  icon: '🏆', category: 'progression', description: 'Alcanzaste el nivel 10.',                   points: 250 },
 ];
 
 // ─── Main ──────────────────────────────────────────────────────────────────────
@@ -121,6 +133,7 @@ async function seed() {
       university:   UNIVERSITY,
       career:       CAREER,
       semester:     ud.semester,
+      role:         (ud as any).role ?? 'USER',
       passwordHash,
       stats: {
         xp: 0, level: 0, elo: 1200, quizzesPlayed: 0, quizzesWon: 0,
@@ -134,7 +147,7 @@ async function seed() {
 
   // ── 3. Inscribir usuarios en materias ────────────────────────────────────────
   console.log('\n📝  Inscribiendo usuarios en materias...');
-  const [alice, bob, carol, dave, eve, frank, grace] = savedUsers;
+  const [_admin, alice, bob, carol, dave, eve, frank, grace] = savedUsers;
   const [am2, aed, bd, so, rc] = savedSubjects;
 
   console.log('\n🤝  Creando amistades de prueba...');
@@ -151,6 +164,20 @@ async function seed() {
     }),
   ]);
   console.log('   ✔  Solicitudes de amistad seeded');
+
+  // ── 3b. Logros ──────────────────────────────────────────────────────────────────
+  console.log('\n🏆  Creando logros...');
+  const achievementRepo = AppDataSource.getRepository(Achievement);
+
+  for (const ad of ACHIEVEMENTS_DATA) {
+    const existing = await achievementRepo.findOneBy({ code: ad.code });
+    if (existing) {
+      console.log(`   ⚠️  Logro "${ad.code}" ya existe — omitido`);
+      continue;
+    }
+    await achievementRepo.save(achievementRepo.create(ad));
+    console.log(`   ✔  ${ad.icon} ${ad.name}`);
+  }
 
   // CORRECTO: AppDataSource.createQueryBuilder().relation(...)
   // INCORRECTO (bug original): subjectRepo.createQueryBuilder().relation(...)

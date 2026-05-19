@@ -1442,6 +1442,66 @@ input, textarea, select { font-family: inherit; }
   color: var(--text-secondary);
 }
 
+/* ─── Achievements Grid ─────────────────────────────────────────────────────── */
+
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 10px;
+  padding: 0 16px;
+}
+
+.achievement-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 8px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+  text-align: center;
+  transition: all 0.25s ease;
+  cursor: default;
+}
+
+.achievement-item--unlocked {
+  border-color: rgba(124, 58, 237, 0.4);
+  background: rgba(124, 58, 237, 0.06);
+  box-shadow: 0 0 12px rgba(124, 58, 237, 0.15);
+}
+
+.achievement-item--unlocked:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.25);
+}
+
+.achievement-item--locked {
+  opacity: 0.35;
+  filter: grayscale(0.8);
+}
+
+.achievement-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.achievement-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.achievement-item--unlocked .achievement-name {
+  color: var(--text-primary);
+}
+
 /* ─── League System ──────────────────────────────────────────────────────────── */
 
 .league-banner {

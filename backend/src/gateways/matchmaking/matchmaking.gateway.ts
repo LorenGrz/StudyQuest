@@ -270,4 +270,13 @@ export class MatchmakingGateway
   handleChatMessageCreated(payload: { partyId: string; message: any }) {
     this.server.to(payload.partyId).emit('chat:message', payload.message);
   }
+
+  @OnEvent('achievement.unlocked')
+  handleAchievementUnlocked(payload: { userId: string; achievement: any }) {
+    for (const [socketId, conn] of this.connections) {
+      if (conn.userId === payload.userId) {
+        this.server.to(socketId).emit('achievement:unlocked', payload.achievement);
+      }
+    }
+  }
 }
