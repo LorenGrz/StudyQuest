@@ -251,6 +251,8 @@ export class PartiesService {
         'Creó la party (como líder)',
       );
 
+      this.eventEmitter.emit('party.member_joined', { partyId: party.id, userId });
+
       return result;
     });
   }
@@ -660,6 +662,8 @@ export class PartiesService {
         userId,
         `Se unió a la party`,
       );
+
+      this.eventEmitter.emit('party.member_joined', { partyId, userId });
 
       if (statusChanged) {
         await this.logActivity(

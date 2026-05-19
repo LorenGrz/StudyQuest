@@ -5,11 +5,13 @@ import { useAuthStore } from '../store/authStore'
 import { useAuth } from '../hooks/useAuth'
 import { userService } from '../services/userService'
 import { getLeague, getEloProgress, DEFAULT_ELO, LEAGUES } from '../utils/leagues'
+import { useAchievements } from '../hooks/useAchievements'
 
 export default function ProfilePage() {
   const { user, setUser } = useAuthStore()
   const { logout } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
+  const { achievements, isLoading: achievementsLoading } = useAchievements()
 
   useEffect(() => {
     userService.getMe().then(setUser).catch(console.error)
@@ -103,6 +105,29 @@ export default function ProfilePage() {
           <span className="stat-label">Racha</span>
         </div>
       </div>
+
+      {/* ─── Medals / Achievements ──────────────────────────────────── */}
+      <h3 className="section-title" style={{ marginTop: '16px' }}>Medallas</h3>
+      {achievementsLoading ? (
+        <div className="center-spinner" style={{ padding: '20px' }}><Spinner size="sm" /></div>
+      ) : achievements.length === 0 ? (
+        <div className="empty-state" style={{ padding: '20px' }}>
+          <p className="empty-text" style={{ fontSize: '14px' }}>No hay logros disponibles aún</p>
+        </div>
+      ) : (
+        <div className="achievements-grid">
+          {achievements.map((a) => (
+            <div
+              key={a.id}
+              className={`achievement-item ${a.unlocked ? 'achievement-item--unlocked' : 'achievement-item--locked'}`}
+              title={a.unlocked ? `${a.name} — ${a.description}` : `🔒 ${a.name} — ${a.description}`}
+            >
+              <span className="achievement-icon">{a.icon}</span>
+              <span className="achievement-name">{a.name}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* ─── League Ladder ─────────────────────────────────────────── */}
       <h3 className="section-title" style={{ marginTop: '16px' }}>Ligas</h3>

@@ -10,6 +10,7 @@ import {
   Index,
 } from 'typeorm';
 import { DEFAULT_ELO } from '../../common/leagues';
+import { Role } from '../../common/roles';
 import { Subject } from '../subjects/subject.entity';
 import { PartyMember } from '../parties/party-member.entity';
 
@@ -64,6 +65,9 @@ export class User {
 
   @Column({ type: 'smallint', default: 1 })
   semester: number;
+
+  @Column({ type: 'varchar', length: 10, default: Role.USER })
+  role: Role;
 
   @ManyToMany(() => Subject, (s) => s.enrolledUsers, { eager: false })
   @JoinTable({
