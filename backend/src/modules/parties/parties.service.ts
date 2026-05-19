@@ -220,7 +220,7 @@ export class PartiesService {
       resolvedSubjectId = user.enrolledSubjects[0].id;
     }
 
-    return this.dataSource.transaction(async (em) => {
+    const result = await this.dataSource.transaction(async (em) => {
       const party = em.create(Party, {
         subjectId: resolvedSubjectId,
         maxMembers,
@@ -243,18 +243,18 @@ export class PartiesService {
       });
       if (!result) throw new NotFoundException('Error al crear la party');
 
-      // Log que se creó la party después de la transacción
-      await this.logActivity(
-        party.id,
-        'member_joined',
-        userId,
-        'Creó la party (como líder)',
-      );
-
-      this.eventEmitter.emit('party.member_joined', { partyId: party.id, userId });
-
       return result;
     });
+
+    await this.logActivity(
+      result.id,
+      'member_joined',
+      userId,
+      'Creó la party (como líder)',
+    );
+    this.eventEmitter.emit('party.member_joined', { partyId: result.id, userId });
+
+    return result;
   }
 
   async findById(id: string): Promise<Party> {
@@ -371,7 +371,14 @@ export class PartiesService {
    *  - Si es leader y está solo → cierra la party.
    */
   async leaveParty(partyId: string, userId: string): Promise<void> {
-    return this.dataSource.transaction(async (em) => {
+    const deferredActivities: Array<{
+      type: ActivityType;
+      userId?: string;
+      description?: string;
+      metadata?: any;
+    }> = [];
+
+    await this.dataSource.transaction(async (em) => {
       const memberRecord = await em.findOne(PartyMember, {
         where: { partyId, userId },
       });
@@ -379,12 +386,11 @@ export class PartiesService {
 
       if (memberRecord.role !== 'leader') {
         await em.remove(memberRecord);
-        await this.logActivity(
-          partyId,
-          'member_left',
+        deferredActivities.push({
+          type: 'member_left',
           userId,
-          'Salió de la party',
-        );
+          description: 'Salió de la party',
+        });
         return;
       }
 
@@ -399,13 +405,12 @@ export class PartiesService {
         // Estaba solo → cerrar party
         await em.remove(memberRecord);
         await em.update(Party, partyId, { status: 'closed', closedAt: new Date() });
-        await this.logActivity(
-          partyId,
-          'party_status_changed',
+        deferredActivities.push({
+          type: 'party_status_changed',
           userId,
-          'Party cerrada (líder se fue y no había otros miembros)',
-          { oldStatus: 'active', newStatus: 'closed' },
-        );
+          description: 'Party cerrada (líder se fue y no había otros miembros)',
+          metadata: { oldStatus: 'active', newStatus: 'closed' },
+        });
         return;
       }
 
@@ -414,19 +419,27 @@ export class PartiesService {
       await em.update(PartyMember, { id: newLeader.id }, { role: 'leader' });
       await em.remove(memberRecord);
 
-      await this.logActivity(
-        partyId,
-        'member_left',
+      deferredActivities.push({
+        type: 'member_left',
         userId,
-        'Salió de la party (era líder)',
-      );
+        description: 'Salió de la party (era líder)',
+      });
+      deferredActivities.push({
+        type: 'member_promoted',
+        userId: newLeader.userId,
+        description: 'Fue promovido a líder',
+      });
+    });
+
+    for (const activity of deferredActivities) {
       await this.logActivity(
         partyId,
-        'member_promoted',
-        newLeader.userId,
-        `Fue promovido a líder`,
+        activity.type,
+        activity.userId,
+        activity.description,
+        activity.metadata,
       );
-    });
+    }
   }
 
   async updateVisibility(partyId: string, userId: string, isPrivate: boolean): Promise<void> {
@@ -611,7 +624,9 @@ export class PartiesService {
    * Une al usuario autenticado a una party existente si hay slots disponibles.
    */
   async joinParty(partyId: string, userId: string): Promise<Party> {
-    return this.dataSource.transaction(async (em) => {
+    let statusChanged = false;
+
+    const updated = await this.dataSource.transaction(async (em) => {
       // Obtenemos la party con exclusividad (lock) pero SIN JOINs para no romper FOR UPDATE
       const party = await em.findOne(Party, {
         where: { id: partyId },
@@ -642,7 +657,6 @@ export class PartiesService {
       });
       await em.save(member);
 
-      let statusChanged = false;
       // Si la party se llenó, pasarla a active
       if (party.members.length + 1 >= party.maxMembers) {
         await em.update(Party, partyId, { status: 'active' });
@@ -655,27 +669,27 @@ export class PartiesService {
       });
       if (!updated) throw new NotFoundException('Party no encontrada tras unirse');
 
-      // Log activity después de la transacción
-      await this.logActivity(
-        partyId,
-        'member_joined',
-        userId,
-        `Se unió a la party`,
-      );
-
-      this.eventEmitter.emit('party.member_joined', { partyId, userId });
-
-      if (statusChanged) {
-        await this.logActivity(
-          partyId,
-          'party_status_changed',
-          undefined,
-          'Party se llenó y pasó a activa',
-          { oldStatus: 'forming', newStatus: 'active' },
-        );
-      }
-
       return updated;
     });
+
+    await this.logActivity(
+      partyId,
+      'member_joined',
+      userId,
+      'Se unió a la party',
+    );
+    this.eventEmitter.emit('party.member_joined', { partyId, userId });
+
+    if (statusChanged) {
+      await this.logActivity(
+        partyId,
+        'party_status_changed',
+        undefined,
+        'Party se llenó y pasó a activa',
+        { oldStatus: 'forming', newStatus: 'active' },
+      );
+    }
+
+    return updated;
   }
 }
