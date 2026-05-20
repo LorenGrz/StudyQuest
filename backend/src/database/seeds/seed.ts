@@ -36,6 +36,8 @@ import { QuizOption } from '../../modules/quests/quiz-option.entity';
 import { PlayerResult } from '../../modules/quests/player-result.entity';
 import { PartyInvitation } from '../../modules/parties/party-invitation.entity';
 import { Achievement } from '../../modules/achievements/achievement.entity';
+import { UserTitle } from '../../modules/cosmetics/user-title.entity';
+import { UserInventory } from '../../modules/cosmetics/user-inventory.entity';
 
 // ─── Conexión ──────────────────────────────────────────────────────────────────
 const AppDataSource = new DataSource({
@@ -47,11 +49,38 @@ const AppDataSource = new DataSource({
   database: process.env.POSTGRES_DB       ?? 'studyquest',
   entities: [
     User, FriendRequest, Subject, Party, PartyMember, ChatMessage, PartyActivity,
-    Quest, QuizQuestion, QuizOption, PlayerResult, PartyInvitation, Achievement
+    Quest, QuizQuestion, QuizOption, PlayerResult, PartyInvitation, Achievement,
+    UserTitle, UserInventory
   ],
   synchronize: false,
   logging: false,
 });
+
+async function ensureBootstrapSchema(): Promise<void> {
+  await AppDataSource.query('CREATE EXTENSION IF NOT EXISTS pgcrypto;');
+
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS users
+    ADD COLUMN IF NOT EXISTS active_cosmetics jsonb
+    DEFAULT '{"titleCode":null,"titleText":null}'::jsonb;
+  `);
+
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS achievements
+    ADD COLUMN IF NOT EXISTS reward_type varchar(20);
+  `);
+
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS achievements
+    ADD COLUMN IF NOT EXISTS reward_code varchar(60);
+  `);
+
+  // Si quedaron tablas legado de pruebas manuales, las recreamos limpias.
+  await AppDataSource.query('DROP TABLE IF EXISTS user_inventory CASCADE;');
+  await AppDataSource.query('DROP TABLE IF EXISTS user_titles CASCADE;');
+
+  await AppDataSource.synchronize();
+}
 
 // ─── Datos de prueba ───────────────────────────────────────────────────────────
 const UNIVERSITY = 'Universidad Nacional de Córdoba';
@@ -78,18 +107,34 @@ const USERS_DATA = [
 
 const ACHIEVEMENTS_DATA = [
   { code: 'FIRST_QUEST',      name: 'Primera Quest',        icon: '🎯', category: 'academic',    description: 'Completaste tu primera quest.',          points: 50 },
-  { code: 'QUEST_STREAK_3',   name: 'En Racha',             icon: '🔥', category: 'academic',    description: 'Mantuviste una racha de 3 días.',         points: 100 },
+  { code: 'QUEST_STREAK_3',   name: 'En Racha',             icon: '🔥', category: 'academic',    description: 'Mantuviste una racha de 3 días.',         points: 100, rewardType: 'title', rewardCode: 'STREAK_3_TITLE' },
   { code: 'QUEST_STREAK_5',   name: 'Imparable',            icon: '⚡', category: 'academic',    description: 'Mantuviste una racha de 5 días.',         points: 200 },
   { code: 'FIRST_PARTY',      name: 'Primera Party',        icon: '🎉', category: 'social',      description: 'Te uniste a tu primera party de estudio.', points: 50 },
   { code: 'SOCIAL_BUTTERFLY', name: 'Alma de la Fiesta',    icon: '🦋', category: 'social',      description: 'Participaste en 5 parties diferentes.',    points: 150 },
   { code: 'LEVEL_5',          name: 'Estudiante Aplicado',  icon: '📚', category: 'progression', description: 'Alcanzaste el nivel 5.',                    points: 100 },
-  { code: 'LEVEL_10',         name: 'Maestro del Estudio',  icon: '🏆', category: 'progression', description: 'Alcanzaste el nivel 10.',                   points: 250 },
+  { code: 'LEVEL_10',         name: 'Maestro del Estudio',  icon: '🏆', category: 'progression', description: 'Alcanzaste el nivel 10.',                   points: 250, rewardType: 'title', rewardCode: 'MASTER_TITLE' },
+];
+
+const USER_TITLES_DATA = [
+  {
+    code: 'STREAK_3_TITLE',
+    name: 'Racha Activa',
+    text: 'Racha Activa',
+    achievementCode: 'QUEST_STREAK_3',
+  },
+  {
+    code: 'MASTER_TITLE',
+    name: 'Maestro del Estudio',
+    text: 'Maestro del Estudio',
+    achievementCode: 'LEVEL_10',
+  },
 ];
 
 // ─── Main ──────────────────────────────────────────────────────────────────────
 async function seed() {
   console.log('🌱  Conectando a la base de datos...');
   await AppDataSource.initialize();
+  await ensureBootstrapSchema();
   console.log('✅  Conexión exitosa\n');
 
   const userRepo        = AppDataSource.getRepository(User);
@@ -97,6 +142,7 @@ async function seed() {
   const subjectRepo     = AppDataSource.getRepository(Subject);
   const partyRepo       = AppDataSource.getRepository(Party);
   const memberRepo      = AppDataSource.getRepository(PartyMember);
+  const userTitleRepo = AppDataSource.getRepository(UserTitle);
 
   // ── 1. Materias ──────────────────────────────────────────────────────────────
   console.log('📚  Creando materias...');
@@ -151,18 +197,21 @@ async function seed() {
   const [am2, aed, bd, so, rc] = savedSubjects;
 
   console.log('\n🤝  Creando amistades de prueba...');
-  await friendRequestRepo.save([
-    friendRequestRepo.create({
-      requesterId: alice.id,
-      requesteeId: bob.id,
-      status: 'accepted',
-    }),
-    friendRequestRepo.create({
-      requesterId: eve.id,
-      requesteeId: grace.id,
-      status: 'pending',
-    }),
-  ]);
+  const friendSeeds = [
+    { requesterId: alice.id, requesteeId: bob.id, status: 'accepted' as const },
+    { requesterId: eve.id, requesteeId: grace.id, status: 'pending' as const },
+  ];
+
+  for (const fr of friendSeeds) {
+    const existing = await friendRequestRepo.findOne({
+      where: [
+        { requesterId: fr.requesterId, requesteeId: fr.requesteeId },
+        { requesterId: fr.requesteeId, requesteeId: fr.requesterId },
+      ],
+    });
+    if (existing) continue;
+    await friendRequestRepo.save(friendRequestRepo.create(fr));
+  }
   console.log('   ✔  Solicitudes de amistad seeded');
 
   // ── 3b. Logros ──────────────────────────────────────────────────────────────────
@@ -172,11 +221,36 @@ async function seed() {
   for (const ad of ACHIEVEMENTS_DATA) {
     const existing = await achievementRepo.findOneBy({ code: ad.code });
     if (existing) {
-      console.log(`   ⚠️  Logro "${ad.code}" ya existe — omitido`);
+      await achievementRepo.save(
+        achievementRepo.create({
+          ...existing,
+          rewardType: (ad as any).rewardType ?? null,
+          rewardCode: (ad as any).rewardCode ?? null,
+        }),
+      );
+      console.log(`   ⚠️  Logro "${ad.code}" ya existe — actualizado`);
       continue;
     }
-    await achievementRepo.save(achievementRepo.create(ad));
+    await achievementRepo.save(
+      achievementRepo.create({
+        ...ad,
+        rewardType: (ad as any).rewardType ?? null,
+        rewardCode: (ad as any).rewardCode ?? null,
+      }),
+    );
     console.log(`   ✔  ${ad.icon} ${ad.name}`);
+  }
+
+  console.log('\n🏷️  Creando catálogo de títulos...');
+  for (const td of USER_TITLES_DATA) {
+    const existing = await userTitleRepo.findOneBy({ code: td.code });
+    if (existing) {
+      await userTitleRepo.save(userTitleRepo.create({ ...existing, ...td }));
+      console.log(`   ⚠️  Título "${td.code}" ya existe — actualizado`);
+      continue;
+    }
+    await userTitleRepo.save(userTitleRepo.create(td));
+    console.log(`   ✔  ${td.name}`);
   }
 
   // CORRECTO: AppDataSource.createQueryBuilder().relation(...)

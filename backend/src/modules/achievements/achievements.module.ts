@@ -6,10 +6,17 @@ import { AchievementsService } from './achievements.service';
 import { AchievementsController } from './achievements.controller';
 import { UsersModule } from '../users/users.module';
 import { PartiesModule } from '../parties/parties.module';
+import { UserTitle } from '../cosmetics/user-title.entity';
+import { UserInventory } from '../cosmetics/user-inventory.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Achievement, UserAchievement]),
+    TypeOrmModule.forFeature([
+      Achievement,
+      UserAchievement,
+      UserTitle,
+      UserInventory,
+    ]),
     UsersModule,
     PartiesModule,
   ],

@@ -11,8 +11,25 @@ import * as bcrypt from 'bcrypt';
 import { User } from './user.entity';
 import { Subject } from '../subjects/subject.entity';
 import { FriendRequest } from './friend-request.entity';
-import { RegisterDto, UpdateProfileDto } from '../../common/dto';
+import {
+  RegisterDto,
+  UpdateProfileDto,
+  SetActiveCosmeticsDto,
+} from '../../common/dto';
 import { DEFAULT_ELO } from '../../common/leagues';
+import { UserTitle } from '../cosmetics/user-title.entity';
+import { UserInventory } from '../cosmetics/user-inventory.entity';
+
+interface InventoryTitleItem {
+  code: string;
+  name: string;
+  text: string;
+  unlockedAt: Date;
+}
+
+interface InventoryPayload {
+  titles: InventoryTitleItem[];
+}
 
 @Injectable()
 export class UsersService {
@@ -23,6 +40,10 @@ export class UsersService {
     private readonly subjectRepo: Repository<Subject>,
     @InjectRepository(FriendRequest)
     private readonly friendRequestRepo: Repository<FriendRequest>,
+    @InjectRepository(UserTitle)
+    private readonly userTitleRepo: Repository<UserTitle>,
+    @InjectRepository(UserInventory)
+    private readonly userInventoryRepo: Repository<UserInventory>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -256,6 +277,74 @@ export class UsersService {
 
   async updateProfile(userId: string, dto: UpdateProfileDto): Promise<User> {
     await this.userRepo.update(userId, dto as any);
+    return this.findById(userId);
+  }
+
+  async getInventory(userId: string): Promise<InventoryPayload> {
+    const [inventory, titles] = await Promise.all([
+      this.userInventoryRepo.find({
+        where: { userId },
+        order: { unlockedAt: 'DESC' },
+      }),
+      this.userTitleRepo.find(),
+    ]);
+
+    const titleByCode = new Map(titles.map((item) => [item.code, item]));
+
+    const titleItems: InventoryTitleItem[] = [];
+
+    for (const item of inventory) {
+      if (item.itemType === 'title') {
+        const title = titleByCode.get(item.itemCode);
+        if (!title) continue;
+        titleItems.push({
+          code: title.code,
+          name: title.name,
+          text: title.text,
+          unlockedAt: item.unlockedAt,
+        });
+      }
+    }
+
+    return { titles: titleItems };
+  }
+
+  async setActiveCosmetics(userId: string, dto: SetActiveCosmeticsDto): Promise<User> {
+    const user = await this.userRepo.findOneBy({ id: userId });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+
+    const current = user.activeCosmetics ?? {
+      titleCode: null,
+      titleText: null,
+    };
+
+    const requestedTitleCode = dto.titleCode === undefined ? current.titleCode : (dto.titleCode || null);
+
+    let titleText = current.titleText;
+
+    if (requestedTitleCode) {
+      const [ownsTitle, title] = await Promise.all([
+        this.userInventoryRepo.findOneBy({
+          userId,
+          itemType: 'title',
+          itemCode: requestedTitleCode,
+        }),
+        this.userTitleRepo.findOneBy({ code: requestedTitleCode }),
+      ]);
+      if (!ownsTitle || !title) {
+        throw new ForbiddenException('No tenés ese título desbloqueado');
+      }
+      titleText = title.text;
+    } else {
+      titleText = null;
+    }
+
+    user.activeCosmetics = {
+      titleCode: requestedTitleCode,
+      titleText,
+    };
+
+    await this.userRepo.save(user);
     return this.findById(userId);
   }
 

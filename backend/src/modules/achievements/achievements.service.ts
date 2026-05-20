@@ -6,6 +6,8 @@ import { Achievement } from './achievement.entity';
 import { UserAchievement } from './user-achievement.entity';
 import { UsersService } from '../users/users.service';
 import { PartyMember } from '../parties/party-member.entity';
+import { UserTitle } from '../cosmetics/user-title.entity';
+import { UserInventory } from '../cosmetics/user-inventory.entity';
 
 @Injectable()
 export class AchievementsService {
@@ -18,6 +20,10 @@ export class AchievementsService {
     private readonly userAchievementRepo: Repository<UserAchievement>,
     @InjectRepository(PartyMember)
     private readonly partyMemberRepo: Repository<PartyMember>,
+    @InjectRepository(UserTitle)
+    private readonly userTitleRepo: Repository<UserTitle>,
+    @InjectRepository(UserInventory)
+    private readonly userInventoryRepo: Repository<UserInventory>,
     private readonly usersService: UsersService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
@@ -104,6 +110,7 @@ export class AchievementsService {
       achievementId: achievement.id,
     });
     await this.userAchievementRepo.save(userAchievement);
+    await this.grantRewardToInventory(userId, achievement);
 
     this.logger.log(`🏆 Logro desbloqueado: ${achievement.icon} ${achievement.name} para user=${userId}`);
 
@@ -119,5 +126,34 @@ export class AchievementsService {
         points: achievement.points,
       },
     });
+  }
+
+  private async grantRewardToInventory(userId: string, achievement: Achievement): Promise<void> {
+    if (!achievement.rewardType || !achievement.rewardCode) return;
+
+    if (achievement.rewardType === 'title') {
+      const title = await this.userTitleRepo.findOneBy({ code: achievement.rewardCode });
+      if (!title) {
+        this.logger.warn(
+          `Logro ${achievement.code} tiene reward title=${achievement.rewardCode} sin catálogo`,
+        );
+        return;
+      }
+    }
+
+    const existing = await this.userInventoryRepo.findOneBy({
+      userId,
+      itemType: achievement.rewardType,
+      itemCode: achievement.rewardCode,
+    });
+    if (existing) return;
+
+    await this.userInventoryRepo.save(
+      this.userInventoryRepo.create({
+        userId,
+        itemType: achievement.rewardType,
+        itemCode: achievement.rewardCode,
+      }),
+    );
   }
 }

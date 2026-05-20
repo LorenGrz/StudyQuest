@@ -3,7 +3,7 @@ import { MobileLayout } from '../components/Layouts'
 import { Button, Badge, Spinner } from '../components/UI'
 import { useAuthStore } from '../store/authStore'
 import { useAuth } from '../hooks/useAuth'
-import { userService } from '../services/userService'
+import { userService, type UserInventory } from '../services/userService'
 import { getLeague, getEloProgress, DEFAULT_ELO, LEAGUES } from '../utils/leagues'
 import { useAchievements } from '../hooks/useAchievements'
 
@@ -11,10 +11,24 @@ export default function ProfilePage() {
   const { user, setUser } = useAuthStore()
   const { logout } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
+  const [inventory, setInventory] = useState<UserInventory>({ titles: [] })
+  const [inventoryLoading, setInventoryLoading] = useState(true)
+  const [inventoryError, setInventoryError] = useState<string | null>(null)
+  const [isUpdatingCosmetics, setIsUpdatingCosmetics] = useState(false)
   const { achievements, isLoading: achievementsLoading } = useAchievements()
 
   useEffect(() => {
-    userService.getMe().then(setUser).catch(console.error)
+    Promise.all([userService.getMe(), userService.getInventory()])
+      .then(([me, inv]) => {
+        setUser(me)
+        setInventory(inv)
+        setInventoryError(null)
+      })
+      .catch((err) => {
+        console.error(err)
+        setInventoryError('No se pudo cargar el inventario')
+      })
+      .finally(() => setInventoryLoading(false))
   }, [setUser])
 
   if (!user) {
@@ -35,6 +49,18 @@ export default function ProfilePage() {
   const winRate = stats.quizzesPlayed > 0
     ? Math.round((stats.quizzesWon / stats.quizzesPlayed) * 100)
     : 0
+
+  const equipTitle = async (titleCode: string | null) => {
+    try {
+      setIsUpdatingCosmetics(true)
+      const updated = await userService.setActiveCosmetics({ titleCode })
+      setUser(updated)
+    } catch (err) {
+      console.error('No se pudo equipar título', err)
+    } finally {
+      setIsUpdatingCosmetics(false)
+    }
+  }
 
   return (
     <MobileLayout>
@@ -127,6 +153,45 @@ export default function ProfilePage() {
             </div>
           ))}
         </div>
+      )}
+
+      {/* ─── Inventario de cosméticos ─────────────────────────────── */}
+      <h3 className="section-title" style={{ marginTop: '16px' }}>Inventario</h3>
+      {inventoryLoading ? (
+        <div className="center-spinner" style={{ padding: '20px' }}><Spinner size="sm" /></div>
+      ) : inventoryError ? (
+        <div className="empty-state" style={{ padding: '20px' }}>
+          <p className="empty-text" style={{ fontSize: '14px' }}>{inventoryError}</p>
+        </div>
+      ) : (
+        <>
+          <div className="input-group" style={{ marginTop: '8px' }}>
+            <p className="input-label" style={{ marginBottom: '8px' }}>Títulos</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px' }}>
+              <button
+                className="btn btn-ghost"
+                onClick={() => equipTitle(null)}
+                disabled={isUpdatingCosmetics}
+                style={{ borderColor: user.activeCosmetics?.titleCode ? 'var(--border)' : 'var(--accent)' }}
+              >
+                Sin título
+              </button>
+              {inventory.titles.map((title) => (
+                <button
+                  key={title.code}
+                  className="btn btn-ghost"
+                  onClick={() => equipTitle(title.code)}
+                  disabled={isUpdatingCosmetics}
+                  style={{
+                    borderColor: user.activeCosmetics?.titleCode === title.code ? 'var(--accent)' : 'var(--border)',
+                  }}
+                >
+                  {title.text}
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
       )}
 
       {/* ─── League Ladder ─────────────────────────────────────────── */}

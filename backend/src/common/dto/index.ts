@@ -87,6 +87,10 @@ export class EnrollSubjectDto {
   @ApiProperty() @IsUUID() subjectId: string;
 }
 
+export class SetActiveCosmeticsDto {
+  @IsOptional() @IsString() @MaxLength(60) titleCode?: string | null;
+}
+
 // ─── Subjects ─────────────────────────────────────────────────────────────────
 
 export class CreateSubjectDto {

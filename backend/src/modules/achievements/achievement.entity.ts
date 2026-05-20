@@ -31,6 +31,24 @@ export class Achievement {
   @Column({ type: 'int', default: 0 })
   points: number;
 
+  @Column({
+    name: 'reward_type',
+    type: 'varchar',
+    length: 20,
+    nullable: true,
+    default: null,
+  })
+  rewardType: 'title' | null;
+
+  @Column({
+    name: 'reward_code',
+    type: 'varchar',
+    length: 60,
+    nullable: true,
+    default: null,
+  })
+  rewardCode: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

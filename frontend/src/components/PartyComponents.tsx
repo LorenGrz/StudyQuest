@@ -8,6 +8,15 @@ import { Button, Spinner } from './UI'
 import { useNavigate } from 'react-router-dom'
 export { ChatBox } from './party-chat/ChatBox'
 
+const API_ORIGIN = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
+
+function resolveAssetUrl(url: string | null | undefined): string | null {
+  if (!url) return null
+  if (/^https?:\/\//i.test(url)) return url
+  if (url.startsWith('/')) return `${API_ORIGIN}${url}`
+  return `${API_ORIGIN}/${url}`
+}
+
 // ─── PartyHeader ─────────────────────────────────────────────────────────────
 export function PartyHeader({ party }: { party: Party | null }) {
   if (!party) return null
@@ -31,27 +40,65 @@ export function PartyHeader({ party }: { party: Party | null }) {
   )
 }
 
-// ─── TabBar ──────────────────────────────────────────────────────────────────
-interface TabBarProps<T extends string> {
-  tabs: Array<{ id: T; label: string }>
-  active: T
-  onChange: (tab: T) => void
+interface TabDefinition<T extends string> {
+  id: T
+  label: string
+  ariaLabel?: string
 }
 
+interface TabBarProps<T extends string> {
+  tabs: TabDefinition<T>[]
+  active: T
+  onChange: (id: T) => void
+}
+
+// Enhanced TabBar with better visual design
 export function TabBar<T extends string>({ tabs, active, onChange }: TabBarProps<T>) {
   return (
-    <div className="tab-bar">
-      {tabs.map((t) => (
+    <div className="tab-bar" role="tablist">
+      {tabs.map(({ id, label, ariaLabel }) => (
         <button
-          key={t.id}
-          className={`tab-item ${t.id === active ? 'tab-active' : ''}`}
-          onClick={() => onChange(t.id)}
+          key={id}
+          className={`tab-bar-item ${id === active ? 'active' : ''}`}
+          onClick={() => onChange(id)}
+          role="tab"
+          aria-selected={id === active}
+          aria-label={ariaLabel ?? label}
         >
-          {t.label}
+          {label}
         </button>
       ))}
     </div>
-  )
+  );
+}
+
+// Added styles for TabBar
+const tabBarStyles = `
+  .tab-bar {
+    display: flex;
+    gap: 8px;
+    border-bottom: 2px solid var(--border);
+  }
+  .tab-bar-item {
+    padding: 8px 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-secondary);
+  }
+  .tab-bar-item.active {
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--accent);
+  }
+`;
+
+// Inject styles into the document
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement('style');
+  styleSheet.type = 'text/css';
+  styleSheet.innerText = tabBarStyles;
+  document.head.appendChild(styleSheet);
 }
 
 // ─── MemberList ──────────────────────────────────────────────────────────────
@@ -97,15 +144,17 @@ export function MemberList({ members, partyId, isPrivate, currentUserId, onVisib
           </div>
         )}
 
-        {members.map((m) => (
+        {members.map((m) => {
+          const avatarUrl = resolveAssetUrl(m.user.avatarUrl)
+
+          return (
           <div
             key={m.id}
             className={`member-item${m.role === 'leader' ? ' member-item-leader' : ''}`}
           >
-            {/* Avatar con indicador de presencia superpuesto */}
-            <div className="member-avatar" style={{ position: 'relative' }}>
-              {m.user.avatarUrl
-                ? <img src={m.user.avatarUrl} alt={m.user.displayName} className="avatar-sm" />
+            <div className="member-avatar" style={{ position: 'relative', overflow: 'hidden' }}>
+              {avatarUrl
+                ? <img src={avatarUrl} alt={m.user.displayName} className="avatar-sm" />
                 : <div className="avatar-placeholder-sm">{m.user.displayName[0]}</div>
               }
               <span
@@ -123,6 +172,19 @@ export function MemberList({ members, partyId, isPrivate, currentUserId, onVisib
                 )}
               </p>
               <p className="member-username">@{m.user.username}</p>
+              {m.user.activeCosmetics?.titleText && (
+                <p
+                  className="member-title"
+                  style={{
+                    margin: '2px 0 0',
+                    fontSize: '12px',
+                    color: 'var(--accent)',
+                    fontWeight: 600,
+                  }}
+                >
+                  {m.user.activeCosmetics.titleText}
+                </p>
+              )}
             </div>
 
             <div className="member-stats">
@@ -142,7 +204,8 @@ export function MemberList({ members, partyId, isPrivate, currentUserId, onVisib
               )}
             </div>
           </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* ─ Acciones del miembro ─ */}

@@ -1515,6 +1515,8 @@ input, textarea, select { font-family: inherit; }
 
 .profile-badges {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
   margin-top: 8px;
 }
@@ -1732,13 +1734,16 @@ input, textarea, select { font-family: inherit; }
 /* ─── League System ──────────────────────────────────────────────────────────── */
 
 .league-banner {
-  margin: 0 16px 16px;
+  margin: 4px 0 18px;
   border-radius: var(--radius-xl);
-  padding: 20px 20px 14px;
+  padding: 24px 22px 18px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
   position: relative;
+  z-index: 2;
+  isolation: isolate;
+  min-height: 150px;
   overflow: hidden;
 }
 .league-banner::before {
@@ -1754,43 +1759,76 @@ input, textarea, select { font-family: inherit; }
   align-items: center;
   gap: 14px;
   position: relative;
+  z-index: 1;
 }
 .league-banner-icon {
-  font-size: 40px;
+  font-size: 52px;
   filter: drop-shadow(0 0 10px rgba(255,255,255,0.4));
 }
 .league-banner-info { display: flex; flex-direction: column; gap: 2px; }
 .league-banner-name {
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 900;
+  line-height: 1.05;
   color: #fff;
   text-shadow: 0 2px 8px rgba(0,0,0,0.5);
   letter-spacing: -0.3px;
 }
-.league-banner-elo { font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.8); }
+.league-banner-elo { font-size: 16px; font-weight: 700; color: rgba(255,255,255,0.85); }
 
-.league-progress-wrap { display: flex; flex-direction: column; gap: 6px; position: relative; }
+.league-progress-wrap { display: flex; flex-direction: column; gap: 8px; position: relative; z-index: 1; }
 .league-progress-track { height: 8px; background: rgba(0,0,0,0.3); border-radius: 99px; overflow: hidden; }
 .league-progress-fill { height: 100%; border-radius: 99px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
 .league-progress-labels {
   display: flex;
   justify-content: space-between;
-  font-size: 11px;
+  gap: 8px;
+  font-size: 12px;
   color: rgba(255,255,255,0.7);
   font-weight: 600;
+}
+
+.league-progress-labels span:nth-child(2) {
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 420px) {
+  .league-banner {
+    min-height: 136px;
+    padding: 20px 18px 16px;
+  }
+
+  .league-banner-icon {
+    font-size: 44px;
+  }
+
+  .league-banner-name {
+    font-size: 24px;
+  }
 }
 
 .league-pill {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
-  padding: 3px 10px;
+  padding: 6px 14px;
   border-radius: var(--radius-full);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: #fff;
   text-shadow: 0 1px 3px rgba(0,0,0,0.4);
   letter-spacing: 0.3px;
+  position: relative;
+  z-index: 1;
+}
+
+.profile-badges .league-pill {
+  flex: 1 1 100%;
 }
 
 .stat-box--elo { border-width: 2px; background: rgba(0,0,0,0.2); }

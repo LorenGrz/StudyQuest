@@ -30,6 +30,11 @@ export interface UserStats {
   lastPlayedAt: string | null;
 }
 
+export interface ActiveCosmetics {
+  titleCode: string | null;
+  titleText: string | null;
+}
+
 @Entity('users')
 @Index(['university', 'career'])
 export class User {
@@ -97,6 +102,16 @@ export class User {
     },
   })
   stats: UserStats;
+
+  @Column({
+    name: 'active_cosmetics',
+    type: 'jsonb',
+    default: {
+      titleCode: null,
+      titleText: null,
+    },
+  })
+  activeCosmetics: ActiveCosmetics;
 
   @Column({ name: 'refresh_tokens', type: 'jsonb', default: [], select: false })
   refreshTokens: string[];
