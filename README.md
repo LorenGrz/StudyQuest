@@ -9,9 +9,21 @@ Plataforma de estudio colaborativo con matchmaking y quizzes generados por IA.
 
 El proyecto está dividido en componentes principales diseñados siguiendo heurísticas limpias (separación de responsabilidades):
 
-- **`backend/`**: API RESTful y WebSockets construida con NestJS. Maneja la lógica de dominio, matchmaking, IA (OpenAI) y persistencia usando el patrón Repository a través de TypeORM.
-- **`frontend/`**: Aplicación de Single Page Application (SPA) construida con React 18 y TypeScript. Utiliza una arquitectura orientada a componentes, estilos de Tailwind CSS y manejo de estado centralizado (Zustand).
-- **`docker-compose.yml`**: Orquestación contenida de la infraestructura de las bases de datos externas que garantizan la fácil portabilidad del proyecto en fase de desarrollo.
+- **`backend/`**: API RESTful y WebSockets construida con NestJS. Maneja la lógica de dominio, matchmaking, IA y persistencia usando el patrón Repository a través de TypeORM.
+- **`frontend/`**: Aplicación SPA construida con React 19 y TypeScript. Utiliza una arquitectura orientada a componentes y manejo de estado centralizado (Zustand).
+- **`docker-compose.yml`**: Orquestación de la infraestructura de bases de datos para desarrollo local.
+
+---
+
+## Requisitos Previos
+
+| Herramienta | Versión mínima | Instalación |
+|---|---|---|
+| Node.js | 20+ | https://nodejs.org |
+| pnpm | 9+ | `npm install -g pnpm` |
+| Docker | cualquiera | https://docs.docker.com/get-docker/ |
+
+> **Este proyecto usa `pnpm` como gestor de paquetes.** No uses `npm install` ni `yarn`.
 
 ---
 
@@ -52,8 +64,8 @@ Abre una terminal, muévete a la ruta del servidor e instala dependencias:
 
 ```bash
 cd backend
-npm install
-npm run start:dev
+pnpm install
+pnpm run start:dev
 ```
 *Tip: Al activar el servidor por primera vez, TypeORM se comunicará con PostgreSQL para generar o **sincronizar (migrar)** los esquemas vacíos automáticamente según tus Entidades configuradas (esto ocurre si `TYPEORM_SYNC=true` en tu `.env`).*
 
@@ -65,7 +77,7 @@ Debe ir **DESPUÉS** de que tu backend procese el punto anterior por primera vez
 Tras asegurarte de que el backend haya sincronizado la estructura local en la DB, y manteniendo este encendido, abre otra terminal dentro de la ruta del `backend/` y corre el script poblador:
 
 ```bash
-npm run seed
+pnpm run seed
 ```
 *(Esto insertará universidades, materias de prueba, usuarios y administradores clave listos para probar).*
 
@@ -75,13 +87,14 @@ Con el backend y las bases de soporte operando, sólo nos queda montar la parte 
 
 ```bash
 cd frontend
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 El portal cargará e iniciará disponible desde tu navegador.
 - **Portal URL**: [http://localhost:5173](http://localhost:5173)
 - **API URL (Base)**: [http://localhost:3000/api/v1](http://localhost:3000/api/v1)
+- **Swagger**: [http://localhost:3000/docs](http://localhost:3000/docs)
 
 ---
 
