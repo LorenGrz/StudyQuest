@@ -6,6 +6,7 @@ import { PartyMember } from '../parties/party-member.entity';
 import { FriendRequest } from './friend-request.entity';
 import { UserTitle } from '../cosmetics/user-title.entity';
 import { UserInventory } from '../cosmetics/user-inventory.entity';
+import { ProfileBorder } from '../cosmetics/profile-border.entity';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 
@@ -18,6 +19,7 @@ import { UsersController } from './users.controller';
       FriendRequest,
       UserTitle,
       UserInventory,
+      ProfileBorder,
     ]),
   ],
   controllers: [UsersController],

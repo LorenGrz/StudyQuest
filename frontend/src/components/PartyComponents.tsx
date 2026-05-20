@@ -5,6 +5,7 @@ import { friendService } from '../services/friendService'
 import type { User } from '../services/userService'
 import type { Quest } from '../services/questService'
 import { Button, Spinner } from './UI'
+import { AvatarWithBorder } from './AvatarWithBorder'
 import { useNavigate } from 'react-router-dom'
 export { ChatBox } from './party-chat/ChatBox'
 
@@ -152,11 +153,13 @@ export function MemberList({ members, partyId, isPrivate, currentUserId, onVisib
             key={m.id}
             className={`member-item${m.role === 'leader' ? ' member-item-leader' : ''}`}
           >
-            <div className="member-avatar" style={{ position: 'relative', overflow: 'hidden' }}>
-              {avatarUrl
-                ? <img src={avatarUrl} alt={m.user.displayName} className="avatar-sm" />
-                : <div className="avatar-placeholder-sm">{m.user.displayName[0]}</div>
-              }
+            <div className="member-avatar" style={{ position: 'relative' }}>
+              <AvatarWithBorder
+                displayName={m.user.displayName}
+                avatarUrl={avatarUrl}
+                borderImageUrl={m.user.activeCosmetics?.borderImageUrl}
+                size="sm"
+              />
               <span
                 className={`presence-dot presence-dot-${m.isOnline ? 'online' : 'offline'}`}
                 title={m.isOnline ? 'En línea' : 'Desconectado'}

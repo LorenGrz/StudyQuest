@@ -38,7 +38,7 @@ export class Achievement {
     nullable: true,
     default: null,
   })
-  rewardType: 'title' | null;
+  rewardType: 'title' | 'border' | null;
 
   @Column({
     name: 'reward_code',

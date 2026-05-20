@@ -2180,3 +2180,111 @@ input, textarea, select { font-family: inherit; }
     height: 22px;
   }
 }
+
+/* %%% Avatar With Border %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+.avatar-border-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-border-wrap-sm { width: 36px; height: 36px; }
+.avatar-border-wrap-md { width: 44px; height: 44px; }
+.avatar-border-wrap-lg { width: 64px; height: 64px; }
+
+.avatar-border-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.avatar-border-wrap-sm .avatar-border-overlay {
+  width: 52px;
+  height: 52px;
+}
+
+.avatar-border-wrap-md .avatar-border-overlay {
+  width: 64px;
+  height: 64px;
+}
+
+.avatar-border-wrap-lg .avatar-border-overlay {
+  width: 92px;
+  height: 92px;
+}
+
+.avatar-img {
+  border-radius: var(--radius-full);
+  object-fit: cover;
+}
+.avatar-img-sm { width: 36px; height: 36px; }
+.avatar-img-md { width: 44px; height: 44px; }
+.avatar-img-lg { width: 64px; height: 64px; }
+
+/* %%% Border Selector %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+.border-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.border-selector-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 8px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.border-selector-item:hover {
+  border-color: var(--accent);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.border-selector-item--active {
+  border-color: var(--accent);
+  background: rgba(99, 102, 241, 0.1);
+  box-shadow: 0 0 16px rgba(99, 102, 241, 0.2);
+}
+
+.border-selector-preview {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--background);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.border-selector-img {
+  position: absolute;
+  width: 64px;
+  height: 64px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.border-selector-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-align: center;
+}
+.border-selector-item--active .border-selector-name {
+  color: var(--accent);
+}
+

@@ -8,6 +8,7 @@ import { UsersModule } from '../users/users.module';
 import { PartiesModule } from '../parties/parties.module';
 import { UserTitle } from '../cosmetics/user-title.entity';
 import { UserInventory } from '../cosmetics/user-inventory.entity';
+import { ProfileBorder } from '../cosmetics/profile-border.entity';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { UserInventory } from '../cosmetics/user-inventory.entity';
       UserAchievement,
       UserTitle,
       UserInventory,
+      ProfileBorder,
     ]),
     UsersModule,
     PartiesModule,

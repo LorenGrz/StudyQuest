@@ -89,6 +89,7 @@ export class EnrollSubjectDto {
 
 export class SetActiveCosmeticsDto {
   @IsOptional() @IsString() @MaxLength(60) titleCode?: string | null;
+  @IsOptional() @IsString() @MaxLength(60) borderCode?: string | null;
 }
 
 // ─── Subjects ─────────────────────────────────────────────────────────────────

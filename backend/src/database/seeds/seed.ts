@@ -38,6 +38,7 @@ import { PartyInvitation } from '../../modules/parties/party-invitation.entity';
 import { Achievement } from '../../modules/achievements/achievement.entity';
 import { UserTitle } from '../../modules/cosmetics/user-title.entity';
 import { UserInventory } from '../../modules/cosmetics/user-inventory.entity';
+import { ProfileBorder } from '../../modules/cosmetics/profile-border.entity';
 
 // ─── Conexión ──────────────────────────────────────────────────────────────────
 const AppDataSource = new DataSource({
@@ -50,7 +51,7 @@ const AppDataSource = new DataSource({
   entities: [
     User, FriendRequest, Subject, Party, PartyMember, ChatMessage, PartyActivity,
     Quest, QuizQuestion, QuizOption, PlayerResult, PartyInvitation, Achievement,
-    UserTitle, UserInventory
+    UserTitle, UserInventory, ProfileBorder
   ],
   synchronize: false,
   logging: false,
@@ -78,6 +79,7 @@ async function ensureBootstrapSchema(): Promise<void> {
   // Si quedaron tablas legado de pruebas manuales, las recreamos limpias.
   await AppDataSource.query('DROP TABLE IF EXISTS user_inventory CASCADE;');
   await AppDataSource.query('DROP TABLE IF EXISTS user_titles CASCADE;');
+  await AppDataSource.query('DROP TABLE IF EXISTS profile_borders CASCADE;');
 
   await AppDataSource.synchronize();
 }
@@ -113,6 +115,10 @@ const ACHIEVEMENTS_DATA = [
   { code: 'SOCIAL_BUTTERFLY', name: 'Alma de la Fiesta',    icon: '🦋', category: 'social',      description: 'Participaste en 5 parties diferentes.',    points: 150 },
   { code: 'LEVEL_5',          name: 'Estudiante Aplicado',  icon: '📚', category: 'progression', description: 'Alcanzaste el nivel 5.',                    points: 100 },
   { code: 'LEVEL_10',         name: 'Maestro del Estudio',  icon: '🏆', category: 'progression', description: 'Alcanzaste el nivel 10.',                   points: 250, rewardType: 'title', rewardCode: 'MASTER_TITLE' },
+
+  { code: 'STREAK_3_BORDER',  name: 'Marco de Fuego',       icon: '🔥', category: 'cosmetic',    description: 'Recompensa por racha de 3 días.',         points: 0,   rewardType: 'border', rewardCode: 'FIRE_BORDER' },
+  { code: 'LEVEL_5_BORDER',   name: 'Marco Estelar',        icon: '⭐', category: 'cosmetic',    description: 'Recompensa por nivel 5.',                 points: 0,   rewardType: 'border', rewardCode: 'STAR_BORDER' },
+  { code: 'LEVEL_10_BORDER',  name: 'Marco de Campeón',     icon: '👑', category: 'cosmetic',    description: 'Recompensa por nivel 10.',                points: 0,   rewardType: 'border', rewardCode: 'CHAMPION_BORDER' },
 ];
 
 const USER_TITLES_DATA = [
@@ -128,6 +134,12 @@ const USER_TITLES_DATA = [
     text: 'Maestro del Estudio',
     achievementCode: 'LEVEL_10',
   },
+];
+
+const PROFILE_BORDERS_DATA = [
+  { code: 'FIRE_BORDER',     name: 'Llamas',   imageFile: 'fire.svg',     achievementCode: 'STREAK_3_BORDER' },
+  { code: 'STAR_BORDER',     name: 'Estrella', imageFile: 'star.svg',     achievementCode: 'LEVEL_5_BORDER' },
+  { code: 'CHAMPION_BORDER', name: 'Campeón',  imageFile: 'champion.svg', achievementCode: 'LEVEL_10_BORDER' },
 ];
 
 // ─── Main ──────────────────────────────────────────────────────────────────────
@@ -251,6 +263,19 @@ async function seed() {
     }
     await userTitleRepo.save(userTitleRepo.create(td));
     console.log(`   ✔  ${td.name}`);
+  }
+
+  console.log('\n🖼️  Creando catálogo de bordes...');
+  const profileBorderRepo = AppDataSource.getRepository(ProfileBorder);
+  for (const bd of PROFILE_BORDERS_DATA) {
+    const existing = await profileBorderRepo.findOneBy({ code: bd.code });
+    if (existing) {
+      await profileBorderRepo.save(profileBorderRepo.create({ ...existing, ...bd }));
+      console.log(`   ⚠️  Borde "${bd.code}" ya existe — actualizado`);
+      continue;
+    }
+    await profileBorderRepo.save(profileBorderRepo.create(bd));
+    console.log(`   ✔  ${bd.name}`);
   }
 
   // CORRECTO: AppDataSource.createQueryBuilder().relation(...)

@@ -19,6 +19,7 @@ import {
 import { DEFAULT_ELO } from '../../common/leagues';
 import { UserTitle } from '../cosmetics/user-title.entity';
 import { UserInventory } from '../cosmetics/user-inventory.entity';
+import { ProfileBorder } from '../cosmetics/profile-border.entity';
 
 interface InventoryTitleItem {
   code: string;
@@ -27,8 +28,16 @@ interface InventoryTitleItem {
   unlockedAt: Date;
 }
 
+interface InventoryBorderItem {
+  code: string;
+  name: string;
+  imageUrl: string;
+  unlockedAt: Date;
+}
+
 interface InventoryPayload {
   titles: InventoryTitleItem[];
+  borders: InventoryBorderItem[];
 }
 
 @Injectable()
@@ -44,6 +53,8 @@ export class UsersService {
     private readonly userTitleRepo: Repository<UserTitle>,
     @InjectRepository(UserInventory)
     private readonly userInventoryRepo: Repository<UserInventory>,
+    @InjectRepository(ProfileBorder)
+    private readonly profileBorderRepo: Repository<ProfileBorder>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -281,17 +292,20 @@ export class UsersService {
   }
 
   async getInventory(userId: string): Promise<InventoryPayload> {
-    const [inventory, titles] = await Promise.all([
+    const [inventory, titles, borders] = await Promise.all([
       this.userInventoryRepo.find({
         where: { userId },
         order: { unlockedAt: 'DESC' },
       }),
       this.userTitleRepo.find(),
+      this.profileBorderRepo.find(),
     ]);
 
     const titleByCode = new Map(titles.map((item) => [item.code, item]));
+    const borderByCode = new Map(borders.map((item) => [item.code, item]));
 
     const titleItems: InventoryTitleItem[] = [];
+    const borderItems: InventoryBorderItem[] = [];
 
     for (const item of inventory) {
       if (item.itemType === 'title') {
@@ -303,10 +317,19 @@ export class UsersService {
           text: title.text,
           unlockedAt: item.unlockedAt,
         });
+      } else if (item.itemType === 'border') {
+        const border = borderByCode.get(item.itemCode);
+        if (!border) continue;
+        borderItems.push({
+          code: border.code,
+          name: border.name,
+          imageUrl: `/uploads/borders/${border.imageFile}`,
+          unlockedAt: item.unlockedAt,
+        });
       }
     }
 
-    return { titles: titleItems };
+    return { titles: titleItems, borders: borderItems };
   }
 
   async setActiveCosmetics(userId: string, dto: SetActiveCosmeticsDto): Promise<User> {
@@ -316,11 +339,15 @@ export class UsersService {
     const current = user.activeCosmetics ?? {
       titleCode: null,
       titleText: null,
+      borderCode: null,
+      borderImageUrl: null,
     };
 
     const requestedTitleCode = dto.titleCode === undefined ? current.titleCode : (dto.titleCode || null);
+    const requestedBorderCode = dto.borderCode === undefined ? current.borderCode : (dto.borderCode || null);
 
     let titleText = current.titleText;
+    let borderImageUrl = current.borderImageUrl;
 
     if (requestedTitleCode) {
       const [ownsTitle, title] = await Promise.all([
@@ -339,9 +366,28 @@ export class UsersService {
       titleText = null;
     }
 
+    if (requestedBorderCode) {
+      const [ownsBorder, border] = await Promise.all([
+        this.userInventoryRepo.findOneBy({
+          userId,
+          itemType: 'border',
+          itemCode: requestedBorderCode,
+        }),
+        this.profileBorderRepo.findOneBy({ code: requestedBorderCode }),
+      ]);
+      if (!ownsBorder || !border) {
+        throw new ForbiddenException('No tenés ese borde desbloqueado');
+      }
+      borderImageUrl = `/uploads/borders/${border.imageFile}`;
+    } else {
+      borderImageUrl = null;
+    }
+
     user.activeCosmetics = {
       titleCode: requestedTitleCode,
       titleText,
+      borderCode: requestedBorderCode,
+      borderImageUrl,
     };
 
     await this.userRepo.save(user);
@@ -462,6 +508,7 @@ export class UsersService {
       username: string;
       displayName: string;
       avatarUrl: string | null;
+      activeCosmetics: any;
       elo: number;
     }[]
   > {
@@ -472,6 +519,7 @@ export class UsersService {
       .addSelect('u.username', 'username')
       .addSelect('u.display_name', 'displayName')
       .addSelect('u.avatar_url', 'avatarUrl')
+      .addSelect('u.active_cosmetics', 'activeCosmetics')
       .addSelect(`COALESCE((u.stats->>'elo')::int, ${DEFAULT_ELO})`, 'elo')
       .orderBy('elo', 'DESC')
       .limit(limit)
@@ -480,6 +528,7 @@ export class UsersService {
         username: string;
         displayName: string;
         avatarUrl: string | null;
+        activeCosmetics: any;
         elo: number;
       }>();
 

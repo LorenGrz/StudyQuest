@@ -33,6 +33,8 @@ export interface UserStats {
 export interface ActiveCosmetics {
   titleCode: string | null;
   titleText: string | null;
+  borderCode: string | null;
+  borderImageUrl: string | null;
 }
 
 @Entity('users')
@@ -109,6 +111,8 @@ export class User {
     default: {
       titleCode: null,
       titleText: null,
+      borderCode: null,
+      borderImageUrl: null,
     },
   })
   activeCosmetics: ActiveCosmetics;

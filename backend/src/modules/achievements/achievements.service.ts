@@ -8,6 +8,7 @@ import { UsersService } from '../users/users.service';
 import { PartyMember } from '../parties/party-member.entity';
 import { UserTitle } from '../cosmetics/user-title.entity';
 import { UserInventory } from '../cosmetics/user-inventory.entity';
+import { ProfileBorder } from '../cosmetics/profile-border.entity';
 
 @Injectable()
 export class AchievementsService {
@@ -24,6 +25,8 @@ export class AchievementsService {
     private readonly userTitleRepo: Repository<UserTitle>,
     @InjectRepository(UserInventory)
     private readonly userInventoryRepo: Repository<UserInventory>,
+    @InjectRepository(ProfileBorder)
+    private readonly profileBorderRepo: Repository<ProfileBorder>,
     private readonly usersService: UsersService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
@@ -71,9 +74,14 @@ export class AchievementsService {
       await this.tryUnlock(userId, 'QUEST_STREAK_3', stats.currentStreak >= 3);
       await this.tryUnlock(userId, 'QUEST_STREAK_5', stats.currentStreak >= 5);
 
+      await this.tryUnlock(userId, 'STREAK_3_BORDER', stats.currentStreak >= 3);
+
       // Level-based achievements
       await this.tryUnlock(userId, 'LEVEL_5', stats.level >= 5);
       await this.tryUnlock(userId, 'LEVEL_10', stats.level >= 10);
+
+      await this.tryUnlock(userId, 'LEVEL_5_BORDER', stats.level >= 5);
+      await this.tryUnlock(userId, 'LEVEL_10_BORDER', stats.level >= 10);
     } catch (err) {
       this.logger.error(`Error evaluando logros para quest.completed (user=${userId}):`, err);
     }
@@ -136,6 +144,14 @@ export class AchievementsService {
       if (!title) {
         this.logger.warn(
           `Logro ${achievement.code} tiene reward title=${achievement.rewardCode} sin catálogo`,
+        );
+        return;
+      }
+    } else if (achievement.rewardType === 'border') {
+      const border = await this.profileBorderRepo.findOneBy({ code: achievement.rewardCode });
+      if (!border) {
+        this.logger.warn(
+          `Logro ${achievement.code} tiene reward border=${achievement.rewardCode} sin catálogo`,
         );
         return;
       }

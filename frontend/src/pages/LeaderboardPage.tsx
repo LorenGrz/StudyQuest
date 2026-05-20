@@ -6,6 +6,7 @@ import { userService } from '../services/userService'
 import type { LeaderboardEntry } from '../services/userService'
 
 import { getLeague, DEFAULT_ELO } from '../utils/leagues'
+import { AvatarWithBorder } from '../components/AvatarWithBorder'
 
 export default function LeaderboardPage() {
   const { user } = useAuthStore()
@@ -129,12 +130,13 @@ function PodiumCard({
       style={{ borderColor: league.color, boxShadow: `0 0 16px ${league.glowColor}` }}
     >
       <div className="podium-medal">{medals[position]}</div>
-      <div
-        className="podium-avatar"
-        style={{ background: league.gradient, boxShadow: `0 0 10px ${league.glowColor}` }}
-      >
-        {entry.displayName?.charAt(0).toUpperCase() ?? '?'}
-      </div>
+      <AvatarWithBorder
+        displayName={entry.displayName ?? '?'}
+        avatarUrl={entry.avatarUrl}
+        borderImageUrl={entry.activeCosmetics?.borderImageUrl}
+        size={position === 1 ? 'lg' : 'md'}
+        glowColor={league.glowColor}
+      />
       <p className="podium-name">{entry.displayName}</p>
       <p className="podium-league" style={{ color: league.color }}>{league.icon} {league.name}</p>
       <p className="podium-elo">{entry.elo} ELO</p>
@@ -163,12 +165,13 @@ function LeaderboardRow({
       }}
     >
       <span className="leaderboard-rank">{entry.rank}</span>
-      <div
-        className="leaderboard-avatar"
-        style={{ background: league.gradient, boxShadow: isMe ? `0 0 8px ${league.glowColor}` : undefined }}
-      >
-        {entry.displayName?.charAt(0).toUpperCase() ?? '?'}
-      </div>
+      <AvatarWithBorder
+        displayName={entry.displayName ?? '?'}
+        avatarUrl={entry.avatarUrl}
+        borderImageUrl={entry.activeCosmetics?.borderImageUrl}
+        size="sm"
+        glowColor={isMe ? league.glowColor : undefined}
+      />
       <div className="leaderboard-info">
         <span className="leaderboard-name">
           {entry.displayName}

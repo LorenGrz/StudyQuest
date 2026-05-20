@@ -51,6 +51,8 @@ export interface DashboardStats {
 export interface ActiveCosmetics {
   titleCode: string | null
   titleText: string | null
+  borderCode: string | null
+  borderImageUrl: string | null
 }
 
 export interface InventoryTitleItem {
@@ -60,8 +62,16 @@ export interface InventoryTitleItem {
   unlockedAt: string
 }
 
+export interface InventoryBorderItem {
+  code: string
+  name: string
+  imageUrl: string
+  unlockedAt: string
+}
+
 export interface UserInventory {
   titles: InventoryTitleItem[]
+  borders: InventoryBorderItem[]
 }
 
 export interface User {
@@ -93,6 +103,7 @@ export interface UpdateProfilePayload {
 
 export interface SetActiveCosmeticsPayload {
   titleCode?: string | null
+  borderCode?: string | null
 }
 
 export interface LeaderboardEntry {
@@ -101,6 +112,7 @@ export interface LeaderboardEntry {
   username: string
   displayName: string
   avatarUrl: string | null
+  activeCosmetics?: ActiveCosmetics
   elo: number
 }
 
