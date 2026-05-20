@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { AxiosError } from 'axios'
 import { questService, type Quest } from '../services/questService'
 
 export function useQuests(partyId: string) {
@@ -19,19 +20,56 @@ export function useQuests(partyId: string) {
 
   useEffect(() => { load() }, [load])
 
+  useEffect(() => {
+    const hasGeneratingQuest = quests.some(
+      (quest) => quest.status === 'generating' || quest.status === 'pending',
+    )
+
+    if (!hasGeneratingQuest) return
+
+    const timer = window.setInterval(() => {
+      void load()
+    }, 2500)
+
+    return () => window.clearInterval(timer)
+  }, [quests, load])
+
   const uploadNote = useCallback(async (
     title: string,
-    subjectId: string,
     file?: File,
-    noteText?: string,
+    textContent?: string,
   ) => {
     setIsGenerating(true)
     try {
       const quest = await questService.create(
-        { partyId, title, subjectId, noteText },
+        { partyId, title, textContent },
         file,
       )
-      setQuests((prev) => [quest, ...prev])
+      setQuests((prev) => [
+        {
+          ...quest,
+          sourceType: file ? 'pdf' : 'text',
+          questionCount: 0,
+          myBestScore: null,
+          myLastScore: null,
+          myStatus: 'never_started',
+          leaderboard: [],
+          questions: [],
+        },
+        ...prev,
+      ])
+      return quest
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        const message = error.response?.data?.message
+        if (Array.isArray(message) && message.length > 0) {
+          throw new Error(message[0])
+        }
+        if (typeof message === 'string' && message.trim()) {
+          throw new Error(message)
+        }
+      }
+      throw new Error('No se pudo generar la quest')
     } finally {
       setIsGenerating(false)
     }

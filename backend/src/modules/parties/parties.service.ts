@@ -12,8 +12,12 @@ import { v4 as uuid } from 'uuid';
 import { Party } from './party.entity';
 import { PartyMember } from './party-member.entity';
 import { ChatMessage } from './chat-message.entity';
+import { PartyInvitation } from './party-invitation.entity';
 import { PartyActivity, ActivityType } from './party-activity.entity';
 import { User } from '../users/user.entity';
+import { UsersService } from '../users/users.service';
+import { ChatAttachmentPayload } from './chat-message.types';
+import { presentChatMessage } from './chat-message.presenter';
 
 @Injectable()
 export class PartiesService {
@@ -26,10 +30,13 @@ export class PartiesService {
     private readonly chatRepo: Repository<ChatMessage>,
     @InjectRepository(PartyActivity)
     private readonly activityRepo: Repository<PartyActivity>,
+    @InjectRepository(PartyInvitation)
+    private readonly invitationRepo: Repository<PartyInvitation>,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
     private readonly dataSource: DataSource,
     private readonly eventEmitter: EventEmitter2,
+    private readonly usersService: UsersService,
   ) {}
 
   // ─── Invite Link (≥PostgreSQL, sin Redis) ────────────────────────────────────
@@ -64,6 +71,107 @@ export class PartiesService {
     if (!party) throw new NotFoundException('El enlace de invitación es inválido o expiró');
 
     return this.joinParty(party.id, userId);
+  }
+
+  async inviteFriendToParty(
+    partyId: string,
+    inviterId: string,
+    inviteeId: string,
+  ): Promise<PartyInvitation> {
+    if (inviterId === inviteeId) {
+      throw new BadRequestException('No podés invitarte a vos mismo');
+    }
+
+    const party = await this.partyRepo.findOne({
+      where: { id: partyId },
+      relations: ['members'],
+    });
+    if (!party) throw new NotFoundException('Party no encontrada');
+
+    const inviterMember = party.members?.find((m) => m.userId === inviterId);
+    if (!inviterMember) {
+      throw new ForbiddenException('Solo los miembros pueden invitar a amigos');
+    }
+
+    if (party.members.some((m) => m.userId === inviteeId)) {
+      throw new BadRequestException('El usuario ya forma parte de la party');
+    }
+
+    const areFriends = await this.usersService.areFriends(inviterId, inviteeId);
+    if (!areFriends) {
+      throw new BadRequestException('Solo podés invitar amigos directos');
+    }
+
+    const existing = await this.invitationRepo.findOne({
+      where: { partyId, inviteeId },
+    });
+    if (existing?.status === 'pending') return existing;
+    if (existing?.status === 'accepted') {
+      throw new ConflictException('La invitación ya fue aceptada');
+    }
+
+    const invitation = this.invitationRepo.create({
+      partyId,
+      inviterId,
+      inviteeId,
+      status: 'pending',
+    });
+    return this.invitationRepo.save(invitation);
+  }
+
+  async getPartyInvitations(userId: string): Promise<PartyInvitation[]> {
+    return this.invitationRepo.find({
+      where: { inviteeId: userId, status: 'pending' },
+      relations: ['party', 'inviter'],
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  async acceptPartyInvitation(invitationId: string, userId: string): Promise<Party> {
+    const invitation = await this.invitationRepo.findOne({
+      where: { id: invitationId },
+      relations: ['party'],
+    });
+    if (!invitation) throw new NotFoundException('Invitación no encontrada');
+    if (invitation.inviteeId !== userId) {
+      throw new ForbiddenException('No podés aceptar esta invitación');
+    }
+    if (invitation.status !== 'pending') {
+      throw new BadRequestException('La invitación ya fue respondida');
+    }
+
+    const joinedParty = await this.joinParty(invitation.partyId, userId);
+    await this.invitationRepo.update(invitationId, {
+      status: 'accepted',
+      respondedAt: new Date(),
+    });
+    await this.logActivity(
+      invitation.partyId,
+      'member_joined',
+      userId,
+      'Aceptó invitación directa a la party',
+      { inviterId: invitation.inviterId },
+    );
+
+    return joinedParty;
+  }
+
+  async rejectPartyInvitation(invitationId: string, userId: string): Promise<void> {
+    const invitation = await this.invitationRepo.findOne({
+      where: { id: invitationId },
+    });
+    if (!invitation) throw new NotFoundException('Invitación no encontrada');
+    if (invitation.inviteeId !== userId) {
+      throw new ForbiddenException('No podés rechazar esta invitación');
+    }
+    if (invitation.status !== 'pending') {
+      throw new BadRequestException('La invitación ya fue respondida');
+    }
+
+    await this.invitationRepo.update(invitationId, {
+      status: 'rejected',
+      respondedAt: new Date(),
+    });
   }
 
   async createParty(
@@ -112,7 +220,7 @@ export class PartiesService {
       resolvedSubjectId = user.enrolledSubjects[0].id;
     }
 
-    return this.dataSource.transaction(async (em) => {
+    const result = await this.dataSource.transaction(async (em) => {
       const party = em.create(Party, {
         subjectId: resolvedSubjectId,
         maxMembers,
@@ -135,16 +243,18 @@ export class PartiesService {
       });
       if (!result) throw new NotFoundException('Error al crear la party');
 
-      // Log que se creó la party después de la transacción
-      await this.logActivity(
-        party.id,
-        'member_joined',
-        userId,
-        'Creó la party (como líder)',
-      );
-
       return result;
     });
+
+    await this.logActivity(
+      result.id,
+      'member_joined',
+      userId,
+      'Creó la party (como líder)',
+    );
+    this.eventEmitter.emit('party.member_joined', { partyId: result.id, userId });
+
+    return result;
   }
 
   async findById(id: string): Promise<Party> {
@@ -261,7 +371,14 @@ export class PartiesService {
    *  - Si es leader y está solo → cierra la party.
    */
   async leaveParty(partyId: string, userId: string): Promise<void> {
-    return this.dataSource.transaction(async (em) => {
+    const deferredActivities: Array<{
+      type: ActivityType;
+      userId?: string;
+      description?: string;
+      metadata?: any;
+    }> = [];
+
+    await this.dataSource.transaction(async (em) => {
       const memberRecord = await em.findOne(PartyMember, {
         where: { partyId, userId },
       });
@@ -269,12 +386,11 @@ export class PartiesService {
 
       if (memberRecord.role !== 'leader') {
         await em.remove(memberRecord);
-        await this.logActivity(
-          partyId,
-          'member_left',
+        deferredActivities.push({
+          type: 'member_left',
           userId,
-          'Salió de la party',
-        );
+          description: 'Salió de la party',
+        });
         return;
       }
 
@@ -289,13 +405,12 @@ export class PartiesService {
         // Estaba solo → cerrar party
         await em.remove(memberRecord);
         await em.update(Party, partyId, { status: 'closed', closedAt: new Date() });
-        await this.logActivity(
-          partyId,
-          'party_status_changed',
+        deferredActivities.push({
+          type: 'party_status_changed',
           userId,
-          'Party cerrada (líder se fue y no había otros miembros)',
-          { oldStatus: 'active', newStatus: 'closed' },
-        );
+          description: 'Party cerrada (líder se fue y no había otros miembros)',
+          metadata: { oldStatus: 'active', newStatus: 'closed' },
+        });
         return;
       }
 
@@ -304,19 +419,27 @@ export class PartiesService {
       await em.update(PartyMember, { id: newLeader.id }, { role: 'leader' });
       await em.remove(memberRecord);
 
-      await this.logActivity(
-        partyId,
-        'member_left',
+      deferredActivities.push({
+        type: 'member_left',
         userId,
-        'Salió de la party (era líder)',
-      );
+        description: 'Salió de la party (era líder)',
+      });
+      deferredActivities.push({
+        type: 'member_promoted',
+        userId: newLeader.userId,
+        description: 'Fue promovido a líder',
+      });
+    });
+
+    for (const activity of deferredActivities) {
       await this.logActivity(
         partyId,
-        'member_promoted',
-        newLeader.userId,
-        `Fue promovido a líder`,
+        activity.type,
+        activity.userId,
+        activity.description,
+        activity.metadata,
       );
-    });
+    }
   }
 
   async updateVisibility(partyId: string, userId: string, isPrivate: boolean): Promise<void> {
@@ -341,24 +464,72 @@ export class PartiesService {
     }
   }
 
+  async addTextChatMessage(
+    partyId: string,
+    userId: string,
+    text: string,
+  ) {
+    const msg = this.chatRepo.create({
+      partyId,
+      userId,
+      type: 'text',
+      text: text.trim(),
+      attachmentUrl: null,
+      attachmentName: null,
+      attachmentMimeType: null,
+      attachmentSizeBytes: null,
+      attachmentDurationMs: null,
+    });
+    const saved = await this.chatRepo.save(msg);
+    const full = await this.chatRepo.findOne({
+      where: { id: saved.id },
+      relations: ['user'],
+    });
+    return presentChatMessage(full as ChatMessage);
+  }
+
+  async addBinaryChatMessage(
+    partyId: string,
+    userId: string,
+    attachment: ChatAttachmentPayload & { type: 'file' | 'audio' },
+  ) {
+    const msg = this.chatRepo.create({
+      partyId,
+      userId,
+      type: attachment.type,
+      text: null,
+      attachmentUrl: attachment.url,
+      attachmentName: attachment.name,
+      attachmentMimeType: attachment.mimeType,
+      attachmentSizeBytes: attachment.sizeBytes,
+      attachmentDurationMs: attachment.durationMs ?? null,
+    });
+    const saved = await this.chatRepo.save(msg);
+    const full = await this.chatRepo.findOne({
+      where: { id: saved.id },
+      relations: ['user'],
+    });
+    const response = presentChatMessage(full as ChatMessage);
+    this.eventEmitter.emit('party.chat_message', { partyId, message: response });
+    return response;
+  }
+
   async addChatMessage(
     partyId: string,
     userId: string,
     text: string,
-  ): Promise<ChatMessage> {
-    const msg = this.chatRepo.create({ partyId, userId, text: text.trim() });
-    const saved = await this.chatRepo.save(msg);
-    return this.chatRepo.findOne({ where: { id: saved.id }, relations: ['user'] }) as Promise<ChatMessage>;
+  ) {
+    return this.addTextChatMessage(partyId, userId, text);
   }
 
-  async getChatHistory(partyId: string, limit = 100): Promise<ChatMessage[]> {
+  async getChatHistory(partyId: string, limit = 100) {
     const msgs = await this.chatRepo.find({
       where: { partyId },
       relations: ['user'],
       order: { createdAt: 'DESC' },
       take: limit,
     });
-    return msgs.reverse();
+    return msgs.reverse().map(presentChatMessage);
   }
 
   // ─── Activity Logging ──────────────────────────────────────────────────────────
@@ -453,7 +624,9 @@ export class PartiesService {
    * Une al usuario autenticado a una party existente si hay slots disponibles.
    */
   async joinParty(partyId: string, userId: string): Promise<Party> {
-    return this.dataSource.transaction(async (em) => {
+    let statusChanged = false;
+
+    const updated = await this.dataSource.transaction(async (em) => {
       // Obtenemos la party con exclusividad (lock) pero SIN JOINs para no romper FOR UPDATE
       const party = await em.findOne(Party, {
         where: { id: partyId },
@@ -484,7 +657,6 @@ export class PartiesService {
       });
       await em.save(member);
 
-      let statusChanged = false;
       // Si la party se llenó, pasarla a active
       if (party.members.length + 1 >= party.maxMembers) {
         await em.update(Party, partyId, { status: 'active' });
@@ -497,25 +669,27 @@ export class PartiesService {
       });
       if (!updated) throw new NotFoundException('Party no encontrada tras unirse');
 
-      // Log activity después de la transacción
-      await this.logActivity(
-        partyId,
-        'member_joined',
-        userId,
-        `Se unió a la party`,
-      );
-
-      if (statusChanged) {
-        await this.logActivity(
-          partyId,
-          'party_status_changed',
-          undefined,
-          'Party se llenó y pasó a activa',
-          { oldStatus: 'forming', newStatus: 'active' },
-        );
-      }
-
       return updated;
     });
+
+    await this.logActivity(
+      partyId,
+      'member_joined',
+      userId,
+      'Se unió a la party',
+    );
+    this.eventEmitter.emit('party.member_joined', { partyId, userId });
+
+    if (statusChanged) {
+      await this.logActivity(
+        partyId,
+        'party_status_changed',
+        undefined,
+        'Party se llenó y pasó a activa',
+        { oldStatus: 'forming', newStatus: 'active' },
+      );
+    }
+
+    return updated;
   }
 }

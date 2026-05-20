@@ -4,6 +4,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
+import express from 'express';
+import { join } from 'path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -11,9 +13,15 @@ async function bootstrap() {
   const cfg = app.get(ConfigService);
   const port = cfg.get<number>('PORT', 3000);
   const corsOriginRaw = cfg.get<string>('CORS_ORIGIN', 'http://localhost:5173');
-  const corsOrigin = corsOriginRaw.includes(',')
-    ? corsOriginRaw.split(',').map((o) => o.trim())
-    : corsOriginRaw;
+  const corsOrigins = new Set(
+    corsOriginRaw
+      .split(',')
+      .map((o) => o.trim())
+      .filter(Boolean),
+  );
+  corsOrigins.add('http://localhost:5173');
+  corsOrigins.add('http://localhost:5174');
+  const corsOrigin = Array.from(corsOrigins);
 
   // CORS debe ir ANTES de helmet para que no sobreescriba las cabeceras
   app.enableCors({
@@ -23,6 +31,7 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
   app.use(helmet({ crossOriginResourcePolicy: false }));
+  app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

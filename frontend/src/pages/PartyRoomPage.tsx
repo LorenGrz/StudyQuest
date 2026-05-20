@@ -4,12 +4,12 @@ import { MobileLayout } from '../components/Layouts'
 import {
   PartyHeader,
   TabBar,
-  ChatBox,
   MemberList,
   UploadNoteCard,
   QuestCard,
   ActivityFeed,
 } from '../components/PartyComponents'
+import { ChatBox } from '../components/party-chat/ChatBox'
 import { Spinner } from '../components/UI'
 import { useParty } from '../hooks/useParty'
 import { useQuests } from '../hooks/useQuests'
@@ -22,7 +22,18 @@ const PartyRoomPage = () => {
   const { partyId } = useParams<{ partyId: string }>()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<ActiveTab>('quests')
-  const { party, setParty, messages, sendMessage, isLoading, currentUserId } = useParty(partyId ?? '')
+  const {
+    party,
+    setParty,
+    messages,
+    sendTextMessage,
+    sendFileMessage,
+    sendAudioMessage,
+    isPartyLoading,
+    isChatLoading,
+    chatError,
+    currentUserId,
+  } = useParty(partyId ?? '')
   const { quests, uploadNote, isGenerating } = useQuests(partyId ?? '')
   const { activities, isLoading: activityLoading } = useActivity(partyId ?? '')
 
@@ -66,7 +77,7 @@ const PartyRoomPage = () => {
     }
   }
 
-  if (isLoading) {
+  if (isPartyLoading) {
     return (
       <MobileLayout>
         <div className="center-spinner"><Spinner size="lg" /></div>
@@ -76,50 +87,64 @@ const PartyRoomPage = () => {
 
   return (
     <MobileLayout>
-      <PartyHeader party={party} />
-      <TabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
+      <div className="party-room-shell">
+        <div className="party-room-topbar">
+          <PartyHeader party={party} />
+          <TabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
+        </div>
 
-      {activeTab === 'quests' && (
-        <div className="tab-content">
-          <UploadNoteCard onUpload={uploadNote} isLoading={isGenerating} />
-          {quests.map((q) => <QuestCard key={q.id} quest={q} />)}
-          {quests.length === 0 && !isGenerating && (
-            <div className="empty-state">
-              <p className="empty-icon">⚡</p>
-              <p className="empty-text">No hay quests todavía</p>
-              <p className="empty-sub">Subí un apunte para generar el primero</p>
+        <div className="party-room-panel">
+          {activeTab === 'quests' && (
+            <div className="tab-content">
+              <UploadNoteCard onUpload={uploadNote} isLoading={isGenerating} />
+              {quests.map((q) => <QuestCard key={q.id} quest={q} />)}
+              {quests.length === 0 && !isGenerating && (
+                <div className="empty-state">
+                  <p className="empty-icon">⚡</p>
+                  <p className="empty-text">No hay quests todavía</p>
+                  <p className="empty-sub">Subí un apunte para generar el primero</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'chat' && (
+            <ChatBox
+              messages={messages}
+              isLoading={isChatLoading}
+              error={chatError}
+              onSendText={sendTextMessage}
+              onSendFile={sendFileMessage}
+              onSendAudio={sendAudioMessage}
+              currentUserId={currentUserId}
+            />
+          )}
+
+          {activeTab === 'members' && (
+            <MemberList 
+              members={party?.members ?? []} 
+              partyId={partyId ?? ''} 
+              isPrivate={party?.isPrivate ?? false}
+              currentUserId={currentUserId}
+              onVisibilityChange={(isPrivate) => {
+                if (!party) return
+                partyService.updateVisibility(party.id, isPrivate).then(() => {
+                  setParty({ ...party, isPrivate })
+                }).catch(console.error)
+              }}
+              onLeave={handleLeave}
+              onRemoveMember={handleRemoveMember}
+              onCloseParty={handleCloseParty}
+            />
+          )}
+
+          {activeTab === 'activity' && (
+            <div className="tab-content">
+              <ActivityFeed activities={activities} isLoading={activityLoading} />
             </div>
           )}
         </div>
-      )}
-
-      {activeTab === 'chat' && (
-        <ChatBox messages={messages} onSend={sendMessage} currentUserId={currentUserId} />
-      )}
-
-      {activeTab === 'members' && (
-        <MemberList 
-          members={party?.members ?? []} 
-          partyId={partyId ?? ''} 
-          isPrivate={party?.isPrivate ?? false}
-          currentUserId={currentUserId}
-          onVisibilityChange={(isPrivate) => {
-            if (!party) return
-            partyService.updateVisibility(party.id, isPrivate).then(() => {
-              setParty({ ...party, isPrivate })
-            }).catch(console.error)
-          }}
-          onLeave={handleLeave}
-          onRemoveMember={handleRemoveMember}
-          onCloseParty={handleCloseParty}
-        />
-      )}
-
-      {activeTab === 'activity' && (
-        <div className="tab-content">
-          <ActivityFeed activities={activities} isLoading={activityLoading} />
-        </div>
-      )}
+      </div>
     </MobileLayout>
   )
 }

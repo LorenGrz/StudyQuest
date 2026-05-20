@@ -13,7 +13,7 @@ export class AuthService {
 
   async register(dto: RegisterDto) {
     const user = await this.usersService.create(dto);
-    return this.buildTokens(user.id, user.email, user.username);
+    return this.buildTokens(user.id, user.email, user.username, user.role);
   }
 
   async login(dto: LoginDto) {
@@ -21,7 +21,7 @@ export class AuthService {
     if (!user || !(await bcrypt.compare(dto.password, user.passwordHash))) {
       throw new UnauthorizedException('Credenciales incorrectas');
     }
-    return this.buildTokens(user.id, user.email, user.username);
+    return this.buildTokens(user.id, user.email, user.username, user.role);
   }
 
   async refresh(token: string) {
@@ -31,7 +31,7 @@ export class AuthService {
       const valid = await this.usersService.validateRefreshToken(userId, token);
       if (!valid) throw new UnauthorizedException('Refresh token inválido');
       const user = await this.usersService.findById(userId);
-      return this.buildTokens(user.id, user.email, user.username);
+      return this.buildTokens(user.id, user.email, user.username, user.role);
     } catch {
       throw new UnauthorizedException('Refresh token inválido');
     }
@@ -42,8 +42,8 @@ export class AuthService {
     await this.usersService.removeRefreshToken(userId, hashed);
   }
 
-  private async buildTokens(userId: string, email: string, username: string) {
-    const payload = { sub: userId, email, username };
+  private async buildTokens(userId: string, email: string, username: string, role = 'USER') {
+    const payload = { sub: userId, email, username, role };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, { expiresIn: '15m' }),
       this.jwtService.signAsync(payload, { expiresIn: '30d' }),

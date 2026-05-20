@@ -15,7 +15,7 @@ export const mockQuest: Quest = {
   questions: [
     {
       id: 'q1',
-      order: 0,
+      position: 0,
       text: '¿Qué algoritmo tiene peor caso O(n²)?',
       topic: 'Computer Science',
       options: [
@@ -27,7 +27,7 @@ export const mockQuest: Quest = {
     },
     {
       id: 'q2',
-      order: 1,
+      position: 1,
       text: '¿Qué estructura de datos usa LIFO?',
       topic: 'Estructuras de datos',
       options: [
@@ -39,7 +39,7 @@ export const mockQuest: Quest = {
     },
     {
       id: 'q3',
-      order: 2,
+      position: 2,
       text: '¿Complejidad de búsqueda en un BST balanceado?',
       topic: 'Algoritmos',
       options: [

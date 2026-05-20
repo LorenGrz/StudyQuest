@@ -1,11 +1,25 @@
 import { api } from './api'
 import type { User } from './userService'
 
+const API_ORIGIN = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
+
+export type ChatMessageType = 'text' | 'file' | 'audio'
+
+export interface ChatAttachment {
+  url: string
+  name: string
+  mimeType: string
+  sizeBytes: number
+  durationMs?: number | null
+}
+
 export interface ChatMessage {
   id: string
-  text: string
+  type: ChatMessageType
+  text: string | null
   userId: string
   user?: Pick<User, 'id' | 'username' | 'displayName' | 'avatarUrl'>
+  attachment: ChatAttachment | null
   createdAt: string
 }
 
@@ -40,6 +54,18 @@ export interface PartyQuest {
   status: string
 }
 
+export interface PartyInvitation {
+  id: string
+  partyId: string
+  inviterId: string
+  inviteeId: string
+  status: 'pending' | 'accepted' | 'rejected'
+  createdAt: string
+  respondedAt: string | null
+  inviter?: Pick<User, 'id' | 'username' | 'displayName' | 'avatarUrl'>
+  party?: Party
+}
+
 export interface Party {
   id: string
   name?: string
@@ -52,6 +78,24 @@ export interface Party {
   isPrivate: boolean
   createdAt: string
   updatedAt: string
+}
+
+function resolveAttachmentUrl(url: string): string {
+  if (/^https?:\/\//i.test(url)) return url
+  if (url.startsWith('/')) return `${API_ORIGIN}${url}`
+  return `${API_ORIGIN}/${url}`
+}
+
+export function normalizeChatMessage(message: ChatMessage): ChatMessage {
+  if (!message.attachment) return message
+
+  return {
+    ...message,
+    attachment: {
+      ...message.attachment,
+      url: resolveAttachmentUrl(message.attachment.url),
+    },
+  }
 }
 
 export const partyService = {
@@ -79,7 +123,7 @@ export const partyService = {
     const { data } = await api.get<ChatMessage[]>(`/parties/${partyId}/chat`, {
       params: { limit },
     })
-    return data
+    return data.map(normalizeChatMessage)
   },
 
   async create(subjectId?: string, maxMembers = 4, isPrivate = false): Promise<Party> {
@@ -101,6 +145,24 @@ export const partyService = {
     return data
   },
 
+  async inviteFriend(partyId: string, inviteeId: string): Promise<void> {
+    await api.post(`/parties/${partyId}/invite-friend`, { inviteeId })
+  },
+
+  async getInvitations(): Promise<PartyInvitation[]> {
+    const { data } = await api.get<PartyInvitation[]>('/parties/invitations')
+    return data
+  },
+
+  async acceptInvitation(invitationId: string): Promise<Party> {
+    const { data } = await api.post<Party>(`/parties/invitations/${invitationId}/accept`)
+    return data
+  },
+
+  async rejectInvitation(invitationId: string): Promise<void> {
+    await api.post(`/parties/invitations/${invitationId}/reject`)
+  },
+
   async leaveParty(partyId: string): Promise<void> {
     await api.post(`/parties/${partyId}/leave`)
   },
@@ -117,7 +179,26 @@ export const partyService = {
     const { data } = await api.post<ChatMessage>(`/parties/${partyId}/chat`, {
       text,
     })
-    return data
+    return normalizeChatMessage(data)
+  },
+
+  async uploadFileMessage(partyId: string, file: File): Promise<ChatMessage> {
+    const form = new FormData()
+    form.append('file', file)
+    const { data } = await api.post<ChatMessage>(`/parties/${partyId}/chat/file`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    return normalizeChatMessage(data)
+  },
+
+  async uploadAudioMessage(partyId: string, file: File, durationMs: number): Promise<ChatMessage> {
+    const form = new FormData()
+    form.append('file', file)
+    form.append('durationMs', String(durationMs))
+    const { data } = await api.post<ChatMessage>(`/parties/${partyId}/chat/audio`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    return normalizeChatMessage(data)
   },
 
   async getActivity(partyId: string, limit = 50): Promise<Activity[]> {
