@@ -191,14 +191,23 @@ export default function ProfilePage() {
         )}
       </div>
 
-      <div style={{ marginTop: '32px', display: 'flex', gap: '10px' }}>
-        <Button variant="ghost" onClick={() => setIsEditing(true)} className="flex-1">
+      <h3 className="section-title" style={{ marginTop: '24px' }}>Cuenta</h3>
+      <div className="profile-actions-card">
+        <Button variant="secondary" onClick={() => setIsEditing(true)} className="w-full" size="lg">
           ✏️ Editar Perfil
         </Button>
-        <Button variant="danger" onClick={logout} className="flex-1" size="lg">
-          Salir
-        </Button>
+
+        <div className="profile-logout-panel">
+          <div className="profile-logout-copy">
+            <span className="profile-logout-title">Cerrar sesión</span>
+            <span className="profile-logout-text">Salí de tu cuenta en este dispositivo cuando quieras.</span>
+          </div>
+          <Button variant="danger" onClick={logout} className="profile-logout-button" size="md">
+            Salir
+          </Button>
+        </div>
       </div>
+      <div aria-hidden="true" style={{ height: '20px', flexShrink: 0 }} />
 
       {isEditing && (
         <EditProfileModal

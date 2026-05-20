@@ -1526,7 +1526,7 @@ input, textarea, select { font-family: inherit; }
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
-  margin: 0 16px 72px;
+  margin: 0 16px 108px;
   padding: 16px;
   display: flex;
   flex-direction: column;
