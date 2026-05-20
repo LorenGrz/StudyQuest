@@ -1,5 +1,15 @@
 import React from 'react'
 
+const API_ORIGIN = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
+
+function resolveMediaUrl(url: string | null | undefined): string | null {
+  if (!url) return null
+  // Already absolute (http/https/blob/data) — leave as-is
+  if (/^(https?:|blob:|data:)/.test(url)) return url
+  // Relative path from the backend (e.g. /uploads/...) — prepend origin
+  return `${API_ORIGIN}${url}`
+}
+
 export interface AvatarWithBorderProps {
   displayName: string
   avatarUrl?: string | null
@@ -19,6 +29,9 @@ export function AvatarWithBorder({
   className = '',
   style,
 }: AvatarWithBorderProps) {
+  const resolvedAvatar = resolveMediaUrl(avatarUrl)
+  const resolvedBorder = resolveMediaUrl(borderImageUrl)
+
   const getAvatarClass = () => {
     switch (size) {
       case 'sm':
@@ -31,19 +44,22 @@ export function AvatarWithBorder({
     }
   }
 
-  const getWrapperClass = () => {
-    return `avatar-border-wrap avatar-border-wrap-${size} ${className}`
-  }
-
   return (
-    <div className={getWrapperClass()} style={style}>
-      {/* ─── Avatar Base ─── */}
-      {avatarUrl ? (
+    <div
+      className={`avatar-border-wrap avatar-border-wrap-${size} ${className}`}
+      style={style}
+    >
+      {/* ─── Avatar image or initial fallback ─── */}
+      {resolvedAvatar ? (
         <img
-          src={avatarUrl}
+          src={resolvedAvatar}
           alt={displayName}
           className={`avatar-img avatar-img-${size}`}
           style={glowColor ? { boxShadow: `0 0 16px ${glowColor}` } : {}}
+          onError={(e) => {
+            // If image fails to load, hide it and let the fallback show
+            ;(e.currentTarget as HTMLImageElement).style.display = 'none'
+          }}
         />
       ) : (
         <div
@@ -54,12 +70,13 @@ export function AvatarWithBorder({
         </div>
       )}
 
-      {/* ─── Border Overlay ─── */}
-      {borderImageUrl && (
+      {/* ─── Border overlay ─── */}
+      {resolvedBorder && (
         <img
-          src={`http://localhost:3000${borderImageUrl}`}
+          src={resolvedBorder}
           alt=""
           className="avatar-border-overlay"
+          aria-hidden="true"
         />
       )}
     </div>
