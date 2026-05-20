@@ -18,6 +18,7 @@ export function getSocket(): Socket {
 
 export function connectSocket(): Socket {
   const s = getSocket()
+  s.auth = { token: localStorage.getItem('accessToken') }
   if (!s.connected) s.connect()
   return s
 }

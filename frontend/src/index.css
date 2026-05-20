@@ -367,6 +367,12 @@ input, textarea, select { font-family: inherit; }
 .party-list-meta { font-size: 13px; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
 .party-list-arrow { color: var(--text-muted); font-size: 20px; }
 .subject-grid { display: flex; flex-direction: column; gap: 10px; }
+.dashboard-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 44px;
+}
 .subject-card {
   display: flex;
   align-items: center;
@@ -386,7 +392,7 @@ input, textarea, select { font-family: inherit; }
 .subject-card-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 .subject-card-arrow { color: var(--text-muted); font-size: 20px; }
 
-.quick-actions { display: flex; gap: 12px; padding: 8px 0; }
+.quick-actions { display: flex; gap: 12px; padding: 8px 0 20px; }
 .quick-btn {
   flex: 1;
   display: flex;
@@ -1678,7 +1684,7 @@ input, textarea, select { font-family: inherit; }
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
-  margin: 0 16px 72px;
+  margin: 0 16px 108px;
   padding: 16px;
   display: flex;
   flex-direction: column;
