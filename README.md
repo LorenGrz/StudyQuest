@@ -9,9 +9,21 @@ Plataforma de estudio colaborativo con matchmaking y quizzes generados por IA.
 
 El proyecto está dividido en componentes principales diseñados siguiendo heurísticas limpias (separación de responsabilidades):
 
-- **`backend/`**: API RESTful y WebSockets construida con NestJS. Maneja la lógica de dominio, matchmaking, quizzes generados por IA y persistencia usando el patrón Repository a través de TypeORM.
-- **`frontend/`**: Aplicación de Single Page Application (SPA) construida con React 18 y TypeScript. Utiliza una arquitectura orientada a componentes, estilos de Tailwind CSS y manejo de estado centralizado (Zustand).
-- **`docker-compose.yml`**: Orquestación contenida de la infraestructura de las bases de datos externas que garantizan la fácil portabilidad del proyecto en fase de desarrollo.
+- **`backend/`**: API RESTful y WebSockets construida con NestJS. Maneja la lógica de dominio, matchmaking, IA y persistencia usando el patrón Repository a través de TypeORM.
+- **`frontend/`**: Aplicación SPA construida con React 19 y TypeScript. Utiliza una arquitectura orientada a componentes y manejo de estado centralizado (Zustand).
+- **`docker-compose.yml`**: Orquestación de la infraestructura de bases de datos para desarrollo local.
+
+---
+
+## Requisitos Previos
+
+| Herramienta | Versión mínima | Instalación |
+|---|---|---|
+| Node.js | 20+ | https://nodejs.org |
+| pnpm | 9+ | `npm install -g pnpm` |
+| Docker | cualquiera | https://docs.docker.com/get-docker/ |
+
+> **Este proyecto usa `pnpm` como gestor de paquetes.** No uses `npm install` ni `yarn`.
 
 ---
 
@@ -37,70 +49,6 @@ Asegúrate de copiar el archivo `environment` de ejemplo para que los servicios 
 cp .env.example .env
 ```
 
-La capa de IA ahora admite multiples proveedores para generacion de quizzes:
-
-- `AI_PROVIDER=gemini|openai|anthropic|groq|mock`
-- `gemini` mantiene compatibilidad con el flujo actual
-- `openai` permite cambiar proveedor segun costo o calidad
-- `anthropic` permite probar Claude sin tocar la logica de quests
-- `groq` agrega una opcion OpenAI-compatible orientada a latencia/costo
-- `mock` sirve para desarrollo y tests sin credenciales externas
-
-Variables soportadas:
-
-- `AI_PROVIDER`
-- `GEMINI_API_KEY`
-- `GEMINI_MODEL`
-- `OPENAI_API_KEY`
-- `OPENAI_MODEL`
-- `ANTHROPIC_API_KEY`
-- `ANTHROPIC_MODEL`
-- `GROQ_API_KEY`
-- `GROQ_MODEL`
-
-Ejemplos rapidos para cambiar de proveedor en local:
-
-```env
-# Opcion 1: Gemini
-AI_PROVIDER=gemini
-GEMINI_API_KEY=tu_api_key
-GEMINI_MODEL=gemini-1.5-flash
-```
-
-```env
-# Opcion 2: OpenAI
-AI_PROVIDER=openai
-OPENAI_API_KEY=tu_api_key
-OPENAI_MODEL=gpt-4.1-mini
-```
-
-```env
-# Opcion 3: Anthropic
-AI_PROVIDER=anthropic
-ANTHROPIC_API_KEY=tu_api_key
-ANTHROPIC_MODEL=claude-3-5-sonnet-latest
-```
-
-```env
-# Opcion 4: Groq
-AI_PROVIDER=groq
-GROQ_API_KEY=tu_api_key
-GROQ_MODEL=llama-3.3-70b-versatile
-```
-
-```env
-# Opcion 5: Mock para desarrollo/test
-AI_PROVIDER=mock
-```
-
-Notas practicas:
-
-- La seleccion del provider se hace hoy desde el backend por `AI_PROVIDER`.
-- Las API keys van en el `.env` que usa el backend. En este repo se puede trabajar con el `.env` de raiz y/o `backend/.env` segun tu flujo local.
-- Si cambias `AI_PROVIDER` o cualquiera de las keys/modelos, reinicia el backend.
-- Frontend no necesita saber qué provider usas; el cambio queda encapsulado en backend.
-- Para validar que el provider activo quedó bien, podés mirar los logs del backend: la capa de IA informa qué provider está usando al generar quizzes.
-
 ### 2. Levantar la Infraestructura (Bases de Datos con Docker)
 
 Levantaremos las bases de datos base utilizando Docker. Ejecuta en la raíz del proyecto el siguiente comando:
@@ -116,8 +64,8 @@ Abre una terminal, muévete a la ruta del servidor e instala dependencias:
 
 ```bash
 cd backend
-npm install
-npm run start:dev
+pnpm install
+pnpm run start:dev
 ```
 *Tip: Al activar el servidor por primera vez, TypeORM se comunicará con PostgreSQL para generar o **sincronizar (migrar)** los esquemas vacíos automáticamente según tus Entidades configuradas (esto ocurre si `TYPEORM_SYNC=true` en tu `.env`).*
 
@@ -129,7 +77,7 @@ Debe ir **DESPUÉS** de que tu backend procese el punto anterior por primera vez
 Tras asegurarte de que el backend haya sincronizado la estructura local en la DB, y manteniendo este encendido, abre otra terminal dentro de la ruta del `backend/` y corre el script poblador:
 
 ```bash
-npm run seed
+pnpm run seed
 ```
 *(Esto insertará universidades, materias de prueba, usuarios y administradores clave listos para probar).*
 
@@ -139,23 +87,14 @@ Con el backend y las bases de soporte operando, sólo nos queda montar la parte 
 
 ```bash
 cd frontend
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 El portal cargará e iniciará disponible desde tu navegador.
 - **Portal URL**: [http://localhost:5173](http://localhost:5173)
 - **API URL (Base)**: [http://localhost:3000/api/v1](http://localhost:3000/api/v1)
-
-### Estado actual del chat de party
-
-El chat de party ahora soporta:
-
-- mensajes de texto
-- adjuntos `PDF`, `TXT`, `DOC` y `DOCX`
-- notas de voz reproducibles inline
-
-Los archivos binarios se suben por endpoints REST autenticados y luego se emiten en tiempo real a la sala mediante Socket.IO.
+- **Swagger**: [http://localhost:3000/docs](http://localhost:3000/docs)
 
 ---
 

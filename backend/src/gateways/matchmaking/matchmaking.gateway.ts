@@ -260,7 +260,9 @@ export class MatchmakingGateway
 
   @OnEvent('party.activity')
   handlePartyActivity(payload: { partyId: string; activity: any }) {
-    this.logger.debug(`Activity en party ${payload.partyId}: ${payload.activity.type}`);
+    this.logger.debug(
+      `Activity en party ${payload.partyId}: ${payload.activity.type}`,
+    );
     this.server.to(payload.partyId).emit('party:activity', {
       activity: payload.activity,
     });
@@ -275,7 +277,9 @@ export class MatchmakingGateway
   handleAchievementUnlocked(payload: { userId: string; achievement: any }) {
     for (const [socketId, conn] of this.connections) {
       if (conn.userId === payload.userId) {
-        this.server.to(socketId).emit('achievement:unlocked', payload.achievement);
+        this.server
+          .to(socketId)
+          .emit('achievement:unlocked', payload.achievement);
       }
     }
   }
