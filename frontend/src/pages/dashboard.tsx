@@ -27,17 +27,19 @@ const DashboardPage = () => {
 
   return (
     <MobileLayout>
-      <GreetingHeader user={user} />
-      <ActivePartyBanner party={activeParty} />
-      <SectionTitle>Mis Materias</SectionTitle>
-      {isLoading ? (
-        <div className="center-spinner">
-          <Spinner />
-        </div>
-      ) : (
-        <SubjectCardGrid subjects={subjects} />
-      )}
-      <QuickActions />
+      <div className="dashboard-page">
+        <GreetingHeader user={user} />
+        <ActivePartyBanner party={activeParty} />
+        <SectionTitle>Mis Materias</SectionTitle>
+        {isLoading ? (
+          <div className="center-spinner">
+            <Spinner />
+          </div>
+        ) : (
+          <SubjectCardGrid subjects={subjects} />
+        )}
+        <QuickActions />
+      </div>
     </MobileLayout>
   )
 }
