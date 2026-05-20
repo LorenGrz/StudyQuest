@@ -1,11 +1,16 @@
-import { useState, useEffect } from 'react'
-import { MobileLayout } from '../components/Layouts'
-import { Button, Badge, Spinner } from '../components/UI'
-import { useAuthStore } from '../store/authStore'
-import { useAuth } from '../hooks/useAuth'
-import { userService } from '../services/userService'
-import { getLeague, getEloProgress, DEFAULT_ELO, LEAGUES } from '../utils/leagues'
-import { useAchievements } from '../hooks/useAchievements'
+import { useState, useEffect } from "react"
+import { MobileLayout } from "../components/Layouts"
+import { Button, Badge, Spinner } from "../components/UI"
+import { useAuthStore } from "../store/authStore"
+import { useAuth } from "../hooks/useAuth"
+import { userService } from "../services/userService"
+import {
+  getLeague,
+  getEloProgress,
+  DEFAULT_ELO,
+  LEAGUES,
+} from "../utils/leagues"
+import { useAchievements } from "../hooks/useAchievements"
 
 export default function ProfilePage() {
   const { user, setUser } = useAuthStore()
@@ -20,56 +25,47 @@ export default function ProfilePage() {
   if (!user) {
     return (
       <MobileLayout>
-        <div className="center-spinner"><Spinner size="lg" /></div>
+        <div className="center-spinner">
+          <Spinner size="lg" />
+        </div>
       </MobileLayout>
     )
   }
 
   const stats = user.stats || {
-    quizzesPlayed: 0, quizzesWon: 0, currentStreak: 0,
-    longestStreak: 0, level: 1, xp: 0, elo: DEFAULT_ELO,
+    quizzesPlayed: 0,
+    quizzesWon: 0,
+    currentStreak: 0,
+    longestStreak: 0,
+    level: 1,
+    xp: 0,
+    elo: DEFAULT_ELO,
   }
   const elo = stats.elo ?? DEFAULT_ELO
   const league = getLeague(elo)
   const progress = getEloProgress(elo)
-  const winRate = stats.quizzesPlayed > 0
-    ? Math.round((stats.quizzesWon / stats.quizzesPlayed) * 100)
-    : 0
+  const winRate =
+    stats.quizzesPlayed > 0
+      ? Math.round((stats.quizzesWon / stats.quizzesPlayed) * 100)
+      : 0
 
   return (
     <MobileLayout>
-
-      {/* ─── League Banner ─────────────────────────────────────────── */}
-      <div className="league-banner" style={{ background: league.gradient, boxShadow: `0 4px 24px ${league.glowColor}` }}>
-        <div className="league-banner-inner">
-          <span className="league-banner-icon">{league.icon}</span>
-          <div className="league-banner-info">
-            <span className="league-banner-name">{league.name}</span>
-            <span className="league-banner-elo">{elo} ELO</span>
-          </div>
-        </div>
-        {/* Progress bar within league */}
-        <div className="league-progress-wrap">
-          <div className="league-progress-track">
-            <div
-              className="league-progress-fill"
-              style={{ width: `${progress.percent}%`, background: 'rgba(255,255,255,0.85)' }}
-            />
-          </div>
-          <div className="league-progress-labels">
-            <span>{league.minElo}</span>
-            {progress.nextLeague && (
-              <span>{progress.nextLeague.icon} {progress.nextLeague.name} en {(league.maxElo + 1) - elo} ELO</span>
-            )}
-            {!progress.nextLeague && <span>✨ Rango máximo</span>}
-            <span>{league.maxElo === Infinity ? '∞' : league.maxElo}</span>
-          </div>
-        </div>
-      </div>
-
       {/* ─── User Card ─────────────────────────────────────────────── */}
-      <div className="profile-card" style={{ borderTop: `3px solid ${league.color}` }}>
-        <div className="avatar-placeholder" style={{ width: '64px', height: '64px', fontSize: '28px', flexShrink: 0, boxShadow: `0 0 16px ${league.glowColor}` }}>
+      <div
+        className="profile-card"
+        style={{ marginTop: "16px", borderTop: `3px solid ${league.color}` }}
+      >
+        <div
+          className="avatar-placeholder"
+          style={{
+            width: "64px",
+            height: "64px",
+            fontSize: "28px",
+            flexShrink: 0,
+            boxShadow: `0 0 16px ${league.glowColor}`,
+          }}
+        >
           {user.displayName.charAt(0).toUpperCase()}
         </div>
         <div className="profile-card-info">
@@ -78,7 +74,13 @@ export default function ProfilePage() {
           <div className="profile-badges">
             <Badge variant="primary">Nivel {stats.level}</Badge>
             <Badge variant="success">⚡ {stats.xp} XP</Badge>
-            <span className="league-pill" style={{ background: league.gradient, boxShadow: `0 0 8px ${league.glowColor}` }}>
+            <span
+              className="league-pill"
+              style={{
+                background: league.gradient,
+                boxShadow: `0 0 8px ${league.glowColor}`,
+              }}
+            >
               {league.icon} {league.name}
             </span>
           </div>
@@ -86,10 +88,17 @@ export default function ProfilePage() {
       </div>
 
       {/* ─── Stats Grid ────────────────────────────────────────────── */}
-      <h3 className="section-title" style={{ marginTop: '16px' }}>Estadísticas</h3>
+      <h3 className="section-title" style={{ marginTop: "16px" }}>
+        Estadísticas
+      </h3>
       <div className="stats-grid">
-        <div className="stat-box stat-box--elo" style={{ borderColor: league.color }}>
-          <span className="stat-value" style={{ color: league.color }}>{elo}</span>
+        <div
+          className="stat-box stat-box--elo"
+          style={{ borderColor: league.color }}
+        >
+          <span className="stat-value" style={{ color: league.color }}>
+            {elo}
+          </span>
           <span className="stat-label">ELO</span>
         </div>
         <div className="stat-box">
@@ -107,20 +116,30 @@ export default function ProfilePage() {
       </div>
 
       {/* ─── Medals / Achievements ──────────────────────────────────── */}
-      <h3 className="section-title" style={{ marginTop: '16px' }}>Medallas</h3>
+      <h3 className="section-title" style={{ marginTop: "16px" }}>
+        Medallas
+      </h3>
       {achievementsLoading ? (
-        <div className="center-spinner" style={{ padding: '20px' }}><Spinner size="sm" /></div>
+        <div className="center-spinner" style={{ padding: "20px" }}>
+          <Spinner size="sm" />
+        </div>
       ) : achievements.length === 0 ? (
-        <div className="empty-state" style={{ padding: '20px' }}>
-          <p className="empty-text" style={{ fontSize: '14px' }}>No hay logros disponibles aún</p>
+        <div className="empty-state" style={{ padding: "20px" }}>
+          <p className="empty-text" style={{ fontSize: "14px" }}>
+            No hay logros disponibles aún
+          </p>
         </div>
       ) : (
         <div className="achievements-grid">
           {achievements.map((a) => (
             <div
               key={a.id}
-              className={`achievement-item ${a.unlocked ? 'achievement-item--unlocked' : 'achievement-item--locked'}`}
-              title={a.unlocked ? `${a.name} — ${a.description}` : `🔒 ${a.name} — ${a.description}`}
+              className={`achievement-item ${a.unlocked ? "achievement-item--unlocked" : "achievement-item--locked"}`}
+              title={
+                a.unlocked
+                  ? `${a.name} — ${a.description}`
+                  : `🔒 ${a.name} — ${a.description}`
+              }
             >
               <span className="achievement-icon">{a.icon}</span>
               <span className="achievement-name">{a.name}</span>
@@ -130,20 +149,35 @@ export default function ProfilePage() {
       )}
 
       {/* ─── League Ladder ─────────────────────────────────────────── */}
-      <h3 className="section-title" style={{ marginTop: '16px' }}>Ligas</h3>
+      <h3 className="section-title" style={{ marginTop: "16px" }}>
+        Ligas
+      </h3>
       <div className="league-ladder">
-        {[...LEAGUES].reverse().map(l => (
+        {[...LEAGUES].reverse().map((l) => (
           <div
             key={l.tier}
-            className={`league-ladder-row ${l.tier === league.tier ? 'league-ladder-row--active' : ''}`}
-            style={l.tier === league.tier ? { borderColor: l.color, background: `${l.glowColor}` } : {}}
+            className={`league-ladder-row ${l.tier === league.tier ? "league-ladder-row--active" : ""}`}
+            style={
+              l.tier === league.tier
+                ? { borderColor: l.color, background: `${l.glowColor}` }
+                : {}
+            }
           >
             <span className="league-ladder-icon">{l.icon}</span>
-            <span className="league-ladder-name" style={l.tier === league.tier ? { color: l.color, fontWeight: 700 } : {}}>
+            <span
+              className="league-ladder-name"
+              style={
+                l.tier === league.tier
+                  ? { color: l.color, fontWeight: 700 }
+                  : {}
+              }
+            >
               {l.name}
             </span>
             <span className="league-ladder-range">
-              {l.maxElo === Infinity ? `${l.minElo}+` : `${l.minElo}–${l.maxElo}`}
+              {l.maxElo === Infinity
+                ? `${l.minElo}+`
+                : `${l.minElo}–${l.maxElo}`}
             </span>
             {l.tier === league.tier && (
               <span className="league-ladder-badge">● Tú</span>
@@ -153,7 +187,9 @@ export default function ProfilePage() {
       </div>
 
       {/* ─── Academic Info ─────────────────────────────────────────── */}
-      <h3 className="section-title" style={{ marginTop: '16px' }}>Información Académica</h3>
+      <h3 className="section-title" style={{ marginTop: "16px" }}>
+        Información Académica
+      </h3>
       <div className="academic-card">
         <div className="academic-row">
           <span className="academic-label">🏫 Universidad</span>
@@ -170,12 +206,12 @@ export default function ProfilePage() {
       </div>
 
       {/* ─── Enrolled Subjects ─────────────────────────────────────── */}
-      <h3 className="section-title" style={{ marginTop: '16px' }}>
+      <h3 className="section-title" style={{ marginTop: "16px" }}>
         Materias Inscriptas ({user.enrolledSubjects?.length || 0})
       </h3>
       <div className="enrolled-subjects-list">
         {user.enrolledSubjects && user.enrolledSubjects.length > 0 ? (
-          user.enrolledSubjects.map(sub => (
+          user.enrolledSubjects.map((sub) => (
             <div key={sub.id} className="enrolled-subject-item">
               <span className="enrolled-subject-icon">📘</span>
               <div className="enrolled-subject-info">
@@ -185,29 +221,45 @@ export default function ProfilePage() {
             </div>
           ))
         ) : (
-          <div className="empty-state" style={{ padding: '20px' }}>
-            <p className="empty-text" style={{ fontSize: '14px' }}>No estás inscripto en ninguna materia</p>
+          <div className="empty-state" style={{ padding: "20px" }}>
+            <p className="empty-text" style={{ fontSize: "14px" }}>
+              No estás inscripto en ninguna materia
+            </p>
           </div>
         )}
       </div>
 
-      <h3 className="section-title" style={{ marginTop: '24px' }}>Cuenta</h3>
+      <h3 className="section-title" style={{ marginTop: "24px" }}>
+        Cuenta
+      </h3>
       <div className="profile-actions-card">
-        <Button variant="secondary" onClick={() => setIsEditing(true)} className="w-full" size="lg">
+        <Button
+          variant="secondary"
+          onClick={() => setIsEditing(true)}
+          className="w-full"
+          size="lg"
+        >
           ✏️ Editar Perfil
         </Button>
 
         <div className="profile-logout-panel">
           <div className="profile-logout-copy">
             <span className="profile-logout-title">Cerrar sesión</span>
-            <span className="profile-logout-text">Salí de tu cuenta en este dispositivo cuando quieras.</span>
+            <span className="profile-logout-text">
+              Salí de tu cuenta en este dispositivo cuando quieras.
+            </span>
           </div>
-          <Button variant="danger" onClick={logout} className="profile-logout-button" size="md">
+          <Button
+            variant="danger"
+            onClick={logout}
+            className="profile-logout-button"
+            size="md"
+          >
             Salir
           </Button>
         </div>
       </div>
-      <div aria-hidden="true" style={{ height: '20px', flexShrink: 0 }} />
+      <div aria-hidden="true" style={{ height: "20px", flexShrink: 0 }} />
 
       {isEditing && (
         <EditProfileModal
@@ -242,7 +294,7 @@ function EditProfileModal({ user, onClose, onUpdate }: any) {
       onUpdate(updatedUser)
       onClose()
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Error al actualizar perfil')
+      setError(err?.response?.data?.message || "Error al actualizar perfil")
     } finally {
       setIsLoading(false)
     }
@@ -250,19 +302,25 @@ function EditProfileModal({ user, onClose, onUpdate }: any) {
 
   return (
     <div className="invite-overlay" onClick={onClose}>
-      <div className="invite-sheet" onClick={e => e.stopPropagation()}>
+      <div className="invite-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="invite-sheet-handle" />
         <h2 className="invite-title">Editar Perfil</h2>
 
         {error && <div className="alert alert-danger">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="auth-form" style={{ marginTop: '16px' }}>
+        <form
+          onSubmit={handleSubmit}
+          className="auth-form"
+          style={{ marginTop: "16px" }}
+        >
           <div className="input-group">
             <label className="input-label">Nombre Completo</label>
             <input
               className="input"
               value={formData.displayName}
-              onChange={e => setFormData({ ...formData, displayName: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, displayName: e.target.value })
+              }
               required
             />
           </div>
@@ -271,7 +329,9 @@ function EditProfileModal({ user, onClose, onUpdate }: any) {
             <input
               className="input"
               value={formData.university}
-              onChange={e => setFormData({ ...formData, university: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, university: e.target.value })
+              }
               required
             />
           </div>
@@ -280,7 +340,9 @@ function EditProfileModal({ user, onClose, onUpdate }: any) {
             <input
               className="input"
               value={formData.career}
-              onChange={e => setFormData({ ...formData, career: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, career: e.target.value })
+              }
               required
             />
           </div>
@@ -290,15 +352,31 @@ function EditProfileModal({ user, onClose, onUpdate }: any) {
               type="number"
               className="input"
               value={formData.semester}
-              onChange={e => setFormData({ ...formData, semester: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, semester: e.target.value })
+              }
               min="1"
               required
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '10px', marginTop: '12px' }}>
-            <Button type="button" variant="ghost" className="flex-1" onClick={onClose}>Cancelar</Button>
-            <Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>Guardar</Button>
+          <div style={{ display: "flex", gap: "10px", marginTop: "12px" }}>
+            <Button
+              type="button"
+              variant="ghost"
+              className="flex-1"
+              onClick={onClose}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              className="flex-1"
+              isLoading={isLoading}
+            >
+              Guardar
+            </Button>
           </div>
         </form>
       </div>
