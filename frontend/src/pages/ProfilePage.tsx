@@ -200,6 +200,8 @@ export default function ProfilePage() {
                 onClick={() => equipTitle(null)}
                 disabled={isUpdatingCosmetics}
                 style={{ 
+                  padding: '12px 16px',
+                  borderRadius: '12px',
                   borderColor: user.activeCosmetics?.titleCode ? 'var(--border)' : 'var(--accent)',
                   background: user.activeCosmetics?.titleCode ? 'var(--bg-surface)' : 'rgba(99, 102, 241, 0.1)'
                 }}
@@ -213,6 +215,8 @@ export default function ProfilePage() {
                   onClick={() => equipTitle(title.code)}
                   disabled={isUpdatingCosmetics}
                   style={{
+                    padding: '12px 16px',
+                    borderRadius: '12px',
                     borderColor: user.activeCosmetics?.titleCode === title.code ? 'var(--accent)' : 'var(--border)',
                     background: user.activeCosmetics?.titleCode === title.code ? 'rgba(99, 102, 241, 0.1)' : 'var(--bg-surface)',
                   }}
