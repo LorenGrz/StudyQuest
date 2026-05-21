@@ -119,27 +119,62 @@ const ACHIEVEMENTS_DATA = [
   { code: 'STREAK_3_BORDER',  name: 'Marco de Fuego',       icon: '🔥', category: 'cosmetic',    description: 'Recompensa por racha de 3 días.',         points: 0,   rewardType: 'border', rewardCode: 'FIRE_BORDER' },
   { code: 'LEVEL_5_BORDER',   name: 'Marco Estelar',        icon: '⭐', category: 'cosmetic',    description: 'Recompensa por nivel 5.',                 points: 0,   rewardType: 'border', rewardCode: 'STAR_BORDER' },
   { code: 'LEVEL_10_BORDER',  name: 'Marco de Campeón',     icon: '👑', category: 'cosmetic',    description: 'Recompensa por nivel 10.',                points: 0,   rewardType: 'border', rewardCode: 'CHAMPION_BORDER' },
+
+  // ── League rank-up achievements ─────────────────────────────────────────────
+  { code: 'LEAGUE_IRON',        name: 'Bienvenido al Hierro',  icon: '⚙️',  category: 'league', description: 'Comenzaste tu camino en StudyQuest.',  points: 0,  rewardType: 'border', rewardCode: 'IRON_BORDER' },
+  { code: 'LEAGUE_SILVER',      name: 'Ascenso a Plata',       icon: '🥈',  category: 'league', description: 'Alcanzaste la liga Plata.',            points: 50, rewardType: 'border', rewardCode: 'SILVER_BORDER' },
+  { code: 'LEAGUE_GOLD',        name: 'Ascenso a Oro',         icon: '🥇',  category: 'league', description: 'Alcanzaste la liga Oro.',              points: 100, rewardType: 'border', rewardCode: 'GOLD_BORDER' },
+  { code: 'LEAGUE_PLATINUM',    name: 'Ascenso a Platino',     icon: '💎',  category: 'league', description: 'Alcanzaste la liga Platino.',          points: 150, rewardType: 'border', rewardCode: 'PLATINUM_BORDER' },
+  { code: 'LEAGUE_EMERALD',     name: 'Ascenso a Esmeralda',   icon: '💚',  category: 'league', description: 'Alcanzaste la liga Esmeralda.',        points: 200, rewardType: 'border', rewardCode: 'EMERALD_BORDER' },
+  { code: 'LEAGUE_DIAMOND',     name: 'Ascenso a Diamante',    icon: '💠',  category: 'league', description: 'Alcanzaste la liga Diamante.',         points: 300, rewardType: 'border', rewardCode: 'DIAMOND_BORDER' },
+  { code: 'LEAGUE_QUESTMASTER', name: '¡QuestMaster!',         icon: '👑',  category: 'league', description: 'Alcanzaste el rango máximo.',          points: 500, rewardType: 'border', rewardCode: 'QUESTMASTER_BORDER' },
+
+  // league title achievements
+  { code: 'LEAGUE_IRON_TITLE',        name: 'Título: Forjado en Hierro',    icon: '⚙️',  category: 'league', description: 'Título desbloqueado al iniciar.',        points: 0, rewardType: 'title', rewardCode: 'IRON_TITLE' },
+  { code: 'LEAGUE_SILVER_TITLE',      name: 'Título: De Plata',            icon: '🥈',  category: 'league', description: 'Título desbloqueado en Plata.',          points: 0, rewardType: 'title', rewardCode: 'SILVER_TITLE' },
+  { code: 'LEAGUE_GOLD_TITLE',        name: 'Título: Dorado',              icon: '🥇',  category: 'league', description: 'Título desbloqueado en Oro.',            points: 0, rewardType: 'title', rewardCode: 'GOLD_TITLE' },
+  { code: 'LEAGUE_PLATINUM_TITLE',    name: 'Título: Platinado',           icon: '💎',  category: 'league', description: 'Título desbloqueado en Platino.',        points: 0, rewardType: 'title', rewardCode: 'PLATINUM_TITLE' },
+  { code: 'LEAGUE_EMERALD_TITLE',     name: 'Título: Esmeralda',           icon: '💚',  category: 'league', description: 'Título desbloqueado en Esmeralda.',      points: 0, rewardType: 'title', rewardCode: 'EMERALD_TITLE' },
+  { code: 'LEAGUE_DIAMOND_TITLE',     name: 'Título: Diamante',            icon: '💠',  category: 'league', description: 'Título desbloqueado en Diamante.',       points: 0, rewardType: 'title', rewardCode: 'DIAMOND_TITLE' },
+  { code: 'LEAGUE_QUESTMASTER_TITLE', name: 'Título: QuestMaster',         icon: '👑',  category: 'league', description: 'Título desbloqueado al ser QuestMaster.', points: 0, rewardType: 'title', rewardCode: 'QUESTMASTER_TITLE' },
+];
+
+// ── League cosmetics map (tier → codes) ─────────────────────────────────────
+const LEAGUE_TIERS = [
+  { tier: 1, minElo: 0,    borderCode: 'IRON_BORDER',        titleCode: 'IRON_TITLE' },
+  { tier: 2, minElo: 400,  borderCode: 'SILVER_BORDER',      titleCode: 'SILVER_TITLE' },
+  { tier: 3, minElo: 800,  borderCode: 'GOLD_BORDER',        titleCode: 'GOLD_TITLE' },
+  { tier: 4, minElo: 1200, borderCode: 'PLATINUM_BORDER',    titleCode: 'PLATINUM_TITLE' },
+  { tier: 5, minElo: 1600, borderCode: 'EMERALD_BORDER',     titleCode: 'EMERALD_TITLE' },
+  { tier: 6, minElo: 2000, borderCode: 'DIAMOND_BORDER',     titleCode: 'DIAMOND_TITLE' },
+  { tier: 7, minElo: 2400, borderCode: 'QUESTMASTER_BORDER', titleCode: 'QUESTMASTER_TITLE' },
 ];
 
 const USER_TITLES_DATA = [
-  {
-    code: 'STREAK_3_TITLE',
-    name: 'Racha Activa',
-    text: 'Racha Activa',
-    achievementCode: 'QUEST_STREAK_3',
-  },
-  {
-    code: 'MASTER_TITLE',
-    name: 'Maestro del Estudio',
-    text: 'Maestro del Estudio',
-    achievementCode: 'LEVEL_10',
-  },
+  { code: 'STREAK_3_TITLE', name: 'Racha Activa',        text: 'Racha Activa',        achievementCode: 'QUEST_STREAK_3' },
+  { code: 'MASTER_TITLE',   name: 'Maestro del Estudio', text: 'Maestro del Estudio', achievementCode: 'LEVEL_10' },
+  // league titles
+  { code: 'IRON_TITLE',        name: 'Forjado en Hierro', text: 'Forjado en Hierro',    achievementCode: 'LEAGUE_IRON_TITLE' },
+  { code: 'SILVER_TITLE',      name: 'De Plata',          text: 'De Plata',             achievementCode: 'LEAGUE_SILVER_TITLE' },
+  { code: 'GOLD_TITLE',        name: 'Dorado',            text: 'Dorado',               achievementCode: 'LEAGUE_GOLD_TITLE' },
+  { code: 'PLATINUM_TITLE',    name: 'Platinado',         text: 'Platinado',            achievementCode: 'LEAGUE_PLATINUM_TITLE' },
+  { code: 'EMERALD_TITLE',     name: 'Esmeralda',         text: 'Esmeralda',            achievementCode: 'LEAGUE_EMERALD_TITLE' },
+  { code: 'DIAMOND_TITLE',     name: 'Diamante',          text: 'Diamante',             achievementCode: 'LEAGUE_DIAMOND_TITLE' },
+  { code: 'QUESTMASTER_TITLE', name: 'QuestMaster',       text: 'QuestMaster',          achievementCode: 'LEAGUE_QUESTMASTER_TITLE' },
 ];
 
 const PROFILE_BORDERS_DATA = [
-  { code: 'FIRE_BORDER',     name: 'Llamas',   imageFile: 'fire.svg',     achievementCode: 'STREAK_3_BORDER' },
-  { code: 'STAR_BORDER',     name: 'Estrella', imageFile: 'star.svg',     achievementCode: 'LEVEL_5_BORDER' },
-  { code: 'CHAMPION_BORDER', name: 'Campeón',  imageFile: 'champion.svg', achievementCode: 'LEVEL_10_BORDER' },
+  { code: 'FIRE_BORDER',        name: 'Llamas',     imageFile: 'fire.svg',        achievementCode: 'STREAK_3_BORDER' },
+  { code: 'STAR_BORDER',        name: 'Estrella',   imageFile: 'star.svg',        achievementCode: 'LEVEL_5_BORDER' },
+  { code: 'CHAMPION_BORDER',    name: 'Campeón',    imageFile: 'champion.svg',    achievementCode: 'LEVEL_10_BORDER' },
+  // league borders
+  { code: 'IRON_BORDER',        name: 'Hierro',        imageFile: 'iron.svg',        achievementCode: 'LEAGUE_IRON' },
+  { code: 'SILVER_BORDER',      name: 'Plata',         imageFile: 'silver.svg',      achievementCode: 'LEAGUE_SILVER' },
+  { code: 'GOLD_BORDER',        name: 'Oro',           imageFile: 'gold.svg',        achievementCode: 'LEAGUE_GOLD' },
+  { code: 'PLATINUM_BORDER',    name: 'Platino',       imageFile: 'platinum.svg',    achievementCode: 'LEAGUE_PLATINUM' },
+  { code: 'EMERALD_BORDER',     name: 'Esmeralda',     imageFile: 'emerald.svg',     achievementCode: 'LEAGUE_EMERALD' },
+  { code: 'DIAMOND_BORDER',     name: 'Diamante',      imageFile: 'diamond.svg',     achievementCode: 'LEAGUE_DIAMOND' },
+  { code: 'QUESTMASTER_BORDER', name: 'QuestMaster',   imageFile: 'questmaster.svg', achievementCode: 'LEAGUE_QUESTMASTER' },
 ];
 
 // ─── Main ──────────────────────────────────────────────────────────────────────
@@ -362,6 +397,42 @@ async function seed() {
     console.log('   ✔  Party "Análisis Matemático II" (eve)');
   } else {
     console.log('   ⚠️  Party AM2 ya existe — omitida');
+  }
+
+  // ── Cosmetics retroactivos por liga ──────────────────────────────────────────
+  console.log('\n🎨  Otorgando cosmetics de liga retroactivos...');
+  const inventoryRepo = AppDataSource.getRepository(UserInventory);
+  const allUsers = await userRepo.find();
+
+  for (const u of allUsers) {
+    const elo: number = (u.stats as any)?.elo ?? 1200;
+
+    // grant all tiers the user has reached (cumulative)
+    const earnedTiers = LEAGUE_TIERS.filter(lt => elo >= lt.minElo);
+
+    for (const lt of earnedTiers) {
+      // border
+      const hasBorder = await inventoryRepo.findOneBy({
+        userId: u.id, itemType: 'border', itemCode: lt.borderCode,
+      });
+      if (!hasBorder) {
+        await inventoryRepo.save(inventoryRepo.create({
+          userId: u.id, itemType: 'border', itemCode: lt.borderCode,
+        }));
+      }
+      // title
+      const hasTitle = await inventoryRepo.findOneBy({
+        userId: u.id, itemType: 'title', itemCode: lt.titleCode,
+      });
+      if (!hasTitle) {
+        await inventoryRepo.save(inventoryRepo.create({
+          userId: u.id, itemType: 'title', itemCode: lt.titleCode,
+        }));
+      }
+    }
+
+    const highestTier = earnedTiers[earnedTiers.length - 1];
+    console.log(`   ✔  ${u.displayName} (ELO ${elo}) → hasta ${highestTier?.borderCode ?? 'ninguno'}`);
   }
 
   // ── Resumen ──────────────────────────────────────────────────────────────────

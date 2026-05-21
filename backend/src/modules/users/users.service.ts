@@ -477,7 +477,10 @@ export class UsersService {
   }
 
   async updateElo(userId: string, delta: number): Promise<void> {
-    // Clamp so ELO never goes below 0
+    // 1. Read current ELO before update
+    const before = await this.getElo(userId);
+
+    // 2. Apply ELO change (clamp >= 0)
     await this.userRepo
       .createQueryBuilder()
       .update()
@@ -487,6 +490,52 @@ export class UsersService {
       })
       .where('id = :id', { id: userId })
       .execute();
+
+    // 3. On positive delta, check for league promotion and grant cosmetics
+    if (delta > 0) {
+      const after = await this.getElo(userId);
+      await this.grantLeagueCosmetics(userId, before, after);
+    }
+  }
+
+  /** Grant league border + title for every tier newly reached. Idempotent. */
+  private async grantLeagueCosmetics(
+    userId: string,
+    eloBefore: number,
+    eloAfter: number,
+  ): Promise<void> {
+    const LEAGUE_TIERS = [
+      { minElo: 0,    borderCode: 'IRON_BORDER',        titleCode: 'IRON_TITLE' },
+      { minElo: 400,  borderCode: 'SILVER_BORDER',      titleCode: 'SILVER_TITLE' },
+      { minElo: 800,  borderCode: 'GOLD_BORDER',        titleCode: 'GOLD_TITLE' },
+      { minElo: 1200, borderCode: 'PLATINUM_BORDER',    titleCode: 'PLATINUM_TITLE' },
+      { minElo: 1600, borderCode: 'EMERALD_BORDER',     titleCode: 'EMERALD_TITLE' },
+      { minElo: 2000, borderCode: 'DIAMOND_BORDER',     titleCode: 'DIAMOND_TITLE' },
+      { minElo: 2400, borderCode: 'QUESTMASTER_BORDER', titleCode: 'QUESTMASTER_TITLE' },
+    ];
+
+    const newTiers = LEAGUE_TIERS.filter(
+      (lt) => eloAfter >= lt.minElo && (eloBefore < lt.minElo || lt.minElo === 0),
+    );
+
+    for (const lt of newTiers) {
+      const hasBorder = await this.userInventoryRepo.findOneBy({
+        userId, itemType: 'border', itemCode: lt.borderCode,
+      });
+      if (!hasBorder) {
+        await this.userInventoryRepo.save(
+          this.userInventoryRepo.create({ userId, itemType: 'border', itemCode: lt.borderCode }),
+        );
+      }
+      const hasTitle = await this.userInventoryRepo.findOneBy({
+        userId, itemType: 'title', itemCode: lt.titleCode,
+      });
+      if (!hasTitle) {
+        await this.userInventoryRepo.save(
+          this.userInventoryRepo.create({ userId, itemType: 'title', itemCode: lt.titleCode }),
+        );
+      }
+    }
   }
 
   async getElo(userId: string): Promise<number> {
