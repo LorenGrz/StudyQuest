@@ -196,21 +196,25 @@ export default function ProfilePage() {
             <p className="input-label" style={{ marginBottom: '8px' }}>Títulos</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px' }}>
               <button
-                className="btn btn-ghost"
+                className="btn btn-secondary"
                 onClick={() => equipTitle(null)}
                 disabled={isUpdatingCosmetics}
-                style={{ borderColor: user.activeCosmetics?.titleCode ? 'var(--border)' : 'var(--accent)' }}
+                style={{ 
+                  borderColor: user.activeCosmetics?.titleCode ? 'var(--border)' : 'var(--accent)',
+                  background: user.activeCosmetics?.titleCode ? 'var(--bg-surface)' : 'rgba(99, 102, 241, 0.1)'
+                }}
               >
                 Sin título
               </button>
               {inventory.titles.map((title) => (
                 <button
                   key={title.code}
-                  className="btn btn-ghost"
+                  className="btn btn-secondary"
                   onClick={() => equipTitle(title.code)}
                   disabled={isUpdatingCosmetics}
                   style={{
                     borderColor: user.activeCosmetics?.titleCode === title.code ? 'var(--accent)' : 'var(--border)',
+                    background: user.activeCosmetics?.titleCode === title.code ? 'rgba(99, 102, 241, 0.1)' : 'var(--bg-surface)',
                   }}
                 >
                   {title.text}

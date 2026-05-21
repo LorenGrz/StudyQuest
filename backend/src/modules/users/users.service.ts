@@ -40,6 +40,8 @@ interface InventoryPayload {
   borders: InventoryBorderItem[];
 }
 
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -56,6 +58,7 @@ export class UsersService {
     @InjectRepository(ProfileBorder)
     private readonly profileBorderRepo: Repository<ProfileBorder>,
     private readonly dataSource: DataSource,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async create(dto: RegisterDto): Promise<User> {
@@ -491,50 +494,10 @@ export class UsersService {
       .where('id = :id', { id: userId })
       .execute();
 
-    // 3. On positive delta, check for league promotion and grant cosmetics
+    // 3. Emit event so achievements service can process league promotions
     if (delta > 0) {
       const after = await this.getElo(userId);
-      await this.grantLeagueCosmetics(userId, before, after);
-    }
-  }
-
-  /** Grant league border + title for every tier newly reached. Idempotent. */
-  private async grantLeagueCosmetics(
-    userId: string,
-    eloBefore: number,
-    eloAfter: number,
-  ): Promise<void> {
-    const LEAGUE_TIERS = [
-      { minElo: 0,    borderCode: 'IRON_BORDER',        titleCode: 'IRON_TITLE' },
-      { minElo: 400,  borderCode: 'SILVER_BORDER',      titleCode: 'SILVER_TITLE' },
-      { minElo: 800,  borderCode: 'GOLD_BORDER',        titleCode: 'GOLD_TITLE' },
-      { minElo: 1200, borderCode: 'PLATINUM_BORDER',    titleCode: 'PLATINUM_TITLE' },
-      { minElo: 1600, borderCode: 'EMERALD_BORDER',     titleCode: 'EMERALD_TITLE' },
-      { minElo: 2000, borderCode: 'DIAMOND_BORDER',     titleCode: 'DIAMOND_TITLE' },
-      { minElo: 2400, borderCode: 'QUESTMASTER_BORDER', titleCode: 'QUESTMASTER_TITLE' },
-    ];
-
-    const newTiers = LEAGUE_TIERS.filter(
-      (lt) => eloAfter >= lt.minElo && (eloBefore < lt.minElo || lt.minElo === 0),
-    );
-
-    for (const lt of newTiers) {
-      const hasBorder = await this.userInventoryRepo.findOneBy({
-        userId, itemType: 'border', itemCode: lt.borderCode,
-      });
-      if (!hasBorder) {
-        await this.userInventoryRepo.save(
-          this.userInventoryRepo.create({ userId, itemType: 'border', itemCode: lt.borderCode }),
-        );
-      }
-      const hasTitle = await this.userInventoryRepo.findOneBy({
-        userId, itemType: 'title', itemCode: lt.titleCode,
-      });
-      if (!hasTitle) {
-        await this.userInventoryRepo.save(
-          this.userInventoryRepo.create({ userId, itemType: 'title', itemCode: lt.titleCode }),
-        );
-      }
+      this.eventEmitter.emit('user.elo_updated', { userId, eloBefore: before, eloAfter: after });
     }
   }
 

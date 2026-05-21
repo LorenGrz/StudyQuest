@@ -98,6 +98,33 @@ export class AchievementsService {
     }
   }
 
+  @OnEvent('user.elo_updated')
+  async onUserEloUpdated({ userId, eloBefore, eloAfter }: { userId: string; eloBefore: number; eloAfter: number }) {
+    try {
+      const LEAGUE_TIERS = [
+        { minElo: 0,    borderAchiev: 'LEAGUE_IRON',        titleAchiev: 'LEAGUE_IRON_TITLE' },
+        { minElo: 400,  borderAchiev: 'LEAGUE_SILVER',      titleAchiev: 'LEAGUE_SILVER_TITLE' },
+        { minElo: 800,  borderAchiev: 'LEAGUE_GOLD',        titleAchiev: 'LEAGUE_GOLD_TITLE' },
+        { minElo: 1200, borderAchiev: 'LEAGUE_PLATINUM',    titleAchiev: 'LEAGUE_PLATINUM_TITLE' },
+        { minElo: 1600, borderAchiev: 'LEAGUE_EMERALD',     titleAchiev: 'LEAGUE_EMERALD_TITLE' },
+        { minElo: 2000, borderAchiev: 'LEAGUE_DIAMOND',     titleAchiev: 'LEAGUE_DIAMOND_TITLE' },
+        { minElo: 2400, borderAchiev: 'LEAGUE_QUESTMASTER', titleAchiev: 'LEAGUE_QUESTMASTER_TITLE' },
+      ];
+
+      // Check for tiers newly reached or tier 1 if it's the first time
+      const newTiers = LEAGUE_TIERS.filter(
+        (lt) => eloAfter >= lt.minElo && (eloBefore < lt.minElo || lt.minElo === 0),
+      );
+
+      for (const lt of newTiers) {
+        await this.tryUnlock(userId, lt.borderAchiev, true);
+        await this.tryUnlock(userId, lt.titleAchiev, true);
+      }
+    } catch (err) {
+      this.logger.error(`Error evaluando logros para user.elo_updated (user=${userId}):`, err);
+    }
+  }
+
   // ─── Unlock logic ──────────────────────────────────────────────────────────────
 
   private async tryUnlock(userId: string, code: string, condition: boolean): Promise<void> {

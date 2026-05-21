@@ -36,6 +36,7 @@ import { QuizOption } from '../../modules/quests/quiz-option.entity';
 import { PlayerResult } from '../../modules/quests/player-result.entity';
 import { PartyInvitation } from '../../modules/parties/party-invitation.entity';
 import { Achievement } from '../../modules/achievements/achievement.entity';
+import { UserAchievement } from '../../modules/achievements/user-achievement.entity';
 import { UserTitle } from '../../modules/cosmetics/user-title.entity';
 import { UserInventory } from '../../modules/cosmetics/user-inventory.entity';
 import { ProfileBorder } from '../../modules/cosmetics/profile-border.entity';
@@ -51,6 +52,7 @@ const AppDataSource = new DataSource({
   entities: [
     User, FriendRequest, Subject, Party, PartyMember, ChatMessage, PartyActivity,
     Quest, QuizQuestion, QuizOption, PlayerResult, PartyInvitation, Achievement,
+    UserAchievement,
     UserTitle, UserInventory, ProfileBorder
   ],
   synchronize: false,
@@ -141,13 +143,13 @@ const ACHIEVEMENTS_DATA = [
 
 // ── League cosmetics map (tier → codes) ─────────────────────────────────────
 const LEAGUE_TIERS = [
-  { tier: 1, minElo: 0,    borderCode: 'IRON_BORDER',        titleCode: 'IRON_TITLE' },
-  { tier: 2, minElo: 400,  borderCode: 'SILVER_BORDER',      titleCode: 'SILVER_TITLE' },
-  { tier: 3, minElo: 800,  borderCode: 'GOLD_BORDER',        titleCode: 'GOLD_TITLE' },
-  { tier: 4, minElo: 1200, borderCode: 'PLATINUM_BORDER',    titleCode: 'PLATINUM_TITLE' },
-  { tier: 5, minElo: 1600, borderCode: 'EMERALD_BORDER',     titleCode: 'EMERALD_TITLE' },
-  { tier: 6, minElo: 2000, borderCode: 'DIAMOND_BORDER',     titleCode: 'DIAMOND_TITLE' },
-  { tier: 7, minElo: 2400, borderCode: 'QUESTMASTER_BORDER', titleCode: 'QUESTMASTER_TITLE' },
+  { tier: 1, minElo: 0,    borderCode: 'IRON_BORDER',        titleCode: 'IRON_TITLE',        borderAchiev: 'LEAGUE_IRON',        titleAchiev: 'LEAGUE_IRON_TITLE' },
+  { tier: 2, minElo: 400,  borderCode: 'SILVER_BORDER',      titleCode: 'SILVER_TITLE',      borderAchiev: 'LEAGUE_SILVER',      titleAchiev: 'LEAGUE_SILVER_TITLE' },
+  { tier: 3, minElo: 800,  borderCode: 'GOLD_BORDER',        titleCode: 'GOLD_TITLE',        borderAchiev: 'LEAGUE_GOLD',        titleAchiev: 'LEAGUE_GOLD_TITLE' },
+  { tier: 4, minElo: 1200, borderCode: 'PLATINUM_BORDER',    titleCode: 'PLATINUM_TITLE',    borderAchiev: 'LEAGUE_PLATINUM',    titleAchiev: 'LEAGUE_PLATINUM_TITLE' },
+  { tier: 5, minElo: 1600, borderCode: 'EMERALD_BORDER',     titleCode: 'EMERALD_TITLE',     borderAchiev: 'LEAGUE_EMERALD',     titleAchiev: 'LEAGUE_EMERALD_TITLE' },
+  { tier: 6, minElo: 2000, borderCode: 'DIAMOND_BORDER',     titleCode: 'DIAMOND_TITLE',     borderAchiev: 'LEAGUE_DIAMOND',     titleAchiev: 'LEAGUE_DIAMOND_TITLE' },
+  { tier: 7, minElo: 2400, borderCode: 'QUESTMASTER_BORDER', titleCode: 'QUESTMASTER_TITLE', borderAchiev: 'LEAGUE_QUESTMASTER', titleAchiev: 'LEAGUE_QUESTMASTER_TITLE' },
 ];
 
 const USER_TITLES_DATA = [
@@ -399,9 +401,10 @@ async function seed() {
     console.log('   ⚠️  Party AM2 ya existe — omitida');
   }
 
-  // ── Cosmetics retroactivos por liga ──────────────────────────────────────────
-  console.log('\n🎨  Otorgando cosmetics de liga retroactivos...');
+  // ── Cosmetics y logros retroactivos por liga ────────────────────────────────
+  console.log('\n🎨  Otorgando cosmetics y logros de liga retroactivos...');
   const inventoryRepo = AppDataSource.getRepository(UserInventory);
+  const userAchievementRepo = AppDataSource.getRepository(UserAchievement);
   const allUsers = await userRepo.find();
 
   for (const u of allUsers) {
@@ -411,7 +414,7 @@ async function seed() {
     const earnedTiers = LEAGUE_TIERS.filter(lt => elo >= lt.minElo);
 
     for (const lt of earnedTiers) {
-      // border
+      // border cosmetic
       const hasBorder = await inventoryRepo.findOneBy({
         userId: u.id, itemType: 'border', itemCode: lt.borderCode,
       });
@@ -420,7 +423,7 @@ async function seed() {
           userId: u.id, itemType: 'border', itemCode: lt.borderCode,
         }));
       }
-      // title
+      // title cosmetic
       const hasTitle = await inventoryRepo.findOneBy({
         userId: u.id, itemType: 'title', itemCode: lt.titleCode,
       });
@@ -428,6 +431,24 @@ async function seed() {
         await inventoryRepo.save(inventoryRepo.create({
           userId: u.id, itemType: 'title', itemCode: lt.titleCode,
         }));
+      }
+
+      // border achievement
+      const borderAch = await achievementRepo.findOneBy({ code: lt.borderAchiev });
+      if (borderAch) {
+        const hasBorderAch = await userAchievementRepo.findOneBy({ userId: u.id, achievementId: borderAch.id });
+        if (!hasBorderAch) {
+          await userAchievementRepo.save(userAchievementRepo.create({ userId: u.id, achievementId: borderAch.id }));
+        }
+      }
+
+      // title achievement
+      const titleAch = await achievementRepo.findOneBy({ code: lt.titleAchiev });
+      if (titleAch) {
+        const hasTitleAch = await userAchievementRepo.findOneBy({ userId: u.id, achievementId: titleAch.id });
+        if (!hasTitleAch) {
+          await userAchievementRepo.save(userAchievementRepo.create({ userId: u.id, achievementId: titleAch.id }));
+        }
       }
     }
 
