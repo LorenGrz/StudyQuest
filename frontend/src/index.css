@@ -3829,41 +3829,35 @@ select {
   justify-content: center;
 }
 
-.avatar-border-wrap-sm { width: 36px; height: 36px; }
-.avatar-border-wrap-md { width: 44px; height: 44px; }
-.avatar-border-wrap-lg { width: 64px; height: 64px; }
+.avatar-border-wrap-sm { width: 52px;  height: 52px; }
+.avatar-border-wrap-md { width: 64px;  height: 64px; }
+.avatar-border-wrap-lg { width: 92px;  height: 92px; }
 
 .avatar-border-overlay {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   z-index: 10;
-}
-
-.avatar-border-wrap-sm .avatar-border-overlay {
-  width: 52px;
-  height: 52px;
-}
-
-.avatar-border-wrap-md .avatar-border-overlay {
-  width: 64px;
-  height: 64px;
-}
-
-.avatar-border-wrap-lg .avatar-border-overlay {
-  width: 92px;
-  height: 92px;
 }
 
 .avatar-img {
   border-radius: var(--radius-full);
   object-fit: cover;
+  flex-shrink: 0;
 }
 .avatar-img-sm { width: 36px; height: 36px; }
 .avatar-img-md { width: 44px; height: 44px; }
 .avatar-img-lg { width: 64px; height: 64px; }
+
+/* Ensure placeholder sizes match inner image inside border wrapper */
+.avatar-border-wrap-sm .avatar-placeholder,
+.avatar-border-wrap-sm .avatar-placeholder-sm { width: 36px; height: 36px; font-size: 15px; }
+.avatar-border-wrap-md .avatar-placeholder,
+.avatar-border-wrap-md .avatar-placeholder-sm { width: 44px; height: 44px; font-size: 18px; }
+.avatar-border-wrap-lg .avatar-placeholder,
+.avatar-border-wrap-lg .avatar-placeholder-lg { width: 64px; height: 64px; font-size: 28px; }
 
 /* %%% Border Selector %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
 .border-selector-grid {
