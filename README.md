@@ -41,6 +41,16 @@ En **StudyQuest**, Redis es el corazón del desempeño para estados temporales:
 
 No necesitas instalar PostgreSQL ni Redis directamente. Sigue estos pasos para arrancar el entorno usando los módulos acoplados.
 
+### 0. Arranque único recomendado (sin pasos manuales)
+
+Con una sola orden se construye todo, se inicializa la base con seed + skill tree y se levantan API + Web:
+
+```bash
+npm run dev
+```
+
+Este flujo usa Docker Compose con un servicio de bootstrap automático para dejar la app lista out of the box.
+
 ### 1. Variables de Entorno
 
 Asegúrate de copiar el archivo `environment` de ejemplo para que los servicios tengan las contraseñas base y credenciales de IA:
@@ -57,6 +67,8 @@ Levantaremos las bases de datos base utilizando Docker. Ejecuta en la raíz del 
 docker compose up -d postgres redis
 ```
 *(Si deseas correr todo con contenedores también puedes omitir especificar los servicios, pero para un entorno dev es preferible sólo virtualizar las DBs y correr el código manual).*
+
+Si usas el arranque único (`npm run dev`), este paso queda implícito.
 
 ### 3. Ejecutar el Backend (NestJS)
 

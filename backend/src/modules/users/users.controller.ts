@@ -13,7 +13,11 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UsersService } from './users.service';
-import { UpdateProfileDto, EnrollSubjectDto } from '../../common/dto';
+import {
+  UpdateProfileDto,
+  EnrollSubjectDto,
+  SetActiveCosmeticsDto,
+} from '../../common/dto';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -30,6 +34,16 @@ export class UsersController {
   @Patch('me')
   updateMe(@Request() req: any, @Body() dto: UpdateProfileDto) {
     return this.usersService.updateProfile(req.user.userId, dto);
+  }
+
+  @Get('me/inventory')
+  getMyInventory(@Request() req: any): Promise<any> {
+    return this.usersService.getInventory(req.user.userId);
+  }
+
+  @Patch('me/cosmetics')
+  setMyCosmetics(@Request() req: any, @Body() dto: SetActiveCosmeticsDto) {
+    return this.usersService.setActiveCosmetics(req.user.userId, dto);
   }
 
   @Get('leaderboard/:subjectId')

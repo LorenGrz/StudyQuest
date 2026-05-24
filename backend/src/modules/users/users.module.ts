@@ -4,11 +4,24 @@ import { User } from './user.entity';
 import { Subject } from '../subjects/subject.entity';
 import { PartyMember } from '../parties/party-member.entity';
 import { FriendRequest } from './friend-request.entity';
+import { UserTitle } from '../cosmetics/user-title.entity';
+import { UserInventory } from '../cosmetics/user-inventory.entity';
+import { ProfileBorder } from '../cosmetics/profile-border.entity';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Subject, PartyMember, FriendRequest])],
+  imports: [
+    TypeOrmModule.forFeature([
+      User,
+      Subject,
+      PartyMember,
+      FriendRequest,
+      UserTitle,
+      UserInventory,
+      ProfileBorder,
+    ]),
+  ],
   controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService, TypeOrmModule],

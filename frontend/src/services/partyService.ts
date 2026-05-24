@@ -39,7 +39,7 @@ export interface PartyMember {
   isOnline: boolean
   joinedAt: string
   role: 'leader' | 'member'
-  user: Pick<User, 'id' | 'username' | 'displayName' | 'avatarUrl' | 'stats'>
+  user: Pick<User, 'id' | 'username' | 'displayName' | 'avatarUrl' | 'stats' | 'activeCosmetics'>
 }
 
 export interface PartySubject {

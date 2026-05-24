@@ -38,7 +38,7 @@ const AppDataSource = new DataSource({
     PlayerResult,
     SkillNode,
   ],
-  synchronize: false,
+  synchronize: true,
   logging: false,
 });
 

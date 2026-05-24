@@ -4,20 +4,26 @@ import type { User } from '../services/userService'
 import type { Party } from '../services/partyService'
 import type { Subject } from '../services/userService'
 import { Button } from './UI'
+import { getLeague, getEloProgress, DEFAULT_ELO } from '../utils/leagues'
+import { AvatarWithBorder } from './AvatarWithBorder'
 
 // ─── GreetingHeader ──────────────────────────────────────────────────────────
 export function GreetingHeader({ user }: { user: User | null }) {
   if (!user) return null
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Buenos días' : hour < 18 ? 'Buenas tardes' : 'Buenas noches'
+  const league = getLeague(user.stats?.elo ?? DEFAULT_ELO)
 
   return (
     <div className="greeting-header">
       <div className="greeting-avatar">
-        {user.avatarUrl
-          ? <img src={user.avatarUrl} alt={user.displayName} className="avatar" />
-          : <div className="avatar-placeholder">{user.displayName[0].toUpperCase()}</div>
-        }
+        <AvatarWithBorder
+          displayName={user.displayName}
+          avatarUrl={user.avatarUrl}
+          borderImageUrl={user.activeCosmetics?.borderImageUrl}
+          size="md"
+          glowColor={league.glowColor}
+        />
       </div>
       <div className="greeting-text">
         <p className="greeting-salute">{greeting},</p>

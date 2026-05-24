@@ -37,6 +37,10 @@ import { QuizOption } from '../../modules/quests/quiz-option.entity';
 import { PlayerResult } from '../../modules/quests/player-result.entity';
 import { PartyInvitation } from '../../modules/parties/party-invitation.entity';
 import { Achievement } from '../../modules/achievements/achievement.entity';
+import { UserAchievement } from '../../modules/achievements/user-achievement.entity';
+import { UserTitle } from '../../modules/cosmetics/user-title.entity';
+import { UserInventory } from '../../modules/cosmetics/user-inventory.entity';
+import { ProfileBorder } from '../../modules/cosmetics/profile-border.entity';
 
 // ─── Conexión ──────────────────────────────────────────────────────────────────
 const AppDataSource = new DataSource({
@@ -48,11 +52,40 @@ const AppDataSource = new DataSource({
   database: process.env.POSTGRES_DB       ?? 'studyquest',
   entities: [
     User, FriendRequest, Subject, Party, PartyMember, ChatMessage, PartyActivity,
-    Quest, QuizQuestion, QuizOption, PlayerResult, PartyInvitation, Achievement
+    Quest, QuizQuestion, QuizOption, PlayerResult, PartyInvitation, Achievement,
+    UserAchievement,
+    UserTitle, UserInventory, ProfileBorder
   ],
   synchronize: false,
   logging: false,
 });
+
+async function ensureBootstrapSchema(): Promise<void> {
+  await AppDataSource.query('CREATE EXTENSION IF NOT EXISTS pgcrypto;');
+
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS users
+    ADD COLUMN IF NOT EXISTS active_cosmetics jsonb
+    DEFAULT '{"titleCode":null,"titleText":null}'::jsonb;
+  `);
+
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS achievements
+    ADD COLUMN IF NOT EXISTS reward_type varchar(20);
+  `);
+
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS achievements
+    ADD COLUMN IF NOT EXISTS reward_code varchar(60);
+  `);
+
+  // Si quedaron tablas legado de pruebas manuales, las recreamos limpias.
+  await AppDataSource.query('DROP TABLE IF EXISTS user_inventory CASCADE;');
+  await AppDataSource.query('DROP TABLE IF EXISTS user_titles CASCADE;');
+  await AppDataSource.query('DROP TABLE IF EXISTS profile_borders CASCADE;');
+
+  await AppDataSource.synchronize();
+}
 
 // ─── Datos de prueba ───────────────────────────────────────────────────────────
 const UNIVERSITY = 'Universidad Nacional de Córdoba';
@@ -79,18 +112,79 @@ const USERS_DATA = [
 
 const ACHIEVEMENTS_DATA = [
   { code: 'FIRST_QUEST',      name: 'Primera Quest',        icon: '🎯', category: 'academic',    description: 'Completaste tu primera quest.',          points: 50 },
-  { code: 'QUEST_STREAK_3',   name: 'En Racha',             icon: '🔥', category: 'academic',    description: 'Mantuviste una racha de 3 días.',         points: 100 },
+  { code: 'QUEST_STREAK_3',   name: 'En Racha',             icon: '🔥', category: 'academic',    description: 'Mantuviste una racha de 3 días.',         points: 100, rewardType: 'title', rewardCode: 'STREAK_3_TITLE' },
   { code: 'QUEST_STREAK_5',   name: 'Imparable',            icon: '⚡', category: 'academic',    description: 'Mantuviste una racha de 5 días.',         points: 200 },
   { code: 'FIRST_PARTY',      name: 'Primera Party',        icon: '🎉', category: 'social',      description: 'Te uniste a tu primera party de estudio.', points: 50 },
   { code: 'SOCIAL_BUTTERFLY', name: 'Alma de la Fiesta',    icon: '🦋', category: 'social',      description: 'Participaste en 5 parties diferentes.',    points: 150 },
   { code: 'LEVEL_5',          name: 'Estudiante Aplicado',  icon: '📚', category: 'progression', description: 'Alcanzaste el nivel 5.',                    points: 100 },
-  { code: 'LEVEL_10',         name: 'Maestro del Estudio',  icon: '🏆', category: 'progression', description: 'Alcanzaste el nivel 10.',                   points: 250 },
+  { code: 'LEVEL_10',         name: 'Maestro del Estudio',  icon: '🏆', category: 'progression', description: 'Alcanzaste el nivel 10.',                   points: 250, rewardType: 'title', rewardCode: 'MASTER_TITLE' },
+
+  { code: 'STREAK_3_BORDER',  name: 'Marco de Fuego',       icon: '🔥', category: 'cosmetic',    description: 'Recompensa por racha de 3 días.',         points: 0,   rewardType: 'border', rewardCode: 'FIRE_BORDER' },
+  { code: 'LEVEL_5_BORDER',   name: 'Marco Estelar',        icon: '⭐', category: 'cosmetic',    description: 'Recompensa por nivel 5.',                 points: 0,   rewardType: 'border', rewardCode: 'STAR_BORDER' },
+  { code: 'LEVEL_10_BORDER',  name: 'Marco de Campeón',     icon: '👑', category: 'cosmetic',    description: 'Recompensa por nivel 10.',                points: 0,   rewardType: 'border', rewardCode: 'CHAMPION_BORDER' },
+
+  // ── League rank-up achievements ─────────────────────────────────────────────
+  { code: 'LEAGUE_IRON',        name: 'Bienvenido al Hierro',  icon: '⚙️',  category: 'league', description: 'Comenzaste tu camino en StudyQuest.',  points: 0,  rewardType: 'border', rewardCode: 'IRON_BORDER' },
+  { code: 'LEAGUE_SILVER',      name: 'Ascenso a Plata',       icon: '🥈',  category: 'league', description: 'Alcanzaste la liga Plata.',            points: 50, rewardType: 'border', rewardCode: 'SILVER_BORDER' },
+  { code: 'LEAGUE_GOLD',        name: 'Ascenso a Oro',         icon: '🥇',  category: 'league', description: 'Alcanzaste la liga Oro.',              points: 100, rewardType: 'border', rewardCode: 'GOLD_BORDER' },
+  { code: 'LEAGUE_PLATINUM',    name: 'Ascenso a Platino',     icon: '💎',  category: 'league', description: 'Alcanzaste la liga Platino.',          points: 150, rewardType: 'border', rewardCode: 'PLATINUM_BORDER' },
+  { code: 'LEAGUE_EMERALD',     name: 'Ascenso a Esmeralda',   icon: '💚',  category: 'league', description: 'Alcanzaste la liga Esmeralda.',        points: 200, rewardType: 'border', rewardCode: 'EMERALD_BORDER' },
+  { code: 'LEAGUE_DIAMOND',     name: 'Ascenso a Diamante',    icon: '💠',  category: 'league', description: 'Alcanzaste la liga Diamante.',         points: 300, rewardType: 'border', rewardCode: 'DIAMOND_BORDER' },
+  { code: 'LEAGUE_QUESTMASTER', name: '¡QuestMaster!',         icon: '👑',  category: 'league', description: 'Alcanzaste el rango máximo.',          points: 500, rewardType: 'border', rewardCode: 'QUESTMASTER_BORDER' },
+
+  // league title achievements
+  { code: 'LEAGUE_IRON_TITLE',        name: 'Título: Forjado en Hierro',    icon: '⚙️',  category: 'league', description: 'Título desbloqueado al iniciar.',        points: 0, rewardType: 'title', rewardCode: 'IRON_TITLE' },
+  { code: 'LEAGUE_SILVER_TITLE',      name: 'Título: De Plata',            icon: '🥈',  category: 'league', description: 'Título desbloqueado en Plata.',          points: 0, rewardType: 'title', rewardCode: 'SILVER_TITLE' },
+  { code: 'LEAGUE_GOLD_TITLE',        name: 'Título: Dorado',              icon: '🥇',  category: 'league', description: 'Título desbloqueado en Oro.',            points: 0, rewardType: 'title', rewardCode: 'GOLD_TITLE' },
+  { code: 'LEAGUE_PLATINUM_TITLE',    name: 'Título: Platinado',           icon: '💎',  category: 'league', description: 'Título desbloqueado en Platino.',        points: 0, rewardType: 'title', rewardCode: 'PLATINUM_TITLE' },
+  { code: 'LEAGUE_EMERALD_TITLE',     name: 'Título: Esmeralda',           icon: '💚',  category: 'league', description: 'Título desbloqueado en Esmeralda.',      points: 0, rewardType: 'title', rewardCode: 'EMERALD_TITLE' },
+  { code: 'LEAGUE_DIAMOND_TITLE',     name: 'Título: Diamante',            icon: '💠',  category: 'league', description: 'Título desbloqueado en Diamante.',       points: 0, rewardType: 'title', rewardCode: 'DIAMOND_TITLE' },
+  { code: 'LEAGUE_QUESTMASTER_TITLE', name: 'Título: QuestMaster',         icon: '👑',  category: 'league', description: 'Título desbloqueado al ser QuestMaster.', points: 0, rewardType: 'title', rewardCode: 'QUESTMASTER_TITLE' },
+];
+
+// ── League cosmetics map (tier → codes) ─────────────────────────────────────
+const LEAGUE_TIERS = [
+  { tier: 1, minElo: 0,    borderCode: 'IRON_BORDER',        titleCode: 'IRON_TITLE',        borderAchiev: 'LEAGUE_IRON',        titleAchiev: 'LEAGUE_IRON_TITLE' },
+  { tier: 2, minElo: 400,  borderCode: 'SILVER_BORDER',      titleCode: 'SILVER_TITLE',      borderAchiev: 'LEAGUE_SILVER',      titleAchiev: 'LEAGUE_SILVER_TITLE' },
+  { tier: 3, minElo: 800,  borderCode: 'GOLD_BORDER',        titleCode: 'GOLD_TITLE',        borderAchiev: 'LEAGUE_GOLD',        titleAchiev: 'LEAGUE_GOLD_TITLE' },
+  { tier: 4, minElo: 1200, borderCode: 'PLATINUM_BORDER',    titleCode: 'PLATINUM_TITLE',    borderAchiev: 'LEAGUE_PLATINUM',    titleAchiev: 'LEAGUE_PLATINUM_TITLE' },
+  { tier: 5, minElo: 1600, borderCode: 'EMERALD_BORDER',     titleCode: 'EMERALD_TITLE',     borderAchiev: 'LEAGUE_EMERALD',     titleAchiev: 'LEAGUE_EMERALD_TITLE' },
+  { tier: 6, minElo: 2000, borderCode: 'DIAMOND_BORDER',     titleCode: 'DIAMOND_TITLE',     borderAchiev: 'LEAGUE_DIAMOND',     titleAchiev: 'LEAGUE_DIAMOND_TITLE' },
+  { tier: 7, minElo: 2400, borderCode: 'QUESTMASTER_BORDER', titleCode: 'QUESTMASTER_TITLE', borderAchiev: 'LEAGUE_QUESTMASTER', titleAchiev: 'LEAGUE_QUESTMASTER_TITLE' },
+];
+
+const USER_TITLES_DATA = [
+  { code: 'STREAK_3_TITLE', name: 'Racha Activa',        text: 'Racha Activa',        achievementCode: 'QUEST_STREAK_3' },
+  { code: 'MASTER_TITLE',   name: 'Maestro del Estudio', text: 'Maestro del Estudio', achievementCode: 'LEVEL_10' },
+  // league titles
+  { code: 'IRON_TITLE',        name: 'Forjado en Hierro', text: 'Forjado en Hierro',    achievementCode: 'LEAGUE_IRON_TITLE' },
+  { code: 'SILVER_TITLE',      name: 'De Plata',          text: 'De Plata',             achievementCode: 'LEAGUE_SILVER_TITLE' },
+  { code: 'GOLD_TITLE',        name: 'Dorado',            text: 'Dorado',               achievementCode: 'LEAGUE_GOLD_TITLE' },
+  { code: 'PLATINUM_TITLE',    name: 'Platinado',         text: 'Platinado',            achievementCode: 'LEAGUE_PLATINUM_TITLE' },
+  { code: 'EMERALD_TITLE',     name: 'Esmeralda',         text: 'Esmeralda',            achievementCode: 'LEAGUE_EMERALD_TITLE' },
+  { code: 'DIAMOND_TITLE',     name: 'Diamante',          text: 'Diamante',             achievementCode: 'LEAGUE_DIAMOND_TITLE' },
+  { code: 'QUESTMASTER_TITLE', name: 'QuestMaster',       text: 'QuestMaster',          achievementCode: 'LEAGUE_QUESTMASTER_TITLE' },
+];
+
+const PROFILE_BORDERS_DATA = [
+  { code: 'FIRE_BORDER',        name: 'Llamas',     imageFile: 'fire.svg',        achievementCode: 'STREAK_3_BORDER' },
+  { code: 'STAR_BORDER',        name: 'Estrella',   imageFile: 'star.svg',        achievementCode: 'LEVEL_5_BORDER' },
+  { code: 'CHAMPION_BORDER',    name: 'Campeón',    imageFile: 'champion.svg',    achievementCode: 'LEVEL_10_BORDER' },
+  // league borders
+  { code: 'IRON_BORDER',        name: 'Hierro',        imageFile: 'iron.svg',        achievementCode: 'LEAGUE_IRON' },
+  { code: 'SILVER_BORDER',      name: 'Plata',         imageFile: 'silver.svg',      achievementCode: 'LEAGUE_SILVER' },
+  { code: 'GOLD_BORDER',        name: 'Oro',           imageFile: 'gold.svg',        achievementCode: 'LEAGUE_GOLD' },
+  { code: 'PLATINUM_BORDER',    name: 'Platino',       imageFile: 'platinum.svg',    achievementCode: 'LEAGUE_PLATINUM' },
+  { code: 'EMERALD_BORDER',     name: 'Esmeralda',     imageFile: 'emerald.svg',     achievementCode: 'LEAGUE_EMERALD' },
+  { code: 'DIAMOND_BORDER',     name: 'Diamante',      imageFile: 'diamond.svg',     achievementCode: 'LEAGUE_DIAMOND' },
+  { code: 'QUESTMASTER_BORDER', name: 'QuestMaster',   imageFile: 'questmaster.svg', achievementCode: 'LEAGUE_QUESTMASTER' },
 ];
 
 // ─── Main ──────────────────────────────────────────────────────────────────────
 async function seed() {
   console.log('🌱  Conectando a la base de datos...');
   await AppDataSource.initialize();
+  await ensureBootstrapSchema();
   console.log('✅  Conexión exitosa\n');
 
   const userRepo        = AppDataSource.getRepository(User);
@@ -98,6 +192,7 @@ async function seed() {
   const subjectRepo     = AppDataSource.getRepository(Subject);
   const partyRepo       = AppDataSource.getRepository(Party);
   const memberRepo      = AppDataSource.getRepository(PartyMember);
+  const userTitleRepo = AppDataSource.getRepository(UserTitle);
 
   // ── 1. Materias ──────────────────────────────────────────────────────────────
   console.log('📚  Creando materias...');
@@ -152,18 +247,21 @@ async function seed() {
   const [am2, aed, bd, so, rc] = savedSubjects;
 
   console.log('\n🤝  Creando amistades de prueba...');
-  await friendRequestRepo.save([
-    friendRequestRepo.create({
-      requesterId: alice.id,
-      requesteeId: bob.id,
-      status: 'accepted',
-    }),
-    friendRequestRepo.create({
-      requesterId: eve.id,
-      requesteeId: grace.id,
-      status: 'pending',
-    }),
-  ]);
+  const friendSeeds = [
+    { requesterId: alice.id, requesteeId: bob.id, status: 'accepted' as const },
+    { requesterId: eve.id, requesteeId: grace.id, status: 'pending' as const },
+  ];
+
+  for (const fr of friendSeeds) {
+    const existing = await friendRequestRepo.findOne({
+      where: [
+        { requesterId: fr.requesterId, requesteeId: fr.requesteeId },
+        { requesterId: fr.requesteeId, requesteeId: fr.requesterId },
+      ],
+    });
+    if (existing) continue;
+    await friendRequestRepo.save(friendRequestRepo.create(fr));
+  }
   console.log('   ✔  Solicitudes de amistad seeded');
 
   // ── 3b. Logros ──────────────────────────────────────────────────────────────────
@@ -173,11 +271,49 @@ async function seed() {
   for (const ad of ACHIEVEMENTS_DATA) {
     const existing = await achievementRepo.findOneBy({ code: ad.code });
     if (existing) {
-      console.log(`   ⚠️  Logro "${ad.code}" ya existe — omitido`);
+      await achievementRepo.save(
+        achievementRepo.create({
+          ...existing,
+          rewardType: (ad as any).rewardType ?? null,
+          rewardCode: (ad as any).rewardCode ?? null,
+        }),
+      );
+      console.log(`   ⚠️  Logro "${ad.code}" ya existe — actualizado`);
       continue;
     }
-    await achievementRepo.save(achievementRepo.create(ad));
+    await achievementRepo.save(
+      achievementRepo.create({
+        ...ad,
+        rewardType: (ad as any).rewardType ?? null,
+        rewardCode: (ad as any).rewardCode ?? null,
+      }),
+    );
     console.log(`   ✔  ${ad.icon} ${ad.name}`);
+  }
+
+  console.log('\n🏷️  Creando catálogo de títulos...');
+  for (const td of USER_TITLES_DATA) {
+    const existing = await userTitleRepo.findOneBy({ code: td.code });
+    if (existing) {
+      await userTitleRepo.save(userTitleRepo.create({ ...existing, ...td }));
+      console.log(`   ⚠️  Título "${td.code}" ya existe — actualizado`);
+      continue;
+    }
+    await userTitleRepo.save(userTitleRepo.create(td));
+    console.log(`   ✔  ${td.name}`);
+  }
+
+  console.log('\n🖼️  Creando catálogo de bordes...');
+  const profileBorderRepo = AppDataSource.getRepository(ProfileBorder);
+  for (const bd of PROFILE_BORDERS_DATA) {
+    const existing = await profileBorderRepo.findOneBy({ code: bd.code });
+    if (existing) {
+      await profileBorderRepo.save(profileBorderRepo.create({ ...existing, ...bd }));
+      console.log(`   ⚠️  Borde "${bd.code}" ya existe — actualizado`);
+      continue;
+    }
+    await profileBorderRepo.save(profileBorderRepo.create(bd));
+    console.log(`   ✔  ${bd.name}`);
   }
 
   // CORRECTO: AppDataSource.createQueryBuilder().relation(...)
@@ -264,6 +400,61 @@ async function seed() {
     console.log('   ✔  Party "Análisis Matemático II" (eve)');
   } else {
     console.log('   ⚠️  Party AM2 ya existe — omitida');
+  }
+
+  // ── Cosmetics y logros retroactivos por liga ────────────────────────────────
+  console.log('\n🎨  Otorgando cosmetics y logros de liga retroactivos...');
+  const inventoryRepo = AppDataSource.getRepository(UserInventory);
+  const userAchievementRepo = AppDataSource.getRepository(UserAchievement);
+  const allUsers = await userRepo.find();
+
+  for (const u of allUsers) {
+    const elo: number = (u.stats as any)?.elo ?? 1200;
+
+    // grant all tiers the user has reached (cumulative)
+    const earnedTiers = LEAGUE_TIERS.filter(lt => elo >= lt.minElo);
+
+    for (const lt of earnedTiers) {
+      // border cosmetic
+      const hasBorder = await inventoryRepo.findOneBy({
+        userId: u.id, itemType: 'border', itemCode: lt.borderCode,
+      });
+      if (!hasBorder) {
+        await inventoryRepo.save(inventoryRepo.create({
+          userId: u.id, itemType: 'border', itemCode: lt.borderCode,
+        }));
+      }
+      // title cosmetic
+      const hasTitle = await inventoryRepo.findOneBy({
+        userId: u.id, itemType: 'title', itemCode: lt.titleCode,
+      });
+      if (!hasTitle) {
+        await inventoryRepo.save(inventoryRepo.create({
+          userId: u.id, itemType: 'title', itemCode: lt.titleCode,
+        }));
+      }
+
+      // border achievement
+      const borderAch = await achievementRepo.findOneBy({ code: lt.borderAchiev });
+      if (borderAch) {
+        const hasBorderAch = await userAchievementRepo.findOneBy({ userId: u.id, achievementId: borderAch.id });
+        if (!hasBorderAch) {
+          await userAchievementRepo.save(userAchievementRepo.create({ userId: u.id, achievementId: borderAch.id }));
+        }
+      }
+
+      // title achievement
+      const titleAch = await achievementRepo.findOneBy({ code: lt.titleAchiev });
+      if (titleAch) {
+        const hasTitleAch = await userAchievementRepo.findOneBy({ userId: u.id, achievementId: titleAch.id });
+        if (!hasTitleAch) {
+          await userAchievementRepo.save(userAchievementRepo.create({ userId: u.id, achievementId: titleAch.id }));
+        }
+      }
+    }
+
+    const highestTier = earnedTiers[earnedTiers.length - 1];
+    console.log(`   ✔  ${u.displayName} (ELO ${elo}) → hasta ${highestTier?.borderCode ?? 'ninguno'}`);
   }
 
   // ── Resumen ──────────────────────────────────────────────────────────────────

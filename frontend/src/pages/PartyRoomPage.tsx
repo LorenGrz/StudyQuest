@@ -37,11 +37,11 @@ const PartyRoomPage = () => {
   const { quests, uploadNote, isGenerating } = useQuests(partyId ?? '')
   const { activities, isLoading: activityLoading } = useActivity(partyId ?? '')
 
-  const tabs: Array<{ id: ActiveTab; label: string }> = [
-    { id: 'quests', label: '⚡ Quests' },
-    { id: 'chat', label: '💬 Chat' },
-    { id: 'members', label: '👥 Miembros' },
-    { id: 'activity', label: '📊 Historial' },
+  const tabs: Array<{ id: ActiveTab; label: string; ariaLabel: string }> = [
+    { id: 'quests', label: 'Quests', ariaLabel: 'Ver quests de la party' },
+    { id: 'chat', label: 'Chat', ariaLabel: 'Abrir chat de la party' },
+    { id: 'members', label: 'Miembros', ariaLabel: 'Ver miembros de la party' },
+    { id: 'activity', label: 'Actividad', ariaLabel: 'Ver actividad reciente de la party' },
   ]
 
   const handleLeave = async () => {
@@ -79,9 +79,10 @@ const PartyRoomPage = () => {
 
   if (isPartyLoading) {
     return (
-      <MobileLayout>
-        <div className="center-spinner"><Spinner size="lg" /></div>
-      </MobileLayout>
+      <div style={{ textAlign: 'center', padding: '20px' }}>
+        <Spinner size="lg" />
+        <p>Cargando la party...</p>
+      </div>
     )
   }
 
@@ -90,7 +91,11 @@ const PartyRoomPage = () => {
       <div className="party-room-shell">
         <div className="party-room-topbar">
           <PartyHeader party={party} />
-          <TabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
+          <TabBar
+            tabs={tabs}
+            active={activeTab}
+            onChange={(tab) => setActiveTab(tab)}
+          />
         </div>
 
         <div className="party-room-panel">

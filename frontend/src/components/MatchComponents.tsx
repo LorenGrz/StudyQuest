@@ -1,4 +1,5 @@
 import type { Party, PartyMember } from '../services/partyService'
+import { AvatarWithBorder } from './AvatarWithBorder'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -22,23 +23,18 @@ interface MemberAvatarProps {
 }
 
 export function MemberAvatar({ member, size = 28 }: MemberAvatarProps) {
-  const initial = getInitial(member.user?.displayName)
-  if (member.user?.avatarUrl) {
-    return (
-      <img
-        src={member.user.avatarUrl}
-        alt={member.user.displayName}
-        className="mc-avatar-img"
-        style={{ width: size, height: size }}
-      />
-    )
-  }
+  const bs = size > 40 ? 'md' : 'sm'
+  const baseSize = bs === 'md' ? 44 : 36
+  const scale = size / baseSize
+
   return (
-    <div
-      className="mc-avatar-placeholder"
-      style={{ width: size, height: size, fontSize: size * 0.4 }}
-    >
-      {initial}
+    <div style={{ transform: `scale(${scale})`, transformOrigin: 'center', display: 'inline-flex' }}>
+      <AvatarWithBorder
+        displayName={member.user?.displayName ?? '?'}
+        avatarUrl={member.user?.avatarUrl}
+        borderImageUrl={member.user?.activeCosmetics?.borderImageUrl}
+        size={bs}
+      />
     </div>
   )
 }

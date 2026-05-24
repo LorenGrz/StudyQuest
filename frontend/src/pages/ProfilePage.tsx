@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react"
 import { MobileLayout } from "../components/Layouts"
 import { Button, Badge, Spinner } from "../components/UI"
+import { AvatarWithBorder } from "../components/AvatarWithBorder"
 import { useAuthStore } from "../store/authStore"
 import { useAuth } from "../hooks/useAuth"
-import { userService } from "../services/userService"
+import { userService, type UserInventory } from "../services/userService"
 import {
   getLeague,
   DEFAULT_ELO,
@@ -15,10 +16,24 @@ export default function ProfilePage() {
   const { user, setUser } = useAuthStore()
   const { logout } = useAuth()
   const [isEditing, setIsEditing] = useState(false)
+  const [inventory, setInventory] = useState<UserInventory>({ titles: [], borders: [] })
+  const [inventoryLoading, setInventoryLoading] = useState(true)
+  const [inventoryError, setInventoryError] = useState<string | null>(null)
+  const [isUpdatingCosmetics, setIsUpdatingCosmetics] = useState(false)
   const { achievements, isLoading: achievementsLoading } = useAchievements()
 
   useEffect(() => {
-    userService.getMe().then(setUser).catch(console.error)
+    Promise.all([userService.getMe(), userService.getInventory()])
+      .then(([me, inv]) => {
+        setUser(me)
+        setInventory(inv)
+        setInventoryError(null)
+      })
+      .catch((err) => {
+        console.error(err)
+        setInventoryError('No se pudo cargar el inventario')
+      })
+      .finally(() => setInventoryLoading(false))
   }, [setUser])
 
   if (!user) {
@@ -47,6 +62,30 @@ export default function ProfilePage() {
       ? Math.round((stats.quizzesWon / stats.quizzesPlayed) * 100)
       : 0
 
+  const equipTitle = async (titleCode: string | null) => {
+    try {
+      setIsUpdatingCosmetics(true)
+      const updated = await userService.setActiveCosmetics({ titleCode })
+      setUser(updated)
+    } catch (err) {
+      console.error('No se pudo equipar título', err)
+    } finally {
+      setIsUpdatingCosmetics(false)
+    }
+  }
+
+  const equipBorder = async (borderCode: string | null) => {
+    try {
+      setIsUpdatingCosmetics(true)
+      const updated = await userService.setActiveCosmetics({ borderCode })
+      setUser(updated)
+    } catch (err) {
+      console.error('No se pudo equipar borde', err)
+    } finally {
+      setIsUpdatingCosmetics(false)
+    }
+  }
+
   return (
     <MobileLayout>
       {/* ─── User Card ─────────────────────────────────────────────── */}
@@ -54,18 +93,13 @@ export default function ProfilePage() {
         className="profile-card"
         style={{ marginTop: "16px", borderTop: `3px solid ${league.color}` }}
       >
-        <div
-          className="avatar-placeholder"
-          style={{
-            width: "64px",
-            height: "64px",
-            fontSize: "28px",
-            flexShrink: 0,
-            boxShadow: `0 0 16px ${league.glowColor}`,
-          }}
-        >
-          {user.displayName.charAt(0).toUpperCase()}
-        </div>
+        <AvatarWithBorder
+          displayName={user.displayName}
+          avatarUrl={user.avatarUrl}
+          borderImageUrl={user.activeCosmetics?.borderImageUrl}
+          size="lg"
+          glowColor={league.glowColor}
+        />
         <div className="profile-card-info">
           <h2>{user.displayName}</h2>
           <p>@{user.username}</p>
@@ -144,6 +178,83 @@ export default function ProfilePage() {
             </div>
           ))}
         </div>
+      )}
+
+      {/* ─── Inventario de cosméticos ─────────────────────────────── */}
+      <h3 className="section-title" style={{ marginTop: '16px' }}>Inventario</h3>
+      {inventoryLoading ? (
+        <div className="center-spinner" style={{ padding: '20px' }}><Spinner size="sm" /></div>
+      ) : inventoryError ? (
+        <div className="empty-state" style={{ padding: '20px' }}>
+          <p className="empty-text" style={{ fontSize: '14px' }}>{inventoryError}</p>
+        </div>
+      ) : (
+        <>
+          <div className="input-group" style={{ marginTop: '8px' }}>
+            <p className="input-label" style={{ marginBottom: '8px' }}>Títulos</p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px' }}>
+              <button
+                className="btn btn-secondary"
+                onClick={() => equipTitle(null)}
+                disabled={isUpdatingCosmetics}
+                style={{ 
+                  padding: '12px 16px',
+                  borderRadius: '12px',
+                  borderColor: user.activeCosmetics?.titleCode ? 'var(--border)' : 'var(--accent)',
+                  background: user.activeCosmetics?.titleCode ? 'var(--bg-surface)' : 'rgba(99, 102, 241, 0.1)'
+                }}
+              >
+                Sin título
+              </button>
+              {inventory.titles.map((title) => (
+                <button
+                  key={title.code}
+                  className="btn btn-secondary"
+                  onClick={() => equipTitle(title.code)}
+                  disabled={isUpdatingCosmetics}
+                  style={{
+                    padding: '12px 16px',
+                    borderRadius: '12px',
+                    borderColor: user.activeCosmetics?.titleCode === title.code ? 'var(--accent)' : 'var(--border)',
+                    background: user.activeCosmetics?.titleCode === title.code ? 'rgba(99, 102, 241, 0.1)' : 'var(--bg-surface)',
+                  }}
+                >
+                  {title.text}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="input-group" style={{ marginTop: '24px' }}>
+            <p className="input-label" style={{ marginBottom: '8px' }}>Bordes</p>
+            <div className="border-selector-grid">
+              <div
+                className={`border-selector-item ${!user.activeCosmetics?.borderCode ? 'border-selector-item--active' : ''}`}
+                onClick={() => equipBorder(null)}
+                style={{ opacity: isUpdatingCosmetics ? 0.5 : 1 }}
+              >
+                <div className="border-selector-preview">
+                  <span style={{ fontSize: '14px', fontWeight: 800 }}>{user.displayName.charAt(0).toUpperCase()}</span>
+                </div>
+                <span className="border-selector-name">Sin borde</span>
+              </div>
+              {inventory.borders?.map((border) => (
+                <div
+                  key={border.code}
+                  className={`border-selector-item ${user.activeCosmetics?.borderCode === border.code ? 'border-selector-item--active' : ''}`}
+                  onClick={() => equipBorder(border.code)}
+                  style={{ opacity: isUpdatingCosmetics ? 0.5 : 1 }}
+                >
+                  <div className="border-selector-preview">
+                    <span style={{ fontSize: '14px', fontWeight: 800 }}>{user.displayName.charAt(0).toUpperCase()}</span>
+                    <img src={`http://localhost:3000${border.imageUrl}`} alt="" className="border-selector-img" />
+                  </div>
+                  <span className="border-selector-name">{border.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
       )}
 
       {/* ─── League Ladder ─────────────────────────────────────────── */}

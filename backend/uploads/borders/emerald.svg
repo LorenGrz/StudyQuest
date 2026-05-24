@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="50%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#6ee7b7"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <circle cx="50" cy="50" r="46" stroke="#34d399" stroke-width="7" stroke-opacity="0.2" filter="url(#glow)"/>
+  <circle cx="50" cy="50" r="46" stroke="url(#g)" stroke-width="4.5"/>
+  <circle cx="50" cy="50" r="40" stroke="#6ee7b7" stroke-width="1" stroke-opacity="0.5"/>
+  <!-- Leaf/gem ornaments -->
+  <path d="M50 2 C46 6 44 10 50 14 C56 10 54 6 50 2Z" fill="#34d399" opacity="0.9"/>
+  <path d="M50 98 C46 94 44 90 50 86 C56 90 54 94 50 98Z" fill="#34d399" opacity="0.9"/>
+  <path d="M2 50 C6 46 10 44 14 50 C10 56 6 54 2 50Z" fill="#34d399" opacity="0.9"/>
+  <path d="M98 50 C94 46 90 44 86 50 C90 56 94 54 98 50Z" fill="#34d399" opacity="0.9"/>
+  <!-- diagonal gem dots -->
+  <circle cx="79.6" cy="20.4" r="3" fill="#6ee7b7" opacity="0.75"/>
+  <circle cx="20.4" cy="79.6" r="3" fill="#6ee7b7" opacity="0.75"/>
+  <circle cx="79.6" cy="79.6" r="3" fill="#6ee7b7" opacity="0.75"/>
+  <circle cx="20.4" cy="20.4" r="3" fill="#6ee7b7" opacity="0.75"/>
+</svg>

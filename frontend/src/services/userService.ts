@@ -48,6 +48,32 @@ export interface DashboardStats {
   subjectPerformance: DashboardSubjectPerformance[]
 }
 
+export interface ActiveCosmetics {
+  titleCode: string | null
+  titleText: string | null
+  borderCode: string | null
+  borderImageUrl: string | null
+}
+
+export interface InventoryTitleItem {
+  code: string
+  name: string
+  text: string
+  unlockedAt: string
+}
+
+export interface InventoryBorderItem {
+  code: string
+  name: string
+  imageUrl: string
+  unlockedAt: string
+}
+
+export interface UserInventory {
+  titles: InventoryTitleItem[]
+  borders: InventoryBorderItem[]
+}
+
 export interface User {
   id: string
   email: string
@@ -60,6 +86,7 @@ export interface User {
   enrolledSubjects: Subject[]
   availability: AvailabilitySlot[]
   stats: UserStats
+  activeCosmetics?: ActiveCosmetics
   isActive: boolean
   createdAt: string
   updatedAt: string
@@ -74,12 +101,18 @@ export interface UpdateProfilePayload {
   availability?: AvailabilitySlot[]
 }
 
+export interface SetActiveCosmeticsPayload {
+  titleCode?: string | null
+  borderCode?: string | null
+}
+
 export interface LeaderboardEntry {
   rank: number
   userId: string
   username: string
   displayName: string
   avatarUrl: string | null
+  activeCosmetics?: ActiveCosmetics
   elo: number
 }
 
@@ -96,6 +129,16 @@ export const userService = {
 
   async getDashboardStats(): Promise<DashboardStats> {
     const { data } = await api.get<DashboardStats>('/users/me/stats')
+    return data
+  },
+
+  async getInventory(): Promise<UserInventory> {
+    const { data } = await api.get<UserInventory>('/users/me/inventory')
+    return data
+  },
+
+  async setActiveCosmetics(payload: SetActiveCosmeticsPayload): Promise<User> {
+    const { data } = await api.patch<User>('/users/me/cosmetics', payload)
     return data
   },
 

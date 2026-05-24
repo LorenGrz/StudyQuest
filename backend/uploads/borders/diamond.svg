@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="50%" stop-color="#818cf8"/>
+      <stop offset="100%" stop-color="#c7d2fe"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="g2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#c7d2fe"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+  </defs>
+  <circle cx="50" cy="50" r="46" stroke="#818cf8" stroke-width="8" stroke-opacity="0.25" filter="url(#glow)"/>
+  <!-- dual rotating rings -->
+  <circle cx="50" cy="50" r="46" stroke="url(#g)" stroke-width="4"/>
+  <circle cx="50" cy="50" r="42" stroke="url(#g2)" stroke-width="1.5" stroke-dasharray="4 6"/>
+  <circle cx="50" cy="50" r="38" stroke="#818cf8" stroke-width="0.8" stroke-opacity="0.4"/>
+  <!-- Diamond facets at cardinal -->
+  <polygon points="50,2 54,7 50,12 46,7" fill="#818cf8"/>
+  <polygon points="50,98 54,93 50,88 46,93" fill="#818cf8"/>
+  <polygon points="2,50 7,54 12,50 7,46" fill="#818cf8"/>
+  <polygon points="98,50 93,54 88,50 93,46" fill="#818cf8"/>
+  <!-- diagonal sparkles -->
+  <path d="M79 20 L81 24 L79 22 L77 24 L79 20Z" fill="#c7d2fe"/>
+  <path d="M21 80 L23 84 L21 82 L19 84 L21 80Z" fill="#c7d2fe"/>
+  <path d="M79 80 L81 84 L79 82 L77 84 L79 80Z" fill="#c7d2fe"/>
+  <path d="M21 20 L23 24 L21 22 L19 24 L21 20Z" fill="#c7d2fe"/>
+</svg>

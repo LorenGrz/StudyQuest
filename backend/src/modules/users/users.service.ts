@@ -11,8 +11,36 @@ import * as bcrypt from 'bcrypt';
 import { User } from './user.entity';
 import { Subject } from '../subjects/subject.entity';
 import { FriendRequest } from './friend-request.entity';
-import { RegisterDto, UpdateProfileDto } from '../../common/dto';
+import {
+  RegisterDto,
+  UpdateProfileDto,
+  SetActiveCosmeticsDto,
+} from '../../common/dto';
 import { DEFAULT_ELO } from '../../common/leagues';
+import { UserTitle } from '../cosmetics/user-title.entity';
+import { UserInventory } from '../cosmetics/user-inventory.entity';
+import { ProfileBorder } from '../cosmetics/profile-border.entity';
+
+interface InventoryTitleItem {
+  code: string;
+  name: string;
+  text: string;
+  unlockedAt: Date;
+}
+
+interface InventoryBorderItem {
+  code: string;
+  name: string;
+  imageUrl: string;
+  unlockedAt: Date;
+}
+
+interface InventoryPayload {
+  titles: InventoryTitleItem[];
+  borders: InventoryBorderItem[];
+}
+
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class UsersService {
@@ -23,7 +51,14 @@ export class UsersService {
     private readonly subjectRepo: Repository<Subject>,
     @InjectRepository(FriendRequest)
     private readonly friendRequestRepo: Repository<FriendRequest>,
+    @InjectRepository(UserTitle)
+    private readonly userTitleRepo: Repository<UserTitle>,
+    @InjectRepository(UserInventory)
+    private readonly userInventoryRepo: Repository<UserInventory>,
+    @InjectRepository(ProfileBorder)
+    private readonly profileBorderRepo: Repository<ProfileBorder>,
     private readonly dataSource: DataSource,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async create(dto: RegisterDto): Promise<User> {
@@ -259,6 +294,109 @@ export class UsersService {
     return this.findById(userId);
   }
 
+  async getInventory(userId: string): Promise<InventoryPayload> {
+    const [inventory, titles, borders] = await Promise.all([
+      this.userInventoryRepo.find({
+        where: { userId },
+        order: { unlockedAt: 'DESC' },
+      }),
+      this.userTitleRepo.find(),
+      this.profileBorderRepo.find(),
+    ]);
+
+    const titleByCode = new Map(titles.map((item) => [item.code, item]));
+    const borderByCode = new Map(borders.map((item) => [item.code, item]));
+
+    const titleItems: InventoryTitleItem[] = [];
+    const borderItems: InventoryBorderItem[] = [];
+
+    for (const item of inventory) {
+      if (item.itemType === 'title') {
+        const title = titleByCode.get(item.itemCode);
+        if (!title) continue;
+        titleItems.push({
+          code: title.code,
+          name: title.name,
+          text: title.text,
+          unlockedAt: item.unlockedAt,
+        });
+      } else if (item.itemType === 'border') {
+        const border = borderByCode.get(item.itemCode);
+        if (!border) continue;
+        borderItems.push({
+          code: border.code,
+          name: border.name,
+          imageUrl: `/uploads/borders/${border.imageFile}`,
+          unlockedAt: item.unlockedAt,
+        });
+      }
+    }
+
+    return { titles: titleItems, borders: borderItems };
+  }
+
+  async setActiveCosmetics(userId: string, dto: SetActiveCosmeticsDto): Promise<User> {
+    const user = await this.userRepo.findOneBy({ id: userId });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+
+    const current = user.activeCosmetics ?? {
+      titleCode: null,
+      titleText: null,
+      borderCode: null,
+      borderImageUrl: null,
+    };
+
+    const requestedTitleCode = dto.titleCode === undefined ? current.titleCode : (dto.titleCode || null);
+    const requestedBorderCode = dto.borderCode === undefined ? current.borderCode : (dto.borderCode || null);
+
+    let titleText = current.titleText;
+    let borderImageUrl = current.borderImageUrl;
+
+    if (requestedTitleCode) {
+      const [ownsTitle, title] = await Promise.all([
+        this.userInventoryRepo.findOneBy({
+          userId,
+          itemType: 'title',
+          itemCode: requestedTitleCode,
+        }),
+        this.userTitleRepo.findOneBy({ code: requestedTitleCode }),
+      ]);
+      if (!ownsTitle || !title) {
+        throw new ForbiddenException('No tenés ese título desbloqueado');
+      }
+      titleText = title.text;
+    } else {
+      titleText = null;
+    }
+
+    if (requestedBorderCode) {
+      const [ownsBorder, border] = await Promise.all([
+        this.userInventoryRepo.findOneBy({
+          userId,
+          itemType: 'border',
+          itemCode: requestedBorderCode,
+        }),
+        this.profileBorderRepo.findOneBy({ code: requestedBorderCode }),
+      ]);
+      if (!ownsBorder || !border) {
+        throw new ForbiddenException('No tenés ese borde desbloqueado');
+      }
+      borderImageUrl = `/uploads/borders/${border.imageFile}`;
+    } else {
+      borderImageUrl = null;
+    }
+
+    user.activeCosmetics = {
+      titleCode: requestedTitleCode,
+      titleText,
+      borderCode: requestedBorderCode,
+      borderImageUrl,
+    };
+
+    await this.userRepo.save(user);
+    return this.findById(userId);
+  }
+
   async enrollSubject(userId: string, subjectId: string): Promise<User> {
     const [user, subject] = await Promise.all([
       this.userRepo.findOne({
@@ -342,7 +480,10 @@ export class UsersService {
   }
 
   async updateElo(userId: string, delta: number): Promise<void> {
-    // Clamp so ELO never goes below 0
+    // 1. Read current ELO before update
+    const before = await this.getElo(userId);
+
+    // 2. Apply ELO change (clamp >= 0)
     await this.userRepo
       .createQueryBuilder()
       .update()
@@ -352,6 +493,12 @@ export class UsersService {
       })
       .where('id = :id', { id: userId })
       .execute();
+
+    // 3. Emit event so achievements service can process league promotions
+    if (delta > 0) {
+      const after = await this.getElo(userId);
+      this.eventEmitter.emit('user.elo_updated', { userId, eloBefore: before, eloAfter: after });
+    }
   }
 
   async getElo(userId: string): Promise<number> {
@@ -373,6 +520,7 @@ export class UsersService {
       username: string;
       displayName: string;
       avatarUrl: string | null;
+      activeCosmetics: any;
       elo: number;
     }[]
   > {
@@ -383,6 +531,7 @@ export class UsersService {
       .addSelect('u.username', 'username')
       .addSelect('u.display_name', 'displayName')
       .addSelect('u.avatar_url', 'avatarUrl')
+      .addSelect('u.active_cosmetics', 'activeCosmetics')
       .addSelect(`COALESCE((u.stats->>'elo')::int, ${DEFAULT_ELO})`, 'elo')
       .orderBy('elo', 'DESC')
       .limit(limit)
@@ -391,6 +540,7 @@ export class UsersService {
         username: string;
         displayName: string;
         avatarUrl: string | null;
+        activeCosmetics: any;
         elo: number;
       }>();
 

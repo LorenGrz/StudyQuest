@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState, type PointerEvent, type WheelEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type PointerEvent, type WheelEvent } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { MobileLayout } from '../components/Layouts'
 import { Spinner, Button } from '../components/UI'
@@ -49,11 +49,72 @@ const GRID_GAP_Y = 40
 const SCENE_PADDING = 40
 const MIN_SCALE = 0.6
 const MAX_SCALE = 2.2
+const VIEWPORT_PADDING = 28
 
 function pointForNode(node: SkillNode) {
   const x = SCENE_PADDING + node.col * (NODE_WIDTH + GRID_GAP_X)
   const y = SCENE_PADDING + node.row * (NODE_HEIGHT + GRID_GAP_Y)
   return { x, y }
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value))
+}
+
+function clampViewport(
+  nextViewport: { x: number; y: number; scale: number },
+  canvas: HTMLDivElement | null,
+  sceneWidth: number,
+  sceneHeight: number,
+) {
+  if (!canvas) {
+    return nextViewport
+  }
+
+  const scaledWidth = sceneWidth * nextViewport.scale
+  const scaledHeight = sceneHeight * nextViewport.scale
+  const availableWidth = canvas.clientWidth
+  const availableHeight = canvas.clientHeight
+
+  const minX = scaledWidth <= availableWidth
+    ? (availableWidth - scaledWidth) / 2
+    : availableWidth - scaledWidth - VIEWPORT_PADDING
+  const maxX = scaledWidth <= availableWidth
+    ? minX
+    : VIEWPORT_PADDING
+
+  const minY = scaledHeight <= availableHeight
+    ? (availableHeight - scaledHeight) / 2
+    : availableHeight - scaledHeight - VIEWPORT_PADDING
+  const maxY = scaledHeight <= availableHeight
+    ? minY
+    : VIEWPORT_PADDING
+
+  return {
+    ...nextViewport,
+    x: clamp(nextViewport.x, minX, maxX),
+    y: clamp(nextViewport.y, minY, maxY),
+  }
+}
+
+function fitViewport(canvas: HTMLDivElement | null, sceneWidth: number, sceneHeight: number) {
+  if (!canvas) {
+    return { x: 0, y: 0, scale: 1 }
+  }
+
+  const availableWidth = Math.max(canvas.clientWidth - VIEWPORT_PADDING * 2, 1)
+  const availableHeight = Math.max(canvas.clientHeight - VIEWPORT_PADDING * 2, 1)
+  const scale = clamp(
+    Math.min(availableWidth / sceneWidth, availableHeight / sceneHeight, 1),
+    MIN_SCALE,
+    MAX_SCALE,
+  )
+
+  return clampViewport({
+    scale,
+    x: (canvas.clientWidth - sceneWidth * scale) / 2,
+    y: (canvas.clientHeight - sceneHeight * scale) / 2,
+  }, canvas, sceneWidth, sceneHeight)
 }
 
 const SkillTreePage = () => {
@@ -70,6 +131,7 @@ const SkillTreePage = () => {
     moved: boolean
   } | null>(null)
   const suppressClickUntilRef = useRef(0)
+  const didFitViewportRef = useRef(false)
 
   const selectedNode = useMemo(
     () => nodes.find((node) => node.id === selectedNodeId) ?? null,
@@ -102,6 +164,9 @@ const SkillTreePage = () => {
 
   const edges = useMemo(() => {
     const lines: Array<{
+      id: string
+      fromId: string
+      toId: string
       fromX: number
       fromY: number
       toX: number
@@ -118,6 +183,9 @@ const SkillTreePage = () => {
         const to = pointForNode(node)
 
         lines.push({
+          id: `${prerequisite.id}-${node.id}`,
+          fromId: prerequisite.id,
+          toId: node.id,
           fromX: from.x + NODE_WIDTH / 2,
           fromY: from.y + NODE_HEIGHT / 2,
           toX: to.x + NODE_WIDTH / 2,
@@ -129,6 +197,117 @@ const SkillTreePage = () => {
 
     return lines
   }, [nodes, nodesById])
+
+  const treeStats = useMemo(() => {
+    const total = nodes.length
+    const unlocked = nodes.filter((node) => node.unlocked).length
+    const available = nodes.filter((node) => !node.unlocked && node.prerequisitesMet).length
+    const locked = total - unlocked - available
+    const progress = total > 0 ? Math.round((unlocked / total) * 100) : 0
+
+    return { total, unlocked, available, locked, progress }
+  }, [nodes])
+
+  const selectedPathIds = useMemo(() => {
+    if (!selectedNode) {
+      return new Set<string>()
+    }
+
+    const visited = new Set<string>()
+    const stack = [selectedNode.id]
+
+    while (stack.length > 0) {
+      const currentId = stack.pop()
+      if (!currentId || visited.has(currentId)) {
+        continue
+      }
+
+      visited.add(currentId)
+      const currentNode = nodesById.get(currentId)
+      currentNode?.prerequisiteIds.forEach((prerequisiteId) => {
+        if (!visited.has(prerequisiteId)) {
+          stack.push(prerequisiteId)
+        }
+      })
+    }
+
+    return visited
+  }, [selectedNode, nodesById])
+
+  const selectedEdgeIds = useMemo(() => {
+    if (!selectedNode) {
+      return new Set<string>()
+    }
+
+    return new Set(
+      edges
+        .filter((edge) => selectedPathIds.has(edge.fromId) && selectedPathIds.has(edge.toId))
+        .map((edge) => edge.id),
+    )
+  }, [edges, selectedNode, selectedPathIds])
+
+  const nextStepText = useMemo(() => {
+    if (!selectedNode) {
+      return null
+    }
+
+    if (selectedNode.unlocked) {
+      return 'Nodo completado. Podés seguir con sus ramas dependientes o reforzar el tema con más XP.'
+    }
+
+    if (!selectedNode.prerequisitesMet) {
+      return 'Desbloqueá primero los nodos requeridos para abrir esta mejora.'
+    }
+
+    const remainingXp = Math.max(0, selectedNode.xpThreshold - selectedNode.topicXp)
+    if (remainingXp === 0) {
+      return 'Cumpliste la XP necesaria. Revisá si ya podés desbloquear este nodo.'
+    }
+
+    return `Te faltan ${remainingXp} XP en ${selectedNode.topic} para avanzar sobre este nodo.`
+  }, [selectedNode])
+
+  useEffect(() => {
+    didFitViewportRef.current = false
+  }, [subjectId])
+
+  useEffect(() => {
+    if (!nodes.length || !canvasRef.current || didFitViewportRef.current) {
+      return
+    }
+
+    setViewport(fitViewport(canvasRef.current, sceneWidth, sceneHeight))
+    didFitViewportRef.current = true
+  }, [nodes.length, sceneWidth, sceneHeight])
+
+  const updateViewport = (updater: (prev: { x: number; y: number; scale: number }) => { x: number; y: number; scale: number }) => {
+    setViewport((prev) => clampViewport(updater(prev), canvasRef.current, sceneWidth, sceneHeight))
+  }
+
+  const centerTree = () => {
+    setViewport(fitViewport(canvasRef.current, sceneWidth, sceneHeight))
+  }
+
+  const zoomBy = (zoomFactor: number) => {
+    if (!canvasRef.current) {
+      return
+    }
+
+    const localX = canvasRef.current.clientWidth / 2
+    const localY = canvasRef.current.clientHeight / 2
+
+    updateViewport((prev) => {
+      const nextScale = clamp(prev.scale * zoomFactor, MIN_SCALE, MAX_SCALE)
+      const worldX = (localX - prev.x) / prev.scale
+      const worldY = (localY - prev.y) / prev.scale
+
+      return {
+        scale: nextScale,
+        x: localX - worldX * nextScale,
+        y: localY - worldY * nextScale,
+      }
+    })
+  }
 
   const onCanvasPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement
@@ -160,7 +339,7 @@ const SkillTreePage = () => {
       drag.moved = true
     }
 
-    setViewport((prev) => ({
+    updateViewport((prev) => ({
       ...prev,
       x: prev.x + dx,
       y: prev.y + dy,
@@ -183,9 +362,9 @@ const SkillTreePage = () => {
       const localX = event.clientX - rect.left
       const localY = event.clientY - rect.top
 
-      setViewport((prev) => {
+      updateViewport((prev) => {
         const zoomFactor = event.deltaY > 0 ? 0.92 : 1.08
-        const nextScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, prev.scale * zoomFactor))
+        const nextScale = clamp(prev.scale * zoomFactor, MIN_SCALE, MAX_SCALE)
         if (nextScale === prev.scale) {
           return prev
         }
@@ -203,7 +382,7 @@ const SkillTreePage = () => {
       return
     }
 
-    setViewport((prev) => ({
+    updateViewport((prev) => ({
       ...prev,
       x: prev.x - event.deltaX,
       y: prev.y - event.deltaY,
@@ -247,6 +426,25 @@ const SkillTreePage = () => {
         </p>
       </div>
 
+      <section className="skill-tree-summary" aria-label="Resumen de progreso del árbol de habilidades">
+        <article className="skill-tree-summary-card">
+          <span className="skill-tree-summary-value">{treeStats.progress}%</span>
+          <span className="skill-tree-summary-label">Progreso total</span>
+        </article>
+        <article className="skill-tree-summary-card">
+          <span className="skill-tree-summary-value">{treeStats.unlocked}/{treeStats.total}</span>
+          <span className="skill-tree-summary-label">Nodos desbloqueados</span>
+        </article>
+        <article className="skill-tree-summary-card">
+          <span className="skill-tree-summary-value">{treeStats.available}</span>
+          <span className="skill-tree-summary-label">Listos para seguir</span>
+        </article>
+        <article className="skill-tree-summary-card">
+          <span className="skill-tree-summary-value">{treeStats.locked}</span>
+          <span className="skill-tree-summary-label">Todavía bloqueados</span>
+        </article>
+      </section>
+
       <div className="skill-tree-legend">
         <span className="skill-tree-legend-item">
           <span className="skill-tree-dot skill-tree-dot--unlocked" /> Desbloqueado
@@ -261,9 +459,23 @@ const SkillTreePage = () => {
 
       <p className="skill-tree-nav-help">Arrastrá para mover, usá la rueda para recorrer, y Ctrl + rueda para zoom.</p>
 
+      <div className="skill-tree-toolbar" aria-label="Controles de navegación del árbol">
+        <Button size="sm" variant="secondary" onClick={() => zoomBy(1.12)} aria-label="Acercar árbol">
+          + Zoom
+        </Button>
+        <Button size="sm" variant="secondary" onClick={() => zoomBy(0.9)} aria-label="Alejar árbol">
+          - Zoom
+        </Button>
+        <Button size="sm" variant="ghost" onClick={centerTree} aria-label="Centrar árbol">
+          Recentrar
+        </Button>
+        <span className="skill-tree-toolbar-scale" aria-live="polite">{Math.round(viewport.scale * 100)}%</span>
+      </div>
+
       <div
         ref={canvasRef}
         className="skill-tree-canvas"
+        aria-label="Mapa interactivo del árbol de habilidades"
         onPointerDown={onCanvasPointerDown}
         onPointerMove={onCanvasPointerMove}
         onPointerUp={endDrag}
@@ -281,8 +493,13 @@ const SkillTreePage = () => {
           <svg className="skill-tree-edges" viewBox={`0 0 ${sceneWidth} ${sceneHeight}`} preserveAspectRatio="none">
             {edges.map((edge, index) => (
               <line
-                key={`${edge.fromX}-${edge.fromY}-${edge.toX}-${edge.toY}-${index}`}
-                className={`skill-tree-edge ${edge.unlocked ? 'skill-tree-edge--active' : ''}`}
+                key={`${edge.id}-${index}`}
+                className={[
+                  'skill-tree-edge',
+                  edge.unlocked ? 'skill-tree-edge--active' : '',
+                  selectedNode ? 'skill-tree-edge--dimmed' : '',
+                  selectedEdgeIds.has(edge.id) ? 'skill-tree-edge--focused' : '',
+                ].filter(Boolean).join(' ')}
                 x1={edge.fromX}
                 y1={edge.fromY}
                 x2={edge.toX}
@@ -298,11 +515,19 @@ const SkillTreePage = () => {
               return (
                 <button
                   key={node.id}
-                  className={`skill-node ${nodeStatus(node)}`}
+                  className={[
+                    'skill-node',
+                    nodeStatus(node),
+                    selectedNodeId === node.id ? 'skill-node--selected' : '',
+                    selectedNode ? 'skill-node--dimmed' : '',
+                    selectedPathIds.has(node.id) ? 'skill-node--path' : '',
+                  ].filter(Boolean).join(' ')}
                   style={{
                     left: position.x,
                     top: position.y,
                   }}
+                  aria-label={`${node.name}. ${nodeStatusLabel(node)}. ${node.topicXp} de ${node.xpThreshold} XP en ${node.topic}.`}
+                  aria-pressed={selectedNodeId === node.id}
                   onClick={() => {
                     if (Date.now() < suppressClickUntilRef.current) {
                       return
@@ -338,19 +563,29 @@ const SkillTreePage = () => {
       </div>
 
       {selectedNode && (
-        <div className="skill-node-popover">
+        <div className="skill-node-popover" role="dialog" aria-live="polite" aria-label={`Detalle del nodo ${selectedNode.name}`}>
           <div className="skill-node-popover-head">
-            <h3>{selectedNode.name}</h3>
+            <div>
+              <h3>{selectedNode.name}</h3>
+              <p className="skill-node-popover-kicker">{nodeStatusLabel(selectedNode)} · {selectedNode.topic}</p>
+            </div>
             <Button size="sm" variant="ghost" onClick={() => setSelectedNodeId(null)}>
               Cerrar
             </Button>
           </div>
           <p>{selectedNode.description ?? 'Sin descripcion disponible.'}</p>
-          <p className="skill-node-popover-topic">Estado: {nodeStatusLabel(selectedNode)}</p>
-          <p className="skill-node-popover-topic">Tema: {selectedNode.topic}</p>
-          <p className="skill-node-popover-xp">
-            Progreso: {selectedNode.topicXp}/{selectedNode.xpThreshold} XP
-          </p>
+          <div className="skill-node-popover-progress">
+            <div className="skill-node__progress" aria-hidden="true">
+              <div
+                className="skill-node__progress-fill"
+                style={{ width: `${selectedNode.progressPercent}%` }}
+              />
+            </div>
+            <p className="skill-node-popover-xp">
+              Progreso: {selectedNode.topicXp}/{selectedNode.xpThreshold} XP · {selectedNode.progressPercent}%
+            </p>
+          </div>
+          {nextStepText && <p className="skill-node-popover-next-step">Siguiente paso: {nextStepText}</p>}
 
           {!selectedNode.unlocked && !selectedNode.prerequisitesMet && (
             <div className="skill-node-prereq-list">
