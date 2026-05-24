@@ -1,3 +1,4 @@
+import '../../polyfill';
 import { config } from 'dotenv';
 config({ path: '../.env' });
 

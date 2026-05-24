@@ -1,6 +1,12 @@
 import { InternalServerErrorException } from '@nestjs/common';
 import { RawQuestion } from './ai.types';
 
+if (typeof global.DOMMatrix === 'undefined') {
+  (global as any).DOMMatrix = class DOMMatrix {
+    a = 1; b = 0; c = 0; d = 1; e = 0; f = 0;
+  };
+}
+
 const { PDFParse } = require('pdf-parse');
 
 export function validateRawQuestion(q: any): q is RawQuestion {
