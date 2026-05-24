@@ -6,7 +6,6 @@ import { useAuth } from "../hooks/useAuth"
 import { userService } from "../services/userService"
 import {
   getLeague,
-  getEloProgress,
   DEFAULT_ELO,
   LEAGUES,
 } from "../utils/leagues"
@@ -43,7 +42,6 @@ export default function ProfilePage() {
   }
   const elo = stats.elo ?? DEFAULT_ELO
   const league = getLeague(elo)
-  const progress = getEloProgress(elo)
   const winRate =
     stats.quizzesPlayed > 0
       ? Math.round((stats.quizzesWon / stats.quizzesPlayed) * 100)

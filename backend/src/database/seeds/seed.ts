@@ -16,6 +16,7 @@
 // el cuerpo del módulo corre de arriba hacia abajo:
 //   1. config()           → carga .env en process.env
 //   2. new DataSource(…)  → lee process.env ya cargado ✅
+import '../../polyfill';
 import { config } from 'dotenv';
 config({ path: '../.env' }); // carga el .env desde la raíz del proyecto
 
