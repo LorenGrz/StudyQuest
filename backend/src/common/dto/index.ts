@@ -163,6 +163,57 @@ export class SubmitAnswerDto {
   @IsNumber() @Min(0) timeSpentMs: number;
 }
 
+// ─── Recommendations ──────────────────────────────────────────────────────────
+
+export class RecommendedQuestsQueryDto {
+  @IsOptional() @IsNumber() @Min(1) page?: number;
+  @IsOptional() @IsNumber() @Min(1) @Max(50) limit?: number;
+  @IsOptional() @IsUUID() subjectId?: string;
+}
+
+export class RecommendedQuestDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  title: string;
+
+  @ApiProperty()
+  subjectId: string;
+
+  @ApiProperty()
+  subjectName: string;
+
+  @ApiProperty()
+  partyId: string;
+
+  @ApiProperty()
+  status: string;
+
+  @ApiProperty()
+  createdAt: Date;
+
+  @ApiProperty()
+  playCount: number;
+}
+
+export class RecommendedQuestsResponseDto {
+  @ApiProperty({ type: [RecommendedQuestDto] })
+  items: RecommendedQuestDto[];
+
+  @ApiProperty()
+  total: number;
+
+  @ApiProperty()
+  page: number;
+
+  @ApiProperty()
+  limit: number;
+
+  @ApiProperty()
+  totalPages: number;
+}
+
 // ─── Skill Tree ───────────────────────────────────────────────────────────────
 
 export class CreateSkillNodeDto {

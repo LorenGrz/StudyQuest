@@ -10,13 +10,16 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiQuery, ApiOkResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UsersService } from './users.service';
 import {
   UpdateProfileDto,
   EnrollSubjectDto,
   SetActiveCosmeticsDto,
+  RecommendedQuestsQueryDto,
+  RecommendedQuestsResponseDto,
+  RecommendedQuestDto,
 } from '../../common/dto';
 
 @ApiTags('users')
@@ -39,6 +42,32 @@ export class UsersController {
   @Get('me/inventory')
   getMyInventory(@Request() req: any): Promise<any> {
     return this.usersService.getInventory(req.user.userId);
+  }
+
+  @Get('me/recommended-quests')
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'subjectId', required: false, type: String })
+  @ApiOkResponse({ type: RecommendedQuestsResponseDto })
+  getRecommendedQuests(
+    @Request() req: any,
+    @Query() query: RecommendedQuestsQueryDto,
+  ) {
+    return this.usersService.getRecommendedQuests(
+      req.user.userId,
+      query.page,
+      query.limit,
+      query.subjectId,
+    );
+  }
+
+  @Get('me/quests-today')
+  @ApiOkResponse({
+    type: [RecommendedQuestDto],
+    description: 'Lista de quests sugeridas para hoy',
+  })
+  getQuestsForToday(@Request() req: any) {
+    return this.usersService.getQuestsForToday(req.user.userId);
   }
 
   @Patch('me/cosmetics')
