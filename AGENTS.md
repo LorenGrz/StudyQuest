@@ -96,29 +96,29 @@ docker compose up -d postgres redis
 
 ```bash
 cd backend
-npm install
-npm run start:dev
+pnpm install
+pnpm run start:dev
 ```
 
 4. Seed base data after backend has initialized the schema:
 
 ```bash
 cd backend
-npm run seed
+pnpm run seed
 ```
 
 Optional extra seed:
 
 ```bash
-npm run seed:skill-tree
+pnpm run seed:skill-tree
 ```
 
 5. Start frontend:
 
 ```bash
 cd frontend
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 ### Full Docker flow
@@ -232,21 +232,21 @@ Backend:
 
 ```bash
 cd backend
-npm run start:dev
-npm run test
-npm run test:e2e
-npm run lint
-npm run seed
-npm run seed:skill-tree
+pnpm run start:dev
+pnpm run test
+pnpm run test:e2e
+pnpm run lint
+pnpm run seed
+pnpm run seed:skill-tree
 ```
 
 Frontend:
 
 ```bash
 cd frontend
-npm run dev
-npm run build
-npm run lint
+pnpm run dev
+pnpm run build
+pnpm run lint
 ```
 
 Infra:

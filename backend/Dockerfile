@@ -1,17 +1,17 @@
 FROM node:22-alpine AS development
 WORKDIR /app
 COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* ./
-RUN npm install -g pnpm && pnpm install
+RUN corepack enable && pnpm install
 COPY . .
 EXPOSE 3000
-CMD ["npm", "run", "start:dev"]
+CMD ["pnpm", "run", "start:dev"]
 
 FROM node:22-alpine AS build
 WORKDIR /app
 COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* ./
-RUN npm install -g pnpm && pnpm install --frozen-lockfile
+RUN corepack enable && pnpm install --frozen-lockfile
 COPY . .
-RUN npm run build
+RUN pnpm run build
 
 FROM node:22-alpine AS production
 WORKDIR /app
