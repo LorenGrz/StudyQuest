@@ -50,6 +50,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
       target: development
+      network: host
     container_name: studyquest-api
     restart: unless-stopped
     ports:
@@ -72,6 +73,8 @@ services:
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-1.5-flash}
       CORS_ORIGIN: http://localhost:5173
+      CI: "true"
+      PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: "false"
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -81,7 +84,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: pnpm run start:dev
+    command: sh -c "pnpm install && pnpm run start:dev"
     networks:
       - studyquest-net
 
@@ -90,6 +93,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       target: development
+      network: host
     container_name: studyquest-web
     restart: unless-stopped
     ports:
@@ -97,11 +101,14 @@ services:
     environment:
       VITE_API_URL: http://localhost:3000
       VITE_WS_URL: ws://localhost:3000
+      CI: "true"
+      PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: "false"
     volumes:
       - ./frontend:/app
       - /app/node_modules
     depends_on:
       - api
+    command: sh -c "pnpm install && pnpm run dev --host 0.0.0.0"
     networks:
       - studyquest-net
 

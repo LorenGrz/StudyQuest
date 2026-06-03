@@ -516,6 +516,41 @@ export class UsersService {
     return user?.elo ?? DEFAULT_ELO;
   }
 
+  async getGlobalLeaderboard(
+    limit = 20,
+  ): Promise<
+    {
+      rank: number;
+      userId: string;
+      username: string;
+      displayName: string;
+      avatarUrl: string | null;
+      activeCosmetics: any;
+      elo: number;
+    }[]
+  > {
+    const rows = await this.userRepo
+      .createQueryBuilder('u')
+      .select('u.id', 'userId')
+      .addSelect('u.username', 'username')
+      .addSelect('u.display_name', 'displayName')
+      .addSelect('u.avatar_url', 'avatarUrl')
+      .addSelect('u.active_cosmetics', 'activeCosmetics')
+      .addSelect(`COALESCE((u.stats->>'elo')::int, ${DEFAULT_ELO})`, 'elo')
+      .orderBy('elo', 'DESC')
+      .limit(limit)
+      .getRawMany<{
+        userId: string;
+        username: string;
+        displayName: string;
+        avatarUrl: string | null;
+        activeCosmetics: any;
+        elo: number;
+      }>();
+
+    return rows.map((row, index) => ({ rank: index + 1, ...row }));
+  }
+
   async getLeaderboard(
     subjectId: string,
     limit = 20,

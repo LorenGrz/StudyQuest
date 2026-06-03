@@ -186,5 +186,12 @@ export const userService = {
     )
     return data
   },
+
+  async getGlobalLeaderboard(limit = 20): Promise<LeaderboardEntry[]> {
+    const { data } = await api.get<LeaderboardEntry[]>(
+      `/users/leaderboard/global?limit=${limit}`,
+    )
+    return data
+  },
 }
 

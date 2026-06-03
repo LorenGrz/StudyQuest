@@ -12,8 +12,9 @@ import { useAuthStore } from '../store/authStore'
 import { usePartyStore } from '../store/partyStore'
 import { useUserSubjects } from '../hooks/useUserSubjects'
 import { partyService } from '../services/partyService'
-import { userService, type RecommendedQuestDto } from '../services/userService'
+import { userService, type RecommendedQuestDto, type LeaderboardEntry, type Subject } from '../services/userService'
 import { searchService, type GlobalSearchResponseDto } from '../services/searchService'
+import { getLeague, DEFAULT_ELO } from '../utils/leagues'
 
 // Componente helper para las tarjetas de quest recomendadas/del día
 const RecommendedQuestCard = ({ quest }: { quest: RecommendedQuestDto }) => {
@@ -31,6 +32,104 @@ const RecommendedQuestCard = ({ quest }: { quest: RecommendedQuestDto }) => {
         </p>
       </div>
       <span className="quest-status">▶</span>
+    </div>
+  )
+}
+
+const HomeLeaderboardPreview = ({ subjects }: { subjects: Subject[] }) => {
+  const [selectedTab, setSelectedTab] = useState<'global' | string>('global')
+  const [entries, setEntries] = useState<LeaderboardEntry[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setIsLoading(true)
+    setError(null)
+    const fetchLeaderboard = async () => {
+      try {
+        if (selectedTab === 'global') {
+          const data = await userService.getGlobalLeaderboard(5)
+          setEntries(data)
+        } else {
+          const data = await userService.getLeaderboard(selectedTab, 5)
+          setEntries(data)
+        }
+      } catch (err) {
+        setError('No se pudo cargar el ranking')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchLeaderboard()
+  }, [selectedTab])
+
+  return (
+    <div className="bg-[#13131f] border border-white/8 rounded-2xl p-4 flex flex-col gap-4 mt-2">
+      <div className="flex justify-between items-center">
+        <h3 className="text-[#8888aa] text-xs font-bold uppercase tracking-wider">🏆 Ranking / Leaderboard</h3>
+      </div>
+      
+      {/* Tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <button
+          onClick={() => setSelectedTab('global')}
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${selectedTab === 'global' ? 'bg-[#7c3aed] text-white' : 'bg-[#1a1a2e] text-[#8888aa] border border-white/5 hover:border-white/15'}`}
+        >
+          🌎 Global
+        </button>
+        {subjects.map((sub) => (
+          <button
+            key={sub.id}
+            onClick={() => setSelectedTab(sub.id)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${selectedTab === sub.id ? 'bg-[#7c3aed] text-white' : 'bg-[#1a1a2e] text-[#8888aa] border border-white/5 hover:border-white/15'}`}
+          >
+            📚 {sub.code}
+          </button>
+        ))}
+      </div>
+
+      {/* Content */}
+      {isLoading ? (
+        <div className="flex justify-center py-6">
+          <div className="w-6 h-6 border-2 border-white/10 border-t-[#7c3aed] rounded-full animate-spin" />
+        </div>
+      ) : error ? (
+        <div className="text-red-500 text-xs text-center py-2 bg-red-500/10 rounded-lg border border-red-500/20">{error}</div>
+      ) : entries.length === 0 ? (
+        <div className="text-[#8888aa] text-xs text-center py-4">No hay datos en este ranking.</div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {entries.map((entry, idx) => {
+            const league = getLeague(entry.elo ?? DEFAULT_ELO)
+            const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : null
+            return (
+              <div
+                key={entry.userId}
+                className="flex items-center gap-3 bg-[#1a1a2e]/60 hover:bg-[#1a1a2e] border border-white/5 p-2 rounded-xl transition-all duration-200"
+              >
+                <div className="w-6 text-center font-bold text-sm text-[#8888aa]">
+                  {medal ? <span className="text-base">{medal}</span> : <span>#{idx + 1}</span>}
+                </div>
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#7c3aed] to-blue-600 flex items-center justify-center text-white font-bold text-xs overflow-hidden shrink-0">
+                  {entry.avatarUrl ? (
+                    <img src={entry.avatarUrl} alt={entry.displayName} className="w-full h-full object-cover" />
+                  ) : (
+                    entry.displayName?.charAt(0).toUpperCase() ?? '?'
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white text-xs font-semibold truncate">{entry.displayName}</p>
+                  <p className="text-[#8888aa] text-[10px] truncate">@{entry.username}</p>
+                </div>
+                <div className="text-right shrink-0">
+                  <span className="text-xs font-bold text-[10px] mr-1" title={league.name}>{league.icon}</span>
+                  <span className="text-xs font-bold" style={{ color: league.color }}>{entry.elo} ELO</span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
@@ -380,6 +479,7 @@ const DashboardPage = () => {
           <SubjectCardGrid subjects={subjects} />
         )}
         
+        <HomeLeaderboardPreview subjects={subjects} />
         <QuickActions />
       </div>
     </MobileLayout>

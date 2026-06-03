@@ -1,6 +1,6 @@
 FROM node:22-alpine AS development
 WORKDIR /app
-COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* ./
+COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* .npmrc* ./
 RUN corepack enable && pnpm install
 COPY . .
 EXPOSE 3000
@@ -8,7 +8,7 @@ CMD ["pnpm", "run", "start:dev"]
 
 FROM node:22-alpine AS build
 WORKDIR /app
-COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* ./
+COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* .npmrc* ./
 RUN corepack enable && pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm run build
