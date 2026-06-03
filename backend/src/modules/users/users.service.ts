@@ -20,6 +20,8 @@ import { DEFAULT_ELO } from '../../common/leagues';
 import { UserTitle } from '../cosmetics/user-title.entity';
 import { UserInventory } from '../cosmetics/user-inventory.entity';
 import { ProfileBorder } from '../cosmetics/profile-border.entity';
+import { Quest } from '../quests/quest.entity';
+import { PlayerResult } from '../quests/player-result.entity';
 
 interface InventoryTitleItem {
   code: string;
@@ -57,6 +59,10 @@ export class UsersService {
     private readonly userInventoryRepo: Repository<UserInventory>,
     @InjectRepository(ProfileBorder)
     private readonly profileBorderRepo: Repository<ProfileBorder>,
+    @InjectRepository(Quest)
+    private readonly questRepo: Repository<Quest>,
+    @InjectRepository(PlayerResult)
+    private readonly playerResultRepo: Repository<PlayerResult>,
     private readonly dataSource: DataSource,
     private readonly eventEmitter: EventEmitter2,
   ) {}
@@ -589,5 +595,155 @@ export class UsersService {
       if (await bcrypt.compare(token, stored)) return true;
     }
     return false;
+  }
+
+  async getRecommendedQuests(
+    userId: string,
+    page = 1,
+    limit = 10,
+    subjectId?: string,
+  ) {
+    // 1. Cargar usuario con materias inscriptas
+    const user = await this.userRepo.findOne({
+      where: { id: userId },
+      relations: ['enrolledSubjects'],
+    });
+    if (!user) throw new NotFoundException('Usuario no encontrado');
+
+    const enrolledSubjectIds = user.enrolledSubjects.map((s) => s.id);
+    if (enrolledSubjectIds.length === 0) {
+      return {
+        items: [],
+        total: 0,
+        page,
+        limit,
+        totalPages: 0,
+      };
+    }
+
+    // 2. Obtener IDs de quests ya jugadas por el usuario (deduplicación en BD)
+    const playedQuestResults = await this.playerResultRepo
+      .createQueryBuilder('result')
+      .select('DISTINCT result.questId', 'questId')
+      .where('result.userId = :userId', { userId })
+      .getRawMany<{ questId: string }>();
+    const playedQuestIds = playedQuestResults.map((r) => r.questId);
+
+    // Parámetros comunes para ambas queries
+    const queryParams = {
+      enrolledSubjectIds,
+      validStatuses: ['ready', 'active', 'completed'],
+      userId,
+    };
+    if (subjectId) {
+      queryParams['subjectId'] = subjectId;
+    }
+
+    // 3. Query 1: Contar total de quests disponibles (COUNT DISTINCT sin GROUP BY)
+    let countQb = this.questRepo
+      .createQueryBuilder('q')
+      .select('COUNT(DISTINCT q.id)', 'total')
+      .leftJoin('q.subject', 'subject')
+      .where('q.subjectId IN (:...enrolledSubjectIds)', queryParams)
+      .andWhere('q.status IN (:...validStatuses)', queryParams)
+      .andWhere('subject.isActive = true', queryParams);
+
+    if (playedQuestIds.length > 0) {
+      countQb = countQb.andWhere('q.id NOT IN (:...playedQuestIds)', {
+        ...queryParams,
+        playedQuestIds,
+      });
+    }
+
+    if (subjectId) {
+      countQb = countQb.andWhere('q.subjectId = :subjectId', queryParams);
+    }
+
+    const countResult = await countQb.getRawOne<{ total: string }>();
+    const total = parseInt(countResult?.total ?? '0', 10);
+
+    // Si total es 0, retornar respuesta vacía
+    if (total === 0) {
+      return {
+        items: [],
+        total: 0,
+        page,
+        limit,
+        totalPages: 0,
+      };
+    }
+
+    // 4. Query 2: Obtener quests con play count (GROUP BY para aggregación)
+    const offset = (page - 1) * limit;
+    let dataQb = this.questRepo
+      .createQueryBuilder('q')
+      .leftJoin('q.results', 'result')
+      .leftJoin('q.subject', 'subject')
+      .select('q.id', 'id')
+      .addSelect('q.title', 'title')
+      .addSelect('q.subjectId', 'subjectId')
+      .addSelect('subject.name', 'subjectName')
+      .addSelect('q.partyId', 'partyId')
+      .addSelect('q.status', 'status')
+      .addSelect('q.createdAt', 'createdAt')
+      .addSelect('COUNT(DISTINCT result.id)', 'playCount')
+      .where('q.subjectId IN (:...enrolledSubjectIds)', queryParams)
+      .andWhere('q.status IN (:...validStatuses)', queryParams)
+      .andWhere('subject.isActive = true', queryParams)
+      .groupBy('q.id')
+      .addGroupBy('subject.id')
+      .orderBy('playCount', 'DESC')
+      .addOrderBy('q.createdAt', 'DESC')
+      .offset(offset)
+      .limit(limit);
+
+    if (playedQuestIds.length > 0) {
+      dataQb = dataQb.andWhere('q.id NOT IN (:...playedQuestIds)', {
+        ...queryParams,
+        playedQuestIds,
+      });
+    }
+
+    if (subjectId) {
+      dataQb = dataQb.andWhere('q.subjectId = :subjectId', queryParams);
+    }
+
+    const rawQuests = await dataQb.getRawMany<{
+      id: string;
+      title: string;
+      subjectId: string;
+      subjectName: string;
+      partyId: string;
+      status: string;
+      createdAt: Date;
+      playCount: string;
+    }>();
+
+    // 5. Transformar raw results a DTOs con playCount como número
+    const items = rawQuests.map((quest) => ({
+      id: quest.id,
+      title: quest.title,
+      subjectId: quest.subjectId,
+      subjectName: quest.subjectName,
+      partyId: quest.partyId,
+      status: quest.status,
+      createdAt: quest.createdAt,
+      playCount: parseInt(quest.playCount, 10),
+    }));
+
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+      totalPages,
+    };
+  }
+
+  async getQuestsForToday(userId: string): Promise<any[]> {
+    const result = await this.getRecommendedQuests(userId, 1, 10);
+    return result.items;
   }
 }

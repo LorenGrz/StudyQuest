@@ -116,7 +116,37 @@ export interface LeaderboardEntry {
   elo: number
 }
 
+export interface RecommendedQuestDto {
+  id: string
+  title: string
+  subjectId: string
+  subjectName: string
+  partyId: string
+  status: string
+  createdAt: string
+  playCount: number
+}
+
+export interface RecommendedQuestsResponseDto {
+  items: RecommendedQuestDto[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+}
+
 export const userService = {
+  async getQuestsToday(): Promise<RecommendedQuestDto[]> {
+    const { data } = await api.get<RecommendedQuestDto[]>('/users/me/quests-today')
+    return data
+  },
+
+  async getRecommendedQuests(page = 1, limit = 10, subjectId?: string): Promise<RecommendedQuestsResponseDto> {
+    const { data } = await api.get<RecommendedQuestsResponseDto>('/users/me/recommended-quests', {
+      params: { page, limit, subjectId },
+    })
+    return data
+  },
   async getMe(): Promise<User> {
     const { data } = await api.get<User>('/users/me')
     return data

@@ -7,6 +7,8 @@ import { FriendRequest } from './friend-request.entity';
 import { UserTitle } from '../cosmetics/user-title.entity';
 import { UserInventory } from '../cosmetics/user-inventory.entity';
 import { ProfileBorder } from '../cosmetics/profile-border.entity';
+import { Quest } from '../quests/quest.entity';
+import { PlayerResult } from '../quests/player-result.entity';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 
@@ -20,6 +22,8 @@ import { UsersController } from './users.controller';
       UserTitle,
       UserInventory,
       ProfileBorder,
+      Quest,
+      PlayerResult,
     ]),
   ],
   controllers: [UsersController],
