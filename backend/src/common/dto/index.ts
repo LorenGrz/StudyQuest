@@ -214,6 +214,100 @@ export class RecommendedQuestsResponseDto {
   totalPages: number;
 }
 
+// ─── Global Search ────────────────────────────────────────────────────────────
+
+export class GlobalSearchQueryDto {
+  @ApiProperty({ example: 'cálculo', minLength: 2, maxLength: 100 })
+  @IsString()
+  @MinLength(2)
+  @MaxLength(100)
+  q: string;
+
+  @ApiPropertyOptional({ example: 10, minimum: 1, maximum: 50 })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(50)
+  limit?: number;
+}
+
+export class SearchResultUserDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  username: string;
+
+  @ApiProperty()
+  displayName: string;
+
+  @ApiProperty({ nullable: true })
+  avatarUrl: string | null;
+
+  @ApiProperty()
+  university: string;
+
+  @ApiProperty()
+  career: string;
+}
+
+export class SearchResultSubjectDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  code: string;
+
+  @ApiProperty()
+  university: string;
+
+  @ApiProperty()
+  career: string;
+
+  @ApiProperty()
+  semester: number;
+
+  @ApiProperty()
+  enrolledCount: number;
+}
+
+export class SearchResultQuestDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  title: string;
+
+  @ApiProperty()
+  subjectId: string;
+
+  @ApiProperty()
+  subjectName: string;
+
+  @ApiProperty()
+  status: string;
+
+  @ApiProperty()
+  createdAt: Date;
+}
+
+export class GlobalSearchResponseDto {
+  @ApiProperty({ type: [SearchResultUserDto] })
+  users: SearchResultUserDto[];
+
+  @ApiProperty({ type: [SearchResultSubjectDto] })
+  subjects: SearchResultSubjectDto[];
+
+  @ApiProperty({ type: [SearchResultQuestDto] })
+  quests: SearchResultQuestDto[];
+
+  @ApiProperty()
+  totalResults: number;
+}
+
 // ─── Skill Tree ───────────────────────────────────────────────────────────────
 
 export class CreateSkillNodeDto {
