@@ -47,3 +47,8 @@ docker-data/
 *.local
 *.cache
 .agent/
+
+# pnpm store cache
+.pnpm-store/
+frontend/.pnpm-store/
+backend/.pnpm-store/
