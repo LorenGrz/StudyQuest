@@ -23,6 +23,7 @@ import { AiModule } from './modules/ai/ai.module';
 import { SkillTreeModule } from './modules/skill-tree/skill-tree.module';
 import { AchievementsModule } from './modules/achievements/achievements.module';
 import { MatchmakingModule } from './gateways/matchmaking/matchmaking.module';
+import { SearchModule } from './modules/search/search.module';
 
 @Module({
   imports: [
@@ -88,6 +89,7 @@ import { MatchmakingModule } from './gateways/matchmaking/matchmaking.module';
     SkillTreeModule,
     AchievementsModule,
     MatchmakingModule,
+    SearchModule,
   ],
 })
 export class AppModule {}

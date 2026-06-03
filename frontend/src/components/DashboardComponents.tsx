@@ -4,7 +4,7 @@ import type { User } from '../services/userService'
 import type { Party } from '../services/partyService'
 import type { Subject } from '../services/userService'
 import { Button } from './UI'
-import { getLeague, getEloProgress, DEFAULT_ELO } from '../utils/leagues'
+import { getLeague, DEFAULT_ELO } from '../utils/leagues'
 import { AvatarWithBorder } from './AvatarWithBorder'
 
 // ─── GreetingHeader ──────────────────────────────────────────────────────────

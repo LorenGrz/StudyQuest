@@ -11,10 +11,6 @@ export function getActiveQuest(party: Party) {
   return party.quests?.find((q) => q.status === 'active') ?? party.quests?.[0] ?? null
 }
 
-function getInitial(str?: string | null): string {
-  return str?.trim()[0]?.toUpperCase() ?? '?'
-}
-
 // ─── MemberAvatar ─────────────────────────────────────────────────────────────
 
 interface MemberAvatarProps {
