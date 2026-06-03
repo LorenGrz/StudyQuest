@@ -20,7 +20,7 @@ El proyecto está dividido en componentes principales diseñados siguiendo heur�
 | Herramienta | Versión mínima | Instalación |
 |---|---|---|
 | Node.js | 20+ | https://nodejs.org |
-| pnpm | 9+ | `npm install -g pnpm` |
+| pnpm | 9+ | `corepack enable` o `npm install -g pnpm` |
 | Docker | cualquiera | https://docs.docker.com/get-docker/ |
 
 > **Este proyecto usa `pnpm` como gestor de paquetes.** No uses `npm install` ni `yarn`.
@@ -46,7 +46,7 @@ No necesitas instalar PostgreSQL ni Redis directamente. Sigue estos pasos para a
 Con una sola orden se construye todo, se inicializa la base con seed + skill tree y se levantan API + Web:
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 Este flujo usa Docker Compose con un servicio de bootstrap automático para dejar la app lista out of the box.
@@ -68,7 +68,7 @@ docker compose up -d postgres redis
 ```
 *(Si deseas correr todo con contenedores también puedes omitir especificar los servicios, pero para un entorno dev es preferible sólo virtualizar las DBs y correr el código manual).*
 
-Si usas el arranque único (`npm run dev`), este paso queda implícito.
+Si usas el arranque único (`pnpm run dev`), este paso queda implícito.
 
 ### 3. Ejecutar el Backend (NestJS)
 

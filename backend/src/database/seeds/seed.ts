@@ -2,7 +2,7 @@
  * Seed script — pobla la BD con datos de prueba
  *
  * Uso (desde la carpeta backend/):
- *   npm run seed
+ *   pnpm run seed
  *
  * Requiere que la BD esté corriendo:
  *   docker-compose up postgres   (solo la BD)
