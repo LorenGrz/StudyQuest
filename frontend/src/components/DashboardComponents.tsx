@@ -1,4 +1,3 @@
-import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import type { User } from '../services/userService'
 import type { Party } from '../services/partyService'
@@ -15,7 +14,7 @@ export function GreetingHeader({ user }: { user: User | null }) {
   const league = getLeague(user.stats?.elo ?? DEFAULT_ELO)
 
   return (
-    <div className="greeting-header">
+    <div className="flex items-center gap-3 py-5 pb-2">
       <div className="greeting-avatar">
         <AvatarWithBorder
           displayName={user.displayName}
@@ -25,13 +24,15 @@ export function GreetingHeader({ user }: { user: User | null }) {
           glowColor={league.glowColor}
         />
       </div>
-      <div className="greeting-text">
-        <p className="greeting-salute">{greeting},</p>
-        <h1 className="greeting-name">{user.displayName} <span className="wave">👋</span></h1>
+      <div className="flex-1">
+        <p className="text-xs text-[#8888aa]">{greeting},</p>
+        <h1 className="text-[22px] font-extrabold text-white leading-tight">
+          {user.displayName} <span className="inline-block animate-[wave_1.5s_ease-in-out_infinite]">👋</span>
+        </h1>
       </div>
-      <div className="xp-chip">
-        <span className="xp-icon">⚡</span>
-        <span className="xp-value">{user.stats?.xp ?? 0} XP</span>
+      <div className="flex items-center gap-1 bg-violet-500/10 border border-violet-500/30 rounded-full px-3 py-1.5 whitespace-nowrap">
+        <span className="text-sm">⚡</span>
+        <span className="text-xs font-bold text-violet-400">{user.stats?.xp ?? 0} XP</span>
       </div>
     </div>
   )
@@ -43,12 +44,15 @@ export function ActivePartyBanner({ party }: { party: Party | null }) {
   if (!party) return null
 
   return (
-    <div className="party-banner" onClick={() => navigate(`/party/${party.id}`)}>
-      <div className="party-banner-info">
-        <span className="party-banner-dot" />
-        <div>
-          <p className="party-banner-label">Party Activa</p>
-          <p className="party-banner-name">{party.name ?? party.subject?.name ?? 'Party activa'}</p>
+    <div 
+      className="flex items-center justify-between gap-3.5 bg-gradient-to-r from-violet-500/15 to-emerald-500/10 border border-emerald-500/30 rounded-2xl p-3.5 px-4 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg" 
+      onClick={() => navigate(`/party/${party.id}`)}
+    >
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full shadow-[0_0_8px_#10b981] animate-pulse" />
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] text-emerald-400 font-semibold uppercase tracking-wide">Party Activa</p>
+          <p className="text-[15px] font-bold text-white truncate">{party.name ?? party.subject?.name ?? 'Party activa'}</p>
         </div>
       </div>
       <Button size="sm" variant="primary">Ir →</Button>
@@ -64,18 +68,18 @@ function SubjectCard({ subject }: { subject: Subject }) {
 
   return (
     <div
-      className="subject-card"
-      style={{ '--subject-color': color } as React.CSSProperties}
+      className="flex items-center gap-3.5 bg-[#13131f] border border-white/8 rounded-2xl p-3.5 px-4 cursor-pointer transition-all duration-200 hover:bg-[#1a1a2e] hover:translate-x-1"
+      style={{ borderLeftWidth: '3px', borderLeftColor: color }}
       onClick={() => navigate(`/subjects`)}
     >
-      <div className="subject-card-icon" style={{ background: color }}>
+      <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg shrink-0" style={{ background: color }}>
         📚
       </div>
-      <div className="subject-card-info">
-        <p className="subject-card-name">{subject.name}</p>
-        <p className="subject-card-meta">Sem. {subject.semester}</p>
+      <div className="flex-1 min-w-0">
+        <p className="font-semibold text-[15px] text-white truncate">{subject.name}</p>
+        <p className="text-xs text-[#8888aa] mt-0.5">Sem. {subject.semester}</p>
         <button
-          className="subject-skill-link"
+          className="text-xs text-emerald-400 font-semibold flex items-center gap-1 mt-1 cursor-pointer hover:underline"
           onClick={(event) => {
             event.stopPropagation()
             navigate(`/subjects/${subject.id}/skill-tree`)
@@ -84,7 +88,7 @@ function SubjectCard({ subject }: { subject: Subject }) {
           🌳 Ver habilidades
         </button>
       </div>
-      <div className="subject-card-arrow">›</div>
+      <div className="text-[#555577] text-xl font-bold shrink-0">›</div>
     </div>
   )
 }
@@ -92,16 +96,16 @@ function SubjectCard({ subject }: { subject: Subject }) {
 export function SubjectCardGrid({ subjects }: { subjects: Subject[] }) {
   if (subjects.length === 0) {
     return (
-      <div className="empty-state">
-        <p className="empty-icon">📖</p>
-        <p className="empty-text">No tenés materias inscriptas</p>
-        <p className="empty-sub">Explorá el catálogo y anotate</p>
+      <div className="flex flex-col items-center justify-center p-8 text-center bg-[#13131f] border border-white/8 rounded-2xl min-h-[160px]">
+        <p className="text-3xl mb-2">📖</p>
+        <p className="text-[#f0f0ff] font-semibold">No tenés materias inscriptas</p>
+        <p className="text-xs text-[#8888aa] mt-1">Explorá el catálogo y anotate</p>
       </div>
     )
   }
 
   return (
-    <div className="subject-grid">
+    <div className="flex flex-col gap-2.5">
       {subjects.map((s) => <SubjectCard key={s.id} subject={s} />)}
     </div>
   )
@@ -111,35 +115,33 @@ export function SubjectCardGrid({ subjects }: { subjects: Subject[] }) {
 export function QuickActions() {
   const navigate = useNavigate()
   return (
-    <div className="quick-actions" style={{ flexWrap: 'wrap' }}>
-      <button className="quick-btn quick-btn-match" onClick={() => navigate('/match')}>
-        <span className="quick-btn-icon">🎮</span>
+    <div className="grid grid-cols-2 gap-3 py-2 pb-5">
+      <button 
+        className="flex flex-col items-center gap-2 p-[18px_12px] rounded-2xl border bg-gradient-to-br from-violet-500/10 to-blue-500/10 border-violet-500/20 hover:border-violet-500/40 text-white font-semibold text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg cursor-pointer"
+        onClick={() => navigate('/match')}
+      >
+        <span className="text-[26px]">🎮</span>
         <span>Find Party</span>
       </button>
-      <button className="quick-btn quick-btn-explore" onClick={() => navigate('/subjects')}>
-        <span className="quick-btn-icon">📚</span>
+      <button 
+        className="flex flex-col items-center gap-2 p-[18px_12px] rounded-2xl border bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-blue-500/20 hover:border-blue-500/40 text-white font-semibold text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg cursor-pointer"
+        onClick={() => navigate('/subjects')}
+      >
+        <span className="text-[26px]">📚</span>
         <span>Materias</span>
       </button>
       <button 
-        className="quick-btn" 
-        style={{ 
-          background: 'linear-gradient(135deg, rgba(236,72,153,0.15), rgba(219,39,119,0.1))', 
-          borderColor: 'rgba(236,72,153,0.25)' 
-        }} 
+        className="flex flex-col items-center gap-2 p-[18px_12px] rounded-2xl border bg-gradient-to-br from-pink-500/10 to-pink-700/10 border-[#ec4899]/25 hover:border-pink-500/40 text-white font-semibold text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg cursor-pointer" 
         onClick={() => navigate('/parties')}
       >
-        <span className="quick-btn-icon">👥</span>
+        <span className="text-[26px]">👥</span>
         <span>Mis Parties</span>
       </button>
       <button
-        className="quick-btn"
-        style={{
-          background: 'linear-gradient(135deg, rgba(34,197,94,0.15), rgba(16,185,129,0.1))',
-          borderColor: 'rgba(34,197,94,0.25)',
-        }}
+        className="flex flex-col items-center gap-2 p-[18px_12px] rounded-2xl border bg-gradient-to-br from-green-500/10 to-emerald-700/10 border-green-500/25 hover:border-green-500/40 text-white font-semibold text-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg cursor-pointer"
         onClick={() => navigate('/friends')}
       >
-        <span className="quick-btn-icon">🤝</span>
+        <span className="text-[26px]">🤝</span>
         <span>Amigos</span>
       </button>
     </div>

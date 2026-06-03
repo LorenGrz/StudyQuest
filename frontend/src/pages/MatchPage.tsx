@@ -82,13 +82,18 @@ export default function MatchPage() {
   }
 
   return (
-    <div className="mc-page">
-      <header className="mc-header">
+    <div className="w-full max-w-[480px] mx-auto self-center h-dvh flex flex-col bg-[#0d0d18] overflow-hidden">
+      
+      {/* Header */}
+      <header className="flex items-center justify-between px-5 pt-5 pb-2.5 shrink-0">
         <div>
-          <h1 className="mc-header-title">Party Discovery</h1>
-          <p className="mc-header-subtitle">{subtitleByStatus}</p>
+          <h1 className="text-[22px] font-extrabold text-white">Party Discovery</h1>
+          <p className="text-[13px] text-[#8888aa] mt-1">{subtitleByStatus}</p>
         </div>
-        <button className="mc-filter-btn" aria-label="Filtros">
+        <button 
+          className="w-[38px] h-[38px] rounded-xl bg-[#13131f] border border-white/8 flex items-center justify-center text-[#8888aa] transition-all duration-200 hover:border-purple-500 hover:text-purple-400 active:scale-95" 
+          aria-label="Filtros"
+        >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <line x1="3" y1="6" x2="21" y2="6" />
             <line x1="7" y1="12" x2="17" y2="12" />
@@ -97,22 +102,23 @@ export default function MatchPage() {
         </button>
       </header>
 
-      <main className="mc-deck">
+      {/* Main Deck Container */}
+      <main className="flex-1 min-h-0 flex items-stretch justify-center px-10 py-[18px] overflow-hidden relative">
         <AnimatePresence mode="popLayout" custom={exitDir}>
           {(status === 'idle' || status === 'loading') && (
-            <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center w-full">
               <LoadingState />
             </motion.div>
           )}
 
           {status === 'error' && (
-            <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div key="error" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center w-full">
               <ErrorState message={error} onRetry={load} />
             </motion.div>
           )}
 
           {status === 'empty' && (
-            <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center w-full">
               <EmptyState onCreateParty={() => navigate('/parties')} />
             </motion.div>
           )}
@@ -131,7 +137,7 @@ export default function MatchPage() {
               dragElastic={0.8}
               onDragEnd={handleDragEnd}
               whileTap={{ cursor: 'grabbing', scale: 0.98 }}
-              className="mc-swipe-wrap"
+              className="w-full max-w-[440px] h-full flex flex-col justify-center select-none touch-none cursor-grab active:cursor-grabbing"
             >
               <PartyCard party={top} />
             </motion.div>
@@ -139,13 +145,17 @@ export default function MatchPage() {
         </AnimatePresence>
       </main>
 
+      {/* Control Buttons */}
       <ActionButtons
         onDiscard={() => top && handleDiscard(top.id, true)}
         onJoin={() => top && handleJoin(top.id, true)}
         disabled={!showCard}
       />
 
+      {/* Create Party Banner */}
       <CreatePartyBar onPress={() => navigate('/parties')} />
+      
+      {/* Bottom Nav Bar */}
       <BottomNav />
     </div>
   )

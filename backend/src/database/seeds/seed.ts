@@ -45,16 +45,29 @@ import { ProfileBorder } from '../../modules/cosmetics/profile-border.entity';
 // ─── Conexión ──────────────────────────────────────────────────────────────────
 const AppDataSource = new DataSource({
   type: 'postgres',
-  host:     process.env.POSTGRES_HOST     ?? 'localhost',
-  port:     Number(process.env.POSTGRES_PORT ?? 5432),
-  username: process.env.POSTGRES_USER     ?? 'studyquest',
+  host: process.env.POSTGRES_HOST ?? 'localhost',
+  port: Number(process.env.POSTGRES_PORT ?? 5432),
+  username: process.env.POSTGRES_USER ?? 'studyquest',
   password: process.env.POSTGRES_PASSWORD ?? 'studyquest_pass',
-  database: process.env.POSTGRES_DB       ?? 'studyquest',
+  database: process.env.POSTGRES_DB ?? 'studyquest',
   entities: [
-    User, FriendRequest, Subject, Party, PartyMember, ChatMessage, PartyActivity,
-    Quest, QuizQuestion, QuizOption, PlayerResult, PartyInvitation, Achievement,
+    User,
+    FriendRequest,
+    Subject,
+    Party,
+    PartyMember,
+    ChatMessage,
+    PartyActivity,
+    Quest,
+    QuizQuestion,
+    QuizOption,
+    PlayerResult,
+    PartyInvitation,
+    Achievement,
     UserAchievement,
-    UserTitle, UserInventory, ProfileBorder
+    UserTitle,
+    UserInventory,
+    ProfileBorder,
   ],
   synchronize: false,
   logging: false,
@@ -89,95 +102,519 @@ async function ensureBootstrapSchema(): Promise<void> {
 
 // ─── Datos de prueba ───────────────────────────────────────────────────────────
 const UNIVERSITY = 'Universidad Nacional de Córdoba';
-const CAREER     = 'Ingeniería en Sistemas de Información';
+const CAREER = 'Ingeniería en Sistemas de Información';
 
 const SUBJECTS_DATA = [
-  { name: 'Análisis Matemático II',           code: 'AM2', semester: 2, description: 'Cálculo diferencial e integral en varias variables.' },
-  { name: 'Algoritmos y Estructuras de Datos', code: 'AED', semester: 3, description: 'Diseño y análisis de algoritmos, estructuras clásicas.' },
-  { name: 'Bases de Datos',                   code: 'BD',  semester: 4, description: 'Modelado relacional, SQL y bases NoSQL.' },
-  { name: 'Sistemas Operativos',              code: 'SO',  semester: 4, description: 'Procesos, memoria, filesystem y concurrencia.' },
-  { name: 'Redes de Computadoras',            code: 'RC',  semester: 5, description: 'Modelo OSI/TCP-IP, protocolos y seguridad.' },
+  {
+    name: 'Análisis Matemático II',
+    code: 'AM2',
+    semester: 2,
+    description: 'Cálculo diferencial e integral en varias variables.',
+  },
+  {
+    name: 'Algoritmos y Estructuras de Datos',
+    code: 'AED',
+    semester: 3,
+    description: 'Diseño y análisis de algoritmos, estructuras clásicas.',
+  },
+  {
+    name: 'Bases de Datos',
+    code: 'BD',
+    semester: 4,
+    description: 'Modelado relacional, SQL y bases NoSQL.',
+  },
+  {
+    name: 'Sistemas Operativos',
+    code: 'SO',
+    semester: 4,
+    description: 'Procesos, memoria, filesystem y concurrencia.',
+  },
+  {
+    name: 'Redes de Computadoras',
+    code: 'RC',
+    semester: 5,
+    description: 'Modelo OSI/TCP-IP, protocolos y seguridad.',
+  },
 ];
 
 const USERS_DATA = [
-  { email: 'admin@studyquest.dev', username: 'admin_sq',   displayName: 'Admin',           password: 'AdminPass123!', semester: 1, role: 'ADMIN' },
-  { email: 'alice@studyquest.dev', username: 'alice_dev',  displayName: 'Alice García',   password: 'Password123!', semester: 4 },
-  { email: 'bob@studyquest.dev',   username: 'bobby_b',    displayName: 'Bob Martínez',   password: 'Password123!', semester: 3 },
-  { email: 'carol@studyquest.dev', username: 'carol_dev',  displayName: 'Carol López',    password: 'Password123!', semester: 5 },
-  { email: 'dave@studyquest.dev',  username: 'dave_code',  displayName: 'Dave Rodríguez', password: 'Password123!', semester: 4 },
-  { email: 'eve@studyquest.dev',   username: 'eve_hacker', displayName: 'Eve Fernández',  password: 'Password123!', semester: 2 },
-  { email: 'frank@studyquest.dev', username: 'frank_tank', displayName: 'Frank Gómez',    password: 'Password123!', semester: 3 },
-  { email: 'grace@studyquest.dev', username: 'grace_hopp', displayName: 'Grace Hopper',   password: 'Password123!', semester: 4 },
+  {
+    email: 'admin@studyquest.dev',
+    username: 'admin_sq',
+    displayName: 'Admin',
+    password: 'AdminPass123!',
+    semester: 1,
+    role: 'ADMIN',
+  },
+  {
+    email: 'alice@studyquest.dev',
+    username: 'alice_dev',
+    displayName: 'Alice García',
+    password: 'Password123!',
+    semester: 4,
+  },
+  {
+    email: 'bob@studyquest.dev',
+    username: 'bobby_b',
+    displayName: 'Bob Martínez',
+    password: 'Password123!',
+    semester: 3,
+  },
+  {
+    email: 'carol@studyquest.dev',
+    username: 'carol_dev',
+    displayName: 'Carol López',
+    password: 'Password123!',
+    semester: 5,
+  },
+  {
+    email: 'dave@studyquest.dev',
+    username: 'dave_code',
+    displayName: 'Dave Rodríguez',
+    password: 'Password123!',
+    semester: 4,
+  },
+  {
+    email: 'eve@studyquest.dev',
+    username: 'eve_hacker',
+    displayName: 'Eve Fernández',
+    password: 'Password123!',
+    semester: 2,
+  },
+  {
+    email: 'frank@studyquest.dev',
+    username: 'frank_tank',
+    displayName: 'Frank Gómez',
+    password: 'Password123!',
+    semester: 3,
+  },
+  {
+    email: 'grace@studyquest.dev',
+    username: 'grace_hopp',
+    displayName: 'Grace Hopper',
+    password: 'Password123!',
+    semester: 4,
+  },
 ];
 
 const ACHIEVEMENTS_DATA = [
-  { code: 'FIRST_QUEST',      name: 'Primera Quest',        icon: '🎯', category: 'academic',    description: 'Completaste tu primera quest.',          points: 50 },
-  { code: 'QUEST_STREAK_3',   name: 'En Racha',             icon: '🔥', category: 'academic',    description: 'Mantuviste una racha de 3 días.',         points: 100, rewardType: 'title', rewardCode: 'STREAK_3_TITLE' },
-  { code: 'QUEST_STREAK_5',   name: 'Imparable',            icon: '⚡', category: 'academic',    description: 'Mantuviste una racha de 5 días.',         points: 200 },
-  { code: 'FIRST_PARTY',      name: 'Primera Party',        icon: '🎉', category: 'social',      description: 'Te uniste a tu primera party de estudio.', points: 50 },
-  { code: 'SOCIAL_BUTTERFLY', name: 'Alma de la Fiesta',    icon: '🦋', category: 'social',      description: 'Participaste en 5 parties diferentes.',    points: 150 },
-  { code: 'LEVEL_5',          name: 'Estudiante Aplicado',  icon: '📚', category: 'progression', description: 'Alcanzaste el nivel 5.',                    points: 100 },
-  { code: 'LEVEL_10',         name: 'Maestro del Estudio',  icon: '🏆', category: 'progression', description: 'Alcanzaste el nivel 10.',                   points: 250, rewardType: 'title', rewardCode: 'MASTER_TITLE' },
+  {
+    code: 'FIRST_QUEST',
+    name: 'Primera Quest',
+    icon: '🎯',
+    category: 'academic',
+    description: 'Completaste tu primera quest.',
+    points: 50,
+  },
+  {
+    code: 'QUEST_STREAK_3',
+    name: 'En Racha',
+    icon: '🔥',
+    category: 'academic',
+    description: 'Mantuviste una racha de 3 días.',
+    points: 100,
+    rewardType: 'title',
+    rewardCode: 'STREAK_3_TITLE',
+  },
+  {
+    code: 'QUEST_STREAK_5',
+    name: 'Imparable',
+    icon: '⚡',
+    category: 'academic',
+    description: 'Mantuviste una racha de 5 días.',
+    points: 200,
+  },
+  {
+    code: 'FIRST_PARTY',
+    name: 'Primera Party',
+    icon: '🎉',
+    category: 'social',
+    description: 'Te uniste a tu primera party de estudio.',
+    points: 50,
+  },
+  {
+    code: 'SOCIAL_BUTTERFLY',
+    name: 'Alma de la Fiesta',
+    icon: '🦋',
+    category: 'social',
+    description: 'Participaste en 5 parties diferentes.',
+    points: 150,
+  },
+  {
+    code: 'LEVEL_5',
+    name: 'Estudiante Aplicado',
+    icon: '📚',
+    category: 'progression',
+    description: 'Alcanzaste el nivel 5.',
+    points: 100,
+  },
+  {
+    code: 'LEVEL_10',
+    name: 'Maestro del Estudio',
+    icon: '🏆',
+    category: 'progression',
+    description: 'Alcanzaste el nivel 10.',
+    points: 250,
+    rewardType: 'title',
+    rewardCode: 'MASTER_TITLE',
+  },
 
-  { code: 'STREAK_3_BORDER',  name: 'Marco de Fuego',       icon: '🔥', category: 'cosmetic',    description: 'Recompensa por racha de 3 días.',         points: 0,   rewardType: 'border', rewardCode: 'FIRE_BORDER' },
-  { code: 'LEVEL_5_BORDER',   name: 'Marco Estelar',        icon: '⭐', category: 'cosmetic',    description: 'Recompensa por nivel 5.',                 points: 0,   rewardType: 'border', rewardCode: 'STAR_BORDER' },
-  { code: 'LEVEL_10_BORDER',  name: 'Marco de Campeón',     icon: '👑', category: 'cosmetic',    description: 'Recompensa por nivel 10.',                points: 0,   rewardType: 'border', rewardCode: 'CHAMPION_BORDER' },
+  {
+    code: 'STREAK_3_BORDER',
+    name: 'Marco de Fuego',
+    icon: '🔥',
+    category: 'cosmetic',
+    description: 'Recompensa por racha de 3 días.',
+    points: 0,
+    rewardType: 'border',
+    rewardCode: 'FIRE_BORDER',
+  },
+  {
+    code: 'LEVEL_5_BORDER',
+    name: 'Marco Estelar',
+    icon: '⭐',
+    category: 'cosmetic',
+    description: 'Recompensa por nivel 5.',
+    points: 0,
+    rewardType: 'border',
+    rewardCode: 'STAR_BORDER',
+  },
+  {
+    code: 'LEVEL_10_BORDER',
+    name: 'Marco de Campeón',
+    icon: '👑',
+    category: 'cosmetic',
+    description: 'Recompensa por nivel 10.',
+    points: 0,
+    rewardType: 'border',
+    rewardCode: 'CHAMPION_BORDER',
+  },
 
   // ── League rank-up achievements ─────────────────────────────────────────────
-  { code: 'LEAGUE_IRON',        name: 'Bienvenido al Hierro',  icon: '⚙️',  category: 'league', description: 'Comenzaste tu camino en StudyQuest.',  points: 0,  rewardType: 'border', rewardCode: 'IRON_BORDER' },
-  { code: 'LEAGUE_SILVER',      name: 'Ascenso a Plata',       icon: '🥈',  category: 'league', description: 'Alcanzaste la liga Plata.',            points: 50, rewardType: 'border', rewardCode: 'SILVER_BORDER' },
-  { code: 'LEAGUE_GOLD',        name: 'Ascenso a Oro',         icon: '🥇',  category: 'league', description: 'Alcanzaste la liga Oro.',              points: 100, rewardType: 'border', rewardCode: 'GOLD_BORDER' },
-  { code: 'LEAGUE_PLATINUM',    name: 'Ascenso a Platino',     icon: '💎',  category: 'league', description: 'Alcanzaste la liga Platino.',          points: 150, rewardType: 'border', rewardCode: 'PLATINUM_BORDER' },
-  { code: 'LEAGUE_EMERALD',     name: 'Ascenso a Esmeralda',   icon: '💚',  category: 'league', description: 'Alcanzaste la liga Esmeralda.',        points: 200, rewardType: 'border', rewardCode: 'EMERALD_BORDER' },
-  { code: 'LEAGUE_DIAMOND',     name: 'Ascenso a Diamante',    icon: '💠',  category: 'league', description: 'Alcanzaste la liga Diamante.',         points: 300, rewardType: 'border', rewardCode: 'DIAMOND_BORDER' },
-  { code: 'LEAGUE_QUESTMASTER', name: '¡QuestMaster!',         icon: '👑',  category: 'league', description: 'Alcanzaste el rango máximo.',          points: 500, rewardType: 'border', rewardCode: 'QUESTMASTER_BORDER' },
+  {
+    code: 'LEAGUE_IRON',
+    name: 'Bienvenido al Hierro',
+    icon: '⚙️',
+    category: 'league',
+    description: 'Comenzaste tu camino en StudyQuest.',
+    points: 0,
+    rewardType: 'border',
+    rewardCode: 'IRON_BORDER',
+  },
+  {
+    code: 'LEAGUE_SILVER',
+    name: 'Ascenso a Plata',
+    icon: '🥈',
+    category: 'league',
+    description: 'Alcanzaste la liga Plata.',
+    points: 50,
+    rewardType: 'border',
+    rewardCode: 'SILVER_BORDER',
+  },
+  {
+    code: 'LEAGUE_GOLD',
+    name: 'Ascenso a Oro',
+    icon: '🥇',
+    category: 'league',
+    description: 'Alcanzaste la liga Oro.',
+    points: 100,
+    rewardType: 'border',
+    rewardCode: 'GOLD_BORDER',
+  },
+  {
+    code: 'LEAGUE_PLATINUM',
+    name: 'Ascenso a Platino',
+    icon: '💎',
+    category: 'league',
+    description: 'Alcanzaste la liga Platino.',
+    points: 150,
+    rewardType: 'border',
+    rewardCode: 'PLATINUM_BORDER',
+  },
+  {
+    code: 'LEAGUE_EMERALD',
+    name: 'Ascenso a Esmeralda',
+    icon: '💚',
+    category: 'league',
+    description: 'Alcanzaste la liga Esmeralda.',
+    points: 200,
+    rewardType: 'border',
+    rewardCode: 'EMERALD_BORDER',
+  },
+  {
+    code: 'LEAGUE_DIAMOND',
+    name: 'Ascenso a Diamante',
+    icon: '💠',
+    category: 'league',
+    description: 'Alcanzaste la liga Diamante.',
+    points: 300,
+    rewardType: 'border',
+    rewardCode: 'DIAMOND_BORDER',
+  },
+  {
+    code: 'LEAGUE_QUESTMASTER',
+    name: '¡QuestMaster!',
+    icon: '👑',
+    category: 'league',
+    description: 'Alcanzaste el rango máximo.',
+    points: 500,
+    rewardType: 'border',
+    rewardCode: 'QUESTMASTER_BORDER',
+  },
 
   // league title achievements
-  { code: 'LEAGUE_IRON_TITLE',        name: 'Título: Forjado en Hierro',    icon: '⚙️',  category: 'league', description: 'Título desbloqueado al iniciar.',        points: 0, rewardType: 'title', rewardCode: 'IRON_TITLE' },
-  { code: 'LEAGUE_SILVER_TITLE',      name: 'Título: De Plata',            icon: '🥈',  category: 'league', description: 'Título desbloqueado en Plata.',          points: 0, rewardType: 'title', rewardCode: 'SILVER_TITLE' },
-  { code: 'LEAGUE_GOLD_TITLE',        name: 'Título: Dorado',              icon: '🥇',  category: 'league', description: 'Título desbloqueado en Oro.',            points: 0, rewardType: 'title', rewardCode: 'GOLD_TITLE' },
-  { code: 'LEAGUE_PLATINUM_TITLE',    name: 'Título: Platinado',           icon: '💎',  category: 'league', description: 'Título desbloqueado en Platino.',        points: 0, rewardType: 'title', rewardCode: 'PLATINUM_TITLE' },
-  { code: 'LEAGUE_EMERALD_TITLE',     name: 'Título: Esmeralda',           icon: '💚',  category: 'league', description: 'Título desbloqueado en Esmeralda.',      points: 0, rewardType: 'title', rewardCode: 'EMERALD_TITLE' },
-  { code: 'LEAGUE_DIAMOND_TITLE',     name: 'Título: Diamante',            icon: '💠',  category: 'league', description: 'Título desbloqueado en Diamante.',       points: 0, rewardType: 'title', rewardCode: 'DIAMOND_TITLE' },
-  { code: 'LEAGUE_QUESTMASTER_TITLE', name: 'Título: QuestMaster',         icon: '👑',  category: 'league', description: 'Título desbloqueado al ser QuestMaster.', points: 0, rewardType: 'title', rewardCode: 'QUESTMASTER_TITLE' },
+  {
+    code: 'LEAGUE_IRON_TITLE',
+    name: 'Título: Forjado en Hierro',
+    icon: '⚙️',
+    category: 'league',
+    description: 'Título desbloqueado al iniciar.',
+    points: 0,
+    rewardType: 'title',
+    rewardCode: 'IRON_TITLE',
+  },
+  {
+    code: 'LEAGUE_SILVER_TITLE',
+    name: 'Título: De Plata',
+    icon: '🥈',
+    category: 'league',
+    description: 'Título desbloqueado en Plata.',
+    points: 0,
+    rewardType: 'title',
+    rewardCode: 'SILVER_TITLE',
+  },
+  {
+    code: 'LEAGUE_GOLD_TITLE',
+    name: 'Título: Dorado',
+    icon: '🥇',
+    category: 'league',
+    description: 'Título desbloqueado en Oro.',
+    points: 0,
+    rewardType: 'title',
+    rewardCode: 'GOLD_TITLE',
+  },
+  {
+    code: 'LEAGUE_PLATINUM_TITLE',
+    name: 'Título: Platinado',
+    icon: '💎',
+    category: 'league',
+    description: 'Título desbloqueado en Platino.',
+    points: 0,
+    rewardType: 'title',
+    rewardCode: 'PLATINUM_TITLE',
+  },
+  {
+    code: 'LEAGUE_EMERALD_TITLE',
+    name: 'Título: Esmeralda',
+    icon: '💚',
+    category: 'league',
+    description: 'Título desbloqueado en Esmeralda.',
+    points: 0,
+    rewardType: 'title',
+    rewardCode: 'EMERALD_TITLE',
+  },
+  {
+    code: 'LEAGUE_DIAMOND_TITLE',
+    name: 'Título: Diamante',
+    icon: '💠',
+    category: 'league',
+    description: 'Título desbloqueado en Diamante.',
+    points: 0,
+    rewardType: 'title',
+    rewardCode: 'DIAMOND_TITLE',
+  },
+  {
+    code: 'LEAGUE_QUESTMASTER_TITLE',
+    name: 'Título: QuestMaster',
+    icon: '👑',
+    category: 'league',
+    description: 'Título desbloqueado al ser QuestMaster.',
+    points: 0,
+    rewardType: 'title',
+    rewardCode: 'QUESTMASTER_TITLE',
+  },
 ];
 
 // ── League cosmetics map (tier → codes) ─────────────────────────────────────
 const LEAGUE_TIERS = [
-  { tier: 1, minElo: 0,    borderCode: 'IRON_BORDER',        titleCode: 'IRON_TITLE',        borderAchiev: 'LEAGUE_IRON',        titleAchiev: 'LEAGUE_IRON_TITLE' },
-  { tier: 2, minElo: 400,  borderCode: 'SILVER_BORDER',      titleCode: 'SILVER_TITLE',      borderAchiev: 'LEAGUE_SILVER',      titleAchiev: 'LEAGUE_SILVER_TITLE' },
-  { tier: 3, minElo: 800,  borderCode: 'GOLD_BORDER',        titleCode: 'GOLD_TITLE',        borderAchiev: 'LEAGUE_GOLD',        titleAchiev: 'LEAGUE_GOLD_TITLE' },
-  { tier: 4, minElo: 1200, borderCode: 'PLATINUM_BORDER',    titleCode: 'PLATINUM_TITLE',    borderAchiev: 'LEAGUE_PLATINUM',    titleAchiev: 'LEAGUE_PLATINUM_TITLE' },
-  { tier: 5, minElo: 1600, borderCode: 'EMERALD_BORDER',     titleCode: 'EMERALD_TITLE',     borderAchiev: 'LEAGUE_EMERALD',     titleAchiev: 'LEAGUE_EMERALD_TITLE' },
-  { tier: 6, minElo: 2000, borderCode: 'DIAMOND_BORDER',     titleCode: 'DIAMOND_TITLE',     borderAchiev: 'LEAGUE_DIAMOND',     titleAchiev: 'LEAGUE_DIAMOND_TITLE' },
-  { tier: 7, minElo: 2400, borderCode: 'QUESTMASTER_BORDER', titleCode: 'QUESTMASTER_TITLE', borderAchiev: 'LEAGUE_QUESTMASTER', titleAchiev: 'LEAGUE_QUESTMASTER_TITLE' },
+  {
+    tier: 1,
+    minElo: 0,
+    borderCode: 'IRON_BORDER',
+    titleCode: 'IRON_TITLE',
+    borderAchiev: 'LEAGUE_IRON',
+    titleAchiev: 'LEAGUE_IRON_TITLE',
+  },
+  {
+    tier: 2,
+    minElo: 400,
+    borderCode: 'SILVER_BORDER',
+    titleCode: 'SILVER_TITLE',
+    borderAchiev: 'LEAGUE_SILVER',
+    titleAchiev: 'LEAGUE_SILVER_TITLE',
+  },
+  {
+    tier: 3,
+    minElo: 800,
+    borderCode: 'GOLD_BORDER',
+    titleCode: 'GOLD_TITLE',
+    borderAchiev: 'LEAGUE_GOLD',
+    titleAchiev: 'LEAGUE_GOLD_TITLE',
+  },
+  {
+    tier: 4,
+    minElo: 1200,
+    borderCode: 'PLATINUM_BORDER',
+    titleCode: 'PLATINUM_TITLE',
+    borderAchiev: 'LEAGUE_PLATINUM',
+    titleAchiev: 'LEAGUE_PLATINUM_TITLE',
+  },
+  {
+    tier: 5,
+    minElo: 1600,
+    borderCode: 'EMERALD_BORDER',
+    titleCode: 'EMERALD_TITLE',
+    borderAchiev: 'LEAGUE_EMERALD',
+    titleAchiev: 'LEAGUE_EMERALD_TITLE',
+  },
+  {
+    tier: 6,
+    minElo: 2000,
+    borderCode: 'DIAMOND_BORDER',
+    titleCode: 'DIAMOND_TITLE',
+    borderAchiev: 'LEAGUE_DIAMOND',
+    titleAchiev: 'LEAGUE_DIAMOND_TITLE',
+  },
+  {
+    tier: 7,
+    minElo: 2400,
+    borderCode: 'QUESTMASTER_BORDER',
+    titleCode: 'QUESTMASTER_TITLE',
+    borderAchiev: 'LEAGUE_QUESTMASTER',
+    titleAchiev: 'LEAGUE_QUESTMASTER_TITLE',
+  },
 ];
 
 const USER_TITLES_DATA = [
-  { code: 'STREAK_3_TITLE', name: 'Racha Activa',        text: 'Racha Activa',        achievementCode: 'QUEST_STREAK_3' },
-  { code: 'MASTER_TITLE',   name: 'Maestro del Estudio', text: 'Maestro del Estudio', achievementCode: 'LEVEL_10' },
+  {
+    code: 'STREAK_3_TITLE',
+    name: 'Racha Activa',
+    text: 'Racha Activa',
+    achievementCode: 'QUEST_STREAK_3',
+  },
+  {
+    code: 'MASTER_TITLE',
+    name: 'Maestro del Estudio',
+    text: 'Maestro del Estudio',
+    achievementCode: 'LEVEL_10',
+  },
   // league titles
-  { code: 'IRON_TITLE',        name: 'Forjado en Hierro', text: 'Forjado en Hierro',    achievementCode: 'LEAGUE_IRON_TITLE' },
-  { code: 'SILVER_TITLE',      name: 'De Plata',          text: 'De Plata',             achievementCode: 'LEAGUE_SILVER_TITLE' },
-  { code: 'GOLD_TITLE',        name: 'Dorado',            text: 'Dorado',               achievementCode: 'LEAGUE_GOLD_TITLE' },
-  { code: 'PLATINUM_TITLE',    name: 'Platinado',         text: 'Platinado',            achievementCode: 'LEAGUE_PLATINUM_TITLE' },
-  { code: 'EMERALD_TITLE',     name: 'Esmeralda',         text: 'Esmeralda',            achievementCode: 'LEAGUE_EMERALD_TITLE' },
-  { code: 'DIAMOND_TITLE',     name: 'Diamante',          text: 'Diamante',             achievementCode: 'LEAGUE_DIAMOND_TITLE' },
-  { code: 'QUESTMASTER_TITLE', name: 'QuestMaster',       text: 'QuestMaster',          achievementCode: 'LEAGUE_QUESTMASTER_TITLE' },
+  {
+    code: 'IRON_TITLE',
+    name: 'Forjado en Hierro',
+    text: 'Forjado en Hierro',
+    achievementCode: 'LEAGUE_IRON_TITLE',
+  },
+  {
+    code: 'SILVER_TITLE',
+    name: 'De Plata',
+    text: 'De Plata',
+    achievementCode: 'LEAGUE_SILVER_TITLE',
+  },
+  {
+    code: 'GOLD_TITLE',
+    name: 'Dorado',
+    text: 'Dorado',
+    achievementCode: 'LEAGUE_GOLD_TITLE',
+  },
+  {
+    code: 'PLATINUM_TITLE',
+    name: 'Platinado',
+    text: 'Platinado',
+    achievementCode: 'LEAGUE_PLATINUM_TITLE',
+  },
+  {
+    code: 'EMERALD_TITLE',
+    name: 'Esmeralda',
+    text: 'Esmeralda',
+    achievementCode: 'LEAGUE_EMERALD_TITLE',
+  },
+  {
+    code: 'DIAMOND_TITLE',
+    name: 'Diamante',
+    text: 'Diamante',
+    achievementCode: 'LEAGUE_DIAMOND_TITLE',
+  },
+  {
+    code: 'QUESTMASTER_TITLE',
+    name: 'QuestMaster',
+    text: 'QuestMaster',
+    achievementCode: 'LEAGUE_QUESTMASTER_TITLE',
+  },
 ];
 
 const PROFILE_BORDERS_DATA = [
-  { code: 'FIRE_BORDER',        name: 'Llamas',     imageFile: 'fire.svg',        achievementCode: 'STREAK_3_BORDER' },
-  { code: 'STAR_BORDER',        name: 'Estrella',   imageFile: 'star.svg',        achievementCode: 'LEVEL_5_BORDER' },
-  { code: 'CHAMPION_BORDER',    name: 'Campeón',    imageFile: 'champion.svg',    achievementCode: 'LEVEL_10_BORDER' },
+  {
+    code: 'FIRE_BORDER',
+    name: 'Llamas',
+    imageFile: 'fire.svg',
+    achievementCode: 'STREAK_3_BORDER',
+  },
+  {
+    code: 'STAR_BORDER',
+    name: 'Estrella',
+    imageFile: 'star.svg',
+    achievementCode: 'LEVEL_5_BORDER',
+  },
+  {
+    code: 'CHAMPION_BORDER',
+    name: 'Campeón',
+    imageFile: 'champion.svg',
+    achievementCode: 'LEVEL_10_BORDER',
+  },
   // league borders
-  { code: 'IRON_BORDER',        name: 'Hierro',        imageFile: 'iron.svg',        achievementCode: 'LEAGUE_IRON' },
-  { code: 'SILVER_BORDER',      name: 'Plata',         imageFile: 'silver.svg',      achievementCode: 'LEAGUE_SILVER' },
-  { code: 'GOLD_BORDER',        name: 'Oro',           imageFile: 'gold.svg',        achievementCode: 'LEAGUE_GOLD' },
-  { code: 'PLATINUM_BORDER',    name: 'Platino',       imageFile: 'platinum.svg',    achievementCode: 'LEAGUE_PLATINUM' },
-  { code: 'EMERALD_BORDER',     name: 'Esmeralda',     imageFile: 'emerald.svg',     achievementCode: 'LEAGUE_EMERALD' },
-  { code: 'DIAMOND_BORDER',     name: 'Diamante',      imageFile: 'diamond.svg',     achievementCode: 'LEAGUE_DIAMOND' },
-  { code: 'QUESTMASTER_BORDER', name: 'QuestMaster',   imageFile: 'questmaster.svg', achievementCode: 'LEAGUE_QUESTMASTER' },
+  {
+    code: 'IRON_BORDER',
+    name: 'Hierro',
+    imageFile: 'iron.svg',
+    achievementCode: 'LEAGUE_IRON',
+  },
+  {
+    code: 'SILVER_BORDER',
+    name: 'Plata',
+    imageFile: 'silver.svg',
+    achievementCode: 'LEAGUE_SILVER',
+  },
+  {
+    code: 'GOLD_BORDER',
+    name: 'Oro',
+    imageFile: 'gold.svg',
+    achievementCode: 'LEAGUE_GOLD',
+  },
+  {
+    code: 'PLATINUM_BORDER',
+    name: 'Platino',
+    imageFile: 'platinum.svg',
+    achievementCode: 'LEAGUE_PLATINUM',
+  },
+  {
+    code: 'EMERALD_BORDER',
+    name: 'Esmeralda',
+    imageFile: 'emerald.svg',
+    achievementCode: 'LEAGUE_EMERALD',
+  },
+  {
+    code: 'DIAMOND_BORDER',
+    name: 'Diamante',
+    imageFile: 'diamond.svg',
+    achievementCode: 'LEAGUE_DIAMOND',
+  },
+  {
+    code: 'QUESTMASTER_BORDER',
+    name: 'QuestMaster',
+    imageFile: 'questmaster.svg',
+    achievementCode: 'LEAGUE_QUESTMASTER',
+  },
 ];
 
 // ─── Main ──────────────────────────────────────────────────────────────────────
@@ -187,11 +624,11 @@ async function seed() {
   await ensureBootstrapSchema();
   console.log('✅  Conexión exitosa\n');
 
-  const userRepo        = AppDataSource.getRepository(User);
+  const userRepo = AppDataSource.getRepository(User);
   const friendRequestRepo = AppDataSource.getRepository(FriendRequest);
-  const subjectRepo     = AppDataSource.getRepository(Subject);
-  const partyRepo       = AppDataSource.getRepository(Party);
-  const memberRepo      = AppDataSource.getRepository(PartyMember);
+  const subjectRepo = AppDataSource.getRepository(Subject);
+  const partyRepo = AppDataSource.getRepository(Party);
+  const memberRepo = AppDataSource.getRepository(PartyMember);
   const userTitleRepo = AppDataSource.getRepository(UserTitle);
 
   // ── 1. Materias ──────────────────────────────────────────────────────────────
@@ -199,13 +636,20 @@ async function seed() {
   const savedSubjects: Subject[] = [];
 
   for (const sd of SUBJECTS_DATA) {
-    const existing = await subjectRepo.findOneBy({ code: sd.code, university: UNIVERSITY });
+    const existing = await subjectRepo.findOneBy({
+      code: sd.code,
+      university: UNIVERSITY,
+    });
     if (existing) {
       console.log(`   ⚠️  Materia "${sd.code}" ya existe — omitida`);
       savedSubjects.push(existing);
       continue;
     }
-    const subject = subjectRepo.create({ ...sd, university: UNIVERSITY, career: CAREER });
+    const subject = subjectRepo.create({
+      ...sd,
+      university: UNIVERSITY,
+      career: CAREER,
+    });
     savedSubjects.push(await subjectRepo.save(subject));
     console.log(`   ✔  ${sd.name}`);
   }
@@ -223,17 +667,23 @@ async function seed() {
     }
     const passwordHash = await bcrypt.hash(ud.password, 12);
     const user = userRepo.create({
-      email:        ud.email,
-      username:     ud.username,
-      displayName:  ud.displayName,
-      university:   UNIVERSITY,
-      career:       CAREER,
-      semester:     ud.semester,
-      role:         (ud as any).role ?? 'USER',
+      email: ud.email,
+      username: ud.username,
+      displayName: ud.displayName,
+      university: UNIVERSITY,
+      career: CAREER,
+      semester: ud.semester,
+      role: (ud as any).role ?? 'USER',
       passwordHash,
       stats: {
-        xp: 0, level: 0, elo: 1200, quizzesPlayed: 0, quizzesWon: 0,
-        currentStreak: 0, longestStreak: 0, lastPlayedAt: null,
+        xp: 0,
+        level: 0,
+        elo: 1200,
+        quizzesPlayed: 0,
+        quizzesWon: 0,
+        currentStreak: 0,
+        longestStreak: 0,
+        lastPlayedAt: null,
       },
       availability: [],
     });
@@ -308,7 +758,9 @@ async function seed() {
   for (const bd of PROFILE_BORDERS_DATA) {
     const existing = await profileBorderRepo.findOneBy({ code: bd.code });
     if (existing) {
-      await profileBorderRepo.save(profileBorderRepo.create({ ...existing, ...bd }));
+      await profileBorderRepo.save(
+        profileBorderRepo.create({ ...existing, ...bd }),
+      );
       console.log(`   ⚠️  Borde "${bd.code}" ya existe — actualizado`);
       continue;
     }
@@ -320,17 +772,53 @@ async function seed() {
   // INCORRECTO (bug original): subjectRepo.createQueryBuilder().relation(...)
   //   → subjectRepo.createQueryBuilder() devuelve SelectQueryBuilder, que NO tiene .relation()
   //   → AppDataSource.createQueryBuilder().relation() devuelve RelationQueryBuilder ✅
-  const rel = () => AppDataSource.createQueryBuilder().relation(User, 'enrolledSubjects');
+  const rel = () =>
+    AppDataSource.createQueryBuilder().relation(User, 'enrolledSubjects');
 
   // Dave se inscribe en todas para probar el feed completo
-  await rel().of(dave.id).add([am2.id, aed.id, bd.id, so.id, rc.id]).catch(() => { /* duplicado, ignorar */ });
-  
-  await rel().of(alice.id).add([aed.id, bd.id]).catch(() => { /* duplicado, ignorar */ });
-  await rel().of(bob.id).add([aed.id, bd.id, so.id]).catch(() => { /* duplicado, ignorar */ });
-  await rel().of(carol.id).add([rc.id, so.id]).catch(() => { /* duplicado, ignorar */ });
-  await rel().of(eve.id).add([am2.id, aed.id]).catch(() => { /* duplicado, ignorar */ });
-  await rel().of(frank.id).add([so.id, rc.id]).catch(() => { /* duplicado, ignorar */ });
-  await rel().of(grace.id).add([bd.id, so.id, aed.id]).catch(() => { /* duplicado, ignorar */ });
+  await rel()
+    .of(dave.id)
+    .add([am2.id, aed.id, bd.id, so.id, rc.id])
+    .catch(() => {
+      /* duplicado, ignorar */
+    });
+
+  await rel()
+    .of(alice.id)
+    .add([aed.id, bd.id])
+    .catch(() => {
+      /* duplicado, ignorar */
+    });
+  await rel()
+    .of(bob.id)
+    .add([aed.id, bd.id, so.id])
+    .catch(() => {
+      /* duplicado, ignorar */
+    });
+  await rel()
+    .of(carol.id)
+    .add([rc.id, so.id])
+    .catch(() => {
+      /* duplicado, ignorar */
+    });
+  await rel()
+    .of(eve.id)
+    .add([am2.id, aed.id])
+    .catch(() => {
+      /* duplicado, ignorar */
+    });
+  await rel()
+    .of(frank.id)
+    .add([so.id, rc.id])
+    .catch(() => {
+      /* duplicado, ignorar */
+    });
+  await rel()
+    .of(grace.id)
+    .add([bd.id, so.id, aed.id])
+    .catch(() => {
+      /* duplicado, ignorar */
+    });
 
   console.log('   ✔  Inscripciones realizadas');
 
@@ -338,65 +826,115 @@ async function seed() {
   console.log('\n🎮  Creando parties...');
 
   // Party 1: Bases de Datos — alice + bob
-  let partyBD = await partyRepo.findOne({ where: { subjectId: bd.id, status: 'forming' } });
+  let partyBD = await partyRepo.findOne({
+    where: { subjectId: bd.id, status: 'forming' },
+  });
   if (!partyBD) {
     partyBD = await partyRepo.save(
       partyRepo.create({ subjectId: bd.id, status: 'forming', maxMembers: 4 }),
     );
-    await memberRepo.save(memberRepo.create({ partyId: partyBD.id, userId: alice.id, role: 'leader' }));
-    await memberRepo.save(memberRepo.create({ partyId: partyBD.id, userId: bob.id }));
+    await memberRepo.save(
+      memberRepo.create({
+        partyId: partyBD.id,
+        userId: alice.id,
+        role: 'leader',
+      }),
+    );
+    await memberRepo.save(
+      memberRepo.create({ partyId: partyBD.id, userId: bob.id }),
+    );
     console.log('   ✔  Party "Bases de Datos" (alice + bob)');
   } else {
     console.log('   ⚠️  Party BD ya existe — omitida');
   }
 
   // Party 2: Redes de Computadoras — carol + frank
-  let partyRC = await partyRepo.findOne({ where: { subjectId: rc.id, status: 'forming' } });
+  let partyRC = await partyRepo.findOne({
+    where: { subjectId: rc.id, status: 'forming' },
+  });
   if (!partyRC) {
     partyRC = await partyRepo.save(
       partyRepo.create({ subjectId: rc.id, status: 'forming', maxMembers: 4 }),
     );
-    await memberRepo.save(memberRepo.create({ partyId: partyRC.id, userId: carol.id, role: 'leader' }));
-    await memberRepo.save(memberRepo.create({ partyId: partyRC.id, userId: frank.id }));
+    await memberRepo.save(
+      memberRepo.create({
+        partyId: partyRC.id,
+        userId: carol.id,
+        role: 'leader',
+      }),
+    );
+    await memberRepo.save(
+      memberRepo.create({ partyId: partyRC.id, userId: frank.id }),
+    );
     console.log('   ✔  Party "Redes de Computadoras" (carol + frank)');
   } else {
     console.log('   ⚠️  Party RC ya existe — omitida');
   }
 
   // Party 3: Algoritmos y Estructuras de Datos — eve + grace
-  let partyAED = await partyRepo.findOne({ where: { subjectId: aed.id, status: 'forming' } });
+  let partyAED = await partyRepo.findOne({
+    where: { subjectId: aed.id, status: 'forming' },
+  });
   if (!partyAED) {
     partyAED = await partyRepo.save(
       partyRepo.create({ subjectId: aed.id, status: 'forming', maxMembers: 3 }),
     );
-    await memberRepo.save(memberRepo.create({ partyId: partyAED.id, userId: eve.id, role: 'leader' }));
-    await memberRepo.save(memberRepo.create({ partyId: partyAED.id, userId: grace.id }));
+    await memberRepo.save(
+      memberRepo.create({
+        partyId: partyAED.id,
+        userId: eve.id,
+        role: 'leader',
+      }),
+    );
+    await memberRepo.save(
+      memberRepo.create({ partyId: partyAED.id, userId: grace.id }),
+    );
     console.log('   ✔  Party "Algoritmos y Estructuras" (eve + grace)');
   } else {
     console.log('   ⚠️  Party AED ya existe — omitida');
   }
 
   // Party 4: Sistemas Operativos — grace + bob + carol
-  let partySO = await partyRepo.findOne({ where: { subjectId: so.id, status: 'forming' } });
+  let partySO = await partyRepo.findOne({
+    where: { subjectId: so.id, status: 'forming' },
+  });
   if (!partySO) {
     partySO = await partyRepo.save(
       partyRepo.create({ subjectId: so.id, status: 'forming', maxMembers: 5 }),
     );
-    await memberRepo.save(memberRepo.create({ partyId: partySO.id, userId: grace.id, role: 'leader' }));
-    await memberRepo.save(memberRepo.create({ partyId: partySO.id, userId: bob.id }));
-    await memberRepo.save(memberRepo.create({ partyId: partySO.id, userId: carol.id }));
+    await memberRepo.save(
+      memberRepo.create({
+        partyId: partySO.id,
+        userId: grace.id,
+        role: 'leader',
+      }),
+    );
+    await memberRepo.save(
+      memberRepo.create({ partyId: partySO.id, userId: bob.id }),
+    );
+    await memberRepo.save(
+      memberRepo.create({ partyId: partySO.id, userId: carol.id }),
+    );
     console.log('   ✔  Party "Sistemas Operativos" (grace + bob + carol)');
   } else {
     console.log('   ⚠️  Party SO ya existe — omitida');
   }
 
   // Party 5: Análisis Matemático II — eve
-  let partyAM2 = await partyRepo.findOne({ where: { subjectId: am2.id, status: 'forming' } });
+  let partyAM2 = await partyRepo.findOne({
+    where: { subjectId: am2.id, status: 'forming' },
+  });
   if (!partyAM2) {
     partyAM2 = await partyRepo.save(
       partyRepo.create({ subjectId: am2.id, status: 'forming', maxMembers: 2 }),
     );
-    await memberRepo.save(memberRepo.create({ partyId: partyAM2.id, userId: eve.id, role: 'leader' }));
+    await memberRepo.save(
+      memberRepo.create({
+        partyId: partyAM2.id,
+        userId: eve.id,
+        role: 'leader',
+      }),
+    );
     console.log('   ✔  Party "Análisis Matemático II" (eve)');
   } else {
     console.log('   ⚠️  Party AM2 ya existe — omitida');
@@ -412,49 +950,83 @@ async function seed() {
     const elo: number = (u.stats as any)?.elo ?? 1200;
 
     // grant all tiers the user has reached (cumulative)
-    const earnedTiers = LEAGUE_TIERS.filter(lt => elo >= lt.minElo);
+    const earnedTiers = LEAGUE_TIERS.filter((lt) => elo >= lt.minElo);
 
     for (const lt of earnedTiers) {
       // border cosmetic
       const hasBorder = await inventoryRepo.findOneBy({
-        userId: u.id, itemType: 'border', itemCode: lt.borderCode,
+        userId: u.id,
+        itemType: 'border',
+        itemCode: lt.borderCode,
       });
       if (!hasBorder) {
-        await inventoryRepo.save(inventoryRepo.create({
-          userId: u.id, itemType: 'border', itemCode: lt.borderCode,
-        }));
+        await inventoryRepo.save(
+          inventoryRepo.create({
+            userId: u.id,
+            itemType: 'border',
+            itemCode: lt.borderCode,
+          }),
+        );
       }
       // title cosmetic
       const hasTitle = await inventoryRepo.findOneBy({
-        userId: u.id, itemType: 'title', itemCode: lt.titleCode,
+        userId: u.id,
+        itemType: 'title',
+        itemCode: lt.titleCode,
       });
       if (!hasTitle) {
-        await inventoryRepo.save(inventoryRepo.create({
-          userId: u.id, itemType: 'title', itemCode: lt.titleCode,
-        }));
+        await inventoryRepo.save(
+          inventoryRepo.create({
+            userId: u.id,
+            itemType: 'title',
+            itemCode: lt.titleCode,
+          }),
+        );
       }
 
       // border achievement
-      const borderAch = await achievementRepo.findOneBy({ code: lt.borderAchiev });
+      const borderAch = await achievementRepo.findOneBy({
+        code: lt.borderAchiev,
+      });
       if (borderAch) {
-        const hasBorderAch = await userAchievementRepo.findOneBy({ userId: u.id, achievementId: borderAch.id });
+        const hasBorderAch = await userAchievementRepo.findOneBy({
+          userId: u.id,
+          achievementId: borderAch.id,
+        });
         if (!hasBorderAch) {
-          await userAchievementRepo.save(userAchievementRepo.create({ userId: u.id, achievementId: borderAch.id }));
+          await userAchievementRepo.save(
+            userAchievementRepo.create({
+              userId: u.id,
+              achievementId: borderAch.id,
+            }),
+          );
         }
       }
 
       // title achievement
-      const titleAch = await achievementRepo.findOneBy({ code: lt.titleAchiev });
+      const titleAch = await achievementRepo.findOneBy({
+        code: lt.titleAchiev,
+      });
       if (titleAch) {
-        const hasTitleAch = await userAchievementRepo.findOneBy({ userId: u.id, achievementId: titleAch.id });
+        const hasTitleAch = await userAchievementRepo.findOneBy({
+          userId: u.id,
+          achievementId: titleAch.id,
+        });
         if (!hasTitleAch) {
-          await userAchievementRepo.save(userAchievementRepo.create({ userId: u.id, achievementId: titleAch.id }));
+          await userAchievementRepo.save(
+            userAchievementRepo.create({
+              userId: u.id,
+              achievementId: titleAch.id,
+            }),
+          );
         }
       }
     }
 
     const highestTier = earnedTiers[earnedTiers.length - 1];
-    console.log(`   ✔  ${u.displayName} (ELO ${elo}) → hasta ${highestTier?.borderCode ?? 'ninguno'}`);
+    console.log(
+      `   ✔  ${u.displayName} (ELO ${elo}) → hasta ${highestTier?.borderCode ?? 'ninguno'}`,
+    );
   }
 
   // ── Resumen ──────────────────────────────────────────────────────────────────
@@ -468,7 +1040,9 @@ async function seed() {
   }
   console.log('\nLogin de prueba:');
   console.log('  POST http://localhost:3000/api/auth/login');
-  console.log('  Body: { "email": "alice@studyquest.dev", "password": "Password123!" }');
+  console.log(
+    '  Body: { "email": "alice@studyquest.dev", "password": "Password123!" }',
+  );
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
   await AppDataSource.destroy();

@@ -58,6 +58,33 @@ async function bootstrap() {
   }
 
   app.enableShutdownHooks();
+
+  if (cfg.get('NODE_ENV') === 'development') {
+    try {
+      const { DataSource } = await import('typeorm');
+      const dataSource = app.get(DataSource);
+      
+      const tableCheck = await dataSource.query(`
+        SELECT EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_schema = 'public' AND table_name = 'users'
+        ) as "exists"
+      `);
+      
+      if (tableCheck[0]?.exists) {
+        const [{ count }] = await dataSource.query('SELECT COUNT(*)::int as count FROM users');
+        if (count === 0) {
+          console.log('🌱 No users found in database. Running seed script...');
+          const { execSync } = await import('child_process');
+          execSync('pnpm run seed', { stdio: 'inherit' });
+          console.log('✅ Seeding completed.');
+        }
+      }
+    } catch (err) {
+      console.error('⚠️ Failed to check database or run seed automatically:', err);
+    }
+  }
+
   await app.listen(port);
   console.log(`🚀 API corriendo en http://localhost:${port}/api/v1`);
   console.log(`📚 Swagger en http://localhost:${port}/docs`);

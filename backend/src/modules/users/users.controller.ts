@@ -75,6 +75,11 @@ export class UsersController {
     return this.usersService.setActiveCosmetics(req.user.userId, dto);
   }
 
+  @Get('leaderboard/global')
+  getGlobalLeaderboard(@Query('limit') limit?: string) {
+    return this.usersService.getGlobalLeaderboard(limit ? parseInt(limit, 10) : 20);
+  }
+
   @Get('leaderboard/:subjectId')
   getLeaderboard(
     @Param('subjectId') subjectId: string,
