@@ -12,6 +12,9 @@ import ProfilePage from './pages/ProfilePage'
 import JoinPartyPage from './pages/JoinPartyPage'
 import SkillTreePage from './pages/SkillTreePage'
 import LeaderboardPage from './pages/LeaderboardPage'
+import TournamentsPage from './pages/TournamentsPage'
+import TournamentLivePage from './pages/TournamentLivePage'
+import TournamentResultsPage from './pages/TournamentResultsPage'
 
 function App() {
   return (
@@ -35,6 +38,9 @@ function App() {
       <Route path="/quiz/:questId" element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
       <Route path="/join/:token" element={<ProtectedRoute><JoinPartyPage /></ProtectedRoute>} />
       <Route path="/subjects/:subjectId/skill-tree" element={<ProtectedRoute><SkillTreePage /></ProtectedRoute>} />
+      <Route path="/tournaments" element={<ProtectedRoute><TournamentsPage /></ProtectedRoute>} />
+      <Route path="/tournament/:id" element={<ProtectedRoute><TournamentLivePage /></ProtectedRoute>} />
+      <Route path="/tournament/:id/results" element={<ProtectedRoute><TournamentResultsPage /></ProtectedRoute>} />
 
       {/* 404 → auth */}
       <Route path="*" element={<Navigate to="/auth" replace />} />

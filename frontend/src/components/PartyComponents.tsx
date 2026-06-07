@@ -7,6 +7,7 @@ import type { Quest } from '../services/questService'
 import { Button, Spinner } from './UI'
 import { AvatarWithBorder } from './AvatarWithBorder'
 import { useNavigate } from 'react-router-dom'
+import { tournamentService } from '../services/tournamentService'
 export { ChatBox } from './party-chat/ChatBox'
 
 const API_ORIGIN = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
@@ -493,9 +494,138 @@ export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
   )
 }
 
+function TournamentCreationModal({ quest, onClose }: { quest: Quest; onClose: () => void }) {
+  const [title, setTitle] = useState(`Torneo de ${quest.title}`)
+  const [delayMin, setDelayMin] = useState(2)
+  const [durationMin, setDurationMin] = useState(5)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    setError(null)
+
+    const startsAt = new Date(Date.now() + delayMin * 60 * 1000).toISOString()
+    const endsAt = new Date(Date.now() + (delayMin + durationMin) * 60 * 1000).toISOString()
+
+    try {
+      await tournamentService.create({
+        title,
+        questId: quest.id,
+        startsAt,
+        endsAt,
+      })
+      setSuccess(true)
+      setTimeout(() => {
+        onClose()
+      }, 1500)
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Error al crear el torneo')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  return (
+    <div
+      className="invite-overlay"
+      style={{ zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      onClick={onClose}
+    >
+      <div
+        className="invite-sheet"
+        style={{
+          width: '90%',
+          maxWidth: '400px',
+          borderRadius: '24px',
+          background: 'var(--bg-surface)',
+          padding: '24px',
+          border: '1px solid var(--border)',
+          transform: 'none',
+          bottom: 'auto'
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 className="invite-title" style={{ fontSize: '18px', textAlign: 'center', marginBottom: '8px' }}>
+          🏆 Crear Torneo por Tiempo
+        </h2>
+        <p className="invite-sub" style={{ textAlign: 'center', marginBottom: '20px' }}>
+          Múltiples parties competirán resolviendo esta quest en simultáneo.
+        </p>
+
+        {success ? (
+          <div className="text-center py-6 text-emerald-400 font-bold">
+            ✓ ¡Torneo creado con éxito!
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div className="input-group">
+              <label className="label">Título del Torneo</label>
+              <input
+                className="input"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Ej. Torneo de Álgebra..."
+                required
+              />
+            </div>
+
+            <div className="input-group">
+              <label className="label">¿Cuándo empieza? (Cuenta regresiva)</label>
+              <select
+                className="input"
+                value={delayMin}
+                onChange={(e) => setDelayMin(Number(e.target.value))}
+              >
+                <option value={1}>En 1 minuto</option>
+                <option value={2}>En 2 minutos</option>
+                <option value={5}>En 5 minutos</option>
+                <option value={10}>En 10 minutos</option>
+              </select>
+            </div>
+
+            <div className="input-group">
+              <label className="label">¿Cuánto dura la competencia?</label>
+              <select
+                className="input"
+                value={durationMin}
+                onChange={(e) => setDurationMin(Number(e.target.value))}
+              >
+                <option value={3}>3 minutos</option>
+                <option value={5}>5 minutos</option>
+                <option value={10}>10 minutos</option>
+                <option value={20}>20 minutos</option>
+                <option value={30}>30 minutos</option>
+              </select>
+            </div>
+
+            {error && (
+              <p style={{ color: 'var(--red)', fontSize: '13px', margin: 0, textAlign: 'center' }}>
+                {error}
+              </p>
+            )}
+
+            <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+              <Button type="button" variant="ghost" className="flex-1" onClick={onClose}>
+                Cancelar
+              </Button>
+              <Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>
+                Crear ⚔️
+              </Button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ─── QuestCard ───────────────────────────────────────────────────────────────
 export function QuestCard({ quest }: { quest: Quest }) {
   const navigate = useNavigate()
+  const [showModal, setShowModal] = useState(false)
   const questionCount = quest.questionCount ?? quest.questions?.length ?? 0
   const sourceLabel = quest.sourceType === 'pdf' || quest.sourcePdfUrl ? 'PDF adjunto' : 'Texto'
   const isGenerating = quest.status === 'generating' || quest.status === 'pending'
@@ -524,42 +654,73 @@ export function QuestCard({ quest }: { quest: Quest }) {
   }
 
   return (
-    <div
-      className="quest-card"
-      onClick={handleOpenQuest}
-      style={{ cursor: canPlay ? 'pointer' : 'default', opacity: isFailed ? 0.8 : 1 }}
-      aria-disabled={!canPlay}
-    >
-      <div className="quest-card-info">
-        <p className="quest-card-title">{quest.title}</p>
-        <p className="quest-card-meta">
-          {questionCount} preguntas
-          {` • ${sourceLabel}`}
-        </p>
-        {statusLabel && <p className="quest-card-link">{statusLabel}</p>}
-        {statusHint && <p className="text-small">{statusHint}</p>}
-        {quest.sourcePdfUrl && (
-          <a
-            className="quest-card-link"
-            href={new URL(quest.sourcePdfUrl, 'http://localhost:3000').toString()}
-            target="_blank"
-            rel="noreferrer"
-            onClick={(event) => event.stopPropagation()}
-          >
-            Ver PDF
-          </a>
-        )}
+    <>
+      <div
+        className="quest-card"
+        onClick={handleOpenQuest}
+        style={{ cursor: canPlay ? 'pointer' : 'default', opacity: isFailed ? 0.8 : 1 }}
+        aria-disabled={!canPlay}
+      >
+        <div className="quest-card-info">
+          <p className="quest-card-title">{quest.title}</p>
+          <p className="quest-card-meta">
+            {questionCount} preguntas
+            {` • ${sourceLabel}`}
+          </p>
+          {statusLabel && <p className="quest-card-link">{statusLabel}</p>}
+          {statusHint && <p className="text-small">{statusHint}</p>}
+          {quest.sourcePdfUrl && (
+            <a
+              className="quest-card-link"
+              href={new URL(quest.sourcePdfUrl, 'http://localhost:3000').toString()}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(event) => event.stopPropagation()}
+            >
+              Ver PDF
+            </a>
+          )}
+          {canPlay && (
+            <button
+              className="quest-card-link"
+              style={{
+                marginTop: '8px',
+                background: 'rgba(124, 58, 237, 0.15)',
+                color: '#c084fc',
+                padding: '4px 8px',
+                borderRadius: '8px',
+                border: '1px solid rgba(124, 58, 237, 0.3)',
+                fontSize: '11px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+              onClick={(e) => {
+                e.stopPropagation()
+                setShowModal(true)
+              }}
+            >
+              🏆 Iniciar Torneo
+            </button>
+          )}
+        </div>
+        <span className={`quest-status quest-status-${quest.status}`}>
+          {isGenerating
+            ? '⏳'
+            : quest.status === 'active'
+              ? '▶'
+              : quest.status === 'failed'
+                ? '⚠️'
+                : '✅'}
+        </span>
       </div>
-      <span className={`quest-status quest-status-${quest.status}`}>
-        {isGenerating
-          ? '⏳'
-          : quest.status === 'active'
-            ? '▶'
-            : quest.status === 'failed'
-              ? '⚠️'
-              : '✅'}
-      </span>
-    </div>
+
+      {showModal && (
+        <TournamentCreationModal quest={quest} onClose={() => setShowModal(false)} />
+      )}
+    </>
   )
 }
 

@@ -13,6 +13,7 @@ import { usePartyStore } from '../store/partyStore'
 import { useUserSubjects } from '../hooks/useUserSubjects'
 import { partyService } from '../services/partyService'
 import { userService, type RecommendedQuestDto, type LeaderboardEntry, type Subject } from '../services/userService'
+import { tournamentService } from '../services/tournamentService'
 import { searchService, type GlobalSearchResponseDto } from '../services/searchService'
 import { getLeague, DEFAULT_ELO } from '../utils/leagues'
 
@@ -140,6 +141,10 @@ const DashboardPage = () => {
   const { subjects, isLoading: isSubjectsLoading } = useUserSubjects()
   const { activeParty, setActiveParty } = usePartyStore()
 
+  // Tournaments state
+  const [tournaments, setTournaments] = useState<any[]>([])
+  const [isTournamentsLoading, setIsTournamentsLoading] = useState(false)
+
   // 1. Quests para hoy state
   const [questsToday, setQuestsToday] = useState<RecommendedQuestDto[]>([])
   const [isQuestsTodayLoading, setIsQuestsTodayLoading] = useState(false)
@@ -165,6 +170,21 @@ const DashboardPage = () => {
       setActiveParty(active)
     }).catch(() => {})
   }, [setActiveParty])
+
+  // Cargar torneos
+  useEffect(() => {
+    setIsTournamentsLoading(true)
+    tournamentService
+      .getAll()
+      .then((data) => {
+        const activeOrPending = data.filter((t) => t.status === 'active' || t.status === 'pending')
+        setTournaments(activeOrPending.slice(0, 2))
+      })
+      .catch(() => {})
+      .finally(() => {
+        setIsTournamentsLoading(false)
+      })
+  }, [])
 
   // Cargar Quests para hoy
   useEffect(() => {
@@ -403,6 +423,58 @@ const DashboardPage = () => {
         </div>
 
         <ActivePartyBanner party={activeParty} />
+
+        {/* Sección de Torneos */}
+        <div className="flex justify-between items-center mt-2 shrink-0">
+          <SectionTitle>🏆 Torneos Activos y Próximos</SectionTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            style={{ padding: '4px 8px', fontSize: '11px', fontWeight: 'bold', textTransform: 'uppercase' }}
+            onClick={() => navigate('/tournaments')}
+          >
+            Ver todos →
+          </Button>
+        </div>
+
+        {isTournamentsLoading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '16px' }}><Spinner /></div>
+        ) : tournaments.length === 0 ? (
+          <div className="empty-state" style={{ padding: '16px', textAlign: 'center', background: '#13131f', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <p className="empty-sub" style={{ margin: 0, fontSize: '11px', color: '#8888aa' }}>No hay torneos activos en este momento.</p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {tournaments.map((t) => (
+              <div
+                key={t.id}
+                onClick={() => navigate(t.status === 'finished' ? `/tournament/${t.id}/results` : `/tournament/${t.id}`)}
+                className="flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-[#13131f] to-[#1a1a2e] border border-white/5 hover:border-purple-500/30 transition-all cursor-pointer"
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{
+                      fontSize: '9px',
+                      fontWeight: 'bold',
+                      padding: '2px 6px',
+                      borderRadius: '6px',
+                      background: t.status === 'active' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(124, 58, 237, 0.15)',
+                      color: t.status === 'active' ? '#ef4444' : '#a78bfa',
+                      textTransform: 'uppercase'
+                    }}>
+                      {t.status === 'active' ? 'En Vivo' : 'Próximo'}
+                    </span>
+                    <span className="text-white font-extrabold text-xs truncate max-w-[180px]">{t.title}</span>
+                  </div>
+                  <span style={{ fontSize: '10px', color: '#8888aa' }}>
+                    Quest: {t.quest?.title ?? 'Quest del Torneo'}
+                  </span>
+                </div>
+                <span className="text-[#a78bfa] text-xs font-bold shrink-0">Ver →</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* 1. Quests para hoy */}
         <SectionTitle>Quests para hoy</SectionTitle>
