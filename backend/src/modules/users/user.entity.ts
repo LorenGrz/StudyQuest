@@ -28,6 +28,7 @@ export interface UserStats {
   currentStreak: number;
   longestStreak: number;
   lastPlayedAt: string | null;
+  coins: number;
 }
 
 export interface ActiveCosmetics {
@@ -101,6 +102,7 @@ export class User {
       currentStreak: 0,
       longestStreak: 0,
       lastPlayedAt: null,
+      coins: 0,
     },
   })
   stats: UserStats;

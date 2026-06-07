@@ -283,4 +283,44 @@ export class MatchmakingGateway
       }
     }
   }
+
+  // ─── Tournament Events ────────────────────────────────────────────────────────
+
+  @SubscribeMessage('tournament:join')
+  handleTournamentJoin(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() { tournamentId }: { tournamentId: string },
+  ) {
+    socket.join(`tournament:${tournamentId}`);
+    this.logger.log(`[WS] Súper-unión de socket ${socket.id} a torneo:${tournamentId}`);
+  }
+
+  @SubscribeMessage('tournament:leave')
+  handleTournamentLeave(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() { tournamentId }: { tournamentId: string },
+  ) {
+    socket.leave(`tournament:${tournamentId}`);
+    this.logger.log(`[WS] Salida de socket ${socket.id} de torneo:${tournamentId}`);
+  }
+
+  @OnEvent('tournament.started')
+  handleTournamentStarted(payload: { tournamentId: string; title: string; questId: string }) {
+    this.logger.log(`[WS] Torneo iniciado event: ${payload.tournamentId}`);
+    this.server.emit('tournament_started', payload);
+    this.server.to(`tournament:${payload.tournamentId}`).emit('tournament_started', payload);
+  }
+
+  @OnEvent('tournament.score_update')
+  handleTournamentScoreUpdate(payload: { tournamentId: string; scoreboard: any }) {
+    this.logger.log(`[WS] Torneo score update: ${payload.tournamentId}`);
+    this.server.to(`tournament:${payload.tournamentId}`).emit('tournament_score_update', payload);
+  }
+
+  @OnEvent('tournament.ended')
+  handleTournamentEnded(payload: { tournamentId: string; ranking: any }) {
+    this.logger.log(`[WS] Torneo finalizado event: ${payload.tournamentId}`);
+    this.server.emit('tournament_ended', payload);
+    this.server.to(`tournament:${payload.tournamentId}`).emit('tournament_ended', payload);
+  }
 }

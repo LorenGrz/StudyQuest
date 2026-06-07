@@ -24,6 +24,7 @@ import { SkillTreeModule } from './modules/skill-tree/skill-tree.module';
 import { AchievementsModule } from './modules/achievements/achievements.module';
 import { MatchmakingModule } from './gateways/matchmaking/matchmaking.module';
 import { SearchModule } from './modules/search/search.module';
+import { TournamentsModule } from './modules/tournaments/tournaments.module';
 
 @Module({
   imports: [
@@ -90,6 +91,7 @@ import { SearchModule } from './modules/search/search.module';
     AchievementsModule,
     MatchmakingModule,
     SearchModule,
+    TournamentsModule,
   ],
 })
 export class AppModule {}

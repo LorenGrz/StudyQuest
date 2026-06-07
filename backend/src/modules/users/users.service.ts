@@ -460,6 +460,20 @@ export class UsersService {
       .execute();
   }
 
+  async addCoins(userId: string, coinsAmount: number): Promise<void> {
+    await this.userRepo
+      .createQueryBuilder()
+      .update()
+      .set({
+        stats: () => `jsonb_set(
+          stats,
+          '{coins}', to_jsonb(COALESCE((stats->>'coins')::int, 0) + ${coinsAmount})
+        )`,
+      })
+      .where('id = :id', { id: userId })
+      .execute();
+  }
+
   async updateStreak(userId: string): Promise<void> {
     await this.userRepo
       .createQueryBuilder()

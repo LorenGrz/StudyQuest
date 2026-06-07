@@ -362,6 +362,12 @@ export class QuestsService {
       answeredQuestionIndices: [...answeredQuestionIndices, dto.questionIndex],
     });
 
+    this.eventEmitter.emit('quest.score_updated', {
+      questId: dto.questId,
+      userId,
+      score: attempt.score + xpEarned,
+    });
+
     return {
       attemptId: attempt.id,
       isCorrect,
@@ -403,6 +409,12 @@ export class QuestsService {
       status: 'completed',
       completedAt: new Date(),
       totalQuestions,
+    });
+
+    this.eventEmitter.emit('quest.score_updated', {
+      questId,
+      userId,
+      score: activeAttempt.score,
     });
 
     if (activeAttempt.attemptNumber === 1) {
