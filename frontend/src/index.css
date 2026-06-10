@@ -6,6 +6,21 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
+/* Tailwind tokens mapped to the app's CSS variables so utilities follow the active theme */
+@theme {
+  --color-base: var(--bg-base);
+  --color-surface: var(--bg-surface);
+  --color-elevated: var(--bg-elevated);
+  --color-input: var(--bg-input);
+  --color-content: var(--text-primary);
+  --color-muted: var(--text-secondary);
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+  --color-success: var(--green);
+  --color-danger: var(--red);
+  --color-edge: var(--border);
+}
+
 /* â”€â”€â”€ CSS Variables â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 :root {
   /* Colors */
@@ -56,6 +71,40 @@
   color: var(--text-primary);
   background: var(--bg-base);
   -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Light theme (toggled via data-theme on <html>) ────────────── */
+:root[data-theme="light"] {
+  --bg-base: #f4f4f8;
+  --bg-surface: #ffffff;
+  --bg-elevated: #ffffff;
+  --bg-input: #eeeef4;
+  --border: rgba(20, 20, 40, 0.1);
+  --border-hover: rgba(20, 20, 40, 0.2);
+
+  --text-primary: #1a1a2e;
+  --text-secondary: #555570;
+  --text-muted: #8888a0;
+
+  --accent: #7c3aed;
+  --accent-light: #6d28d9;
+  --accent-glow: rgba(124, 58, 237, 0.2);
+  --accent-bg: rgba(124, 58, 237, 0.08);
+
+  --green-bg: rgba(16, 185, 129, 0.12);
+  --yellow-bg: rgba(245, 158, 11, 0.12);
+  --red-bg: rgba(239, 68, 68, 0.12);
+  --blue-bg: rgba(59, 130, 246, 0.12);
+
+  --shadow-sm: 0 1px 3px rgba(20, 20, 40, 0.1);
+  --shadow-md: 0 4px 16px rgba(20, 20, 40, 0.12);
+  --shadow-accent: 0 0 24px var(--accent-glow);
+}
+
+html {
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
 *,

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { Link } from "react-router-dom"
 import { MobileLayout } from "../components/Layouts"
 import { Button, Badge, Spinner } from "../components/UI"
 import { AvatarWithBorder } from "../components/AvatarWithBorder"
@@ -88,6 +89,16 @@ export default function ProfilePage() {
 
   return (
     <MobileLayout>
+      <div className="flex justify-end mt-4">
+        <Link
+          to="/settings"
+          aria-label="Configuración"
+          className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-surface text-muted text-sm border border-edge"
+        >
+          ⚙️ Configuración
+        </Link>
+      </div>
+
       {/* ─── User Card ─────────────────────────────────────────────── */}
       <div
         className="profile-card"
