@@ -12,8 +12,8 @@ import {
   UseInterceptors,
   UploadedFile,
   ParseFilePipe,
-  FileTypeValidator,
   MaxFileSizeValidator,
+  BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -68,16 +68,23 @@ export class UsersController {
         filename: (_req, file, cb) =>
           cb(null, `${randomUUID()}${extname(file.originalname).toLowerCase()}`),
       }),
+      fileFilter: (_req, file, cb) => {
+        if (/^image\/(jpeg|png|webp)$/.test(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(
+            new BadRequestException('Solo se permiten imágenes jpeg, png o webp'),
+            false,
+          );
+        }
+      },
     }),
   )
   uploadAvatar(
     @Request() req: any,
     @UploadedFile(
       new ParseFilePipe({
-        validators: [
-          new FileTypeValidator({ fileType: /^image\/(jpeg|png|webp)$/ }),
-          new MaxFileSizeValidator({ maxSize: 2 * 1024 * 1024 }),
-        ],
+        validators: [new MaxFileSizeValidator({ maxSize: 2 * 1024 * 1024 })],
       }),
     )
     file: Express.Multer.File,
