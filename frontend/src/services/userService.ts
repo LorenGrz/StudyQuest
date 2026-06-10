@@ -80,6 +80,7 @@ export interface User {
   username: string
   displayName: string
   avatarUrl: string | null
+  bio: string | null
   university: string
   career: string
   semester: number
@@ -93,6 +94,8 @@ export interface User {
 }
 
 export interface UpdateProfilePayload {
+  username?: string
+  bio?: string
   displayName?: string
   avatarUrl?: string
   university?: string
@@ -154,6 +157,17 @@ export const userService = {
 
   async updateMe(payload: UpdateProfilePayload): Promise<User> {
     const { data } = await api.patch<User>('/users/me', payload)
+    return data
+  },
+
+  async changePassword(payload: { currentPassword: string; newPassword: string }): Promise<void> {
+    await api.patch('/users/me/password', payload)
+  },
+
+  async uploadAvatar(file: File): Promise<User> {
+    const formData = new FormData()
+    formData.append('file', file)
+    const { data } = await api.post<User>('/users/me/avatar', formData)
     return data
   },
 

@@ -48,12 +48,12 @@ export function AvatarStack({ members, max = 3 }: AvatarStackProps) {
   return (
     <div className="flex items-center">
       {visible.map((m, i) => (
-        <div key={m.id} className="rounded-full border-2 border-[#13131f] -ml-[7px] overflow-hidden relative shrink-0 first:ml-0" style={{ zIndex: max - i }}>
+        <div key={m.id} className="rounded-full border-2 border-surface -ml-[7px] overflow-hidden relative shrink-0 first:ml-0" style={{ zIndex: max - i }}>
           <MemberAvatar member={m} size={26} />
         </div>
       ))}
       {extra > 0 && (
-        <div className="rounded-full border-2 border-[#13131f] -ml-[7px] overflow-hidden relative shrink-0 bg-[#1e1e2f] text-[#8888aa] text-[10px] font-bold w-[30px] h-[30px] flex items-center justify-center first:ml-0" style={{ zIndex: 0 }}>
+        <div className="rounded-full border-2 border-surface -ml-[7px] overflow-hidden relative shrink-0 bg-input text-muted text-[10px] font-bold w-[30px] h-[30px] flex items-center justify-center first:ml-0" style={{ zIndex: 0 }}>
           +{extra}
         </div>
       )}
@@ -65,7 +65,7 @@ export function AvatarStack({ members, max = 3 }: AvatarStackProps) {
 
 export function ProgressBar({ pct }: { pct: number }) {
   return (
-    <div className="h-[5px] bg-[#1e1e2f] rounded-full overflow-hidden w-full">
+    <div className="h-[5px] bg-input rounded-full overflow-hidden w-full">
       <div
         className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-[width] duration-800 ease-out"
         style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
@@ -134,7 +134,7 @@ export function PartyCard({ party }: { party: Party }) {
   )) : 0
 
   return (
-    <div className="w-full h-full rounded-[24px] bg-[#13131f] border border-white/7 overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.6),inset_0_0_0_1px_rgba(255,255,255,0.04)] select-none flex flex-col group">
+    <div className="w-full h-full rounded-[24px] bg-surface border border-white/7 overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.6),inset_0_0_0_1px_rgba(255,255,255,0.04)] select-none flex flex-col group">
       
       {/* ── Cover con imagen real ──────────────────────────────── */}
       <div className="flex-1 min-h-[180px] relative overflow-hidden">
@@ -145,7 +145,7 @@ export function PartyCard({ party }: { party: Party }) {
           loading="lazy"
         />
         {/* Overlay de degradado para legibilidad */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/45 to-[#0d0d18]/95" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/45 to-base/95" />
 
         {/* Chip de materia con ícono */}
         <div className="absolute top-3.5 right-3.5 flex items-center gap-1.5 bg-black/45 backdrop-blur-md border border-white/15 rounded-full px-3 py-1.25 text-[11px] font-bold text-white uppercase tracking-[0.6px]">
@@ -160,7 +160,7 @@ export function PartyCard({ party }: { party: Party }) {
         </div>
 
         {/* Fade al body */}
-        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-b from-transparent to-[#13131f]" />
+        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-b from-transparent to-surface" />
       </div>
 
       {/* ── Body ──────────────────────────────────────────────── */}
@@ -171,9 +171,9 @@ export function PartyCard({ party }: { party: Party }) {
             {host ? (
               <MemberAvatar member={host} size={46} />
             ) : (
-              <div className="rounded-full bg-gradient-to-br from-[#9d5df7] to-[#2563eb] flex items-center justify-center font-extrabold text-white w-[46px] h-[46px] text-[18px]">?</div>
+              <div className="rounded-full bg-gradient-to-br from-accent-light to-[#2563eb] flex items-center justify-center font-extrabold text-white w-[46px] h-[46px] text-[18px]">?</div>
             )}
-            <div className="absolute bottom-0.5 right-0.5 w-2.5 h-2.5 bg-[#10b981] rounded-full border-2 border-[#13131f] shadow-[0_0_6px_#10b981]" />
+            <div className="absolute bottom-0.5 right-0.5 w-2.5 h-2.5 bg-[#10b981] rounded-full border-2 border-surface shadow-[0_0_6px_#10b981]" />
           </div>
 
           <div className="flex-1 flex flex-col gap-0.5 min-w-0 text-left">
@@ -196,14 +196,14 @@ export function PartyCard({ party }: { party: Party }) {
             {quest?.title ?? party.subject?.name ?? 'Party de estudio'}
           </p>
           {quest && (
-            <p className="text-[13px] text-[#8888aa] truncate">{party.subject?.name}</p>
+            <p className="text-[13px] text-muted truncate">{party.subject?.name}</p>
           )}
         </div>
 
         {/* Progress */}
         <div className="flex flex-col gap-1.5">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-bold text-[#555577] tracking-[0.8px] uppercase">QUEST PROGRESS</span>
+            <span className="text-[10px] font-bold text-faint tracking-[0.8px] uppercase">QUEST PROGRESS</span>
             <span className="text-[10px] font-bold text-blue-400 tracking-[0.4px]">
               {quest ? `${progressPct}% COMPLETE` : 'SIN QUEST ACTIVA'}
             </span>
@@ -214,7 +214,7 @@ export function PartyCard({ party }: { party: Party }) {
         {/* Footer */}
         <div className="flex items-center justify-between mt-1">
           <AvatarStack members={members} />
-          <span className="text-[12px] text-[#555577] font-medium">
+          <span className="text-[12px] text-faint font-medium">
             {members.length}/{party.maxMembers ?? 4} miembros
           </span>
         </div>
@@ -248,7 +248,7 @@ export function ActionButtons({ onDiscard, onJoin, disabled }: ActionButtonsProp
 
       <button
         id="mc-btn-undo"
-        className="rounded-full flex items-center justify-center border-2 transition-all duration-200 shrink-0 w-[48px] h-[48px] border-white/8 bg-[#13131f] text-[#555577] opacity-35 cursor-not-allowed"
+        className="rounded-full flex items-center justify-center border-2 transition-all duration-200 shrink-0 w-[48px] h-[48px] border-white/8 bg-surface text-faint opacity-35 cursor-not-allowed"
         disabled
         aria-label="Deshacer"
       >
@@ -279,7 +279,7 @@ export function LoadingState() {
   return (
     <div className="flex flex-col items-center gap-3.5 text-center px-4 py-6">
       <div className="w-11 h-11 rounded-full border-3 border-white/8 border-t-purple-500 animate-spin" />
-      <p className="text-[#8888aa] text-sm max-w-[260px] leading-relaxed">Buscando parties para vos...</p>
+      <p className="text-muted text-sm max-w-[260px] leading-relaxed">Buscando parties para vos...</p>
     </div>
   )
 }
@@ -296,7 +296,7 @@ export function ErrorState({ message, onRetry }: ErrorStateProps) {
     <div className="flex flex-col items-center gap-3.5 text-center px-4 py-6">
       <span className="text-[52px] leading-none">⚠️</span>
       <p className="text-[20px] font-extrabold text-white">Algo salió mal</p>
-      <p className="text-[#8888aa] text-sm max-w-[260px] leading-relaxed">{message ?? 'Error desconocido'}</p>
+      <p className="text-muted text-sm max-w-[260px] leading-relaxed">{message ?? 'Error desconocido'}</p>
       <button className="btn btn-primary btn-md mt-2" onClick={onRetry}>Reintentar</button>
     </div>
   )
@@ -309,7 +309,7 @@ export function EmptyState({ onCreateParty }: { onCreateParty: () => void }) {
     <div className="flex flex-col items-center gap-3.5 text-center px-4 py-6">
       <div className="text-[56px] leading-none">✨</div>
       <p className="text-[20px] font-extrabold text-white">¡Ya recorriste todo!</p>
-      <p className="text-[#8888aa] text-sm max-w-[260px] leading-relaxed">No hay más squads disponibles en tus materias.</p>
+      <p className="text-muted text-sm max-w-[260px] leading-relaxed">No hay más squads disponibles en tus materias.</p>
       <button className="btn btn-primary btn-md mt-2" onClick={onCreateParty}>
         ⚡ Crear mi party
       </button>
@@ -322,13 +322,13 @@ export function EmptyState({ onCreateParty }: { onCreateParty: () => void }) {
 export function CreatePartyBar({ onPress }: { onPress: () => void }) {
   return (
     <div className="px-4 pb-[22px] shrink-0">
-      <div className="flex items-center gap-2.5 bg-[#13131f] border border-white/8 rounded-2xl py-[13px] px-4">
-        <div className="w-[26px] h-[26px] rounded-full bg-[#1e1e2f] border border-white/8 flex items-center justify-center text-[#555577] shrink-0">
+      <div className="flex items-center gap-2.5 bg-surface border border-white/8 rounded-2xl py-[13px] px-4">
+        <div className="w-[26px] h-[26px] rounded-full bg-input border border-white/8 flex items-center justify-center text-faint shrink-0">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
           </svg>
         </div>
-        <span className="flex-1 text-[13px] text-[#8888aa] text-left">¿No encontrás tu match?</span>
+        <span className="flex-1 text-[13px] text-muted text-left">¿No encontrás tu match?</span>
         <button className="text-[12px] font-extrabold text-blue-400 tracking-[0.4px] hover:text-blue-300 transition-colors whitespace-nowrap bg-transparent border-0 cursor-pointer" onClick={onPress}>CREAR PARTY</button>
       </div>
     </div>
