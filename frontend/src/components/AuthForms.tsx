@@ -13,9 +13,13 @@ export function LoginForm() {
   }
 
   return (
-    <form className="auth-form" onSubmit={handleSubmit}>
-      <h2 className="auth-form-title">Iniciar sesión</h2>
-      {error && <div className="alert alert-danger">{error}</div>}
+    <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+      <h2 className="text-[22px] font-bold">Iniciar sesión</h2>
+      {error && (
+        <div className="px-4 py-3 rounded-[12px] text-sm bg-[rgba(239,68,68,0.1)] text-danger border border-[rgba(239,68,68,0.2)]">
+          {error}
+        </div>
+      )}
       <Input
         id="login-email"
         label="Email"
@@ -97,20 +101,30 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   }
 
   return (
-    <form className="auth-form" onSubmit={step === 3 ? handleSubmit : (e) => { e.preventDefault(); nextStep() }}>
-      <div className="auth-stepper">
+    <form className="flex flex-col gap-4" onSubmit={step === 3 ? handleSubmit : (e) => { e.preventDefault(); nextStep() }}>
+      {/* Stepper */}
+      <div className="flex justify-center items-center pb-2 gap-2">
         {[1, 2, 3].map((s) => (
-          <div key={s} className={`step-dot ${s <= step ? 'step-dot-active' : ''}`} />
+          <div
+            key={s}
+            className={`w-2 h-2 rounded-full transition-[background,transform] duration-200 ${
+              s <= step
+                ? 'bg-accent scale-[1.3]'
+                : 'bg-white/8'
+            }`}
+          />
         ))}
       </div>
-      <h2 className="auth-form-title">
+      <h2 className="text-[22px] font-bold">
         {step === 1 && 'Tu cuenta'}
         {step === 2 && 'Tu universidad'}
         {step === 3 && 'Tu perfil'}
       </h2>
 
       {(error || localError) && (
-        <div className="alert alert-danger">{localError || error}</div>
+        <div className="px-4 py-3 rounded-[12px] text-sm bg-[rgba(239,68,68,0.1)] text-danger border border-[rgba(239,68,68,0.2)]">
+          {localError || error}
+        </div>
       )}
 
       {step === 1 && (
@@ -144,7 +158,8 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
         </>
       )}
 
-      <div className="auth-form-actions">
+      {/* Actions */}
+      <div className="flex gap-2.5">
         {step > 1 && (
           <Button type="button" variant="ghost" onClick={() => setStep((s) => s - 1)}>
             ← Volver
@@ -156,9 +171,13 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
       </div>
 
       {step === 1 && (
-        <p className="auth-switch">
+        <p className="text-[13px] text-secondary text-center">
           ¿Ya tenés cuenta?{' '}
-          <button type="button" className="link-btn" onClick={onSwitchToLogin}>
+          <button
+            type="button"
+            className="text-accent-light text-[length:inherit] underline"
+            onClick={onSwitchToLogin}
+          >
             Iniciar sesión
           </button>
         </p>

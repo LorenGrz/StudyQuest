@@ -37,24 +37,24 @@ export default function LeaderboardPage() {
 
   return (
     <MobileLayout>
-      <div className="leaderboard-header">
-        <h1 className="page-title">🏆 Leaderboard</h1>
-        <p className="leaderboard-subtitle">Ranking global por materia</p>
+      <div className="px-4 pt-5 pb-2">
+        <h1 className="text-2xl font-extrabold pt-5 pb-2">🏆 Leaderboard</h1>
+        <p className="text-[13px] text-muted mt-0.5">Ranking global por materia</p>
       </div>
 
       {/* Subject Selector */}
       {subjects.length === 0 ? (
-        <div className="empty-state" style={{ padding: '40px 20px' }}>
-          <p className="empty-text">Inscribite a materias para ver el leaderboard.</p>
+        <div className="text-center py-10 px-5" style={{ padding: '40px 20px' }}>
+          <p className="text-lg font-semibold text-primary">Inscribite a materias para ver el leaderboard.</p>
         </div>
       ) : (
         <>
-          <div className="leaderboard-subject-tabs">
+          <div className="flex gap-2 overflow-x-auto px-4 pb-3 scrollbar-none">
             {subjects.map(s => (
               <button
                 key={s.id}
                 id={`lb-tab-${s.id}`}
-                className={`leaderboard-tab ${selectedSubjectId === s.id ? 'leaderboard-tab--active' : ''}`}
+                className={`py-[7px] px-4 rounded-full border border-white/8 bg-surface text-secondary text-[13px] font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer hover:border-accent hover:text-accent-light ${selectedSubjectId === s.id ? 'bg-accent border-accent text-white shadow-[0_0_12px_rgba(124,58,237,0.4)]' : ''}`}
                 onClick={() => setSelectedSubjectId(s.id)}
               >
                 {s.name}
@@ -64,26 +64,26 @@ export default function LeaderboardPage() {
 
           {/* Content */}
           {isLoading && (
-            <div className="center-spinner" style={{ marginTop: '40px' }}>
+            <div className="flex justify-center items-center min-h-[200px]" style={{ marginTop: '40px' }}>
               <Spinner size="lg" />
             </div>
           )}
 
           {error && !isLoading && (
-            <div className="alert alert-danger" style={{ marginTop: '16px' }}>{error}</div>
+            <div className="px-4 py-3 rounded-[12px] text-sm bg-[rgba(239,68,68,0.1)] text-danger border border-[rgba(239,68,68,0.2)]" style={{ marginTop: '16px' }}>{error}</div>
           )}
 
           {!isLoading && !error && entries.length === 0 && (
-            <div className="empty-state" style={{ padding: '40px 20px' }}>
-              <p className="empty-text">Nadie en el ranking todavía. ¡Sé el primero!</p>
+            <div className="text-center py-10 px-5" style={{ padding: '40px 20px' }}>
+              <p className="text-lg font-semibold text-primary">Nadie en el ranking todavía. ¡Sé el primero!</p>
             </div>
           )}
 
           {!isLoading && !error && entries.length > 0 && (
-            <div className="leaderboard-list">
+            <div className="flex flex-col gap-2 px-4 pb-8">
               {/* Top 3 podium */}
               {entries.length >= 3 && (
-                <div className="leaderboard-podium">
+                <div className="flex justify-center items-end gap-2 py-5 pb-6">
                   {/* 2nd */}
                   <PodiumCard entry={entries[1]} currentUserId={user?.id} position={2} />
                   {/* 1st */}
@@ -126,10 +126,10 @@ function PodiumCard({
 
   return (
     <div
-      className={`podium-card podium-card--${position} ${isMe ? 'podium-card--me' : ''}`}
+      className={`flex flex-col items-center gap-1 rounded-[24px] border-2 bg-surface pt-3 px-2.5 pb-0 transition-transform duration-200 overflow-hidden flex-1 max-w-[120px] hover:-translate-y-1 ${isMe ? 'animate-pulse-border' : ''}`}
       style={{ borderColor: league.color, boxShadow: `0 0 16px ${league.glowColor}` }}
     >
-      <div className="podium-medal">{medals[position]}</div>
+      <div className="text-[22px]">{medals[position]}</div>
       <AvatarWithBorder
         displayName={entry.displayName ?? '?'}
         avatarUrl={entry.avatarUrl}
@@ -137,10 +137,10 @@ function PodiumCard({
         size={position === 1 ? 'lg' : 'md'}
         glowColor={league.glowColor}
       />
-      <p className="podium-name">{entry.displayName}</p>
-      <p className="podium-league" style={{ color: league.color }}>{league.icon} {league.name}</p>
-      <p className="podium-elo">{entry.elo} ELO</p>
-      <div className="podium-bar" style={{ height: heights[position], background: league.gradient }} />
+      <p className="text-xs font-bold text-center text-primary overflow-hidden text-ellipsis whitespace-nowrap max-w-[100px]">{entry.displayName}</p>
+      <p className="text-[11px] font-semibold" style={{ color: league.color }}>{league.icon} {league.name}</p>
+      <p className="text-[11px] text-muted font-semibold">{entry.elo} ELO</p>
+      <div className="w-full mt-2 rounded-b-[18px] opacity-60" style={{ height: heights[position], background: league.gradient }} />
     </div>
   )
 }
@@ -158,13 +158,13 @@ function LeaderboardRow({
 
   return (
     <div
-      className={`leaderboard-row ${isMe ? 'leaderboard-row--me' : ''}`}
+      className={`flex items-center gap-3 bg-surface border border-white/8 rounded-[18px] px-3.5 py-3 transition-[transform,border-color] duration-200 animate-lb-in hover:translate-x-1 ${isMe ? 'bg-[rgba(124,58,237,0.06)]' : ''}`}
       style={{
         animationDelay: `${animDelay}ms`,
         borderLeft: isMe ? `4px solid ${league.color}` : '4px solid transparent',
       }}
     >
-      <span className="leaderboard-rank">{entry.rank}</span>
+      <span className="text-base font-extrabold text-muted w-7 text-center shrink-0">{entry.rank}</span>
       <AvatarWithBorder
         displayName={entry.displayName ?? '?'}
         avatarUrl={entry.avatarUrl}
@@ -172,16 +172,16 @@ function LeaderboardRow({
         size="sm"
         glowColor={isMe ? league.glowColor : undefined}
       />
-      <div className="leaderboard-info">
-        <span className="leaderboard-name">
+      <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+        <span className="text-sm font-bold text-primary overflow-hidden text-ellipsis whitespace-nowrap">
           {entry.displayName}
-          {isMe && <span className="leaderboard-you-badge"> • Tú</span>}
+          {isMe && <span className="text-[11px] font-bold text-accent-light"> • Tú</span>}
         </span>
-        <span className="leaderboard-username">@{entry.username}</span>
+        <span className="text-xs text-muted">@{entry.username}</span>
       </div>
-      <div className="leaderboard-right">
-        <span className="leaderboard-league-icon" title={league.name}>{league.icon}</span>
-        <span className="leaderboard-elo" style={{ color: league.color }}>{entry.elo}</span>
+      <div className="flex flex-col items-end gap-0.5 shrink-0">
+        <span className="text-lg" title={league.name}>{league.icon}</span>
+        <span className="text-sm font-extrabold" style={{ color: league.color }}>{entry.elo}</span>
       </div>
     </div>
   )

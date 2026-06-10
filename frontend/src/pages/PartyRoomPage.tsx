@@ -88,8 +88,8 @@ const PartyRoomPage = () => {
 
   return (
     <MobileLayout>
-      <div className="party-room-shell">
-        <div className="party-room-topbar">
+      <div className="flex flex-col flex-1 min-h-0">
+        <div className="sticky top-0 z-20 bg-gradient-to-b from-[rgba(11,11,24,0.98)] to-[rgba(11,11,24,0.94)] backdrop-blur-[14px]">
           <PartyHeader party={party} />
           <TabBar
             tabs={tabs}
@@ -98,16 +98,16 @@ const PartyRoomPage = () => {
           />
         </div>
 
-        <div className="party-room-panel">
+        <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
           {activeTab === 'quests' && (
-            <div className="tab-content">
+            <div className="flex flex-col gap-3 p-4 overflow-y-auto min-h-0">
               <UploadNoteCard onUpload={uploadNote} isLoading={isGenerating} />
               {quests.map((q) => <QuestCard key={q.id} quest={q} />)}
               {quests.length === 0 && !isGenerating && (
-                <div className="empty-state">
-                  <p className="empty-icon">⚡</p>
-                  <p className="empty-text">No hay quests todavía</p>
-                  <p className="empty-sub">Subí un apunte para generar el primero</p>
+                <div className="text-center py-10 px-5">
+                  <p className="text-5xl block mb-3">⚡</p>
+                  <p className="text-lg font-semibold text-primary">No hay quests todavía</p>
+                  <p className="text-sm text-muted mt-1.5">Subí un apunte para generar el primero</p>
                 </div>
               )}
             </div>
@@ -144,7 +144,7 @@ const PartyRoomPage = () => {
           )}
 
           {activeTab === 'activity' && (
-            <div className="tab-content">
+            <div className="flex flex-col gap-3 p-4 overflow-y-auto min-h-0">
               <ActivityFeed activities={activities} isLoading={activityLoading} />
             </div>
           )}

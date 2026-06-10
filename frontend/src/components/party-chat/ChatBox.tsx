@@ -22,14 +22,14 @@ export function ChatBox({ messages, isLoading, error, currentUserId = '', onSend
   }, [messages.length])
 
   return (
-    <div className="chat-box">
-      <div className="chat-messages">
+    <div className="flex flex-col flex-1 min-h-0">
+      <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-3 min-h-0">
         {isLoading ? (
-          <div className="chat-empty"><Spinner size="md" /></div>
+          <div className="flex-1 flex items-center justify-center text-muted text-sm text-center p-5"><Spinner size="md" /></div>
         ) : error ? (
-          <div className="chat-empty"><p>{error}</p></div>
+          <div className="flex-1 flex items-center justify-center text-muted text-sm text-center p-5"><p>{error}</p></div>
         ) : messages.length === 0 ? (
-          <div className="chat-empty"><p>Sin mensajes todavía. ¡Sé el primero! 💬</p></div>
+          <div className="flex-1 flex items-center justify-center text-muted text-sm text-center p-5"><p>Sin mensajes todavía. ¡Sé el primero! 💬</p></div>
         ) : (
           messages.map((message) => (
             <ChatMessageItem

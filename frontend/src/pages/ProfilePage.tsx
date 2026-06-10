@@ -39,7 +39,7 @@ export default function ProfilePage() {
   if (!user) {
     return (
       <MobileLayout>
-        <div className="center-spinner">
+        <div className="flex justify-center items-center min-h-[200px]">
           <Spinner size="lg" />
         </div>
       </MobileLayout>
@@ -90,7 +90,7 @@ export default function ProfilePage() {
     <MobileLayout>
       {/* ─── User Card ─────────────────────────────────────────────── */}
       <div
-        className="profile-card"
+        className="bg-surface border border-white/8 rounded-[24px] p-6 mx-4 flex gap-4 items-center"
         style={{ marginTop: "16px", borderTop: `3px solid ${league.color}` }}
       >
         <AvatarWithBorder
@@ -100,14 +100,14 @@ export default function ProfilePage() {
           size="lg"
           glowColor={league.glowColor}
         />
-        <div className="profile-card-info">
+        <div className="flex flex-col gap-1">
           <h2>{user.displayName}</h2>
           <p>@{user.username}</p>
-          <div className="profile-badges">
+          <div className="flex flex-wrap items-center gap-2 mt-2">
             <Badge variant="primary">Nivel {stats.level}</Badge>
             <Badge variant="success">⚡ {stats.xp} XP</Badge>
             <span
-              className="league-pill"
+              className="inline-flex items-center justify-center gap-1 px-3.5 py-1.5 rounded-full text-[13px] font-bold text-white text-shadow-[0_1px_3px_rgba(0,0,0,0.4)] tracking-[0.3px] relative z-[1]"
               style={{
                 background: league.gradient,
                 boxShadow: `0 0 8px ${league.glowColor}`,
@@ -120,78 +120,78 @@ export default function ProfilePage() {
       </div>
 
       {/* ─── Stats Grid ────────────────────────────────────────────── */}
-      <h3 className="section-title" style={{ marginTop: "16px" }}>
+      <h3 className="text-base font-bold text-secondary uppercase tracking-[1px] pt-4 pb-1" style={{ marginTop: "16px" }}>
         Estadísticas
       </h3>
-      <div className="stats-grid">
+      <div className="grid grid-cols-2 gap-3 px-4">
         <div
-          className="stat-box stat-box--elo"
+          className="bg-surface border border-white/8 rounded-[18px] p-4 flex flex-col items-center justify-center text-center border-2 bg-black/20"
           style={{ borderColor: league.color }}
         >
-          <span className="stat-value" style={{ color: league.color }}>
+          <span className="text-2xl font-extrabold text-accent-light" style={{ color: league.color }}>
             {elo}
           </span>
-          <span className="stat-label">ELO</span>
+          <span className="text-xs text-muted mt-1">ELO</span>
         </div>
-        <div className="stat-box">
-          <span className="stat-value">{winRate}%</span>
-          <span className="stat-label">Win Rate</span>
+        <div className="bg-surface border border-white/8 rounded-[18px] p-4 flex flex-col items-center justify-center text-center">
+          <span className="text-2xl font-extrabold text-accent-light">{winRate}%</span>
+          <span className="text-xs text-muted mt-1">Win Rate</span>
         </div>
-        <div className="stat-box">
-          <span className="stat-value">{stats.quizzesPlayed}</span>
-          <span className="stat-label">Quests</span>
+        <div className="bg-surface border border-white/8 rounded-[18px] p-4 flex flex-col items-center justify-center text-center">
+          <span className="text-2xl font-extrabold text-accent-light">{stats.quizzesPlayed}</span>
+          <span className="text-xs text-muted mt-1">Quests</span>
         </div>
-        <div className="stat-box">
-          <span className="stat-value">🔥 {stats.currentStreak}</span>
-          <span className="stat-label">Racha</span>
+        <div className="bg-surface border border-white/8 rounded-[18px] p-4 flex flex-col items-center justify-center text-center">
+          <span className="text-2xl font-extrabold text-accent-light">🔥 {stats.currentStreak}</span>
+          <span className="text-xs text-muted mt-1">Racha</span>
         </div>
       </div>
 
       {/* ─── Medals / Achievements ──────────────────────────────────── */}
-      <h3 className="section-title" style={{ marginTop: "16px" }}>
+      <h3 className="text-base font-bold text-secondary uppercase tracking-[1px] pt-4 pb-1" style={{ marginTop: "16px" }}>
         Medallas
       </h3>
       {achievementsLoading ? (
-        <div className="center-spinner" style={{ padding: "20px" }}>
+        <div className="flex justify-center items-center min-h-[200px]" style={{ padding: "20px" }}>
           <Spinner size="sm" />
         </div>
       ) : achievements.length === 0 ? (
-        <div className="empty-state" style={{ padding: "20px" }}>
-          <p className="empty-text" style={{ fontSize: "14px" }}>
+        <div className="text-center py-10 px-5" style={{ padding: "20px" }}>
+          <p className="text-lg font-semibold text-primary" style={{ fontSize: "14px" }}>
             No hay logros disponibles aún
           </p>
         </div>
       ) : (
-        <div className="achievements-grid">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(90px,1fr))] gap-2.5 px-4">
           {achievements.map((a) => (
             <div
               key={a.id}
-              className={`achievement-item ${a.unlocked ? "achievement-item--unlocked" : "achievement-item--locked"}`}
+              className={`flex flex-col items-center gap-1.5 px-2 py-3.5 rounded-[18px] border border-white/8 bg-surface text-center transition-all duration-[250ms] ease cursor-default ${a.unlocked ? "border-[rgba(124,58,237,0.4)] bg-[rgba(124,58,237,0.06)] shadow-[0_0_12px_rgba(124,58,237,0.15)] hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(124,58,237,0.25)]" : "opacity-35 grayscale-[0.8]"}`}
               title={
                 a.unlocked
                   ? `${a.name} — ${a.description}`
                   : `🔒 ${a.name} — ${a.description}`
               }
             >
-              <span className="achievement-icon">{a.icon}</span>
-              <span className="achievement-name">{a.name}</span>
+              <span className="text-[28px] leading-none">{a.icon}</span>
+              <span className="text-[11px] font-semibold text-secondary leading-[1.3] overflow-hidden text-ellipsis line-clamp-2">{a.name}</span>
             </div>
           ))}
         </div>
       )}
 
       {/* ─── Inventario de cosméticos ─────────────────────────────── */}
-      <h3 className="section-title" style={{ marginTop: '16px' }}>Inventario</h3>
+      <h3 className="text-base font-bold text-secondary uppercase tracking-[1px] pt-4 pb-1" style={{ marginTop: '16px' }}>Inventario</h3>
       {inventoryLoading ? (
-        <div className="center-spinner" style={{ padding: '20px' }}><Spinner size="sm" /></div>
+        <div className="flex justify-center items-center min-h-[200px]" style={{ padding: '20px' }}><Spinner size="sm" /></div>
       ) : inventoryError ? (
-        <div className="empty-state" style={{ padding: '20px' }}>
-          <p className="empty-text" style={{ fontSize: '14px' }}>{inventoryError}</p>
+        <div className="text-center py-10 px-5" style={{ padding: '20px' }}>
+          <p className="text-lg font-semibold text-primary" style={{ fontSize: '14px' }}>{inventoryError}</p>
         </div>
       ) : (
         <>
-          <div className="input-group" style={{ marginTop: '8px' }}>
-            <p className="input-label" style={{ marginBottom: '8px' }}>Títulos</p>
+          <div className="flex flex-col gap-1.5" style={{ marginTop: '8px' }}>
+            <p className="text-[13px] font-medium text-secondary" style={{ marginBottom: '8px' }}>Títulos</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px' }}>
               <button
                 className="btn btn-secondary"
@@ -225,31 +225,31 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="input-group" style={{ marginTop: '24px' }}>
-            <p className="input-label" style={{ marginBottom: '8px' }}>Bordes</p>
-            <div className="border-selector-grid">
+          <div className="flex flex-col gap-1.5" style={{ marginTop: '24px' }}>
+            <p className="text-[13px] font-medium text-secondary" style={{ marginBottom: '8px' }}>Bordes</p>
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] gap-4 mt-3">
               <div
-                className={`border-selector-item ${!user.activeCosmetics?.borderCode ? 'border-selector-item--active' : ''}`}
+                className={`flex flex-col items-center gap-2 px-2 py-3 border-2 border-white/8 rounded-[18px] bg-transparent cursor-pointer transition-all duration-200 hover:border-accent hover:bg-white/[0.05] ${!user.activeCosmetics?.borderCode ? 'border-accent bg-[rgba(99,102,241,0.1)] shadow-[0_0_16px_rgba(99,102,241,0.2)]' : ''}`}
                 onClick={() => equipBorder(null)}
                 style={{ opacity: isUpdatingCosmetics ? 0.5 : 1 }}
               >
-                <div className="border-selector-preview">
+                <div className="w-11 h-11 rounded-full bg-transparent relative flex items-center justify-center">
                   <span style={{ fontSize: '14px', fontWeight: 800 }}>{user.displayName.charAt(0).toUpperCase()}</span>
                 </div>
-                <span className="border-selector-name">Sin borde</span>
+                <span className="text-xs font-medium text-secondary text-center">Sin borde</span>
               </div>
               {inventory.borders?.map((border) => (
                 <div
                   key={border.code}
-                  className={`border-selector-item ${user.activeCosmetics?.borderCode === border.code ? 'border-selector-item--active' : ''}`}
+                  className={`flex flex-col items-center gap-2 px-2 py-3 border-2 border-white/8 rounded-[18px] bg-transparent cursor-pointer transition-all duration-200 hover:border-accent hover:bg-white/[0.05] ${user.activeCosmetics?.borderCode === border.code ? 'border-accent bg-[rgba(99,102,241,0.1)] shadow-[0_0_16px_rgba(99,102,241,0.2)]' : ''}`}
                   onClick={() => equipBorder(border.code)}
                   style={{ opacity: isUpdatingCosmetics ? 0.5 : 1 }}
                 >
-                  <div className="border-selector-preview">
+                  <div className="w-11 h-11 rounded-full bg-transparent relative flex items-center justify-center">
                     <span style={{ fontSize: '14px', fontWeight: 800 }}>{user.displayName.charAt(0).toUpperCase()}</span>
-                    <img src={`http://localhost:3000${border.imageUrl}`} alt="" className="border-selector-img" />
+                    <img src={`http://localhost:3000${border.imageUrl}`} alt="" className="absolute w-16 h-16 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
-                  <span className="border-selector-name">{border.name}</span>
+                  <span className="text-xs font-medium text-secondary text-center">{border.name}</span>
                 </div>
               ))}
             </div>
@@ -258,23 +258,23 @@ export default function ProfilePage() {
       )}
 
       {/* ─── League Ladder ─────────────────────────────────────────── */}
-      <h3 className="section-title" style={{ marginTop: "16px" }}>
+      <h3 className="text-base font-bold text-secondary uppercase tracking-[1px] pt-4 pb-1" style={{ marginTop: "16px" }}>
         Ligas
       </h3>
-      <div className="league-ladder">
+      <div className="flex flex-col gap-1.5 px-4">
         {[...LEAGUES].reverse().map((l) => (
           <div
             key={l.tier}
-            className={`league-ladder-row ${l.tier === league.tier ? "league-ladder-row--active" : ""}`}
+            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-[18px] border border-white/8 bg-surface transition-all duration-200 ${l.tier === league.tier ? "border-2 translate-x-1" : ""}`}
             style={
               l.tier === league.tier
                 ? { borderColor: l.color, background: `${l.glowColor}` }
                 : {}
             }
           >
-            <span className="league-ladder-icon">{l.icon}</span>
+            <span className="text-xl">{l.icon}</span>
             <span
-              className="league-ladder-name"
+              className="flex-1 text-sm font-semibold"
               style={
                 l.tier === league.tier
                   ? { color: l.color, fontWeight: 700 }
@@ -283,65 +283,65 @@ export default function ProfilePage() {
             >
               {l.name}
             </span>
-            <span className="league-ladder-range">
+            <span className="text-xs text-muted">
               {l.maxElo === Infinity
                 ? `${l.minElo}+`
                 : `${l.minElo}–${l.maxElo}`}
             </span>
             {l.tier === league.tier && (
-              <span className="league-ladder-badge">● Tú</span>
+              <span className="text-[11px] font-bold text-white bg-accent rounded-full px-2 py-0.5">● Tú</span>
             )}
           </div>
         ))}
       </div>
 
       {/* ─── Academic Info ─────────────────────────────────────────── */}
-      <h3 className="section-title" style={{ marginTop: "16px" }}>
+      <h3 className="text-base font-bold text-secondary uppercase tracking-[1px] pt-4 pb-1" style={{ marginTop: "16px" }}>
         Información Académica
       </h3>
-      <div className="academic-card">
-        <div className="academic-row">
-          <span className="academic-label">🏫 Universidad</span>
-          <span className="academic-value">{user.university}</span>
+      <div className="bg-surface border border-white/8 rounded-[18px] p-4 mx-4 flex flex-col gap-3">
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-muted">🏫 Universidad</span>
+          <span className="text-sm font-semibold text-primary text-right">{user.university}</span>
         </div>
-        <div className="academic-row">
-          <span className="academic-label">🎓 Carrera</span>
-          <span className="academic-value">{user.career}</span>
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-muted">🎓 Carrera</span>
+          <span className="text-sm font-semibold text-primary text-right">{user.career}</span>
         </div>
-        <div className="academic-row">
-          <span className="academic-label">📚 Semestre</span>
-          <span className="academic-value">{user.semester}</span>
+        <div className="flex justify-between items-center">
+          <span className="text-sm text-muted">📚 Semestre</span>
+          <span className="text-sm font-semibold text-primary text-right">{user.semester}</span>
         </div>
       </div>
 
       {/* ─── Enrolled Subjects ─────────────────────────────────────── */}
-      <h3 className="section-title" style={{ marginTop: "16px" }}>
+      <h3 className="text-base font-bold text-secondary uppercase tracking-[1px] pt-4 pb-1" style={{ marginTop: "16px" }}>
         Materias Inscriptas ({user.enrolledSubjects?.length || 0})
       </h3>
-      <div className="enrolled-subjects-list">
+      <div className="flex flex-col gap-2.5 px-4">
         {user.enrolledSubjects && user.enrolledSubjects.length > 0 ? (
           user.enrolledSubjects.map((sub) => (
-            <div key={sub.id} className="enrolled-subject-item">
-              <span className="enrolled-subject-icon">📘</span>
-              <div className="enrolled-subject-info">
-                <span className="enrolled-subject-name">{sub.name}</span>
-                <span className="enrolled-subject-code">{sub.code}</span>
+            <div key={sub.id} className="bg-surface border border-white/8 rounded-[18px] px-4 py-3 flex items-center gap-3">
+              <span className="text-2xl">📘</span>
+              <div className="flex flex-col flex-1">
+                <span className="text-[15px] font-semibold">{sub.name}</span>
+                <span className="text-xs text-secondary">{sub.code}</span>
               </div>
             </div>
           ))
         ) : (
-          <div className="empty-state" style={{ padding: "20px" }}>
-            <p className="empty-text" style={{ fontSize: "14px" }}>
+          <div className="text-center py-10 px-5" style={{ padding: "20px" }}>
+            <p className="text-lg font-semibold text-primary" style={{ fontSize: "14px" }}>
               No estás inscripto en ninguna materia
             </p>
           </div>
         )}
       </div>
 
-      <h3 className="section-title" style={{ marginTop: "24px" }}>
+      <h3 className="text-base font-bold text-secondary uppercase tracking-[1px] pt-4 pb-1" style={{ marginTop: "24px" }}>
         Cuenta
       </h3>
-      <div className="profile-actions-card">
+      <div className="bg-surface border border-white/8 rounded-[24px] mx-4 mb-[108px] p-4 flex flex-col gap-3.5">
         <Button
           variant="secondary"
           onClick={() => setIsEditing(true)}
@@ -351,17 +351,17 @@ export default function ProfilePage() {
           ✏️ Editar Perfil
         </Button>
 
-        <div className="profile-logout-panel">
-          <div className="profile-logout-copy">
-            <span className="profile-logout-title">Cerrar sesión</span>
-            <span className="profile-logout-text">
+        <div className="flex items-center justify-between gap-4 px-4 py-3.5 rounded-[18px] border border-[rgba(239,68,68,0.18)] bg-gradient-to-b from-[rgba(127,29,29,0.18)] to-[rgba(12,12,22,0.35)]">
+          <div className="flex flex-col gap-1 min-w-0">
+            <span className="text-sm font-bold text-[#f5c2c7]">Cerrar sesión</span>
+            <span className="text-[13px] leading-[1.4] text-secondary">
               Salí de tu cuenta en este dispositivo cuando quieras.
             </span>
           </div>
           <Button
             variant="danger"
             onClick={logout}
-            className="profile-logout-button"
+            className="shrink-0 min-w-24"
             size="md"
           >
             Salir
@@ -410,22 +410,22 @@ function EditProfileModal({ user, onClose, onUpdate }: any) {
   }
 
   return (
-    <div className="invite-overlay" onClick={onClose}>
-      <div className="invite-sheet" onClick={(e) => e.stopPropagation()}>
-        <div className="invite-sheet-handle" />
-        <h2 className="invite-title">Editar Perfil</h2>
+    <div className="fixed inset-0 bg-black/60 z-[300] flex items-end backdrop-blur-[4px] animate-fade-in" onClick={onClose}>
+      <div className="w-full max-w-[480px] mx-auto bg-elevated border-t border-white/8 rounded-t-[24px] pt-6 px-5 pb-9 flex flex-col gap-4 animate-slide-up" onClick={(e) => e.stopPropagation()}>
+        <div className="w-9 h-1 rounded-sm bg-white/[0.15] mx-auto -mb-2" />
+        <h2 className="text-lg font-extrabold">Editar Perfil</h2>
 
-        {error && <div className="alert alert-danger">{error}</div>}
+        {error && <div className="px-4 py-3 rounded-[12px] text-sm bg-[rgba(239,68,68,0.1)] text-danger border border-[rgba(239,68,68,0.2)]">{error}</div>}
 
         <form
           onSubmit={handleSubmit}
-          className="auth-form"
+          className="flex flex-col gap-4"
           style={{ marginTop: "16px" }}
         >
-          <div className="input-group">
-            <label className="input-label">Nombre Completo</label>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[13px] font-medium text-secondary">Nombre Completo</label>
             <input
-              className="input"
+              className="w-full px-3.5 py-3 bg-panel border border-white/8 rounded-[12px] text-primary text-[15px] transition-[border-color,box-shadow] duration-200 outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(124,58,237,0.3)]"
               value={formData.displayName}
               onChange={(e) =>
                 setFormData({ ...formData, displayName: e.target.value })
@@ -433,10 +433,10 @@ function EditProfileModal({ user, onClose, onUpdate }: any) {
               required
             />
           </div>
-          <div className="input-group">
-            <label className="input-label">Universidad</label>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[13px] font-medium text-secondary">Universidad</label>
             <input
-              className="input"
+              className="w-full px-3.5 py-3 bg-panel border border-white/8 rounded-[12px] text-primary text-[15px] transition-[border-color,box-shadow] duration-200 outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(124,58,237,0.3)]"
               value={formData.university}
               onChange={(e) =>
                 setFormData({ ...formData, university: e.target.value })
@@ -444,10 +444,10 @@ function EditProfileModal({ user, onClose, onUpdate }: any) {
               required
             />
           </div>
-          <div className="input-group">
-            <label className="input-label">Carrera</label>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[13px] font-medium text-secondary">Carrera</label>
             <input
-              className="input"
+              className="w-full px-3.5 py-3 bg-panel border border-white/8 rounded-[12px] text-primary text-[15px] transition-[border-color,box-shadow] duration-200 outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(124,58,237,0.3)]"
               value={formData.career}
               onChange={(e) =>
                 setFormData({ ...formData, career: e.target.value })
@@ -455,11 +455,11 @@ function EditProfileModal({ user, onClose, onUpdate }: any) {
               required
             />
           </div>
-          <div className="input-group">
-            <label className="input-label">Semestre / Año</label>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[13px] font-medium text-secondary">Semestre / Año</label>
             <input
               type="number"
-              className="input"
+              className="w-full px-3.5 py-3 bg-panel border border-white/8 rounded-[12px] text-primary text-[15px] transition-[border-color,box-shadow] duration-200 outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(124,58,237,0.3)]"
               value={formData.semester}
               onChange={(e) =>
                 setFormData({ ...formData, semester: e.target.value })

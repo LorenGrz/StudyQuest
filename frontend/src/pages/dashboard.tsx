@@ -22,17 +22,17 @@ const RecommendedQuestCard = ({ quest }: { quest: RecommendedQuestDto }) => {
   const navigate = useNavigate()
   return (
     <div 
-      className="quest-card" 
+      className="flex items-center gap-3 bg-surface border border-white/8 rounded-[18px] px-4 py-3.5 cursor-pointer transition-all duration-200 hover:border-accent hover:-translate-y-0.5" 
       onClick={() => navigate(`/quiz/${quest.id}`)}
       style={{ marginBottom: '8px' }}
     >
-      <div className="quest-card-info">
-        <p className="quest-card-title">{quest.title}</p>
-        <p className="quest-card-meta">
+      <div className="flex-1">
+        <p className="font-semibold text-[15px]">{quest.title}</p>
+        <p className="text-xs text-muted mt-0.5">
           {quest.subjectName} • {quest.playCount} {quest.playCount === 1 ? 'jugada' : 'jugadas'}
         </p>
       </div>
-      <span className="quest-status">▶</span>
+      <span className="text-xl shrink-0">▶</span>
     </div>
   )
 }
@@ -254,7 +254,7 @@ const DashboardPage = () => {
 
   return (
     <MobileLayout>
-      <div className="dashboard-page">
+      <div className="flex flex-col gap-3 pb-11">
         <GreetingHeader user={user} />
         
         {/* Search Bar & Inline Results */}
@@ -440,8 +440,8 @@ const DashboardPage = () => {
         {isTournamentsLoading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '16px' }}><Spinner /></div>
         ) : tournaments.length === 0 ? (
-          <div className="empty-state" style={{ padding: '16px', textAlign: 'center', background: '#13131f', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <p className="empty-sub" style={{ margin: 0, fontSize: '11px', color: '#8888aa' }}>No hay torneos activos en este momento.</p>
+          <div className="text-center py-4 px-4 bg-surface rounded-2xl border border-white/[0.05]">
+            <p className="text-sm text-muted" style={{ margin: 0 }}>No hay torneos activos en este momento.</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -481,12 +481,12 @@ const DashboardPage = () => {
         {isQuestsTodayLoading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '16px' }}><Spinner /></div>
         ) : questsTodayError ? (
-          <div className="alert alert-danger">{questsTodayError}</div>
+          <div className="px-4 py-3 rounded-[12px] text-sm bg-[rgba(239,68,68,0.1)] text-danger border border-[rgba(239,68,68,0.2)]">{questsTodayError}</div>
         ) : questsToday.length === 0 ? (
-          <div className="empty-state" style={{ padding: '20px', textAlign: 'center' }}>
-            <p className="empty-icon">✨</p>
-            <p className="empty-text">¡Todo al día!</p>
-            <p className="empty-sub">No tenés quests pendientes para hoy.</p>
+          <div className="text-center py-10 px-5">
+            <p className="text-5xl block mb-3">✨</p>
+            <p className="text-lg font-semibold text-primary">¡Todo al día!</p>
+            <p className="text-sm text-muted mt-1.5">No tenés quests pendientes para hoy.</p>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -501,12 +501,12 @@ const DashboardPage = () => {
         {isRecommendedLoading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '16px' }}><Spinner /></div>
         ) : recommendedError ? (
-          <div className="alert alert-danger">{recommendedError}</div>
+          <div className="px-4 py-3 rounded-[12px] text-sm bg-[rgba(239,68,68,0.1)] text-danger border border-[rgba(239,68,68,0.2)]">{recommendedError}</div>
         ) : recommendedQuests.length === 0 ? (
-          <div className="empty-state" style={{ padding: '20px', textAlign: 'center' }}>
-            <p className="empty-icon">📖</p>
-            <p className="empty-text">Sin recomendaciones</p>
-            <p className="empty-sub">Inscribite a más materias para ver quests recomendadas.</p>
+          <div className="text-center py-10 px-5">
+            <p className="text-5xl block mb-3">📖</p>
+            <p className="text-lg font-semibold text-primary">Sin recomendaciones</p>
+            <p className="text-sm text-muted mt-1.5">Inscribite a más materias para ver quests recomendadas.</p>
           </div>
         ) : (
           <div>
@@ -544,7 +544,7 @@ const DashboardPage = () => {
         {/* Mis Materias */}
         <SectionTitle>Mis Materias</SectionTitle>
         {isSubjectsLoading ? (
-          <div className="center-spinner">
+          <div className="flex justify-center items-center min-h-[200px]">
             <Spinner />
           </div>
         ) : (

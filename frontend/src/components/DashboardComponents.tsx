@@ -15,15 +15,13 @@ export function GreetingHeader({ user }: { user: User | null }) {
 
   return (
     <div className="flex items-center gap-3 py-5 pb-2">
-      <div className="greeting-avatar">
-        <AvatarWithBorder
-          displayName={user.displayName}
-          avatarUrl={user.avatarUrl}
-          borderImageUrl={user.activeCosmetics?.borderImageUrl}
-          size="md"
-          glowColor={league.glowColor}
-        />
-      </div>
+      <AvatarWithBorder
+        displayName={user.displayName}
+        avatarUrl={user.avatarUrl}
+        borderImageUrl={user.activeCosmetics?.borderImageUrl}
+        size="md"
+        glowColor={league.glowColor}
+      />
       <div className="flex-1">
         <p className="text-xs text-[#8888aa]">{greeting},</p>
         <h1 className="text-[22px] font-extrabold text-white leading-tight">
