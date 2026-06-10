@@ -35,6 +35,19 @@ import {
 
 const AVATAR_DIR = join(process.cwd(), 'uploads', 'avatars');
 
+const ALLOWED_AVATAR_EXTS = ['.jpg', '.jpeg', '.png', '.webp'];
+// Browsers/OSes report inconsistent mimetypes for the same file (e.g. `image/jpg`
+// for .jpg, or an empty/generic type when none is detected). Validate the
+// extension as the source of truth and only use the mimetype as a hint.
+function isAllowedAvatar(file: {
+  originalname?: string;
+  mimetype?: string;
+}): boolean {
+  const ext = extname(file.originalname || '').toLowerCase();
+  if (ALLOWED_AVATAR_EXTS.includes(ext)) return true;
+  return /^image\/(jpe?g|png|webp)$/.test(file.mimetype || '');
+}
+
 @ApiTags('users')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -69,7 +82,7 @@ export class UsersController {
           cb(null, `${randomUUID()}${extname(file.originalname).toLowerCase()}`),
       }),
       fileFilter: (_req, file, cb) => {
-        if (/^image\/(jpeg|png|webp)$/.test(file.mimetype)) {
+        if (isAllowedAvatar(file)) {
           cb(null, true);
         } else {
           cb(
