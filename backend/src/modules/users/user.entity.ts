@@ -65,6 +65,9 @@ export class User {
   })
   avatarUrl: string | null;
 
+  @Column({ type: 'varchar', length: 500, nullable: true, default: null })
+  bio: string | null;
+
   @Column({ length: 200 })
   university: string;
 

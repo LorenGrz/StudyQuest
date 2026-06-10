@@ -71,6 +71,8 @@ export class AvailabilitySlotDto {
 }
 
 export class UpdateProfileDto {
+  @IsOptional() @IsString() @MinLength(3) @MaxLength(30) username?: string;
+  @IsOptional() @IsString() @MaxLength(500) bio?: string;
   @IsOptional() @IsString() @MaxLength(60) displayName?: string;
   @IsOptional() @IsString() avatarUrl?: string;
   @IsOptional() @IsString() university?: string;
@@ -81,6 +83,11 @@ export class UpdateProfileDto {
   @ValidateNested({ each: true })
   @Type(() => AvailabilitySlotDto)
   availability?: AvailabilitySlotDto[];
+}
+
+export class ChangePasswordDto {
+  @ApiProperty() @IsString() @MinLength(8) @MaxLength(64) currentPassword: string;
+  @ApiProperty({ minLength: 8 }) @IsString() @MinLength(8) @MaxLength(64) newPassword: string;
 }
 
 export class EnrollSubjectDto {
