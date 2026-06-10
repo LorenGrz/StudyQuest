@@ -167,7 +167,11 @@ export const userService = {
   async uploadAvatar(file: File): Promise<User> {
     const formData = new FormData()
     formData.append('file', file)
-    const { data } = await api.post<User>('/users/me/avatar', formData)
+    // The axios instance defaults to 'application/json'; for a multipart upload we
+    // must clear it so axios sets 'multipart/form-data' with the correct boundary.
+    const { data } = await api.post<User>('/users/me/avatar', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
     return data
   },
 
