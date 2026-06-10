@@ -83,13 +83,13 @@ export default function TournamentsPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/dashboard')}
-            className="w-10 h-10 rounded-xl bg-[#13131f] border border-white/8 flex items-center justify-center text-white text-lg hover:bg-[#1a1a2e] transition-all cursor-pointer"
+            className="w-10 h-10 rounded-xl bg-surface border border-white/8 flex items-center justify-center text-white text-lg hover:bg-elevated transition-all cursor-pointer"
           >
             ←
           </button>
           <div>
             <h1 className="text-xl font-black text-white">🏆 Torneos Globales</h1>
-            <p className="text-[#8888aa] text-xs">Competí con tu party resolviendo quests en tiempo real</p>
+            <p className="text-muted text-xs">Competí con tu party resolviendo quests en tiempo real</p>
           </div>
         </div>
 
@@ -105,7 +105,7 @@ export default function TournamentsPage() {
           <div className="flex-1 flex flex-col items-center justify-center py-20 text-center">
             <span className="text-5xl mb-4">🏆</span>
             <h3 className="text-white font-bold text-sm">No hay torneos creados</h3>
-            <p className="text-[#8888aa] text-xs max-w-[280px] mt-1">
+            <p className="text-muted text-xs max-w-[280px] mt-1">
               Podés iniciar un torneo con una quest de tu materia desde el chat de tu party.
             </p>
           </div>
@@ -118,36 +118,36 @@ export default function TournamentsPage() {
               return (
                 <div
                   key={t.id}
-                  className="bg-[#13131f] border border-white/8 rounded-2xl p-4 flex flex-col gap-3 hover:border-purple-500/30 transition-all duration-300 relative overflow-hidden group"
+                  className="bg-surface border border-white/8 rounded-2xl p-4 flex flex-col gap-3 hover:border-purple-500/30 transition-all duration-300 relative overflow-hidden group"
                 >
                   {t.status === 'active' && (
-                    <div className="absolute top-0 right-0 bg-[#7c3aed] text-white text-[9px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-xl shadow-lg">
+                    <div className="absolute top-0 right-0 bg-accent text-white text-[9px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-xl shadow-lg">
                       🔥 ACTIVO
                     </div>
                   )}
                   {t.status === 'finished' && (
-                    <div className="absolute top-0 right-0 bg-[#3b3b4f] text-[#8888aa] text-[9px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-xl">
+                    <div className="absolute top-0 right-0 bg-input text-muted text-[9px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-xl">
                       ✓ TERMINADO
                     </div>
                   )}
 
                   <div className="flex flex-col gap-0.5">
                     <h3 className="text-white font-bold text-base truncate pr-16">{t.title}</h3>
-                    <p className="text-[#8888aa] text-[11px]">
+                    <p className="text-muted text-[11px]">
                       Quest: <span className="text-purple-400 font-semibold">{t.quest?.title ?? 'Quest generada'}</span>
                     </p>
                   </div>
 
                   <div className="flex items-center justify-between text-xs py-1.5 border-y border-white/5">
                     <div className="flex flex-col">
-                      <span className="text-[#666688] text-[9px] uppercase font-bold tracking-wider">Participantes</span>
+                      <span className="text-faint text-[9px] uppercase font-bold tracking-wider">Participantes</span>
                       <span className="text-white font-semibold mt-0.5">👥 {participantCount} Partys</span>
                     </div>
 
                     <div className="flex flex-col text-right">
                       {t.status === 'pending' && (
                         <>
-                          <span className="text-[#666688] text-[9px] uppercase font-bold tracking-wider">Inicia en</span>
+                          <span className="text-faint text-[9px] uppercase font-bold tracking-wider">Inicia en</span>
                           <Countdown targetDate={t.startsAt} onComplete={fetchTournaments} />
                         </>
                       )}
@@ -159,8 +159,8 @@ export default function TournamentsPage() {
                       )}
                       {t.status === 'finished' && (
                         <>
-                          <span className="text-[#666688] text-[9px] uppercase font-bold tracking-wider">Estado</span>
-                          <span className="text-[#8888aa] font-semibold mt-0.5">Finalizado</span>
+                          <span className="text-faint text-[9px] uppercase font-bold tracking-wider">Estado</span>
+                          <span className="text-muted font-semibold mt-0.5">Finalizado</span>
                         </>
                       )}
                     </div>
@@ -178,7 +178,7 @@ export default function TournamentsPage() {
                             ⚔️ Unirse con mi Party
                           </Button>
                         ) : (
-                          <div className="w-full text-center py-2.5 text-[#8888aa] bg-[#1a1a2e] border border-white/5 rounded-xl text-xs font-semibold">
+                          <div className="w-full text-center py-2.5 text-muted bg-elevated border border-white/5 rounded-xl text-xs font-semibold">
                             Debés estar en una party para unirte
                           </div>
                         )}

@@ -14,6 +14,7 @@
   --color-input: var(--bg-input);
   --color-content: var(--text-primary);
   --color-muted: var(--text-secondary);
+  --color-faint: var(--text-muted);
   --color-accent: var(--accent);
   --color-accent-light: var(--accent-light);
   --color-success: var(--green);
@@ -30,6 +31,14 @@
   --bg-input: #1e1e30;
   --border: rgba(255, 255, 255, 0.08);
   --border-hover: rgba(255, 255, 255, 0.15);
+
+  /* Overlay surfaces/borders layered on top of base (flip in light mode) */
+  --overlay-subtle: rgba(255, 255, 255, 0.05);
+  --overlay-soft: rgba(255, 255, 255, 0.08);
+  --overlay-border: rgba(255, 255, 255, 0.12);
+
+  /* Page background gradient for the mobile app shell */
+  --page-gradient: linear-gradient(180deg, #0d0d18 0%, #1a0a2e 100%);
 
   --text-primary: #f0f0ff;
   --text-secondary: #8888aa;
@@ -81,6 +90,12 @@
   --bg-input: #eeeef4;
   --border: rgba(20, 20, 40, 0.1);
   --border-hover: rgba(20, 20, 40, 0.2);
+
+  --overlay-subtle: rgba(20, 20, 40, 0.04);
+  --overlay-soft: rgba(20, 20, 40, 0.07);
+  --overlay-border: rgba(20, 20, 40, 0.12);
+
+  --page-gradient: linear-gradient(180deg, #f4f4f8 0%, #ece9f5 100%);
 
   --text-primary: #1a1a2e;
   --text-secondary: #555570;
@@ -293,7 +308,7 @@ select {
 
 .game-layout {
   height: 100%;
-  background: linear-gradient(180deg, #0d0d18 0%, #1a0a2e 100%);
+  background: var(--page-gradient);
   display: flex;
   flex-direction: column;
   max-width: 480px;
@@ -1014,7 +1029,7 @@ select {
     rgba(124, 58, 237, 0.12),
     transparent 55%
   );
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--overlay-border);
   border-radius: var(--radius-xl);
   min-height: 58vh;
   overflow: hidden;
@@ -1106,7 +1121,7 @@ select {
 .skill-node--locked {
   opacity: 0.92;
   filter: saturate(0.62);
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: var(--overlay-border);
 }
 
 .skill-node--available {
@@ -1144,7 +1159,7 @@ select {
   padding: 2px 6px;
   border: 1px solid transparent;
   color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--overlay-subtle);
 }
 
 .skill-node__state--unlocked {
@@ -1160,8 +1175,8 @@ select {
 }
 
 .skill-node__state--locked {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.18);
+  background: var(--overlay-soft);
+  border-color: var(--overlay-border);
   color: #bfc3d7;
 }
 
@@ -1241,13 +1256,13 @@ select {
 .skill-node-popover-topic,
 .skill-node-popover-xp {
   font-size: 13px;
-  color: #ccd0e5;
+  color: var(--text-secondary);
 }
 
 .skill-node-popover-next-step {
   font-size: 13px;
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--overlay-subtle);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 10px 12px;
@@ -2306,7 +2321,7 @@ select {
   align-items: center;
   gap: 10px;
   padding: 14px 12px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--overlay-subtle);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   text-align: left;
@@ -3104,7 +3119,7 @@ select {
   align-items: center;
   gap: 8px;
   padding: 8px 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--overlay-border);
   background: linear-gradient(
     180deg,
     rgba(31, 32, 48, 0.96) 0%,
@@ -3210,7 +3225,7 @@ select {
 }
 
 .chat-icon-btn-muted {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--overlay-subtle);
   color: rgba(242, 243, 255, 0.9);
 }
 
@@ -3251,7 +3266,7 @@ select {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--overlay-soft);
   flex-shrink: 0;
   font-size: 18px;
 }
@@ -3393,7 +3408,7 @@ select {
 
 .border-selector-item:hover {
   border-color: var(--accent);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--overlay-subtle);
 }
 
 .border-selector-item--active {

@@ -125,13 +125,13 @@ export default function TournamentLivePage() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => navigate('/tournaments')}
-              className="w-10 h-10 rounded-xl bg-[#13131f] border border-white/8 flex items-center justify-center text-white text-lg hover:bg-[#1a1a2e] transition-all cursor-pointer"
+              className="w-10 h-10 rounded-xl bg-surface border border-white/8 flex items-center justify-center text-white text-lg hover:bg-elevated transition-all cursor-pointer"
             >
               ←
             </button>
             <div>
               <h1 className="text-base font-black text-white truncate max-w-[200px]">{tournament.title}</h1>
-              <p className="text-[#8888aa] text-[10px] uppercase font-bold tracking-wider">🔴 COMPETENCIA EN VIVO</p>
+              <p className="text-muted text-[10px] uppercase font-bold tracking-wider">🔴 COMPETENCIA EN VIVO</p>
             </div>
           </div>
 
@@ -146,7 +146,7 @@ export default function TournamentLivePage() {
             <div className="flex justify-between items-start">
               <div>
                 <h4 className="text-white font-extrabold text-sm">¡Tu Party está compitiendo!</h4>
-                <p className="text-[#a78bfa] text-[11px] mt-0.5">Resolvé la quest para acumular puntos.</p>
+                <p className="text-accent-light text-[11px] mt-0.5">Resolvé la quest para acumular puntos.</p>
               </div>
               <span className="text-xl">⚡</span>
             </div>
@@ -158,17 +158,17 @@ export default function TournamentLivePage() {
             </Button>
           </div>
         ) : (
-          <div className="bg-[#13131f] border border-white/5 p-4 rounded-3xl text-center text-xs text-[#8888aa] shrink-0">
+          <div className="bg-surface border border-white/5 p-4 rounded-3xl text-center text-xs text-muted shrink-0">
             Estás viendo este torneo en modo espectador ya que tu party no se inscribió.
           </div>
         )}
 
-        <div className="flex-1 flex flex-col gap-3 min-h-0 bg-[#13131f] border border-white/8 rounded-3xl p-4">
-          <h3 className="text-[#8888aa] text-xs font-bold uppercase tracking-wider">📊 Tabla de Posiciones</h3>
+        <div className="flex-1 flex flex-col gap-3 min-h-0 bg-surface border border-white/8 rounded-3xl p-4">
+          <h3 className="text-muted text-xs font-bold uppercase tracking-wider">📊 Tabla de Posiciones</h3>
           
           <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-2">
             {scoreboard.length === 0 ? (
-              <div className="text-center py-10 text-[#8888aa] text-xs">
+              <div className="text-center py-10 text-muted text-xs">
                 No hay parties participando o aún nadie ha puntuado.
               </div>
             ) : (
@@ -182,10 +182,10 @@ export default function TournamentLivePage() {
                     className={`flex items-center gap-3 p-3 rounded-2xl transition-all duration-300 border ${
                       isMyEntry
                         ? 'bg-purple-950/20 border-purple-500/35 shadow-[0_0_10px_rgba(124,58,237,0.15)]'
-                        : 'bg-[#1a1a2e]/50 border-white/5 hover:bg-[#1a1a2e]'
+                        : 'bg-elevated/50 border-white/5 hover:bg-elevated'
                     }`}
                   >
-                    <div className="w-6 text-center font-black text-sm text-[#8888aa]">
+                    <div className="w-6 text-center font-black text-sm text-muted">
                       {medal ? <span className="text-base">{medal}</span> : <span>#{entry.rank}</span>}
                     </div>
                     
@@ -193,7 +193,7 @@ export default function TournamentLivePage() {
                       <p className={`text-xs font-bold truncate ${isMyEntry ? 'text-purple-400' : 'text-white'}`}>
                         {entry.partyName}
                       </p>
-                      {isMyEntry && <p className="text-[9px] text-[#a78bfa] font-semibold">Tu Party</p>}
+                      {isMyEntry && <p className="text-[9px] text-accent-light font-semibold">Tu Party</p>}
                     </div>
 
                     <div className="text-right shrink-0">
