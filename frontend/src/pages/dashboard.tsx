@@ -65,16 +65,16 @@ const HomeLeaderboardPreview = ({ subjects }: { subjects: Subject[] }) => {
   }, [selectedTab])
 
   return (
-    <div className="bg-[#13131f] border border-white/8 rounded-2xl p-4 flex flex-col gap-4 mt-2">
+    <div className="bg-surface border border-white/8 rounded-2xl p-4 flex flex-col gap-4 mt-2">
       <div className="flex justify-between items-center">
-        <h3 className="text-[#8888aa] text-xs font-bold uppercase tracking-wider">🏆 Ranking / Leaderboard</h3>
+        <h3 className="text-muted text-xs font-bold uppercase tracking-wider">🏆 Ranking / Leaderboard</h3>
       </div>
       
       {/* Tabs */}
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
         <button
           onClick={() => setSelectedTab('global')}
-          className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${selectedTab === 'global' ? 'bg-[#7c3aed] text-white' : 'bg-[#1a1a2e] text-[#8888aa] border border-white/5 hover:border-white/15'}`}
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${selectedTab === 'global' ? 'bg-accent text-white' : 'bg-elevated text-muted border border-white/5 hover:border-white/15'}`}
         >
           🌎 Global
         </button>
@@ -82,7 +82,7 @@ const HomeLeaderboardPreview = ({ subjects }: { subjects: Subject[] }) => {
           <button
             key={sub.id}
             onClick={() => setSelectedTab(sub.id)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${selectedTab === sub.id ? 'bg-[#7c3aed] text-white' : 'bg-[#1a1a2e] text-[#8888aa] border border-white/5 hover:border-white/15'}`}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${selectedTab === sub.id ? 'bg-accent text-white' : 'bg-elevated text-muted border border-white/5 hover:border-white/15'}`}
           >
             📚 {sub.code}
           </button>
@@ -97,7 +97,7 @@ const HomeLeaderboardPreview = ({ subjects }: { subjects: Subject[] }) => {
       ) : error ? (
         <div className="text-red-500 text-xs text-center py-2 bg-red-500/10 rounded-lg border border-red-500/20">{error}</div>
       ) : entries.length === 0 ? (
-        <div className="text-[#8888aa] text-xs text-center py-4">No hay datos en este ranking.</div>
+        <div className="text-muted text-xs text-center py-4">No hay datos en este ranking.</div>
       ) : (
         <div className="flex flex-col gap-2">
           {entries.map((entry, idx) => {
@@ -106,12 +106,12 @@ const HomeLeaderboardPreview = ({ subjects }: { subjects: Subject[] }) => {
             return (
               <div
                 key={entry.userId}
-                className="flex items-center gap-3 bg-[#1a1a2e]/60 hover:bg-[#1a1a2e] border border-white/5 p-2 rounded-xl transition-all duration-200"
+                className="flex items-center gap-3 bg-elevated/60 hover:bg-elevated border border-white/5 p-2 rounded-xl transition-all duration-200"
               >
-                <div className="w-6 text-center font-bold text-sm text-[#8888aa]">
+                <div className="w-6 text-center font-bold text-sm text-muted">
                   {medal ? <span className="text-base">{medal}</span> : <span>#{idx + 1}</span>}
                 </div>
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#7c3aed] to-blue-600 flex items-center justify-center text-white font-bold text-xs overflow-hidden shrink-0">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-blue-600 flex items-center justify-center text-white font-bold text-xs overflow-hidden shrink-0">
                   {entry.avatarUrl ? (
                     <img src={entry.avatarUrl} alt={entry.displayName} className="w-full h-full object-cover" />
                   ) : (
@@ -120,7 +120,7 @@ const HomeLeaderboardPreview = ({ subjects }: { subjects: Subject[] }) => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-white text-xs font-semibold truncate">{entry.displayName}</p>
-                  <p className="text-[#8888aa] text-[10px] truncate">@{entry.username}</p>
+                  <p className="text-muted text-[10px] truncate">@{entry.username}</p>
                 </div>
                 <div className="text-right shrink-0">
                   <span className="text-xs font-bold text-[10px] mr-1" title={league.name}>{league.icon}</span>
@@ -449,7 +449,7 @@ const DashboardPage = () => {
               <div
                 key={t.id}
                 onClick={() => navigate(t.status === 'finished' ? `/tournament/${t.id}/results` : `/tournament/${t.id}`)}
-                className="flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-[#13131f] to-[#1a1a2e] border border-white/5 hover:border-purple-500/30 transition-all cursor-pointer"
+                className="flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-surface to-elevated border border-white/5 hover:border-purple-500/30 transition-all cursor-pointer"
               >
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -466,11 +466,11 @@ const DashboardPage = () => {
                     </span>
                     <span className="text-white font-extrabold text-xs truncate max-w-[180px]">{t.title}</span>
                   </div>
-                  <span style={{ fontSize: '10px', color: '#8888aa' }}>
+                  <span style={{ fontSize: '10px', color: 'var(--text-secondary)' }}>
                     Quest: {t.quest?.title ?? 'Quest del Torneo'}
                   </span>
                 </div>
-                <span className="text-[#a78bfa] text-xs font-bold shrink-0">Ver →</span>
+                <span className="text-accent-light text-xs font-bold shrink-0">Ver →</span>
               </div>
             ))}
           </div>

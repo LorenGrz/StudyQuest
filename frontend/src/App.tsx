@@ -15,6 +15,7 @@ import LeaderboardPage from './pages/LeaderboardPage'
 import TournamentsPage from './pages/TournamentsPage'
 import TournamentLivePage from './pages/TournamentLivePage'
 import TournamentResultsPage from './pages/TournamentResultsPage'
+import SettingsPage from './pages/SettingsPage'
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
       <Route path="/parties" element={<ProtectedRoute><PartiesPage /></ProtectedRoute>} />
       <Route path="/friends" element={<ProtectedRoute><FriendsPage /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+      <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
       <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
       <Route path="/quiz/:questId" element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
       <Route path="/join/:token" element={<ProtectedRoute><JoinPartyPage /></ProtectedRoute>} />

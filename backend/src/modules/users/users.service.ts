@@ -4,6 +4,7 @@ import {
   ConflictException,
   ForbiddenException,
   BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, In } from 'typeorm';
@@ -15,6 +16,7 @@ import {
   RegisterDto,
   UpdateProfileDto,
   SetActiveCosmeticsDto,
+  ChangePasswordDto,
 } from '../../common/dto';
 import { DEFAULT_ELO } from '../../common/leagues';
 import { UserTitle } from '../cosmetics/user-title.entity';
@@ -296,7 +298,39 @@ export class UsersService {
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDto): Promise<User> {
+    if (dto.username) {
+      const existing = await this.userRepo.findOne({
+        where: { username: dto.username },
+      });
+      if (existing && existing.id !== userId) {
+        throw new ConflictException('Username already taken');
+      }
+    }
     await this.userRepo.update(userId, dto as any);
+    return this.findById(userId);
+  }
+
+  async changePassword(
+    userId: string,
+    dto: ChangePasswordDto,
+  ): Promise<{ ok: true }> {
+    const user = await this.userRepo
+      .createQueryBuilder('u')
+      .addSelect('u.passwordHash')
+      .where('u.id = :id', { id: userId })
+      .getOne();
+    if (!user) throw new NotFoundException('User not found');
+    const valid = await bcrypt.compare(dto.currentPassword, user.passwordHash);
+    if (!valid) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+    const passwordHash = await bcrypt.hash(dto.newPassword, 12);
+    await this.userRepo.update(userId, { passwordHash, refreshTokens: [] });
+    return { ok: true };
+  }
+
+  async setAvatar(userId: string, avatarUrl: string): Promise<User> {
+    await this.userRepo.update(userId, { avatarUrl });
     return this.findById(userId);
   }
 

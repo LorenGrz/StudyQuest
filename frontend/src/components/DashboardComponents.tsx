@@ -23,7 +23,7 @@ export function GreetingHeader({ user }: { user: User | null }) {
         glowColor={league.glowColor}
       />
       <div className="flex-1">
-        <p className="text-xs text-[#8888aa]">{greeting},</p>
+        <p className="text-xs text-muted">{greeting},</p>
         <h1 className="text-[22px] font-extrabold text-white leading-tight">
           {user.displayName} <span className="inline-block animate-[wave_1.5s_ease-in-out_infinite]">👋</span>
         </h1>
@@ -66,7 +66,7 @@ function SubjectCard({ subject }: { subject: Subject }) {
 
   return (
     <div
-      className="flex items-center gap-3.5 bg-[#13131f] border border-white/8 rounded-2xl p-3.5 px-4 cursor-pointer transition-all duration-200 hover:bg-[#1a1a2e] hover:translate-x-1"
+      className="flex items-center gap-3.5 bg-surface border border-white/8 rounded-2xl p-3.5 px-4 cursor-pointer transition-all duration-200 hover:bg-elevated hover:translate-x-1"
       style={{ borderLeftWidth: '3px', borderLeftColor: color }}
       onClick={() => navigate(`/subjects`)}
     >
@@ -75,7 +75,7 @@ function SubjectCard({ subject }: { subject: Subject }) {
       </div>
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-[15px] text-white truncate">{subject.name}</p>
-        <p className="text-xs text-[#8888aa] mt-0.5">Sem. {subject.semester}</p>
+        <p className="text-xs text-muted mt-0.5">Sem. {subject.semester}</p>
         <button
           className="text-xs text-emerald-400 font-semibold flex items-center gap-1 mt-1 cursor-pointer hover:underline"
           onClick={(event) => {
@@ -86,7 +86,7 @@ function SubjectCard({ subject }: { subject: Subject }) {
           🌳 Ver habilidades
         </button>
       </div>
-      <div className="text-[#555577] text-xl font-bold shrink-0">›</div>
+      <div className="text-faint text-xl font-bold shrink-0">›</div>
     </div>
   )
 }
@@ -94,10 +94,10 @@ function SubjectCard({ subject }: { subject: Subject }) {
 export function SubjectCardGrid({ subjects }: { subjects: Subject[] }) {
   if (subjects.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 text-center bg-[#13131f] border border-white/8 rounded-2xl min-h-[160px]">
+      <div className="flex flex-col items-center justify-center p-8 text-center bg-surface border border-white/8 rounded-2xl min-h-[160px]">
         <p className="text-3xl mb-2">📖</p>
-        <p className="text-[#f0f0ff] font-semibold">No tenés materias inscriptas</p>
-        <p className="text-xs text-[#8888aa] mt-1">Explorá el catálogo y anotate</p>
+        <p className="text-content font-semibold">No tenés materias inscriptas</p>
+        <p className="text-xs text-muted mt-1">Explorá el catálogo y anotate</p>
       </div>
     )
   }

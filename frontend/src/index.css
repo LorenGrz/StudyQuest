@@ -6,28 +6,23 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
-/* ─── Design Tokens (Tailwind v4) ────────────────────────────────────────── */
+/* Tailwind tokens mapped to the app's CSS variables so utilities follow the active theme */
 @theme {
-  /* Backgrounds */
-  --color-base:     #0d0d18;
-  --color-surface:  #13131f;
-  --color-elevated: #1a1a2e;
-  --color-panel:    #1e1e30;
-
-  /* Text */
-  --color-primary:   #f0f0ff;
-  --color-secondary: #8888aa;
-  --color-muted:     #555577;
-
-  /* Brand / Accent */
-  --color-accent:       #7c3aed;
-  --color-accent-light: #9d5df7;
-
-  /* Semantic */
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-danger:  #ef4444;
-  --color-info:    #3b82f6;
+  --color-base: var(--bg-base);
+  --color-surface: var(--bg-surface);
+  --color-elevated: var(--bg-elevated);
+  --color-input: var(--bg-input);
+  --color-panel: var(--bg-input);
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+  --color-success: var(--green);
+  --color-warning: var(--yellow);
+  --color-danger: var(--red);
+  --color-info: var(--blue);
+  --color-edge: var(--border);
 }
 
 /* ─── Custom Utilities (sin equivalente nativo en Tailwind) ──────────────── */
@@ -68,37 +63,49 @@
   -webkit-text-fill-color: transparent;
 }
 
-/* ─── CSS Variables (alias backward-compat usados por CSS restante) ──────── */
+/* ─── CSS Variables ──────────────────────────────────────────────────────── */
 :root {
-  --bg-base:        var(--color-base);
-  --bg-surface:     var(--color-surface);
-  --bg-elevated:    var(--color-elevated);
-  --bg-input:       var(--color-panel);
+  --bg-base:        #0d0d18;
+  --bg-surface:     #13131f;
+  --bg-elevated:    #1a1a2e;
+  --bg-input:       #1e1e30;
   --border:         rgba(255, 255, 255, 0.08);
   --border-hover:   rgba(255, 255, 255, 0.15);
-  --text-primary:   var(--color-primary);
-  --text-secondary: var(--color-secondary);
-  --text-muted:     var(--color-muted);
-  --accent:         var(--color-accent);
-  --accent-light:   var(--color-accent-light);
+  
+  --overlay-subtle: rgba(255, 255, 255, 0.05);
+  --overlay-soft: rgba(255, 255, 255, 0.08);
+  --overlay-border: rgba(255, 255, 255, 0.12);
+  
+  --page-gradient: linear-gradient(180deg, #0d0d18 0%, #1a0a2e 100%);
+
+  --text-primary:   #f0f0ff;
+  --text-secondary: #8888aa;
+  --text-muted:     #555577;
+  
+  --accent:         #7c3aed;
+  --accent-light:   #9d5df7;
   --accent-glow:    rgba(124, 58, 237, 0.3);
   --accent-bg:      rgba(124, 58, 237, 0.1);
-  --green:          var(--color-success);
+  
+  --green:          #10b981;
   --green-bg:       rgba(16, 185, 129, 0.1);
-  --yellow:         var(--color-warning);
+  --yellow:         #f59e0b;
   --yellow-bg:      rgba(245, 158, 11, 0.1);
-  --red:            var(--color-danger);
+  --red:            #ef4444;
   --red-bg:         rgba(239, 68, 68, 0.1);
-  --blue:           var(--color-info);
+  --blue:           #3b82f6;
   --blue-bg:        rgba(59, 130, 246, 0.1);
+  
   --radius-sm:      8px;
   --radius-md:      12px;
   --radius-lg:      18px;
   --radius-xl:      24px;
   --radius-full:    9999px;
+  
   --shadow-sm:      0 1px 3px rgba(0, 0, 0, 0.4);
   --shadow-md:      0 4px 16px rgba(0, 0, 0, 0.5);
   --shadow-accent:  0 0 24px var(--accent-glow);
+  
   --navbar-height:  70px;
 
   font-family: "Inter", system-ui, sans-serif;
@@ -107,6 +114,46 @@
   color: var(--text-primary);
   background: var(--bg-base);
   -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Light theme (toggled via data-theme on <html>) ────────────── */
+:root[data-theme="light"] {
+  --bg-base: #f4f4f8;
+  --bg-surface: #ffffff;
+  --bg-elevated: #ffffff;
+  --bg-input: #eeeef4;
+  --border: rgba(20, 20, 40, 0.1);
+  --border-hover: rgba(20, 20, 40, 0.2);
+
+  --overlay-subtle: rgba(20, 20, 40, 0.04);
+  --overlay-soft: rgba(20, 20, 40, 0.07);
+  --overlay-border: rgba(20, 20, 40, 0.12);
+
+  --page-gradient: linear-gradient(180deg, #f4f4f8 0%, #ece9f5 100%);
+
+  --text-primary: #1a1a2e;
+  --text-secondary: #555570;
+  --text-muted: #8888a0;
+
+  --accent: #7c3aed;
+  --accent-light: #6d28d9;
+  --accent-glow: rgba(124, 58, 237, 0.2);
+  --accent-bg: rgba(124, 58, 237, 0.08);
+
+  --green-bg: rgba(16, 185, 129, 0.12);
+  --yellow-bg: rgba(245, 158, 11, 0.12);
+  --red-bg: rgba(239, 68, 68, 0.12);
+  --blue-bg: rgba(59, 130, 246, 0.12);
+
+  --shadow-sm: 0 1px 3px rgba(20, 20, 40, 0.1);
+  --shadow-md: 0 4px 16px rgba(20, 20, 40, 0.12);
+  --shadow-accent: 0 0 24px var(--accent-glow);
+}
+
+html {
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
 *,

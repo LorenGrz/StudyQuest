@@ -95,13 +95,13 @@ export default function TournamentResultsPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/tournaments')}
-            className="w-10 h-10 rounded-xl bg-[#13131f] border border-white/8 flex items-center justify-center text-white text-lg hover:bg-[#1a1a2e] transition-all cursor-pointer"
+            className="w-10 h-10 rounded-xl bg-surface border border-white/8 flex items-center justify-center text-white text-lg hover:bg-elevated transition-all cursor-pointer"
           >
             ←
           </button>
           <div>
             <h1 className="text-base font-black text-white truncate max-w-[260px]">{tournament.title}</h1>
-            <p className="text-[#8888aa] text-[10px] uppercase font-bold tracking-wider">🏆 Resultados del Torneo</p>
+            <p className="text-muted text-[10px] uppercase font-bold tracking-wider">🏆 Resultados del Torneo</p>
           </div>
         </div>
 
@@ -116,9 +116,9 @@ export default function TournamentResultsPage() {
               className="flex flex-col items-center flex-1"
             >
               <span className="text-xl mb-1">🥈</span>
-              <span className="text-[10px] font-bold text-[#8888aa] truncate max-w-[80px]">{secondPlace.partyName}</span>
-              <span className="text-[9px] text-[#8888aa]">{secondPlace.score} pts</span>
-              <div className="w-full h-20 bg-gradient-to-t from-[#2a2a3e] to-[#3a3a5e] border-t border-white/10 rounded-t-xl mt-2 flex items-center justify-center shadow-lg">
+              <span className="text-[10px] font-bold text-muted truncate max-w-[80px]">{secondPlace.partyName}</span>
+              <span className="text-[9px] text-muted">{secondPlace.score} pts</span>
+              <div className="w-full h-20 bg-gradient-to-t from-elevated to-elevated border-t border-white/10 rounded-t-xl mt-2 flex items-center justify-center shadow-lg">
                 <span className="text-white font-extrabold text-sm">#2</span>
               </div>
             </motion.div>
@@ -167,7 +167,7 @@ export default function TournamentResultsPage() {
             transition={{ delay: 0.8 }}
             className="bg-gradient-to-br from-purple-950/30 to-indigo-950/30 border border-purple-500/40 p-4 rounded-3xl flex flex-col gap-2 items-center text-center shrink-0"
           >
-            <span className="text-[#a78bfa] text-[10px] font-bold uppercase tracking-widest">Recompensa Obtenida</span>
+            <span className="text-accent-light text-[10px] font-bold uppercase tracking-widest">Recompensa Obtenida</span>
             <h4 className="text-white font-extrabold text-sm">Puesto #{myPartyRank} en el Podio</h4>
             
             <div className="flex gap-4 mt-1">
@@ -182,23 +182,23 @@ export default function TournamentResultsPage() {
             </div>
           </motion.div>
         ) : (
-          <div className="bg-[#13131f] border border-white/5 p-4 rounded-3xl text-center text-xs text-[#8888aa] shrink-0">
+          <div className="bg-surface border border-white/5 p-4 rounded-3xl text-center text-xs text-muted shrink-0">
             No participaste en este torneo. ¡Prepárate para la próxima!
           </div>
         )}
 
         {/* HISTORIAL RESTO DE POSICIONES */}
         {restEntries.length > 0 && (
-          <div className="flex-1 flex flex-col gap-2.5 min-h-0 bg-[#13131f] border border-white/8 rounded-3xl p-4">
-            <h3 className="text-[#8888aa] text-xs font-bold uppercase tracking-wider">Otras posiciones</h3>
+          <div className="flex-1 flex flex-col gap-2.5 min-h-0 bg-surface border border-white/8 rounded-3xl p-4">
+            <h3 className="text-muted text-xs font-bold uppercase tracking-wider">Otras posiciones</h3>
             <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-2">
               {restEntries.map((entry) => (
                 <div
                   key={entry.partyId}
-                  className="flex items-center justify-between p-2.5 bg-[#1a1a2e]/40 border border-white/5 rounded-xl text-xs"
+                  className="flex items-center justify-between p-2.5 bg-elevated/40 border border-white/5 rounded-xl text-xs"
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-[#8888aa] font-bold w-6">#{entry.rank}</span>
+                    <span className="text-muted font-bold w-6">#{entry.rank}</span>
                     <span className="text-white font-semibold">{entry.partyName}</span>
                   </div>
                   <span className="text-white font-bold">{entry.score} pts</span>

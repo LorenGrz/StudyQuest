@@ -9,18 +9,31 @@ import {
   Body,
   UseGuards,
   Request,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  BadRequestException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname, join } from 'path';
+import { randomUUID } from 'crypto';
+import { mkdirSync } from 'fs';
 import { ApiBearerAuth, ApiTags, ApiQuery, ApiOkResponse } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UsersService } from './users.service';
 import {
   UpdateProfileDto,
+  ChangePasswordDto,
   EnrollSubjectDto,
   SetActiveCosmeticsDto,
   RecommendedQuestsQueryDto,
   RecommendedQuestsResponseDto,
   RecommendedQuestDto,
 } from '../../common/dto';
+
+const AVATAR_DIR = join(process.cwd(), 'uploads', 'avatars');
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -37,6 +50,49 @@ export class UsersController {
   @Patch('me')
   updateMe(@Request() req: any, @Body() dto: UpdateProfileDto) {
     return this.usersService.updateProfile(req.user.userId, dto);
+  }
+
+  @Patch('me/password')
+  changePassword(@Request() req: any, @Body() dto: ChangePasswordDto) {
+    return this.usersService.changePassword(req.user.userId, dto);
+  }
+
+  @Post('me/avatar')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: (_req, _file, cb) => {
+          mkdirSync(AVATAR_DIR, { recursive: true });
+          cb(null, AVATAR_DIR);
+        },
+        filename: (_req, file, cb) =>
+          cb(null, `${randomUUID()}${extname(file.originalname).toLowerCase()}`),
+      }),
+      fileFilter: (_req, file, cb) => {
+        if (/^image\/(jpeg|png|webp)$/.test(file.mimetype)) {
+          cb(null, true);
+        } else {
+          cb(
+            new BadRequestException('Solo se permiten imágenes jpeg, png o webp'),
+            false,
+          );
+        }
+      },
+    }),
+  )
+  uploadAvatar(
+    @Request() req: any,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [new MaxFileSizeValidator({ maxSize: 2 * 1024 * 1024 })],
+      }),
+    )
+    file: Express.Multer.File,
+  ) {
+    return this.usersService.setAvatar(
+      req.user.userId,
+      `/uploads/avatars/${file.filename}`,
+    );
   }
 
   @Get('me/inventory')
