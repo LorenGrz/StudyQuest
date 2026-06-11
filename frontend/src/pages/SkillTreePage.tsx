@@ -20,14 +20,14 @@ function nodeIcon(iconKey: string) {
 
 function nodeStatus(node: SkillNode) {
   if (node.unlocked) {
-    return 'skill-node--unlocked'
+    return 'border-[#f5c518] bg-gradient-to-br from-[rgba(245,197,24,0.18)] to-[rgba(124,58,237,0.24)] bg-surface'
   }
 
   if (node.prerequisitesMet) {
-    return 'skill-node--available'
+    return 'border-accent-light shadow-[0_0_12px_rgba(124,58,237,0.3)] animate-skill-pulse'
   }
 
-  return 'skill-node--locked'
+  return 'opacity-[0.92] saturate-[0.62] border-white/[0.12]'
 }
 
 function nodeStatusLabel(node: SkillNode) {
@@ -392,7 +392,7 @@ const SkillTreePage = () => {
   if (isLoading) {
     return (
       <MobileLayout>
-        <div className="center-spinner">
+        <div className="flex justify-center items-center min-h-[200px]">
           <Spinner />
         </div>
       </MobileLayout>
@@ -402,13 +402,13 @@ const SkillTreePage = () => {
   if (error) {
     return (
       <MobileLayout>
-        <div className="skill-tree-header">
-          <Button className="skill-tree-back-btn" variant="secondary" size="sm" onClick={() => navigate(-1)}>
+        <div className="flex flex-col gap-1.5 pt-2.5 pb-1.5">
+          <Button className="w-fit font-bold" variant="secondary" size="sm" onClick={() => navigate(-1)}>
             ← Volver
           </Button>
-          <h1 className="page-title">Árbol de habilidades</h1>
+          <h1 className="text-2xl font-extrabold pt-5 pb-2">Árbol de habilidades</h1>
         </div>
-        <div className="alert alert-danger">{error}</div>
+        <div className="px-4 py-3 rounded-[12px] text-sm bg-[rgba(239,68,68,0.1)] text-danger border border-[rgba(239,68,68,0.2)]">{error}</div>
         <Button onClick={reload}>Reintentar</Button>
       </MobileLayout>
     )
@@ -416,50 +416,50 @@ const SkillTreePage = () => {
 
   return (
     <MobileLayout>
-      <div className="skill-tree-header">
-        <Button className="skill-tree-back-btn" variant="secondary" size="sm" onClick={() => navigate(-1)}>
+      <div className="flex flex-col gap-1.5 pt-2.5 pb-1.5">
+        <Button className="w-fit font-bold" variant="secondary" size="sm" onClick={() => navigate(-1)}>
           ← Volver
         </Button>
-        <h1 className="page-title">Árbol de habilidades</h1>
-        <p className="skill-tree-subtitle">
+        <h1 className="text-2xl font-extrabold pt-5 pb-2">Árbol de habilidades</h1>
+        <p className="text-[13px] text-secondary leading-[1.4]">
           Ganá XP por tema y desbloqueá nodos al completar los requisitos.
         </p>
       </div>
 
-      <section className="skill-tree-summary" aria-label="Resumen de progreso del árbol de habilidades">
-        <article className="skill-tree-summary-card">
-          <span className="skill-tree-summary-value">{treeStats.progress}%</span>
-          <span className="skill-tree-summary-label">Progreso total</span>
+      <section className="grid grid-cols-2 gap-2.5 my-2 mb-3" aria-label="Resumen de progreso del árbol de habilidades">
+        <article className="flex flex-col gap-1 px-3.5 py-3 rounded-[18px] border border-white/8 bg-gradient-to-b from-white/[0.04] to-white/[0.02] bg-surface">
+          <span className="text-xl font-extrabold text-primary">{treeStats.progress}%</span>
+          <span className="text-xs text-secondary">Progreso total</span>
         </article>
-        <article className="skill-tree-summary-card">
-          <span className="skill-tree-summary-value">{treeStats.unlocked}/{treeStats.total}</span>
-          <span className="skill-tree-summary-label">Nodos desbloqueados</span>
+        <article className="flex flex-col gap-1 px-3.5 py-3 rounded-[18px] border border-white/8 bg-gradient-to-b from-white/[0.04] to-white/[0.02] bg-surface">
+          <span className="text-xl font-extrabold text-primary">{treeStats.unlocked}/{treeStats.total}</span>
+          <span className="text-xs text-secondary">Nodos desbloqueados</span>
         </article>
-        <article className="skill-tree-summary-card">
-          <span className="skill-tree-summary-value">{treeStats.available}</span>
-          <span className="skill-tree-summary-label">Listos para seguir</span>
+        <article className="flex flex-col gap-1 px-3.5 py-3 rounded-[18px] border border-white/8 bg-gradient-to-b from-white/[0.04] to-white/[0.02] bg-surface">
+          <span className="text-xl font-extrabold text-primary">{treeStats.available}</span>
+          <span className="text-xs text-secondary">Listos para seguir</span>
         </article>
-        <article className="skill-tree-summary-card">
-          <span className="skill-tree-summary-value">{treeStats.locked}</span>
-          <span className="skill-tree-summary-label">Todavía bloqueados</span>
+        <article className="flex flex-col gap-1 px-3.5 py-3 rounded-[18px] border border-white/8 bg-gradient-to-b from-white/[0.04] to-white/[0.02] bg-surface">
+          <span className="text-xl font-extrabold text-primary">{treeStats.locked}</span>
+          <span className="text-xs text-secondary">Todavía bloqueados</span>
         </article>
       </section>
 
-      <div className="skill-tree-legend">
-        <span className="skill-tree-legend-item">
-          <span className="skill-tree-dot skill-tree-dot--unlocked" /> Desbloqueado
+      <div className="flex flex-wrap gap-2 mb-2.5">
+        <span className="inline-flex items-center gap-1.5 text-xs text-secondary">
+          <span className="w-[9px] h-[9px] rounded-full bg-[#f5c518]" /> Desbloqueado
         </span>
-        <span className="skill-tree-legend-item">
-          <span className="skill-tree-dot skill-tree-dot--available" /> Disponible
+        <span className="inline-flex items-center gap-1.5 text-xs text-secondary">
+          <span className="w-[9px] h-[9px] rounded-full bg-accent-light" /> Disponible
         </span>
-        <span className="skill-tree-legend-item">
-          <span className="skill-tree-dot skill-tree-dot--locked" /> Bloqueado
+        <span className="inline-flex items-center gap-1.5 text-xs text-secondary">
+          <span className="w-[9px] h-[9px] rounded-full bg-[#6f7287]" /> Bloqueado
         </span>
       </div>
 
-      <p className="skill-tree-nav-help">Arrastrá para mover, usá la rueda para recorrer, y Ctrl + rueda para zoom.</p>
+      <p className="text-xs text-muted my-0.5 mb-2.5">Arrastrá para mover, usá la rueda para recorrer, y Ctrl + rueda para zoom.</p>
 
-      <div className="skill-tree-toolbar" aria-label="Controles de navegación del árbol">
+      <div className="flex items-center gap-2 flex-wrap mb-2.5" aria-label="Controles de navegación del árbol">
         <Button size="sm" variant="secondary" onClick={() => zoomBy(1.12)} aria-label="Acercar árbol">
           + Zoom
         </Button>
@@ -469,12 +469,12 @@ const SkillTreePage = () => {
         <Button size="sm" variant="ghost" onClick={centerTree} aria-label="Centrar árbol">
           Recentrar
         </Button>
-        <span className="skill-tree-toolbar-scale" aria-live="polite">{Math.round(viewport.scale * 100)}%</span>
+        <span className="inline-flex items-center justify-center min-w-[52px] h-[34px] px-2.5 rounded-full border border-white/8 bg-surface text-secondary text-xs font-bold" aria-live="polite">{Math.round(viewport.scale * 100)}%</span>
       </div>
 
       <div
         ref={canvasRef}
-        className="skill-tree-canvas"
+        className="relative mb-[18px] bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.12),transparent_55%)] border border-white/[0.06] rounded-[24px] min-h-[58vh] overflow-hidden cursor-grab touch-none active:cursor-grabbing"
         aria-label="Mapa interactivo del árbol de habilidades"
         onPointerDown={onCanvasPointerDown}
         onPointerMove={onCanvasPointerMove}
@@ -483,14 +483,14 @@ const SkillTreePage = () => {
         onWheel={onCanvasWheel}
       >
         <div
-          className="skill-tree-scene"
+          className="absolute left-0 top-0 origin-top-left isolate"
           style={{
             width: sceneWidth,
             height: sceneHeight,
             transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.scale})`,
           }}
         >
-          <svg className="skill-tree-edges" viewBox={`0 0 ${sceneWidth} ${sceneHeight}`} preserveAspectRatio="none">
+          <svg className="absolute inset-0 w-full h-full pointer-events-none z-[1]" viewBox={`0 0 ${sceneWidth} ${sceneHeight}`} preserveAspectRatio="none">
             {edges.map((edge, index) => (
               <line
                 key={`${edge.id}-${index}`}
@@ -508,7 +508,7 @@ const SkillTreePage = () => {
             ))}
           </svg>
 
-          <div className="skill-tree-node-layer">
+          <div className="absolute inset-0 z-[2]">
             {nodes.map((node) => {
               const position = pointForNode(node)
 
@@ -517,10 +517,10 @@ const SkillTreePage = () => {
                   key={node.id}
                   className={[
                     'skill-node',
+                    'absolute w-[164px] min-h-[112px] rounded-[12px] border border-white/8 p-2 flex flex-col items-center justify-center gap-[5px] bg-surface transition-[transform,box-shadow,border-color,opacity] duration-150 z-[1] hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[rgba(245,197,24,0.95)] focus-visible:outline-offset-[3px]',
                     nodeStatus(node),
-                    selectedNodeId === node.id ? 'skill-node--selected' : '',
-                    selectedNode ? 'skill-node--dimmed' : '',
-                    selectedPathIds.has(node.id) ? 'skill-node--path' : '',
+                    selectedNodeId === node.id ? 'z-[3] shadow-[0_0_0_2px_rgba(245,197,24,0.28),0_10px_22px_rgba(0,0,0,0.22)]' : '',
+                    selectedNode && selectedNodeId !== node.id ? 'opacity-30' : '',
                   ].filter(Boolean).join(' ')}
                   style={{
                     left: position.x,
@@ -535,22 +535,22 @@ const SkillTreePage = () => {
                     setSelectedNodeId(node.id)
                   }}
                 >
-                  <span className={`skill-node__state skill-node__state--${nodeStatus(node).replace('skill-node--', '')}`}>
+                  <span className={`absolute top-1.5 right-1.5 text-[9px] rounded-full px-1.5 py-0.5 border border-transparent text-secondary bg-white/[0.05] ${node.unlocked ? 'bg-[rgba(245,197,24,0.2)] border-[rgba(245,197,24,0.4)] text-[#f5c518]' : node.prerequisitesMet ? 'bg-[rgba(124,58,237,0.2)] border-[rgba(124,58,237,0.45)] text-[#c9a8ff]' : 'bg-white/[0.08] border-white/[0.18] text-[#bfc3d7]'}`}>
                     {nodeStatusLabel(node)}
                   </span>
-                  <div className="skill-node__icon">{nodeIcon(node.iconKey)}</div>
-                  <div className="skill-node__name">{node.name}</div>
+                  <div className="text-2xl leading-none">{nodeIcon(node.iconKey)}</div>
+                  <div className="text-xs font-bold text-center text-primary">{node.name}</div>
                   {node.unlocked ? (
                     <div className="badge badge-success">Desbloqueado</div>
                   ) : (
                     <>
-                      <div className="skill-node__progress">
+                      <div className="w-full h-[5px] rounded-full bg-elevated overflow-hidden">
                         <div
-                          className="skill-node__progress-fill"
+                          className="h-full rounded-full bg-gradient-to-r from-accent to-accent-light"
                           style={{ width: `${node.progressPercent}%` }}
                         />
                       </div>
-                      <div className="skill-node__xp">
+                      <div className="text-[11px] text-[#c8cbe0] font-semibold">
                         {node.topicXp}/{node.xpThreshold} XP
                       </div>
                     </>
@@ -563,32 +563,32 @@ const SkillTreePage = () => {
       </div>
 
       {selectedNode && (
-        <div className="skill-node-popover" role="dialog" aria-live="polite" aria-label={`Detalle del nodo ${selectedNode.name}`}>
-          <div className="skill-node-popover-head">
+        <div className="fixed left-4 right-4 bottom-[82px] rounded-[18px] border border-white/8 bg-surface shadow-[0_4px_16px_rgba(0,0,0,0.5)] p-3.5 flex flex-col gap-2 z-[100] max-h-[min(42vh,360px)] overflow-auto" role="dialog" aria-live="polite" aria-label={`Detalle del nodo ${selectedNode.name}`}>
+          <div className="flex items-start justify-between gap-2.5">
             <div>
               <h3>{selectedNode.name}</h3>
-              <p className="skill-node-popover-kicker">{nodeStatusLabel(selectedNode)} · {selectedNode.topic}</p>
+              <p className="mt-0.5 text-xs text-secondary">{nodeStatusLabel(selectedNode)} · {selectedNode.topic}</p>
             </div>
             <Button size="sm" variant="ghost" onClick={() => setSelectedNodeId(null)}>
               Cerrar
             </Button>
           </div>
           <p>{selectedNode.description ?? 'Sin descripcion disponible.'}</p>
-          <div className="skill-node-popover-progress">
-            <div className="skill-node__progress" aria-hidden="true">
+          <div className="flex flex-col gap-1.5">
+            <div className="w-full h-[5px] rounded-full bg-elevated overflow-hidden" aria-hidden="true">
               <div
-                className="skill-node__progress-fill"
+                className="h-full rounded-full bg-gradient-to-r from-accent to-accent-light"
                 style={{ width: `${selectedNode.progressPercent}%` }}
               />
             </div>
-            <p className="skill-node-popover-xp">
+            <p className="text-[13px] text-[#ccd0e5]">
               Progreso: {selectedNode.topicXp}/{selectedNode.xpThreshold} XP · {selectedNode.progressPercent}%
             </p>
           </div>
-          {nextStepText && <p className="skill-node-popover-next-step">Siguiente paso: {nextStepText}</p>}
+          {nextStepText && <p className="text-[13px] text-primary bg-white/[0.04] border border-white/8 rounded-[12px] p-3">Siguiente paso: {nextStepText}</p>}
 
           {!selectedNode.unlocked && !selectedNode.prerequisitesMet && (
-            <div className="skill-node-prereq-list">
+            <div className="mt-1 text-[13px]">
               <strong>Falta desbloquear:</strong>
               <ul>
                 {selectedNode.prerequisiteIds.map((id) => (
