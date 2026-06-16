@@ -122,9 +122,9 @@ export function MemberList({ members, partyId, isPrivate, currentUserId, onVisib
 
   return (
     <>
-      <div className="member-list">
+      <div className="flex flex-col gap-2">
         <button
-          className="invite-btn"
+          className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-accent/10 border border-accent/30 text-accent-light font-semibold text-sm hover:bg-accent/20 transition-colors"
           onClick={() => setShowInvite(true)}
         >
           <span>🔗</span>
@@ -132,29 +132,33 @@ export function MemberList({ members, partyId, isPrivate, currentUserId, onVisib
         </button>
 
         {isLeader && (
-          <div className="input-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px', cursor: 'pointer', background: 'var(--bg-surface)', padding: '12px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', marginTop: '8px' }} onClick={() => onVisibilityChange(!isPrivate)}>
-            <input 
-              type="checkbox" 
-              checked={isPrivate} 
+          <label className="flex items-center gap-3 cursor-pointer bg-surface p-3 rounded-xl border border-edge">
+            <input
+              type="checkbox"
+              checked={isPrivate}
               onChange={() => onVisibilityChange(!isPrivate)}
-              style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+              className="w-[18px] h-[18px] cursor-pointer accent-[var(--accent)]"
             />
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontSize: '15px', fontWeight: 600 }}>Party Privada 🔒</span>
-              <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Ocultar la party en Matchmaking.</span>
+            <div className="flex flex-col">
+              <span className="text-[15px] font-semibold text-primary">Party Privada 🔒</span>
+              <span className="text-xs text-secondary">Ocultar la party en Matchmaking.</span>
             </div>
-          </div>
+          </label>
         )}
 
         {members.map((m) => {
           const avatarUrl = resolveAssetUrl(m.user.avatarUrl)
+          const isLeaderRow = m.role === 'leader'
+          const title = m.user.activeCosmetics?.titleText
 
           return (
           <div
             key={m.id}
-            className={`member-item${m.role === 'leader' ? ' member-item-leader' : ''}`}
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-xl border transition-colors ${
+              isLeaderRow ? 'bg-accent/5 border-accent/40' : 'bg-surface border-edge'
+            }`}
           >
-            <div className="member-avatar" style={{ position: 'relative' }}>
+            <div className="relative shrink-0">
               <AvatarWithBorder
                 displayName={m.user.displayName}
                 avatarUrl={avatarUrl}
@@ -162,60 +166,49 @@ export function MemberList({ members, partyId, isPrivate, currentUserId, onVisib
                 size="sm"
               />
               <span
-                className={`presence-dot presence-dot-${m.isOnline ? 'online' : 'offline'}`}
+                className={`absolute bottom-2 right-2 w-3 h-3 rounded-full border-2 border-surface ${
+                  m.isOnline ? 'bg-success' : 'bg-muted'
+                }`}
                 title={m.isOnline ? 'En línea' : 'Desconectado'}
               />
             </div>
 
-            <div className="member-info">
-              <p className="member-name">
+            <div className="min-w-0 flex-1 flex items-center gap-1.5">
+              <span className="font-bold text-primary text-sm tracking-wide truncate">
                 {m.user.displayName}
-                {/* Etiqueta de líder junto al nombre para que sea inmediatamente visible */}
-                {m.role === 'leader' && (
-                  <span className="member-leader-badge">👑 Líder</span>
-                )}
-              </p>
-              <p className="member-username">@{m.user.username}</p>
-              {m.user.activeCosmetics?.titleText && (
-                <p
-                  className="member-title"
-                  style={{
-                    margin: '2px 0 0',
-                    fontSize: '12px',
-                    color: 'var(--accent)',
-                    fontWeight: 600,
-                  }}
-                >
-                  {m.user.activeCosmetics.titleText}
-                </p>
+              </span>
+              {isLeaderRow && (
+                <span className="shrink-0 text-amber-400 text-sm" title="Líder">👑</span>
+              )}
+              {title && (
+                <span className="shrink-0 max-w-[88px] truncate text-[10px] font-bold uppercase tracking-wider text-accent bg-accent/10 border border-accent/30 rounded px-1.5 py-0.5">
+                  {title}
+                </span>
               )}
             </div>
 
-            <div className="member-stats">
-              <span className="member-xp">⚡{m.user.stats?.xp ?? 0}</span>
-              {/* Texto de estado de presencia */}
-              <span className={`member-presence-label member-presence-label-${m.isOnline ? 'online' : 'offline'}`}>
-                {m.isOnline ? 'En línea' : 'Desconectado'}
-              </span>
-              {isLeader && m.userId !== currentUserId && (
-                <button
-                  className="member-remove-btn"
-                  title="Remover miembro"
-                  onClick={() => onRemoveMember(m.userId)}
-                >
-                  ✕
-                </button>
-              )}
-            </div>
+            <span className="shrink-0 flex items-center gap-1 text-xs font-bold text-warning bg-warning/10 border border-warning/30 rounded-full px-2 py-0.5 tabular-nums">
+              ⚡ {m.user.stats?.xp ?? 0}
+            </span>
+
+            {isLeader && m.userId !== currentUserId && (
+              <button
+                className="shrink-0 w-6 h-6 flex items-center justify-center rounded-md text-muted hover:text-danger hover:bg-danger/10 transition-colors"
+                title="Remover miembro"
+                onClick={() => onRemoveMember(m.userId)}
+              >
+                ✕
+              </button>
+            )}
           </div>
           )
         })}
       </div>
 
       {/* ─ Acciones del miembro ─ */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
+      <div className="flex flex-col gap-2 mt-4">
         <button
-          className="party-leave-btn"
+          className="w-full px-4 py-3 rounded-xl bg-surface border border-edge text-secondary font-semibold text-sm hover:border-danger hover:text-danger transition-colors"
           onClick={onLeave}
         >
           🚪 Salir de la party
@@ -223,22 +216,22 @@ export function MemberList({ members, partyId, isPrivate, currentUserId, onVisib
 
         {isLeader && (
           confirmClose ? (
-            <div className="party-close-confirm">
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0 }}>
+            <div className="flex flex-col gap-2 p-3 rounded-xl bg-danger/5 border border-danger/30">
+              <p className="text-[13px] text-secondary m-0">
                 ¿Cerrás la party para todos?
               </p>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button className="party-close-confirm-btn" onClick={onCloseParty}>
+              <div className="flex gap-2">
+                <button className="flex-1 px-3 py-2 rounded-lg bg-danger text-white font-semibold text-sm" onClick={onCloseParty}>
                   Sí, cerrar
                 </button>
-                <button className="party-close-cancel-btn" onClick={() => setConfirmClose(false)}>
+                <button className="flex-1 px-3 py-2 rounded-lg bg-surface border border-edge text-secondary font-semibold text-sm hover:text-primary transition-colors" onClick={() => setConfirmClose(false)}>
                   Cancelar
                 </button>
               </div>
             </div>
           ) : (
             <button
-              className="party-close-btn"
+              className="w-full px-4 py-3 rounded-xl bg-surface border border-edge text-secondary font-semibold text-sm hover:border-danger hover:text-danger transition-colors"
               onClick={() => setConfirmClose(true)}
             >
               🔒 Cerrar party
