@@ -450,10 +450,13 @@ export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
 
   if (!expanded) {
     return (
-      <button className="upload-cta" onClick={() => setExpanded(true)}>
-        <span className="upload-cta-icon">✨</span>
-        <span>Crear Quest con IA</span>
-        <span className="upload-cta-sub">Subí un apunte → quiz automático</span>
+      <button
+        className="w-full flex flex-col items-center gap-1 px-4 py-5 rounded-2xl bg-surface border border-edge hover:border-accent transition-colors"
+        onClick={() => setExpanded(true)}
+      >
+        <span className="text-3xl">✨</span>
+        <span className="font-semibold text-primary">Crear Quest con IA</span>
+        <span className="text-xs text-muted">Subí un apunte → quiz automático</span>
       </button>
     )
   }

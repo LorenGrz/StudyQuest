@@ -7,8 +7,8 @@ interface Props {
 
 export function MobileLayout({ children }: Props) {
   return (
-    <div className="w-full max-w-[480px] mx-auto self-center h-dvh flex flex-col bg-base overflow-hidden">
-      <main className="flex-1 flex flex-col gap-3 min-h-0 overflow-y-auto overflow-x-hidden pb-6">{children}</main>
+    <div className="w-full max-w-[480px] mx-auto self-center h-dvh flex flex-col bg-base overflow-hidden pt-[env(safe-area-inset-top)]">
+      <main className="flex-1 flex flex-col gap-3 min-h-0 overflow-y-auto overflow-x-hidden px-4 pb-6">{children}</main>
       <BottomNav />
     </div>
   )
