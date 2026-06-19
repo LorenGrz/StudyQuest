@@ -24,31 +24,43 @@ export default function SettingsPage() {
 
   return (
     <MobileLayout>
-      <h1 className="text-xl font-bold text-content mt-4 mb-3">Configuración</h1>
+      <h1 className="text-xl font-bold text-primary mt-4 mb-3">Configuración</h1>
 
-      <div className="flex gap-2 overflow-x-auto pb-2" role="tablist">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            role="tab"
-            aria-selected={activeTab === tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-colors ${
-              activeTab === tab.id
-                ? 'bg-accent text-white font-semibold'
-                : 'bg-surface text-muted'
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
+      {/*
+        Single tab list — rendered once.
+        Mobile: horizontal scrollable row (flex-row gap-2 overflow-x-auto)
+        Desktop (md+): vertical rail beside the content panel (via parent flex-row)
+      */}
+      <div className="md:flex md:gap-6 md:mt-2">
+        {/* Tab rail — horizontal on mobile, vertical on desktop */}
+        <div
+          role="tablist"
+          className="flex flex-row gap-2 overflow-x-auto pb-2 scrollbar-none md:flex-col md:overflow-visible md:pb-0 md:gap-1 md:w-48 md:shrink-0 md:bg-surface md:rounded-xl md:border md:border-edge md:p-2 md:h-fit"
+        >
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-colors min-h-[44px] md:rounded-lg md:text-left md:whitespace-normal md:w-full ${
+                activeTab === tab.id
+                  ? 'bg-accent text-white font-semibold'
+                  : 'bg-surface text-muted md:bg-transparent md:hover:bg-elevated md:hover:text-primary'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-      <div className="bg-surface rounded-2xl p-4 mt-2 border border-edge">
-        {activeTab === 'perfil' && <ProfileTab />}
-        {activeTab === 'seguridad' && <SecurityTab />}
-        {activeTab === 'apariencia' && <AppearanceTab />}
-        {activeTab === 'notificaciones' && <NotificationsTab />}
+        {/* Content panel */}
+        <div className="flex-1 bg-surface rounded-2xl p-4 mt-2 border border-edge md:rounded-xl md:p-6 md:mt-0">
+          {activeTab === 'perfil' && <ProfileTab />}
+          {activeTab === 'seguridad' && <SecurityTab />}
+          {activeTab === 'apariencia' && <AppearanceTab />}
+          {activeTab === 'notificaciones' && <NotificationsTab />}
+        </div>
       </div>
     </MobileLayout>
   )
@@ -195,7 +207,7 @@ function ProfileTab() {
             rows={4}
             placeholder="Contanos algo sobre vos..."
             onChange={(e) => setBio(e.target.value)}
-            className="bg-input text-content rounded-xl p-3 text-sm border border-edge focus:border-accent outline-none resize-none"
+            className="bg-input text-primary rounded-xl p-3 text-sm border border-edge focus:border-accent outline-none resize-none min-h-[44px]"
           />
           <span className="text-xs text-muted self-end">{bio.length}/500</span>
         </div>
@@ -295,7 +307,7 @@ function AppearanceTab() {
   return (
     <div className="flex items-center justify-between p-4 bg-elevated rounded-xl border border-edge">
       <div className="flex flex-col">
-        <span className="text-content font-medium">
+        <span className="text-primary font-medium">
           {isDark ? 'Tema oscuro' : 'Tema claro'}
         </span>
         <span className="text-xs text-muted">
@@ -308,7 +320,7 @@ function AppearanceTab() {
         aria-checked={isDark}
         aria-label="Cambiar tema"
         onClick={toggle}
-        className={`relative w-12 h-7 rounded-full transition-colors ${
+        className={`relative w-12 h-7 rounded-full transition-colors min-h-[44px] min-w-[44px] flex items-center ${
           isDark ? 'bg-accent' : 'bg-muted'
         }`}
       >
@@ -336,7 +348,7 @@ function NotificationsTab() {
           key={label}
           className="flex items-center justify-between p-4 bg-elevated rounded-xl border border-edge opacity-60"
         >
-          <span className="text-content text-sm">{label}</span>
+          <span className="text-primary text-sm">{label}</span>
           <div className="w-12 h-7 rounded-full bg-muted/40" aria-hidden />
         </div>
       ))}
