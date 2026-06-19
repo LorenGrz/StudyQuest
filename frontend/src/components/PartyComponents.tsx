@@ -8,7 +8,11 @@ import { Button, Spinner } from './UI'
 import { AvatarWithBorder } from './AvatarWithBorder'
 import { useNavigate } from 'react-router-dom'
 import { tournamentService } from '../services/tournamentService'
+import { SegmentedTabs } from './PagePrimitives'
 export { ChatBox } from './party-chat/ChatBox'
+
+// Re-export SegmentedTabs as TabBar so callers don't need to change imports
+export { SegmentedTabs as TabBar }
 
 const API_ORIGIN = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
 
@@ -23,84 +27,31 @@ function resolveAssetUrl(url: string | null | undefined): string | null {
 export function PartyHeader({ party }: { party: Party | null }) {
   if (!party) return null
   return (
-    <div className="party-header">
-      <div className="party-header-info">
-        <h1 className="party-header-name">{party.name ?? party.subject?.name ?? 'Party'}</h1>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <span className={`party-status party-status-${party.status}`}>
-            {party.status === 'active' ? '🟢 Activa' : party.status === 'waiting' ? '🟡 Esperando' : party.status === 'forming' ? '🟡 Armando' : '⚫ Finalizada'}
+    <div className="flex items-center justify-between gap-3 px-4 py-3">
+      <div className="min-w-0 flex-1">
+        <h1 className="text-lg font-bold text-primary truncate">
+          {party.name ?? party.subject?.name ?? 'Party'}
+        </h1>
+        <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+          <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border ${
+            party.status === 'active'
+              ? 'bg-success/10 border-success/30 text-success'
+              : party.status === 'waiting' || party.status === 'forming'
+                ? 'bg-warning/10 border-warning/30 text-warning'
+                : 'bg-surface border-edge text-secondary'
+          }`}>
+            {party.status === 'active' ? 'Activa' : party.status === 'waiting' ? 'Esperando' : party.status === 'forming' ? 'Armando' : 'Finalizada'}
           </span>
-          <span style={{ fontSize: '11px', background: 'rgba(0,0,0,0.3)', padding: '2px 8px', borderRadius: '12px', border: '1px solid var(--border)', color: 'var(--text-secondary)' }}>
+          <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-surface border border-edge text-secondary">
             {party.isPrivate ? '🔒 Privada' : '🌎 Pública'}
           </span>
         </div>
       </div>
-      <span className="party-members-count">
+      <span className="shrink-0 text-sm font-semibold text-secondary">
         👥 {party.members?.length ?? 0}
       </span>
     </div>
   )
-}
-
-interface TabDefinition<T extends string> {
-  id: T
-  label: string
-  ariaLabel?: string
-}
-
-interface TabBarProps<T extends string> {
-  tabs: TabDefinition<T>[]
-  active: T
-  onChange: (id: T) => void
-}
-
-// Enhanced TabBar with better visual design
-export function TabBar<T extends string>({ tabs, active, onChange }: TabBarProps<T>) {
-  return (
-    <div className="tab-bar" role="tablist">
-      {tabs.map(({ id, label, ariaLabel }) => (
-        <button
-          key={id}
-          className={`tab-bar-item ${id === active ? 'active' : ''}`}
-          onClick={() => onChange(id)}
-          role="tab"
-          aria-selected={id === active}
-          aria-label={ariaLabel ?? label}
-        >
-          {label}
-        </button>
-      ))}
-    </div>
-  );
-}
-
-// Added styles for TabBar
-const tabBarStyles = `
-  .tab-bar {
-    display: flex;
-    gap: 8px;
-    border-bottom: 2px solid var(--border);
-  }
-  .tab-bar-item {
-    padding: 8px 16px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
-    color: var(--text-secondary);
-  }
-  .tab-bar-item.active {
-    color: var(--text-primary);
-    border-bottom: 2px solid var(--accent);
-  }
-`;
-
-// Inject styles into the document
-if (typeof document !== 'undefined') {
-  const styleSheet = document.createElement('style');
-  styleSheet.type = 'text/css';
-  styleSheet.innerText = tabBarStyles;
-  document.head.appendChild(styleSheet);
 }
 
 // ─── MemberList ──────────────────────────────────────────────────────────────
@@ -122,17 +73,17 @@ export function MemberList({ members, partyId, isPrivate, currentUserId, onVisib
 
   return (
     <>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2 p-4 overflow-y-auto">
         <button
-          className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-accent/10 border border-accent/30 text-accent-light font-semibold text-sm hover:bg-accent/20 transition-colors"
+          className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-lg bg-accent/10 border border-accent/30 text-accent-light font-semibold text-sm hover:bg-accent/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           onClick={() => setShowInvite(true)}
         >
-          <span>🔗</span>
+          <span aria-hidden="true">🔗</span>
           <span>Invitar miembros</span>
         </button>
 
         {isLeader && (
-          <label className="flex items-center gap-3 cursor-pointer bg-surface p-3 rounded-xl border border-edge">
+          <label className="flex items-center gap-3 cursor-pointer bg-surface p-3 rounded-lg border border-edge">
             <input
               type="checkbox"
               checked={isPrivate}
@@ -146,98 +97,101 @@ export function MemberList({ members, partyId, isPrivate, currentUserId, onVisib
           </label>
         )}
 
-        {members.map((m) => {
-          const avatarUrl = resolveAssetUrl(m.user.avatarUrl)
-          const isLeaderRow = m.role === 'leader'
-          const title = m.user.activeCosmetics?.titleText
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {members.map((m) => {
+            const avatarUrl = resolveAssetUrl(m.user.avatarUrl)
+            const isLeaderRow = m.role === 'leader'
+            const title = m.user.activeCosmetics?.titleText
 
-          return (
-          <div
-            key={m.id}
-            className={`flex items-center gap-2.5 px-3 py-2 rounded-xl border transition-colors ${
-              isLeaderRow ? 'bg-accent/5 border-accent/40' : 'bg-surface border-edge'
-            }`}
-          >
-            <div className="relative shrink-0">
-              <AvatarWithBorder
-                displayName={m.user.displayName}
-                avatarUrl={avatarUrl}
-                borderImageUrl={m.user.activeCosmetics?.borderImageUrl}
-                size="sm"
-              />
-              <span
-                className={`absolute bottom-2 right-2 w-3 h-3 rounded-full border-2 border-surface ${
-                  m.isOnline ? 'bg-success' : 'bg-muted'
+            return (
+              <div
+                key={m.id}
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border transition-colors ${
+                  isLeaderRow ? 'bg-accent/5 border-accent/40' : 'bg-surface border-edge'
                 }`}
-                title={m.isOnline ? 'En línea' : 'Desconectado'}
-              />
-            </div>
-
-            <div className="min-w-0 flex-1 flex items-center gap-1.5">
-              <span className="font-bold text-primary text-sm tracking-wide truncate">
-                {m.user.displayName}
-              </span>
-              {isLeaderRow && (
-                <span className="shrink-0 text-amber-400 text-sm" title="Líder">👑</span>
-              )}
-              {title && (
-                <span className="shrink-0 max-w-[88px] truncate text-[10px] font-bold uppercase tracking-wider text-accent bg-accent/10 border border-accent/30 rounded px-1.5 py-0.5">
-                  {title}
-                </span>
-              )}
-            </div>
-
-            <span className="shrink-0 flex items-center gap-1 text-xs font-bold text-warning bg-warning/10 border border-warning/30 rounded-full px-2 py-0.5 tabular-nums">
-              ⚡ {m.user.stats?.xp ?? 0}
-            </span>
-
-            {isLeader && m.userId !== currentUserId && (
-              <button
-                className="shrink-0 w-6 h-6 flex items-center justify-center rounded-md text-muted hover:text-danger hover:bg-danger/10 transition-colors"
-                title="Remover miembro"
-                onClick={() => onRemoveMember(m.userId)}
               >
-                ✕
-              </button>
-            )}
-          </div>
-          )
-        })}
-      </div>
+                <div className="relative shrink-0">
+                  <AvatarWithBorder
+                    displayName={m.user.displayName}
+                    avatarUrl={avatarUrl}
+                    borderImageUrl={m.user.activeCosmetics?.borderImageUrl}
+                    size="sm"
+                  />
+                  <span
+                    className={`absolute bottom-2 right-2 w-3 h-3 rounded-full border-2 border-surface ${
+                      m.isOnline ? 'bg-success' : 'bg-muted'
+                    }`}
+                    title={m.isOnline ? 'En línea' : 'Desconectado'}
+                  />
+                </div>
 
-      {/* ─ Acciones del miembro ─ */}
-      <div className="flex flex-col gap-2 mt-4">
-        <button
-          className="w-full px-4 py-3 rounded-xl bg-surface border border-edge text-secondary font-semibold text-sm hover:border-danger hover:text-danger transition-colors"
-          onClick={onLeave}
-        >
-          🚪 Salir de la party
-        </button>
+                <div className="min-w-0 flex-1 flex items-center gap-1.5">
+                  <span className="font-bold text-primary text-sm tracking-wide truncate">
+                    {m.user.displayName}
+                  </span>
+                  {isLeaderRow && (
+                    <span className="shrink-0 text-amber-400 text-sm" title="Líder" aria-label="Líder">👑</span>
+                  )}
+                  {title && (
+                    <span className="shrink-0 max-w-[88px] truncate text-[10px] font-bold uppercase tracking-wider text-accent bg-accent/10 border border-accent/30 rounded px-1.5 py-0.5">
+                      {title}
+                    </span>
+                  )}
+                </div>
 
-        {isLeader && (
-          confirmClose ? (
-            <div className="flex flex-col gap-2 p-3 rounded-xl bg-danger/5 border border-danger/30">
-              <p className="text-[13px] text-secondary m-0">
-                ¿Cerrás la party para todos?
-              </p>
-              <div className="flex gap-2">
-                <button className="flex-1 px-3 py-2 rounded-lg bg-danger text-white font-semibold text-sm" onClick={onCloseParty}>
-                  Sí, cerrar
-                </button>
-                <button className="flex-1 px-3 py-2 rounded-lg bg-surface border border-edge text-secondary font-semibold text-sm hover:text-primary transition-colors" onClick={() => setConfirmClose(false)}>
-                  Cancelar
-                </button>
+                <span className="shrink-0 flex items-center gap-1 text-xs font-bold text-warning bg-warning/10 border border-warning/30 rounded-full px-2 py-0.5 tabular-nums">
+                  ⚡ {m.user.stats?.xp ?? 0}
+                </span>
+
+                {isLeader && m.userId !== currentUserId && (
+                  <button
+                    className="shrink-0 w-7 h-7 flex items-center justify-center rounded-md text-muted hover:text-danger hover:bg-danger/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+                    title="Remover miembro"
+                    aria-label={`Remover a ${m.user.displayName}`}
+                    onClick={() => onRemoveMember(m.userId)}
+                  >
+                    ✕
+                  </button>
+                )}
               </div>
-            </div>
-          ) : (
-            <button
-              className="w-full px-4 py-3 rounded-xl bg-surface border border-edge text-secondary font-semibold text-sm hover:border-danger hover:text-danger transition-colors"
-              onClick={() => setConfirmClose(true)}
-            >
-              🔒 Cerrar party
-            </button>
-          )
-        )}
+            )
+          })}
+        </div>
+
+        {/* ─ Acciones del miembro ─ */}
+        <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-edge">
+          <button
+            className="w-full px-4 py-3 rounded-lg bg-surface border border-edge text-secondary font-semibold text-sm hover:border-danger hover:text-danger transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+            onClick={onLeave}
+          >
+            🚪 Salir de la party
+          </button>
+
+          {isLeader && (
+            confirmClose ? (
+              <div className="flex flex-col gap-2 p-3 rounded-lg bg-danger/5 border border-danger/30">
+                <p className="text-[13px] text-secondary m-0">
+                  ¿Cerrás la party para todos?
+                </p>
+                <div className="flex gap-2">
+                  <button className="flex-1 px-3 py-2 rounded-lg bg-danger text-white font-semibold text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger" onClick={onCloseParty}>
+                    Sí, cerrar
+                  </button>
+                  <button className="flex-1 px-3 py-2 rounded-lg bg-surface border border-edge text-secondary font-semibold text-sm hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent" onClick={() => setConfirmClose(false)}>
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                className="w-full px-4 py-3 rounded-lg bg-surface border border-edge text-secondary font-semibold text-sm hover:border-danger hover:text-danger transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+                onClick={() => setConfirmClose(true)}
+              >
+                🔒 Cerrar party
+              </button>
+            )
+          )}
+        </div>
       </div>
 
       {showInvite && (
@@ -330,50 +284,64 @@ export function InviteSheet({ partyId, onClose }: InviteSheetProps) {
   }
 
   return (
-    <div className="invite-overlay" onClick={onClose}>
-      <div className="invite-sheet" onClick={(e) => e.stopPropagation()}>
-        <div className="invite-sheet-handle" />
-        <h2 className="invite-title">🔗 Invitar a la Party</h2>
-        <p className="invite-sub">Compartí este link — expira en 24 horas</p>
+    /* Overlay */
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      {/* Sheet — bottom sheet on mobile, centered dialog on sm+ */}
+      <div
+        className="w-full sm:w-auto sm:min-w-[360px] sm:max-w-sm bg-bg-elevated border border-edge rounded-t-2xl sm:rounded-xl p-6 flex flex-col gap-4 max-h-[90dvh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Handle (mobile only) */}
+        <div className="sm:hidden mx-auto w-10 h-1.5 rounded-full bg-edge -mt-1 mb-1" />
+
+        <h2 className="text-lg font-bold text-primary text-center">🔗 Invitar a la Party</h2>
+        <p className="text-sm text-secondary text-center -mt-2">Compartí este link — expira en 24 horas</p>
 
         {isLoading && (
-          <div className="center-spinner" style={{ minHeight: '80px' }}>
+          <div className="flex justify-center py-5">
             <Spinner size="md" />
           </div>
         )}
 
         {error && (
-          <p style={{ color: 'var(--red)', fontSize: '14px', textAlign: 'center' }}>{error}</p>
+          <p className="text-sm text-danger text-center">{error}</p>
         )}
 
         {link && !isLoading && (
           <>
-            <div className="invite-link-box">
-              <span className="invite-link-text">{link}</span>
-              <button className="invite-copy-btn" onClick={handleCopy}>
-                {copied ? '✓' : '📋'}
+            <div className="flex items-center gap-2 bg-surface border border-edge rounded-lg px-3 py-2">
+              <span className="flex-1 text-xs text-secondary truncate">{link}</span>
+              <button
+                className="shrink-0 min-h-9 px-3 rounded-md bg-accent/10 border border-accent/30 text-accent text-sm font-semibold hover:bg-accent/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                onClick={handleCopy}
+                aria-label="Copiar link"
+              >
+                {copied ? '✓ Copiado' : '📋 Copiar'}
               </button>
             </div>
-            {copied && <p className="invite-copied">¡Copiado al portapapeles!</p>}
+
             {'share' in navigator && (
-              <Button variant="secondary" className="w-full" style={{ marginTop: '8px' }} onClick={handleShare}>
+              <Button variant="secondary" className="w-full" onClick={handleShare}>
                 📤 Compartir
               </Button>
             )}
 
-            <div style={{ marginTop: '20px' }}>
-              <h3 style={{ marginBottom: '10px' }}>Invitar a un amigo</h3>
+            <div className="flex flex-col gap-3 pt-2 border-t border-edge">
+              <h3 className="text-sm font-semibold text-primary">Invitar a un amigo</h3>
               {isFriendsLoading ? (
-                <div className="center-spinner" style={{ minHeight: '50px' }}>
+                <div className="flex justify-center py-4">
                   <Spinner size="md" />
                 </div>
               ) : friends.length ? (
-                <div style={{ display: 'grid', gap: '10px' }}>
+                <div className="flex flex-col gap-2">
                   {friends.map((friend) => (
-                    <div key={friend.id} className="invite-friend-row">
-                      <div>
-                        <strong>{friend.displayName}</strong>
-                        <p className="text-small">@{friend.username}</p>
+                    <div key={friend.id} className="flex items-center justify-between gap-3 bg-surface border border-edge rounded-lg px-3 py-2">
+                      <div className="min-w-0">
+                        <strong className="block text-sm text-primary truncate">{friend.displayName}</strong>
+                        <p className="text-xs text-secondary truncate">@{friend.username}</p>
                       </div>
                       <Button size="sm" variant="primary" onClick={() => inviteFriend(friend.id)}>
                         Invitar
@@ -382,15 +350,15 @@ export function InviteSheet({ partyId, onClose }: InviteSheetProps) {
                   ))}
                 </div>
               ) : (
-                <p className="empty-sub">No tenés amigos para invitar. Agregá amigos para invitarlos directamente.</p>
+                <p className="text-sm text-secondary text-center py-2">No tenés amigos para invitar. Agregá amigos para invitarlos directamente.</p>
               )}
-              {inviteSuccess && <p className="invite-copied" style={{ marginTop: '8px' }}>{inviteSuccess}</p>}
-              {inviteError && <p style={{ color: 'var(--red)', fontSize: '14px', marginTop: '8px' }}>{inviteError}</p>}
+              {inviteSuccess && <p className="text-sm text-success text-center">{inviteSuccess}</p>}
+              {inviteError && <p className="text-sm text-danger text-center">{inviteError}</p>}
             </div>
           </>
         )}
 
-        <Button variant="ghost" className="w-full" style={{ marginTop: '12px' }} onClick={onClose}>
+        <Button variant="ghost" className="w-full" onClick={onClose}>
           Cerrar
         </Button>
       </div>
@@ -444,10 +412,10 @@ export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
   if (!expanded) {
     return (
       <button
-        className="w-full flex flex-col items-center gap-1 px-4 py-5 rounded-2xl bg-surface border border-edge hover:border-accent transition-colors"
+        className="w-full flex flex-col items-center gap-1 px-4 py-5 rounded-lg bg-surface border border-edge hover:border-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         onClick={() => setExpanded(true)}
       >
-        <span className="text-3xl">✨</span>
+        <span className="text-3xl" aria-hidden="true">✨</span>
         <span className="font-semibold text-primary">Crear Quest con IA</span>
         <span className="text-xs text-muted">Subí un apunte → quiz automático</span>
       </button>
@@ -455,8 +423,8 @@ export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
   }
 
   return (
-    <form className="upload-card" onSubmit={submit}>
-      <h3 className="upload-title">Nueva Quest</h3>
+    <form className="flex flex-col gap-3 bg-surface border border-edge rounded-lg p-4" onSubmit={submit}>
+      <h3 className="text-base font-bold text-primary">Nueva Quest</h3>
       <input
         className="input"
         value={title}
@@ -474,15 +442,15 @@ export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
         placeholder="Pegá el texto del apunte aquí (o subí un PDF)..."
         rows={4}
       />
-      <p className="upload-helper-text">
+      <p className="text-xs text-secondary">
         Si pegás texto, necesitás al menos 100 caracteres. Si subís PDF, el texto es opcional.
       </p>
-      <label className="upload-file-label">
+      <label className="flex items-center gap-2 text-sm text-secondary cursor-pointer hover:text-primary transition-colors">
         <input ref={fileRef} type="file" accept="application/pdf" hidden />
         📎 Subir PDF (opcional)
       </label>
-      {error && <p className="input-error-msg">{error}</p>}
-      <div className="upload-actions">
+      {error && <p className="text-xs text-danger">{error}</p>}
+      <div className="flex gap-2 justify-end">
         <Button type="button" variant="ghost" onClick={() => setExpanded(false)}>Cancelar</Button>
         <Button type="submit" isLoading={isLoading}>Generar Quest ⚡</Button>
       </div>
@@ -526,37 +494,26 @@ function TournamentCreationModal({ quest, onClose }: { quest: Quest; onClose: ()
 
   return (
     <div
-      className="invite-overlay"
-      style={{ zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <div
-        className="invite-sheet"
-        style={{
-          width: '90%',
-          maxWidth: '400px',
-          borderRadius: '24px',
-          background: 'var(--bg-surface)',
-          padding: '24px',
-          border: '1px solid var(--border)',
-          transform: 'none',
-          bottom: 'auto'
-        }}
+        className="w-full max-w-sm bg-bg-elevated border border-edge rounded-xl p-6 flex flex-col gap-4"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="invite-title" style={{ fontSize: '18px', textAlign: 'center', marginBottom: '8px' }}>
+        <h2 className="text-lg font-bold text-primary text-center">
           🏆 Crear Torneo por Tiempo
         </h2>
-        <p className="invite-sub" style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <p className="text-sm text-secondary text-center -mt-2">
           Múltiples parties competirán resolviendo esta quest en simultáneo.
         </p>
 
         {success ? (
-          <div className="text-center py-6 text-emerald-400 font-bold">
+          <div className="text-center py-6 text-success font-bold">
             ✓ ¡Torneo creado con éxito!
           </div>
         ) : (
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="input-group">
               <label className="label">Título del Torneo</label>
               <input
@@ -598,12 +555,10 @@ function TournamentCreationModal({ quest, onClose }: { quest: Quest; onClose: ()
             </div>
 
             {error && (
-              <p style={{ color: 'var(--red)', fontSize: '13px', margin: 0, textAlign: 'center' }}>
-                {error}
-              </p>
+              <p className="text-sm text-danger text-center">{error}</p>
             )}
 
-            <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+            <div className="flex gap-3">
               <Button type="button" variant="ghost" className="flex-1" onClick={onClose}>
                 Cancelar
               </Button>
@@ -652,22 +607,20 @@ export function QuestCard({ quest }: { quest: Quest }) {
   return (
     <>
       <div
-        className="quest-card"
+        className={`flex items-center justify-between gap-3 bg-surface border border-edge rounded-lg px-4 py-3 transition-colors ${canPlay ? 'cursor-pointer hover:border-accent' : 'opacity-80'}`}
         onClick={handleOpenQuest}
-        style={{ cursor: canPlay ? 'pointer' : 'default', opacity: isFailed ? 0.8 : 1 }}
         aria-disabled={!canPlay}
       >
-        <div className="quest-card-info">
-          <p className="quest-card-title">{quest.title}</p>
-          <p className="quest-card-meta">
-            {questionCount} preguntas
-            {` • ${sourceLabel}`}
+        <div className="min-w-0 flex-1 flex flex-col gap-1">
+          <p className="font-semibold text-sm text-primary truncate">{quest.title}</p>
+          <p className="text-xs text-secondary">
+            {questionCount} preguntas{` • ${sourceLabel}`}
           </p>
-          {statusLabel && <p className="quest-card-link">{statusLabel}</p>}
-          {statusHint && <p className="text-small">{statusHint}</p>}
+          {statusLabel && <p className="text-xs text-accent-light">{statusLabel}</p>}
+          {statusHint && <p className="text-xs text-secondary">{statusHint}</p>}
           {quest.sourcePdfUrl && (
             <a
-              className="quest-card-link"
+              className="text-xs text-accent underline"
               href={new URL(quest.sourcePdfUrl, 'http://localhost:3000').toString()}
               target="_blank"
               rel="noreferrer"
@@ -678,21 +631,7 @@ export function QuestCard({ quest }: { quest: Quest }) {
           )}
           {canPlay && (
             <button
-              className="quest-card-link"
-              style={{
-                marginTop: '8px',
-                background: 'rgba(124, 58, 237, 0.15)',
-                color: '#c084fc',
-                padding: '4px 8px',
-                borderRadius: '8px',
-                border: '1px solid rgba(124, 58, 237, 0.3)',
-                fontSize: '11px',
-                fontWeight: 'bold',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}
+              className="self-start mt-1 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-accent/15 text-accent-light border border-accent/30 text-xs font-bold hover:bg-accent/25 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               onClick={(e) => {
                 e.stopPropagation()
                 setShowModal(true)
@@ -702,7 +641,7 @@ export function QuestCard({ quest }: { quest: Quest }) {
             </button>
           )}
         </div>
-        <span className={`quest-status quest-status-${quest.status}`}>
+        <span className={`shrink-0 text-lg ${isGenerating ? 'animate-pulse' : ''}`} aria-hidden="true">
           {isGenerating
             ? '⏳'
             : quest.status === 'active'
@@ -759,7 +698,7 @@ const getActivityColor = (type: string): string => {
 export function ActivityFeed({ activities, isLoading }: ActivityFeedProps) {
   if (isLoading) {
     return (
-      <div style={{ padding: '16px', textAlign: 'center' }}>
+      <div className="flex justify-center py-6">
         <Spinner size="sm" />
       </div>
     )
@@ -767,26 +706,30 @@ export function ActivityFeed({ activities, isLoading }: ActivityFeedProps) {
 
   if (activities.length === 0) {
     return (
-      <div style={{ padding: '20px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '14px' }}>
+      <div className="py-8 text-center text-secondary text-sm">
         <p>Sin actividad todavía</p>
       </div>
     )
   }
 
   return (
-    <div className="activity-feed">
+    <div className="flex flex-col gap-0">
       {activities.map((activity) => (
-        <div key={activity.id} className="activity-item">
-          <div className="activity-dot" style={{ backgroundColor: getActivityColor(activity.type) }} />
-          <div className="activity-content">
-            <div className="activity-header">
-              <span className="activity-emoji">{getActivityEmoji(activity.type)}</span>
+        <div key={activity.id} className="flex items-start gap-3 py-3 border-b border-edge last:border-0">
+          <div
+            className="shrink-0 mt-1 w-2.5 h-2.5 rounded-full"
+            style={{ backgroundColor: getActivityColor(activity.type) }}
+            aria-hidden="true"
+          />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm" aria-hidden="true">{getActivityEmoji(activity.type)}</span>
               {activity.user && (
-                <span className="activity-user">{activity.user.displayName}</span>
+                <span className="text-sm font-semibold text-primary">{activity.user.displayName}</span>
               )}
             </div>
-            <p className="activity-description">{activity.description}</p>
-            <span className="activity-time">
+            <p className="text-xs text-secondary mt-0.5">{activity.description}</p>
+            <span className="text-[11px] text-muted">
               {new Date(activity.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
           </div>
