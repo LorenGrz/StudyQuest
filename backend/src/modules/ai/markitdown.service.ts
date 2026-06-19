@@ -1,3 +1,5 @@
+import { writeFile } from 'node:fs/promises';
+import { basename, extname, join } from 'node:path';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
@@ -19,7 +21,11 @@ export class MarkitdownService {
     this.timeoutMs = Number(this.cfg.get('MARKITDOWN_TIMEOUT_MS', 30000));
   }
 
-  async toMarkdown(buffer: Buffer, filename = 'document.pdf'): Promise<string> {
+  async toMarkdown(
+    buffer: Buffer,
+    filename = 'document.pdf',
+    outputDir = process.cwd(),
+  ): Promise<string> {
     const form = new FormData();
     form.append('file', new Blob([new Uint8Array(buffer)]), filename);
 
@@ -36,7 +42,14 @@ export class MarkitdownService {
 
     const data = (await res.json()) as { markdown?: string; chars?: number };
     const markdown = data.markdown ?? '';
-    this.logger.debug(`markitdown convirtió ${filename} → ${markdown.length} chars`);
+
+    const fileStem = basename(filename, extname(filename));
+    const outputPath = join(outputDir, `${fileStem}.md`);
+    await writeFile(outputPath, markdown, 'utf8');
+
+    this.logger.debug(
+      `markitdown convirtió ${filename} → ${outputPath} (${markdown.length} chars)`,
+    );
     return markdown;
   }
 }
