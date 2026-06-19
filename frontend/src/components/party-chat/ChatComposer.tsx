@@ -133,7 +133,7 @@ export function ChatComposer({ onSendText, onSendFile, onSendAudio }: Props) {
           <button
             type="submit"
             aria-label="Enviar mensaje"
-            className="size-11 shrink-0 flex items-center justify-center rounded-lg bg-accent text-primary border border-accent hover:bg-accent-light transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="size-11 shrink-0 flex items-center justify-center rounded-lg bg-accent text-on-accent border border-accent hover:bg-accent-light transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             <Send size={18} aria-hidden="true" />
           </button>

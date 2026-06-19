@@ -262,7 +262,7 @@ export default function ProfilePage() {
                     : `${l.minElo}–${l.maxElo}`}
                 </span>
                 {l.tier === league.tier && (
-                  <span className="text-[11px] font-bold text-primary bg-accent rounded-full px-2 py-0.5 shrink-0">● Tú</span>
+                  <span className="text-[11px] font-bold text-on-accent bg-accent rounded-full px-2 py-0.5 shrink-0">● Tú</span>
                 )}
               </div>
             ))}

@@ -99,7 +99,7 @@ export default function TournamentsPage() {
                   className="bg-surface border border-[var(--overlay-border)] rounded-lg p-4 flex flex-col gap-3 hover:border-purple-500/30 transition-all duration-300 relative overflow-hidden group"
                 >
                   {t.status === 'active' && (
-                    <div className="absolute top-0 right-0 bg-accent text-primary text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg shadow-lg">
+                    <div className="absolute top-0 right-0 bg-accent text-on-accent text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg shadow-lg">
                       🔥 ACTIVO
                     </div>
                   )}
