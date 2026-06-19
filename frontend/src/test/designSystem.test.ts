@@ -24,6 +24,17 @@ function extractLayer(source: string, name: string): string {
   return '' // unclosed block — treat as not found
 }
 
+const migratedFiles = [
+  'src/pages/AuthPage.tsx',
+  'src/components/SubjectComponents.tsx',
+  'src/pages/FriendsPage.tsx',
+]
+
+it.each(migratedFiles)('%s has no removed legacy layout classes', (file) => {
+  const source = readFileSync(resolve(process.cwd(), file), 'utf8')
+  expect(source).not.toMatch(/\b(search-bar|filter-chips|subject-list-item|page-header|card-body|row-gap|list-item|auth-switch|link-btn)\b/)
+})
+
 describe('design-system cascade', () => {
   it('keeps global margin and padding resets inside Tailwind base layer', () => {
     const baseLayer = extractLayer(css, 'base')
