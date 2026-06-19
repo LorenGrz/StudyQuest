@@ -110,7 +110,7 @@ export default function TournamentsPage() {
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-3 overflow-y-auto pr-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto pr-1">
             {tournaments.map((t) => {
               const hasJoined = t.participants?.some((p) => p.partyId === activeParty?.id)
               const participantCount = t.participants?.length ?? 0
@@ -118,15 +118,15 @@ export default function TournamentsPage() {
               return (
                 <div
                   key={t.id}
-                  className="bg-surface border border-white/8 rounded-2xl p-4 flex flex-col gap-3 hover:border-purple-500/30 transition-all duration-300 relative overflow-hidden group"
+                  className="bg-surface border border-white/8 rounded-lg p-4 flex flex-col gap-3 hover:border-purple-500/30 transition-all duration-300 relative overflow-hidden group"
                 >
                   {t.status === 'active' && (
-                    <div className="absolute top-0 right-0 bg-accent text-white text-[9px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-xl shadow-lg">
+                    <div className="absolute top-0 right-0 bg-accent text-white text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg shadow-lg">
                       🔥 ACTIVO
                     </div>
                   )}
                   {t.status === 'finished' && (
-                    <div className="absolute top-0 right-0 bg-input text-muted text-[9px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-xl">
+                    <div className="absolute top-0 right-0 bg-input text-muted text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg">
                       ✓ TERMINADO
                     </div>
                   )}
@@ -139,27 +139,27 @@ export default function TournamentsPage() {
                   </div>
 
                   <div className="flex items-center justify-between text-xs py-1.5 border-y border-white/5">
-                    <div className="flex flex-col">
-                      <span className="text-faint text-[9px] uppercase font-bold tracking-wider">Participantes</span>
-                      <span className="text-white font-semibold mt-0.5">👥 {participantCount} Partys</span>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-muted text-[11px] uppercase font-bold tracking-wider">Participantes</span>
+                      <span className="text-white font-semibold mt-0.5 truncate">👥 {participantCount} Partys</span>
                     </div>
 
-                    <div className="flex flex-col text-right">
+                    <div className="flex flex-col text-right shrink-0 ml-2">
                       {t.status === 'pending' && (
                         <>
-                          <span className="text-faint text-[9px] uppercase font-bold tracking-wider">Inicia en</span>
+                          <span className="text-muted text-[11px] uppercase font-bold tracking-wider">Inicia en</span>
                           <Countdown targetDate={t.startsAt} onComplete={fetchTournaments} />
                         </>
                       )}
                       {t.status === 'active' && (
                         <>
-                          <span className="text-red-400 text-[9px] uppercase font-bold tracking-wider animate-pulse">Termina en</span>
+                          <span className="text-red-400 text-[11px] uppercase font-bold tracking-wider animate-pulse">Termina en</span>
                           <Countdown targetDate={t.endsAt} onComplete={fetchTournaments} />
                         </>
                       )}
                       {t.status === 'finished' && (
                         <>
-                          <span className="text-faint text-[9px] uppercase font-bold tracking-wider">Estado</span>
+                          <span className="text-muted text-[11px] uppercase font-bold tracking-wider">Estado</span>
                           <span className="text-muted font-semibold mt-0.5">Finalizado</span>
                         </>
                       )}
@@ -170,15 +170,15 @@ export default function TournamentsPage() {
                     {t.status === 'pending' && (
                       <>
                         {hasJoined ? (
-                          <div className="w-full text-center py-2.5 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5">
+                          <div className="w-full text-center min-h-[44px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5">
                             ✓ ¡Tu Party ya está inscripta!
                           </div>
                         ) : activeParty ? (
-                          <Button className="w-full text-xs" onClick={() => handleJoin(t.id)}>
+                          <Button className="w-full text-xs min-h-[44px] focus-visible:ring-2 focus-visible:ring-accent rounded-lg" onClick={() => handleJoin(t.id)}>
                             ⚔️ Unirse con mi Party
                           </Button>
                         ) : (
-                          <div className="w-full text-center py-2.5 text-muted bg-elevated border border-white/5 rounded-xl text-xs font-semibold">
+                          <div className="w-full text-center min-h-[44px] text-muted bg-elevated border border-white/5 rounded-lg text-xs font-semibold flex items-center justify-center">
                             Debés estar en una party para unirte
                           </div>
                         )}
@@ -189,7 +189,7 @@ export default function TournamentsPage() {
                       <>
                         {hasJoined ? (
                           <Button
-                            className="w-full text-xs bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                            className="w-full text-xs min-h-[44px] bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 focus-visible:ring-2 focus-visible:ring-accent rounded-lg"
                             onClick={() => navigate(`/tournament/${t.id}`)}
                           >
                             ⚡ Ver Scoreboard y Jugar
@@ -197,7 +197,7 @@ export default function TournamentsPage() {
                         ) : (
                           <Button
                             variant="secondary"
-                            className="w-full text-xs"
+                            className="w-full text-xs min-h-[44px] focus-visible:ring-2 focus-visible:ring-accent rounded-lg"
                             onClick={() => navigate(`/tournament/${t.id}`)}
                           >
                             👁️ Ver Scoreboard en Vivo
@@ -209,7 +209,7 @@ export default function TournamentsPage() {
                     {t.status === 'finished' && (
                       <Button
                         variant="secondary"
-                        className="w-full text-xs"
+                        className="w-full text-xs min-h-[44px] focus-visible:ring-2 focus-visible:ring-accent rounded-lg"
                         onClick={() => navigate(`/tournament/${t.id}/results`)}
                       >
                         🏆 Ver Resultados Finales
