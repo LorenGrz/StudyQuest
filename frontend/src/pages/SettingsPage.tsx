@@ -38,7 +38,7 @@ export default function SettingsPage() {
         Mobile: horizontal scrollable row (flex-row gap-2 overflow-x-auto)
         Desktop (md+): vertical rail beside the content panel (via parent flex-row)
       */}
-      <div className="flex flex-col gap-4 mt-2">
+      <div className="flex flex-col flex-1 min-h-0 gap-4 mt-2">
         {/* Tab rail — horizontal on mobile, vertical on desktop */}
         <div
           role="tablist"
@@ -61,8 +61,10 @@ export default function SettingsPage() {
           ))}
         </div>
 
-        {/* Content panel — sizes to its content (no forced full-height stretch) */}
-        <div className="bg-surface rounded-2xl p-4 mt-2 border border-edge md:rounded-xl md:p-6 md:mt-0 relative overflow-hidden">
+        {/* Content area — centers the panel vertically so sparse tabs don't leave a
+            big void on tall screens; taller tabs (Perfil) scroll from the top. */}
+        <div className="flex-1 min-h-0 overflow-y-auto flex flex-col">
+        <div className="bg-surface rounded-2xl p-4 my-auto border border-edge md:rounded-xl md:p-6 relative overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -77,6 +79,7 @@ export default function SettingsPage() {
               {activeTab === 'notificaciones' && <NotificationsTab />}
             </motion.div>
           </AnimatePresence>
+        </div>
         </div>
       </div>
       </motion.div>
