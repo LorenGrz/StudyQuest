@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion, useMotionValue, useTransform } from 'framer-motion'
-import { BottomNav } from '../components/Layouts'
 import {
   ActionButtons,
   CreatePartyBar,
@@ -155,8 +154,6 @@ export default function MatchPage() {
       {/* Create Party Banner */}
       <CreatePartyBar onPress={() => navigate('/parties')} />
       
-      {/* Bottom Nav Bar */}
-      <BottomNav />
     </div>
   )
 }
