@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { UploadNoteCard } from './PartyComponents'
+import { UploadNoteCard } from './UploadNoteCard'
 
 describe('UploadNoteCard', () => {
   it('shows a validation error for short text without a PDF', async () => {
