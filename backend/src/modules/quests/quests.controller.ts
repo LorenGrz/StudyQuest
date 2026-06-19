@@ -9,32 +9,39 @@ import {
   UseInterceptors,
   UploadedFile,
   ParseFilePipe,
-  FileTypeValidator,
   MaxFileSizeValidator,
+  BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { QuestsService } from './quests.service';
 import { CreateQuestDto, SubmitAnswerDto } from '../../common/dto';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+import { v4 as uuid } from 'uuid';
 
 @ApiTags('quests')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('quests')
 export class QuestsController {
+  private static questUploadStorage = diskStorage({
+    destination: './uploads',
+    filename: (_req, file, cb) => cb(null, `${uuid()}${extname(file.originalname)}`),
+  });
+
   constructor(private readonly questsService: QuestsService) {}
 
   @Post()
   @ApiConsumes('multipart/form-data', 'application/json')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { storage: QuestsController.questUploadStorage }))
   create(
     @Request() req: any,
     @Body() dto: CreateQuestDto,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
-          new FileTypeValidator({ fileType: 'application/pdf' }),
           new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }),
         ],
         fileIsRequired: false,
@@ -42,6 +49,9 @@ export class QuestsController {
     )
     file?: Express.Multer.File,
   ) {
+    if (file && file.mimetype !== 'application/pdf') {
+      throw new BadRequestException('Solo se permiten archivos PDF');
+    }
     return this.questsService.createQuest(dto, req.user.userId, file);
   }
 

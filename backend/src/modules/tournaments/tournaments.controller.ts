@@ -10,10 +10,21 @@ import {
 import { TournamentsService } from './tournaments.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
+import { IsString, IsNotEmpty, IsDateString } from 'class-validator';
+
 class CreateTournamentDto {
+  @IsString()
+  @IsNotEmpty()
   title: string;
+
+  @IsString()
+  @IsNotEmpty()
   questId: string;
+
+  @IsDateString()
   startsAt: string;
+
+  @IsDateString()
   endsAt: string;
 }
 
