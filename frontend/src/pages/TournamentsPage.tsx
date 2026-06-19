@@ -1,39 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { MobileLayout } from '../components/Layouts'
 import { Button, Spinner } from '../components/UI'
+import { Countdown } from '../components/Countdown'
 import { tournamentService, type Tournament } from '../services/tournamentService'
 import { partyService } from '../services/partyService'
 
-const Countdown = ({ targetDate, onComplete }: { targetDate: string; onComplete?: () => void }) => {
-  const [timeLeft, setTimeLeft] = useState('')
-
-  useEffect(() => {
-    const calculateTime = () => {
-      const difference = new Date(targetDate).getTime() - Date.now()
-      if (difference <= 0) {
-        setTimeLeft('00:00:00')
-        onComplete?.()
-        return
-      }
-
-      const hours = Math.floor((difference / (1000 * 60 * 60)) % 24)
-      const minutes = Math.floor((difference / 1000 / 60) % 60)
-      const seconds = Math.floor((difference / 1000) % 60)
-
-      setTimeLeft(
-        `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-      )
-    }
-
-    calculateTime()
-    const timer = setInterval(calculateTime, 1000)
-
-    return () => clearInterval(timer)
-  }, [targetDate, onComplete])
-
-  return <span className="font-mono text-purple-400 font-bold">{timeLeft}</span>
-}
 
 export default function TournamentsPage() {
   const navigate = useNavigate()
@@ -79,16 +52,21 @@ export default function TournamentsPage() {
 
   return (
     <MobileLayout>
-      <div className="p-4 flex flex-col gap-4 min-h-0">
+      <motion.div
+        className="p-4 flex flex-col gap-4 min-h-0"
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.22, ease: 'easeOut' }}
+      >
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/dashboard')}
-            className="w-10 h-10 rounded-xl bg-surface border border-white/8 flex items-center justify-center text-white text-lg hover:bg-elevated transition-all cursor-pointer"
+            className="w-10 h-10 rounded-xl bg-surface border border-[var(--overlay-border)] flex items-center justify-center text-primary text-lg hover:bg-elevated transition-all cursor-pointer"
           >
             ←
           </button>
           <div>
-            <h1 className="text-xl font-black text-white">🏆 Torneos Globales</h1>
+            <h1 className="text-xl font-black text-primary">🏆 Torneos Globales</h1>
             <p className="text-muted text-xs">Competí con tu party resolviendo quests en tiempo real</p>
           </div>
         </div>
@@ -104,7 +82,7 @@ export default function TournamentsPage() {
         ) : tournaments.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center py-20 text-center">
             <span className="text-5xl mb-4">🏆</span>
-            <h3 className="text-white font-bold text-sm">No hay torneos creados</h3>
+            <h3 className="text-primary font-bold text-sm">No hay torneos creados</h3>
             <p className="text-muted text-xs max-w-[280px] mt-1">
               Podés iniciar un torneo con una quest de tu materia desde el chat de tu party.
             </p>
@@ -118,10 +96,10 @@ export default function TournamentsPage() {
               return (
                 <div
                   key={t.id}
-                  className="bg-surface border border-white/8 rounded-lg p-4 flex flex-col gap-3 hover:border-purple-500/30 transition-all duration-300 relative overflow-hidden group"
+                  className="bg-surface border border-[var(--overlay-border)] rounded-lg p-4 flex flex-col gap-3 hover:border-purple-500/30 transition-all duration-300 relative overflow-hidden group"
                 >
                   {t.status === 'active' && (
-                    <div className="absolute top-0 right-0 bg-accent text-white text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg shadow-lg">
+                    <div className="absolute top-0 right-0 bg-accent text-primary text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg shadow-lg">
                       🔥 ACTIVO
                     </div>
                   )}
@@ -132,23 +110,23 @@ export default function TournamentsPage() {
                   )}
 
                   <div className="flex flex-col gap-0.5">
-                    <h3 className="text-white font-bold text-base truncate pr-16">{t.title}</h3>
+                    <h3 className="text-primary font-bold text-base truncate pr-16">{t.title}</h3>
                     <p className="text-muted text-[11px]">
                       Quest: <span className="text-purple-400 font-semibold">{t.quest?.title ?? 'Quest generada'}</span>
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between text-xs py-1.5 border-y border-white/5">
+                  <div className="flex items-center justify-between text-xs py-1.5 border-y border-[var(--overlay-border)]">
                     <div className="flex flex-col min-w-0">
                       <span className="text-muted text-[11px] uppercase font-bold tracking-wider">Participantes</span>
-                      <span className="text-white font-semibold mt-0.5 truncate">👥 {participantCount} Partys</span>
+                      <span className="text-primary font-semibold mt-0.5 truncate">👥 {participantCount} Partys</span>
                     </div>
 
                     <div className="flex flex-col text-right shrink-0 ml-2">
                       {t.status === 'pending' && (
                         <>
                           <span className="text-muted text-[11px] uppercase font-bold tracking-wider">Inicia en</span>
-                          <Countdown targetDate={t.startsAt} onComplete={fetchTournaments} />
+                          <Countdown targetDate={t.startsAt} onComplete={fetchTournaments} className="text-purple-400" />
                         </>
                       )}
                       {t.status === 'active' && (
@@ -178,7 +156,7 @@ export default function TournamentsPage() {
                             ⚔️ Unirse con mi Party
                           </Button>
                         ) : (
-                          <div className="w-full text-center min-h-[44px] text-muted bg-elevated border border-white/5 rounded-lg text-xs font-semibold flex items-center justify-center">
+                          <div className="w-full text-center min-h-[44px] text-muted bg-elevated border border-[var(--overlay-border)] rounded-lg text-xs font-semibold flex items-center justify-center">
                             Debés estar en una party para unirte
                           </div>
                         )}
@@ -221,7 +199,7 @@ export default function TournamentsPage() {
             })}
           </div>
         )}
-      </div>
+      </motion.div>
     </MobileLayout>
   )
 }

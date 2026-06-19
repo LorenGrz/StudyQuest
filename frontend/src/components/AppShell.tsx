@@ -47,7 +47,7 @@ export function AppShell({ children }: Props) {
   return (
     <div className="h-dvh w-full bg-base text-primary flex justify-center">
       <div className="flex h-dvh w-full max-w-[480px] flex-col overflow-hidden bg-base">
-        <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+        <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden flex flex-col">
           {children}
         </main>
         <nav

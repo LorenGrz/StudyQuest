@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { MobileLayout } from '../components/Layouts'
 import { Button, Badge, Input } from '../components/UI'
@@ -24,7 +25,13 @@ export default function SettingsPage() {
 
   return (
     <MobileLayout>
-      <h1 className="text-xl font-bold text-primary mt-4 mb-3">Configuración</h1>
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.22, ease: 'easeOut' }}
+        className="flex flex-col flex-1"
+      >
+        <h1 className="text-xl font-bold text-primary mt-4 mb-3">Configuración</h1>
 
       {/*
         Single tab list — rendered once.
@@ -45,7 +52,7 @@ export default function SettingsPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-colors min-h-[44px] md:rounded-lg md:text-left md:whitespace-normal md:w-full ${
                 activeTab === tab.id
-                  ? 'bg-accent text-white font-semibold'
+                  ? 'bg-accent text-primary font-semibold'
                   : 'bg-surface text-muted md:bg-transparent md:hover:bg-elevated md:hover:text-primary'
               }`}
             >
@@ -55,13 +62,24 @@ export default function SettingsPage() {
         </div>
 
         {/* Content panel */}
-        <div className="flex-1 bg-surface rounded-2xl p-4 mt-2 border border-edge md:rounded-xl md:p-6 md:mt-0">
-          {activeTab === 'perfil' && <ProfileTab />}
-          {activeTab === 'seguridad' && <SecurityTab />}
-          {activeTab === 'apariencia' && <AppearanceTab />}
-          {activeTab === 'notificaciones' && <NotificationsTab />}
+        <div className="flex-1 bg-surface rounded-2xl p-4 mt-2 border border-edge md:rounded-xl md:p-6 md:mt-0 relative overflow-hidden">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.15 }}
+            >
+              {activeTab === 'perfil' && <ProfileTab />}
+              {activeTab === 'seguridad' && <SecurityTab />}
+              {activeTab === 'apariencia' && <AppearanceTab />}
+              {activeTab === 'notificaciones' && <NotificationsTab />}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
+      </motion.div>
     </MobileLayout>
   )
 }

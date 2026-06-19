@@ -1,5 +1,5 @@
-import type { Party, PartyMember } from '../services/partyService'
-import { AvatarWithBorder } from './AvatarWithBorder'
+import type { Party, PartyMember } from '../../services/partyService'
+import { AvatarWithBorder } from '../AvatarWithBorder'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -24,7 +24,7 @@ export function MemberAvatar({ member, size = 28 }: MemberAvatarProps) {
   const scale = size / baseSize
 
   return (
-    <div style={{ transform: `scale(${scale})`, transformOrigin: 'center', display: 'inline-flex' }}>
+    <div className="inline-flex origin-center" style={{ transform: `scale(${scale})` }}>
       <AvatarWithBorder
         displayName={member.user?.displayName ?? '?'}
         avatarUrl={member.user?.avatarUrl}
@@ -53,7 +53,7 @@ export function AvatarStack({ members, max = 3 }: AvatarStackProps) {
         </div>
       ))}
       {extra > 0 && (
-        <div className="rounded-full border-2 border-surface -ml-[7px] overflow-hidden relative shrink-0 bg-input text-muted text-[10px] font-bold w-[30px] h-[30px] flex items-center justify-center first:ml-0" style={{ zIndex: 0 }}>
+        <div className="rounded-full border-2 border-surface -ml-[7px] overflow-hidden relative shrink-0 bg-input text-muted text-[10px] font-bold w-[30px] h-[30px] flex items-center justify-center first:ml-0 z-0">
           +{extra}
         </div>
       )}
@@ -134,7 +134,7 @@ export function PartyCard({ party }: { party: Party }) {
   )) : 0
 
   return (
-    <div className="w-full h-full rounded-[24px] bg-surface border border-white/7 overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.6),inset_0_0_0_1px_rgba(255,255,255,0.04)] select-none flex flex-col group">
+    <div className="w-full h-full rounded-[24px] bg-surface border border-[var(--overlay-border)] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.6),inset_0_0_0_1px_rgba(255,255,255,0.04)] select-none flex flex-col group">
       
       {/* ── Cover con imagen real ──────────────────────────────── */}
       <div className="flex-1 min-h-[180px] relative overflow-hidden">
@@ -148,14 +148,14 @@ export function PartyCard({ party }: { party: Party }) {
         <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-black/45 to-base/95" />
 
         {/* Chip de materia con ícono */}
-        <div className="absolute top-3.5 right-3.5 flex items-center gap-1.5 bg-black/45 backdrop-blur-md border border-white/15 rounded-full px-3 py-1.25 text-[11px] font-bold text-white uppercase tracking-[0.6px]">
+        <div className="absolute top-3.5 right-3.5 flex items-center gap-1.5 bg-black/45 backdrop-blur-md border border-[var(--overlay-border)] rounded-full px-3 py-1.25 text-[11px] font-bold text-primary uppercase tracking-[0.6px]">
           <span className="w-1.5 h-1.5 rounded-full bg-[#10b981] shadow-[0_0_6px_#10b981] animate-pulse shrink-0" />
           <span className="text-[13px]">{subjectIcon}</span>
           {party.subject?.code ?? party.subject?.name ?? 'SQUAD'}
         </div>
 
         {/* Badge de slots */}
-        <div className="absolute bottom-[52px] left-3.5 bg-black/55 backdrop-blur-md border border-white/12 rounded-full px-2.5 py-1 text-[11px] font-semibold text-white/90">
+        <div className="absolute bottom-[52px] left-3.5 bg-black/55 backdrop-blur-md border border-[var(--overlay-border)] rounded-full px-2.5 py-1 text-[11px] font-semibold text-secondary">
           {slotsLeft > 0 ? `${slotsLeft} libre${slotsLeft !== 1 ? 's' : ''}` : 'COMPLETO'}
         </div>
 
@@ -171,14 +171,14 @@ export function PartyCard({ party }: { party: Party }) {
             {host ? (
               <MemberAvatar member={host} size={46} />
             ) : (
-              <div className="rounded-full bg-gradient-to-br from-accent-light to-[#2563eb] flex items-center justify-center font-extrabold text-white w-[46px] h-[46px] text-[18px]">?</div>
+              <div className="rounded-full bg-gradient-to-br from-accent-light to-[#2563eb] flex items-center justify-center font-extrabold text-primary w-[46px] h-[46px] text-[18px]">?</div>
             )}
             <div className="absolute bottom-0.5 right-0.5 w-2.5 h-2.5 bg-[#10b981] rounded-full border-2 border-surface shadow-[0_0_6px_#10b981]" />
           </div>
 
           <div className="flex-1 flex flex-col gap-0.5 min-w-0 text-left">
             <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="font-bold text-[15px] text-white truncate max-w-[130px]">{host?.user?.username ?? 'Sin líder'}</span>
+              <span className="font-bold text-[15px] text-primary truncate max-w-[130px]">{host?.user?.username ?? 'Sin líder'}</span>
               {host?.role === 'leader' && (
                 <span className="text-[10px] font-bold text-amber-400 bg-amber-500/15 border border-amber-500/30 rounded-full px-1.75 py-0.25 whitespace-nowrap">👑 Líder</span>
               )}
@@ -188,11 +188,11 @@ export function PartyCard({ party }: { party: Party }) {
           <div className="bg-emerald-500/15 border border-emerald-500/35 rounded-full px-2.5 py-0.75 text-[11px] font-bold text-emerald-400 shrink-0 whitespace-nowrap">LV {host?.user?.stats?.level ?? 0}</div>
         </div>
 
-        <div className="h-[1px] bg-white/8 my-0" />
+        <div className="h-[1px] bg-[var(--overlay-soft)] my-0" />
 
         {/* Quest / descripción */}
         <div className="flex flex-col gap-0.5 text-left">
-          <p className="text-[17px] font-bold text-white leading-snug truncate">
+          <p className="text-[17px] font-bold text-primary leading-snug truncate">
             {quest?.title ?? party.subject?.name ?? 'Party de estudio'}
           </p>
           {quest && (
@@ -248,7 +248,7 @@ export function ActionButtons({ onDiscard, onJoin, disabled }: ActionButtonsProp
 
       <button
         id="mc-btn-undo"
-        className="rounded-full flex items-center justify-center border-2 transition-all duration-200 shrink-0 w-[48px] h-[48px] border-white/8 bg-surface text-faint opacity-35 cursor-not-allowed"
+        className="rounded-full flex items-center justify-center border-2 transition-all duration-200 shrink-0 w-[48px] h-[48px] border-[var(--overlay-border)] bg-surface text-faint opacity-35 cursor-not-allowed"
         disabled
         aria-label="Deshacer"
       >
@@ -278,7 +278,7 @@ export function ActionButtons({ onDiscard, onJoin, disabled }: ActionButtonsProp
 export function LoadingState() {
   return (
     <div className="flex flex-col items-center gap-3.5 text-center px-4 py-6">
-      <div className="w-11 h-11 rounded-full border-3 border-white/8 border-t-purple-500 animate-spin" />
+      <div className="w-11 h-11 rounded-full border-3 border-[var(--overlay-border)] border-t-purple-500 animate-spin" />
       <p className="text-muted text-sm max-w-[260px] leading-relaxed">Buscando parties para vos...</p>
     </div>
   )
@@ -295,9 +295,9 @@ export function ErrorState({ message, onRetry }: ErrorStateProps) {
   return (
     <div className="flex flex-col items-center gap-3.5 text-center px-4 py-6">
       <span className="text-[52px] leading-none">⚠️</span>
-      <p className="text-[20px] font-extrabold text-white">Algo salió mal</p>
+      <p className="text-[20px] font-extrabold text-primary">Algo salió mal</p>
       <p className="text-muted text-sm max-w-[260px] leading-relaxed">{message ?? 'Error desconocido'}</p>
-      <button className="mt-2 px-5 py-2.5 rounded-lg bg-accent text-white font-bold text-sm hover:bg-accent-light transition-colors min-h-[44px]" onClick={onRetry}>Reintentar</button>
+      <button className="mt-2 px-5 py-2.5 rounded-lg bg-accent text-primary font-bold text-sm hover:bg-accent-light transition-colors min-h-[44px]" onClick={onRetry}>Reintentar</button>
     </div>
   )
 }
@@ -308,9 +308,9 @@ export function EmptyState({ onCreateParty }: { onCreateParty: () => void }) {
   return (
     <div className="flex flex-col items-center gap-3.5 text-center px-4 py-6">
       <div className="text-[56px] leading-none">✨</div>
-      <p className="text-[20px] font-extrabold text-white">¡Ya recorriste todo!</p>
+      <p className="text-[20px] font-extrabold text-primary">¡Ya recorriste todo!</p>
       <p className="text-muted text-sm max-w-[260px] leading-relaxed">No hay más squads disponibles en tus materias.</p>
-      <button className="mt-2 px-5 py-2.5 rounded-lg bg-accent text-white font-bold text-sm hover:bg-accent-light transition-colors min-h-[44px]" onClick={onCreateParty}>
+      <button className="mt-2 px-5 py-2.5 rounded-lg bg-accent text-primary font-bold text-sm hover:bg-accent-light transition-colors min-h-[44px]" onClick={onCreateParty}>
         ⚡ Crear mi party
       </button>
     </div>
@@ -322,8 +322,8 @@ export function EmptyState({ onCreateParty }: { onCreateParty: () => void }) {
 export function CreatePartyBar({ onPress }: { onPress: () => void }) {
   return (
     <div className="px-4 pb-[22px] shrink-0">
-      <div className="flex items-center gap-2.5 bg-surface border border-white/8 rounded-2xl py-[13px] px-4">
-        <div className="w-[26px] h-[26px] rounded-full bg-input border border-white/8 flex items-center justify-center text-faint shrink-0">
+      <div className="flex items-center gap-2.5 bg-surface border border-[var(--overlay-border)] rounded-2xl py-[13px] px-4">
+        <div className="w-[26px] h-[26px] rounded-full bg-input border border-[var(--overlay-border)] flex items-center justify-center text-faint shrink-0">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
             <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
           </svg>

@@ -86,7 +86,7 @@ export function ChatComposer({ onSendText, onSendFile, onSendAudio }: Props) {
   }
 
   return (
-    <div className="sticky bottom-[env(safe-area-inset-bottom,0px)] z-10 border-t border-edge bg-base px-3 py-2 pb-[calc(env(safe-area-inset-bottom,0px)+8px)]">
+    <div className="shrink-0 z-10 border-t border-edge bg-base px-3 py-2 pb-[calc(env(safe-area-inset-bottom,0px)+8px)]">
       <form className="flex items-end gap-2" onSubmit={submitText}>
         {/* Hidden native file input — labelled via <label htmlFor> so getByLabelText resolves it */}
         <label htmlFor="chat-file-input" className="sr-only">Adjuntar archivo</label>
@@ -133,7 +133,7 @@ export function ChatComposer({ onSendText, onSendFile, onSendAudio }: Props) {
           <button
             type="submit"
             aria-label="Enviar mensaje"
-            className="size-11 shrink-0 flex items-center justify-center rounded-lg bg-accent text-white border border-accent hover:bg-accent-light transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            className="size-11 shrink-0 flex items-center justify-center rounded-lg bg-accent text-primary border border-accent hover:bg-accent-light transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             <Send size={18} aria-hidden="true" />
           </button>
@@ -145,7 +145,7 @@ export function ChatComposer({ onSendText, onSendFile, onSendAudio }: Props) {
             className={`size-11 shrink-0 flex items-center justify-center rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
               isRecording
                 ? 'bg-danger/10 border-danger/50 text-danger hover:bg-danger/20'
-                : 'bg-accent text-white border-accent hover:bg-accent-light'
+                : 'bg-accent text-primary border-accent hover:bg-accent-light'
             }`}
           >
             {isRecording ? (

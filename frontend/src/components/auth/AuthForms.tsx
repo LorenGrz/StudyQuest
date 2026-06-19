@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useAuth } from '../hooks/useAuth'
-import { Button, Input } from './UI'
+import { useAuth } from '../../hooks/useAuth'
+import { Button, Input } from '../UI'
 
 export function LoginForm() {
   const { login, isLoading, error } = useAuth()
@@ -110,7 +110,7 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
             className={`w-2 h-2 rounded-full transition-[background,transform] duration-200 ${
               s <= step
                 ? 'bg-accent scale-[1.3]'
-                : 'bg-white/8'
+                : 'bg-[var(--overlay-soft)]'
             }`}
           />
         ))}

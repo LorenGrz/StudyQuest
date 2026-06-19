@@ -25,7 +25,7 @@ export function SkillUnlockToast({ nodeNames, onDismiss }: SkillUnlockToastProps
   return (
     <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[200] flex flex-col gap-2 max-w-[320px] w-full px-4">
       {nodeNames.map((name) => (
-        <div key={name} className="bg-surface border border-white/10 rounded-lg px-4 py-3 text-sm font-semibold text-white shadow-[0_4px_20px_rgba(0,0,0,0.5)] flex items-center gap-2">🌟 Habilidad desbloqueada: {name}</div>
+        <div key={name} className="bg-surface border border-[var(--overlay-border)] rounded-lg px-4 py-3 text-sm font-semibold text-primary shadow-[0_4px_20px_rgba(0,0,0,0.5)] flex items-center gap-2">🌟 Habilidad desbloqueada: {name}</div>
       ))}
     </div>
   )

@@ -1,16 +1,16 @@
 import { useState, useEffect, useRef } from 'react'
-import type { Party, PartyMember, Activity } from '../services/partyService'
-import { partyService } from '../services/partyService'
-import { friendService } from '../services/friendService'
-import type { User } from '../services/userService'
-import type { Quest } from '../services/questService'
-import { Button, Spinner } from './UI'
-import { AvatarWithBorder } from './AvatarWithBorder'
+import type { Party, PartyMember, Activity } from '../../services/partyService'
+import { partyService } from '../../services/partyService'
+import { friendService } from '../../services/friendService'
+import type { User } from '../../services/userService'
+import type { Quest } from '../../services/questService'
+import { Button, Spinner } from '../UI'
+import { AvatarWithBorder } from '../AvatarWithBorder'
 import { useNavigate } from 'react-router-dom'
-import { tournamentService } from '../services/tournamentService'
-import { SegmentedTabs } from './PagePrimitives'
+import { tournamentService } from '../../services/tournamentService'
+import { SegmentedTabs } from '../PagePrimitives'
 import { Paperclip, FileText, X, Sparkles } from 'lucide-react'
-export { ChatBox } from './party-chat/ChatBox'
+export { ChatBox } from '../party-chat/ChatBox'
 
 // Re-export SegmentedTabs as TabBar so callers don't need to change imports
 export { SegmentedTabs as TabBar }
@@ -175,7 +175,7 @@ export function MemberList({ members, partyId, isPrivate, currentUserId, onVisib
                   ¿Cerrás la party para todos?
                 </p>
                 <div className="flex gap-2">
-                  <button className="flex-1 px-3 py-2 rounded-lg bg-danger text-white font-semibold text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger" onClick={onCloseParty}>
+                  <button className="flex-1 px-3 py-2 rounded-lg bg-danger text-primary font-semibold text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger" onClick={onCloseParty}>
                     Sí, cerrar
                   </button>
                   <button className="flex-1 px-3 py-2 rounded-lg bg-surface border border-edge text-secondary font-semibold text-sm hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent" onClick={() => setConfirmClose(false)}>

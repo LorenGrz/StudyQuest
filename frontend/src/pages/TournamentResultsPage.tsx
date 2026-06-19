@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { MobileLayout } from '../components/Layouts'
 import { Button, Spinner } from '../components/UI'
 import { tournamentService, type Tournament, type ScoreboardEntry } from '../services/tournamentService'
@@ -91,22 +91,27 @@ export default function TournamentResultsPage() {
 
   return (
     <MobileLayout>
-      <div className="p-4 flex flex-col gap-4 min-h-0">
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.22, ease: 'easeOut' }}
+        className="p-4 flex flex-col gap-4 min-h-0"
+      >
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/tournaments')}
-            className="w-10 h-10 rounded-xl bg-surface border border-white/8 flex items-center justify-center text-white text-lg hover:bg-elevated transition-all cursor-pointer"
+            className="w-10 h-10 rounded-xl bg-surface border border-[var(--overlay-border)] flex items-center justify-center text-primary text-lg hover:bg-elevated transition-all cursor-pointer"
           >
             ←
           </button>
           <div>
-            <h1 className="text-base font-black text-white truncate max-w-[260px]">{tournament.title}</h1>
+            <h1 className="text-base font-black text-primary truncate max-w-[260px]">{tournament.title}</h1>
             <p className="text-muted text-[11px] uppercase font-bold tracking-wider">🏆 Resultados del Torneo</p>
           </div>
         </div>
 
         {/* PODIO ANIMADO */}
-        <div className="flex items-end justify-center gap-3 pt-6 pb-2 shrink-0 border-b border-white/5">
+        <div className="flex items-end justify-center gap-3 pt-6 pb-2 shrink-0 border-b border-[var(--overlay-border)]">
           {/* 2nd Place */}
           {secondPlace && (
             <motion.div
@@ -118,8 +123,8 @@ export default function TournamentResultsPage() {
               <span className="text-xl mb-1">🥈</span>
               <span className="text-[11px] font-bold text-muted truncate max-w-[80px]">{secondPlace.partyName}</span>
               <span className="text-[11px] text-muted">{secondPlace.score} pts</span>
-              <div className="w-full h-20 bg-gradient-to-t from-elevated to-elevated border-t border-white/10 rounded-t-xl mt-2 flex items-center justify-center shadow-lg">
-                <span className="text-white font-extrabold text-sm">#2</span>
+              <div className="w-full h-20 bg-gradient-to-t from-elevated to-elevated border-t border-[var(--overlay-border)] rounded-t-xl mt-2 flex items-center justify-center shadow-lg">
+                <span className="text-primary font-extrabold text-sm">#2</span>
               </div>
             </motion.div>
           )}
@@ -168,50 +173,60 @@ export default function TournamentResultsPage() {
             className="bg-gradient-to-br from-purple-950/30 to-indigo-950/30 border border-purple-500/40 p-4 rounded-3xl flex flex-col gap-2 items-center text-center shrink-0"
           >
             <span className="text-accent-light text-[11px] font-bold uppercase tracking-widest">Recompensa Obtenida</span>
-            <h4 className="text-white font-extrabold text-sm">Puesto #{myPartyRank} en el Podio</h4>
+            <h4 className="text-primary font-extrabold text-sm">Puesto #{myPartyRank} en el Podio</h4>
             
             <div className="flex gap-4 mt-1">
               <div className="bg-purple-500/15 border border-purple-500/30 px-3 py-2 rounded-2xl flex items-center gap-1.5 shadow-lg">
                 <span className="text-base">✨</span>
-                <span className="text-white font-black text-xs">+{xpReward} XP</span>
+                <span className="text-primary font-black text-xs">+{xpReward} XP</span>
               </div>
               <div className="bg-yellow-500/15 border border-yellow-500/30 px-3 py-2 rounded-2xl flex items-center gap-1.5 shadow-lg">
                 <span className="text-base">🪙</span>
-                <span className="text-white font-black text-xs">+{coinsReward} Monedas</span>
+                <span className="text-primary font-black text-xs">+{coinsReward} Monedas</span>
               </div>
             </div>
           </motion.div>
         ) : (
-          <div className="bg-surface border border-white/5 p-4 rounded-3xl text-center text-xs text-muted shrink-0">
+          <div className="bg-surface border border-[var(--overlay-border)] p-4 rounded-3xl text-center text-xs text-muted shrink-0">
             No participaste en este torneo. ¡Prepárate para la próxima!
           </div>
         )}
 
         {/* HISTORIAL RESTO DE POSICIONES */}
         {restEntries.length > 0 && (
-          <div className="flex-1 flex flex-col gap-2.5 min-h-0 bg-surface border border-white/8 rounded-3xl p-4">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="flex-1 flex flex-col gap-2.5 min-h-0 bg-surface border border-[var(--overlay-border)] rounded-3xl p-4"
+          >
             <h3 className="text-muted text-xs font-bold uppercase tracking-wider">Otras posiciones</h3>
             <div className="flex-1 overflow-y-auto pr-1 flex flex-col gap-2">
-              {restEntries.map((entry) => (
-                <div
-                  key={entry.partyId}
-                  className="flex items-center justify-between p-2.5 bg-elevated/40 border border-white/5 rounded-xl text-xs"
-                >
-                  <div className="flex items-center gap-3 min-w-0 flex-1">
-                    <span className="text-muted font-bold w-6 shrink-0">#{entry.rank}</span>
-                    <span className="text-white font-semibold truncate">{entry.partyName}</span>
-                  </div>
-                  <span className="text-white font-bold shrink-0 ml-2">{entry.score} pts</span>
-                </div>
-              ))}
+              <AnimatePresence>
+                {restEntries.map((entry, index) => (
+                  <motion.div
+                    key={entry.partyId}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.6 + index * 0.1, duration: 0.3 }}
+                    className="flex items-center justify-between p-2.5 bg-elevated/40 border border-[var(--overlay-border)] rounded-xl text-xs"
+                  >
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <span className="text-muted font-bold w-6 shrink-0">#{entry.rank}</span>
+                      <span className="text-primary font-semibold truncate">{entry.partyName}</span>
+                    </div>
+                    <span className="text-primary font-bold shrink-0 ml-2">{entry.score} pts</span>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </div>
-          </div>
+          </motion.div>
         )}
 
         <Button className="w-full text-xs font-bold py-2.5 mt-2" onClick={() => navigate('/tournaments')}>
           Volver a Torneos
         </Button>
-      </div>
+      </motion.div>
     </MobileLayout>
   )
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MobileLayout } from '../components/Layouts'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Button, Input, Spinner } from '../components/UI'
 import { PageHeader, PageContainer, Surface, EmptyState } from '../components/PagePrimitives'
 import { friendService, type FriendRequest } from '../services/friendService'
@@ -93,10 +94,16 @@ const FriendsPage = () => {
   return (
     <MobileLayout>
       <PageContainer>
-        <PageHeader
-          title="Amigos"
-          back={() => navigate('/dashboard')}
-        />
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.22, ease: 'easeOut' }}
+          className="flex flex-col flex-1"
+        >
+          <PageHeader
+            title="Amigos"
+            back={() => navigate('/dashboard')}
+          />
 
         {/* Add-friend form — full-width top surface */}
         <Surface className="mb-4">
@@ -133,24 +140,33 @@ const FriendsPage = () => {
                 <div className="flex justify-center py-4"><Spinner /></div>
               ) : requests.length ? (
                 <ul className="flex flex-col divide-y divide-white/5">
-                  {requests.map((request) => (
-                    <li key={request.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
-                      <div className="min-w-0">
-                        <strong className="text-[14px] font-semibold text-primary block truncate">
-                          {request.requester?.displayName ?? request.requesterId}
-                        </strong>
-                        {request.requester?.username && (
-                          <p className="text-[12px] text-secondary truncate">
-                            @{request.requester.username}
-                          </p>
-                        )}
-                      </div>
-                      <div className="flex gap-1.5 flex-shrink-0">
-                        <Button size="sm" variant="primary" onClick={() => handleResponse(request.id, true)}>Aceptar</Button>
-                        <Button size="sm" variant="ghost" onClick={() => handleResponse(request.id, false)}>Rechazar</Button>
-                      </div>
-                    </li>
-                  ))}
+                  <AnimatePresence>
+                    {requests.map((request, idx) => (
+                      <motion.li
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ delay: idx * 0.05 }}
+                        key={request.id}
+                        className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
+                      >
+                        <div className="min-w-0">
+                          <strong className="text-[14px] font-semibold text-primary block truncate">
+                            {request.requester?.displayName ?? request.requesterId}
+                          </strong>
+                          {request.requester?.username && (
+                            <p className="text-[12px] text-secondary truncate">
+                              @{request.requester.username}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex gap-1.5 flex-shrink-0">
+                          <Button size="sm" variant="primary" onClick={() => handleResponse(request.id, true)}>Aceptar</Button>
+                          <Button size="sm" variant="ghost" onClick={() => handleResponse(request.id, false)}>Rechazar</Button>
+                        </div>
+                      </motion.li>
+                    ))}
+                  </AnimatePresence>
                 </ul>
               ) : (
                 <EmptyState
@@ -206,25 +222,35 @@ const FriendsPage = () => {
               <div className="flex justify-center py-4"><Spinner /></div>
             ) : friends.length ? (
               <ul className="flex flex-col divide-y divide-white/5">
-                {friends.map((friend) => (
-                  <li key={friend.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
-                    <div className="min-w-0">
-                      <strong className="text-[14px] font-semibold text-primary block truncate">
-                        {friend.displayName}
-                      </strong>
-                      <p className="text-[12px] text-secondary truncate">
-                        @{friend.username}
-                      </p>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => friendService.removeFriend(friend.id).then(load)}
+                <AnimatePresence>
+                  {friends.map((friend, idx) => (
+                    <motion.li
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ delay: idx * 0.05 }}
+                      whileHover={{ x: 4 }}
+                      key={friend.id}
+                      className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0"
                     >
-                      Eliminar
-                    </Button>
-                  </li>
-                ))}
+                      <div className="min-w-0">
+                        <strong className="text-[14px] font-semibold text-primary block truncate">
+                          {friend.displayName}
+                        </strong>
+                        <p className="text-[12px] text-secondary truncate">
+                          @{friend.username}
+                        </p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => friendService.removeFriend(friend.id).then(load)}
+                      >
+                        Eliminar
+                      </Button>
+                    </motion.li>
+                  ))}
+                </AnimatePresence>
               </ul>
             ) : (
               <EmptyState
@@ -235,6 +261,7 @@ const FriendsPage = () => {
             )}
           </Surface>
         </div>
+        </motion.div>
       </PageContainer>
     </MobileLayout>
   )

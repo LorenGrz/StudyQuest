@@ -7,7 +7,7 @@ import {
   UploadNoteCard,
   QuestCard,
   ActivityFeed,
-} from '../components/PartyComponents'
+} from '../components/party/PartyComponents'
 import { SegmentedTabs } from '../components/PagePrimitives'
 import { ChatBox } from '../components/party-chat/ChatBox'
 import { Spinner, Button } from '../components/UI'
@@ -90,9 +90,9 @@ const PartyRoomPage = () => {
 
   return (
     <MobileLayout>
-      <div className="flex flex-col flex-1 min-h-0">
+      <div className="flex flex-col h-full min-h-0">
         {/* Sticky header: party info + tabs */}
-        <div className="sticky top-0 z-20 bg-gradient-to-b from-[rgba(11,11,24,0.98)] to-[rgba(11,11,24,0.94)] backdrop-blur-[14px] border-b border-edge">
+        <div className="sticky top-0 z-20 bg-[var(--bg-base)]/95 backdrop-blur-[14px] border-b border-edge">
           <div className="flex items-center gap-2 px-4 pt-3 pb-1">
             <Button
               size="sm"

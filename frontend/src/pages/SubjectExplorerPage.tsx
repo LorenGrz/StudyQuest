@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { MobileLayout } from '../components/Layouts'
-import { SearchBar, FilterChips, SubjectList } from '../components/SubjectComponents'
+import { SearchBar, FilterChips, SubjectList } from '../components/subject/SubjectComponents'
 import { Badge, Button } from '../components/UI'
 import { PageHeader, PageContainer } from '../components/PagePrimitives'
 import { useSubjectExplorer, type SubjectFilters } from '../hooks/useSubjectExplorer'

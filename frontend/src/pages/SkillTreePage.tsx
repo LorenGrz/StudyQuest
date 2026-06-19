@@ -3,119 +3,21 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { MobileLayout } from '../components/Layouts'
 import { Spinner, Button } from '../components/UI'
 import { useSkillTree } from '../hooks/useSkillTree'
-import type { SkillNode } from '../services/skillTreeService'
-
-const ICONS: Record<string, string> = {
-  target: '🎯',
-  link: '🔗',
-  'trending-up': '📈',
-  sigma: '∑',
-  rocket: '🚀',
-  star: '⭐',
-}
-
-function nodeIcon(iconKey: string) {
-  return ICONS[iconKey] ?? '⭐'
-}
-
-function nodeStatus(node: SkillNode) {
-  if (node.unlocked) {
-    return 'border-[#f5c518] bg-gradient-to-br from-[rgba(245,197,24,0.18)] to-[rgba(124,58,237,0.24)] bg-surface'
-  }
-
-  if (node.prerequisitesMet) {
-    return 'border-accent-light shadow-[0_0_12px_rgba(124,58,237,0.3)] animate-skill-pulse'
-  }
-
-  return 'opacity-[0.92] saturate-[0.62] border-white/[0.12]'
-}
-
-function nodeStatusLabel(node: SkillNode) {
-  if (node.unlocked) {
-    return 'Desbloqueado'
-  }
-
-  if (node.prerequisitesMet) {
-    return 'Disponible'
-  }
-
-  return 'Bloqueado'
-}
-
-const NODE_WIDTH = 164
-const NODE_HEIGHT = 112
-const GRID_GAP_X = 52
-const GRID_GAP_Y = 40
-const SCENE_PADDING = 40
-const MIN_SCALE = 0.6
-const MAX_SCALE = 2.2
-const VIEWPORT_PADDING = 28
-
-function pointForNode(node: SkillNode) {
-  const x = SCENE_PADDING + node.col * (NODE_WIDTH + GRID_GAP_X)
-  const y = SCENE_PADDING + node.row * (NODE_HEIGHT + GRID_GAP_Y)
-  return { x, y }
-}
-
-function clamp(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value))
-}
-
-function clampViewport(
-  nextViewport: { x: number; y: number; scale: number },
-  canvas: HTMLDivElement | null,
-  sceneWidth: number,
-  sceneHeight: number,
-) {
-  if (!canvas) {
-    return nextViewport
-  }
-
-  const scaledWidth = sceneWidth * nextViewport.scale
-  const scaledHeight = sceneHeight * nextViewport.scale
-  const availableWidth = canvas.clientWidth
-  const availableHeight = canvas.clientHeight
-
-  const minX = scaledWidth <= availableWidth
-    ? (availableWidth - scaledWidth) / 2
-    : availableWidth - scaledWidth - VIEWPORT_PADDING
-  const maxX = scaledWidth <= availableWidth
-    ? minX
-    : VIEWPORT_PADDING
-
-  const minY = scaledHeight <= availableHeight
-    ? (availableHeight - scaledHeight) / 2
-    : availableHeight - scaledHeight - VIEWPORT_PADDING
-  const maxY = scaledHeight <= availableHeight
-    ? minY
-    : VIEWPORT_PADDING
-
-  return {
-    ...nextViewport,
-    x: clamp(nextViewport.x, minX, maxX),
-    y: clamp(nextViewport.y, minY, maxY),
-  }
-}
-
-function fitViewport(canvas: HTMLDivElement | null, sceneWidth: number, sceneHeight: number) {
-  if (!canvas) {
-    return { x: 0, y: 0, scale: 1 }
-  }
-
-  const availableWidth = Math.max(canvas.clientWidth - VIEWPORT_PADDING * 2, 1)
-  const availableHeight = Math.max(canvas.clientHeight - VIEWPORT_PADDING * 2, 1)
-  const scale = clamp(
-    Math.min(availableWidth / sceneWidth, availableHeight / sceneHeight, 1),
-    MIN_SCALE,
-    MAX_SCALE,
-  )
-
-  return clampViewport({
-    scale,
-    x: (canvas.clientWidth - sceneWidth * scale) / 2,
-    y: (canvas.clientHeight - sceneHeight * scale) / 2,
-  }, canvas, sceneWidth, sceneHeight)
-}
+import {
+  clamp,
+  clampViewport,
+  fitViewport,
+  MIN_SCALE,
+  MAX_SCALE,
+  SCENE_PADDING,
+  NODE_WIDTH,
+  GRID_GAP_X,
+  NODE_HEIGHT,
+  GRID_GAP_Y,
+  pointForNode
+} from '../components/skill-tree/utils'
+import { SkillDetailsModal } from '../components/skill-tree/SkillDetailsModal'
+import { SkillNodeItem } from '../components/skill-tree/SkillNodeItem'
 
 const SkillTreePage = () => {
   const navigate = useNavigate()
@@ -427,19 +329,19 @@ const SkillTreePage = () => {
       </div>
 
       <section className="grid grid-cols-2 gap-2.5 my-2 mb-3" aria-label="Resumen de progreso del árbol de habilidades">
-        <article className="flex flex-col gap-1 px-3.5 py-3 rounded-[18px] border border-white/8 bg-gradient-to-b from-white/[0.04] to-white/[0.02] bg-surface">
+        <article className="flex flex-col gap-1 px-3.5 py-3 rounded-[18px] border border-[var(--overlay-border)] bg-gradient-to-b from-white/[0.04] to-white/[0.02] bg-surface">
           <span className="text-xl font-extrabold text-primary">{treeStats.progress}%</span>
           <span className="text-xs text-secondary">Progreso total</span>
         </article>
-        <article className="flex flex-col gap-1 px-3.5 py-3 rounded-[18px] border border-white/8 bg-gradient-to-b from-white/[0.04] to-white/[0.02] bg-surface">
+        <article className="flex flex-col gap-1 px-3.5 py-3 rounded-[18px] border border-[var(--overlay-border)] bg-gradient-to-b from-white/[0.04] to-white/[0.02] bg-surface">
           <span className="text-xl font-extrabold text-primary">{treeStats.unlocked}/{treeStats.total}</span>
           <span className="text-xs text-secondary">Nodos desbloqueados</span>
         </article>
-        <article className="flex flex-col gap-1 px-3.5 py-3 rounded-[18px] border border-white/8 bg-gradient-to-b from-white/[0.04] to-white/[0.02] bg-surface">
+        <article className="flex flex-col gap-1 px-3.5 py-3 rounded-[18px] border border-[var(--overlay-border)] bg-gradient-to-b from-white/[0.04] to-white/[0.02] bg-surface">
           <span className="text-xl font-extrabold text-primary">{treeStats.available}</span>
           <span className="text-xs text-secondary">Listos para seguir</span>
         </article>
-        <article className="flex flex-col gap-1 px-3.5 py-3 rounded-[18px] border border-white/8 bg-gradient-to-b from-white/[0.04] to-white/[0.02] bg-surface">
+        <article className="flex flex-col gap-1 px-3.5 py-3 rounded-[18px] border border-[var(--overlay-border)] bg-gradient-to-b from-white/[0.04] to-white/[0.02] bg-surface">
           <span className="text-xl font-extrabold text-primary">{treeStats.locked}</span>
           <span className="text-xs text-secondary">Todavía bloqueados</span>
         </article>
@@ -469,7 +371,7 @@ const SkillTreePage = () => {
         <Button size="sm" variant="ghost" onClick={centerTree} aria-label="Centrar árbol">
           Recentrar
         </Button>
-        <span className="inline-flex items-center justify-center min-w-[52px] h-[34px] px-2.5 rounded-full border border-white/8 bg-surface text-secondary text-xs font-bold" aria-live="polite">{Math.round(viewport.scale * 100)}%</span>
+        <span className="inline-flex items-center justify-center min-w-[52px] h-[34px] px-2.5 rounded-full border border-[var(--overlay-border)] bg-surface text-secondary text-xs font-bold" aria-live="polite">{Math.round(viewport.scale * 100)}%</span>
       </div>
 
       <div
@@ -509,96 +411,26 @@ const SkillTreePage = () => {
           </svg>
 
           <div className="absolute inset-0 z-[2]">
-            {nodes.map((node) => {
-              const position = pointForNode(node)
-
-              return (
-                <button
-                  key={node.id}
-                  className={[
-                    'skill-node',
-                    'absolute w-[164px] min-h-[112px] rounded-[12px] border border-white/8 p-2 flex flex-col items-center justify-center gap-[5px] bg-surface transition-[transform,box-shadow,border-color,opacity] duration-150 z-[1] hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[rgba(245,197,24,0.95)] focus-visible:outline-offset-[3px]',
-                    nodeStatus(node),
-                    selectedNodeId === node.id ? 'z-[3] shadow-[0_0_0_2px_rgba(245,197,24,0.28),0_10px_22px_rgba(0,0,0,0.22)]' : '',
-                    selectedNode && selectedNodeId !== node.id ? 'opacity-30' : '',
-                  ].filter(Boolean).join(' ')}
-                  style={{
-                    left: position.x,
-                    top: position.y,
-                  }}
-                  aria-label={`${node.name}. ${nodeStatusLabel(node)}. ${node.topicXp} de ${node.xpThreshold} XP en ${node.topic}.`}
-                  aria-pressed={selectedNodeId === node.id}
-                  onClick={() => {
-                    if (Date.now() < suppressClickUntilRef.current) {
-                      return
-                    }
-                    setSelectedNodeId(node.id)
-                  }}
-                >
-                  <span className={`absolute top-1.5 right-1.5 text-[9px] rounded-full px-1.5 py-0.5 border border-transparent text-secondary bg-white/[0.05] ${node.unlocked ? 'bg-[rgba(245,197,24,0.2)] border-[rgba(245,197,24,0.4)] text-[#f5c518]' : node.prerequisitesMet ? 'bg-[rgba(124,58,237,0.2)] border-[rgba(124,58,237,0.45)] text-[#c9a8ff]' : 'bg-white/[0.08] border-white/[0.18] text-[#bfc3d7]'}`}>
-                    {nodeStatusLabel(node)}
-                  </span>
-                  <div className="text-2xl leading-none">{nodeIcon(node.iconKey)}</div>
-                  <div className="text-xs font-bold text-center text-primary">{node.name}</div>
-                  {node.unlocked ? (
-                    <div className="badge badge-success">Desbloqueado</div>
-                  ) : (
-                    <>
-                      <div className="w-full h-[5px] rounded-full bg-elevated overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-accent to-accent-light"
-                          style={{ width: `${node.progressPercent}%` }}
-                        />
-                      </div>
-                      <div className="text-[11px] text-[#c8cbe0] font-semibold">
-                        {node.topicXp}/{node.xpThreshold} XP
-                      </div>
-                    </>
-                  )}
-                </button>
-              )
-            })}
+            {nodes.map((node) => (
+              <SkillNodeItem
+                key={node.id}
+                node={node}
+                selectedNodeId={selectedNodeId}
+                hasSelectedNode={!!selectedNode}
+                suppressClickUntilRef={suppressClickUntilRef}
+                onSelect={setSelectedNodeId}
+              />
+            ))}
           </div>
         </div>
       </div>
 
-      {selectedNode && (
-        <div className="fixed left-4 right-4 bottom-[82px] rounded-[18px] border border-white/8 bg-surface shadow-[0_4px_16px_rgba(0,0,0,0.5)] p-3.5 flex flex-col gap-2 z-[100] max-h-[min(42vh,360px)] overflow-auto" role="dialog" aria-live="polite" aria-label={`Detalle del nodo ${selectedNode.name}`}>
-          <div className="flex items-start justify-between gap-2.5">
-            <div>
-              <h3>{selectedNode.name}</h3>
-              <p className="mt-0.5 text-xs text-secondary">{nodeStatusLabel(selectedNode)} · {selectedNode.topic}</p>
-            </div>
-            <Button size="sm" variant="ghost" onClick={() => setSelectedNodeId(null)}>
-              Cerrar
-            </Button>
-          </div>
-          <p>{selectedNode.description ?? 'Sin descripcion disponible.'}</p>
-          <div className="flex flex-col gap-1.5">
-            <div className="w-full h-[5px] rounded-full bg-elevated overflow-hidden" aria-hidden="true">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-accent to-accent-light"
-                style={{ width: `${selectedNode.progressPercent}%` }}
-              />
-            </div>
-            <p className="text-[13px] text-[#ccd0e5]">
-              Progreso: {selectedNode.topicXp}/{selectedNode.xpThreshold} XP · {selectedNode.progressPercent}%
-            </p>
-          </div>
-          {nextStepText && <p className="text-[13px] text-primary bg-white/[0.04] border border-white/8 rounded-[12px] p-3">Siguiente paso: {nextStepText}</p>}
-
-          {!selectedNode.unlocked && !selectedNode.prerequisitesMet && (
-            <div className="mt-1 text-[13px]">
-              <strong>Falta desbloquear:</strong>
-              <ul>
-                {selectedNode.prerequisiteIds.map((id) => (
-                  <li key={id}>{nodeNameById.get(id) ?? 'Nodo requerido'}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
+      <SkillDetailsModal
+        selectedNode={selectedNode}
+        nextStepText={nextStepText}
+        nodeNameById={nodeNameById}
+        onClose={() => setSelectedNodeId(null)}
+      />
     </MobileLayout>
   )
 }

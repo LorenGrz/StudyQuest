@@ -2,7 +2,7 @@ import React from 'react'
 
 const API_ORIGIN = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
 
-function resolveMediaUrl(url: string | null | undefined): string | null {
+export function resolveMediaUrl(url: string | null | undefined): string | null {
   if (!url) return null
   // Already absolute (http/https/blob/data) — leave as-is
   if (/^(https?:|blob:|data:)/.test(url)) return url
@@ -36,14 +36,14 @@ export function AvatarWithBorder({
     switch (size) {
       case 'sm':
         // avatar-placeholder-sm
-        return 'w-9 h-9 rounded-full bg-gradient-to-br from-accent to-blue-600 flex items-center justify-center font-bold text-sm text-white'
+        return 'w-9 h-9 rounded-full bg-gradient-to-br from-accent to-blue-600 flex items-center justify-center font-bold text-sm text-primary'
       case 'lg':
         // avatar-placeholder (lg uses same base but larger — we treat lg as the big variant)
-        return 'w-16 h-16 rounded-full bg-gradient-to-br from-accent to-blue-600 flex items-center justify-center font-extrabold text-lg text-white'
+        return 'w-16 h-16 rounded-full bg-gradient-to-br from-accent to-blue-600 flex items-center justify-center font-extrabold text-lg text-primary'
       case 'md':
       default:
         // avatar-placeholder
-        return 'w-11 h-11 rounded-full bg-gradient-to-br from-accent to-blue-600 flex items-center justify-center font-extrabold text-lg text-white'
+        return 'w-11 h-11 rounded-full bg-gradient-to-br from-accent to-blue-600 flex items-center justify-center font-extrabold text-lg text-primary'
     }
   }
 

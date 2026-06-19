@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
 import { MobileLayout } from '../components/Layouts'
 import { Spinner } from '../components/UI'
 import { useAuthStore } from '../store/authStore'
@@ -37,10 +38,15 @@ export default function LeaderboardPage() {
 
   return (
     <MobileLayout>
-      <div className="px-4 pt-5 pb-2">
-        <h1 className="text-2xl font-extrabold pt-5 pb-2">🏆 Leaderboard</h1>
-        <p className="text-[13px] text-muted mt-0.5">Ranking global por materia</p>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.22, ease: 'easeOut' }}
+      >
+        <div className="px-4 pt-5 pb-2">
+          <h1 className="text-2xl font-extrabold pt-5 pb-2">🏆 Leaderboard</h1>
+          <p className="text-[13px] text-muted mt-0.5">Ranking global por materia</p>
+        </div>
 
       {/* Subject Selector */}
       {subjects.length === 0 ? (
@@ -55,7 +61,7 @@ export default function LeaderboardPage() {
               <button
                 key={s.id}
                 id={`lb-tab-${s.id}`}
-                className={`py-[7px] px-4 rounded-full border border-white/8 bg-surface text-secondary text-[13px] font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer hover:border-accent hover:text-accent-light min-h-[44px] ${selectedSubjectId === s.id ? 'bg-accent border-accent text-white shadow-[0_0_12px_rgba(124,58,237,0.4)]' : ''}`}
+                className={`py-[7px] px-4 rounded-full border border-[var(--overlay-border)] bg-surface text-secondary text-[13px] font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer hover:border-accent hover:text-accent-light min-h-[44px] ${selectedSubjectId === s.id ? 'bg-accent border-accent text-primary shadow-[0_0_12px_rgba(124,58,237,0.4)]' : ''}`}
                 onClick={() => setSelectedSubjectId(s.id)}
               >
                 {s.name}
@@ -119,6 +125,7 @@ export default function LeaderboardPage() {
           )}
         </>
       )}
+      </motion.div>
     </MobileLayout>
   )
 }
@@ -138,7 +145,10 @@ function PodiumCard({
   const mobileHeights = { 1: '90px', 2: '70px', 3: '60px' }
 
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.1, duration: 0.3, ease: 'easeOut' }}
       className={`flex flex-col items-center gap-1 rounded-xl border-2 bg-surface pt-3 px-2.5 pb-0 transition-transform duration-200 overflow-hidden flex-1 max-w-[120px] hover:-translate-y-0.5 ${isMe ? 'animate-pulse-border' : ''}`}
       style={{ borderColor: league.color, boxShadow: `0 0 16px ${league.glowColor}` }}
     >
@@ -155,11 +165,11 @@ function PodiumCard({
       <div className="flex flex-col items-center flex-1 min-w-0">
         <p className="text-xs font-bold text-center text-primary overflow-hidden text-ellipsis whitespace-nowrap max-w-[100px] w-full">{entry.displayName}</p>
         <p className="text-[11px] font-semibold" style={{ color: league.color }}>{league.icon} {league.name}</p>
-        <p className="text-[11px] text-muted font-semibold">{entry.elo} ELO</p>
+        <span className="text-xs text-muted font-semibold">{entry.elo} ELO</span>
       </div>
       {/* Mobile podium height bar */}
       <div className="w-full mt-2 rounded-b-lg opacity-60" style={{ height: mobileHeights[position], background: league.gradient }} />
-    </div>
+    </motion.div>
   )
 }
 
@@ -175,10 +185,12 @@ function LeaderboardRow({
   const league = getLeague(entry.elo ?? DEFAULT_ELO)
 
   return (
-    <div
-      className={`flex items-center gap-3 bg-surface border border-white/8 rounded-lg px-3.5 py-3 transition-[transform,border-color] duration-200 animate-lb-in hover:translate-x-1 ${isMe ? 'bg-[rgba(124,58,237,0.06)]' : ''}`}
+    <motion.div
+      initial={{ opacity: 0, x: -10 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: animDelay / 1000, duration: 0.2, ease: 'easeOut' }}
+      className={`flex items-center gap-3 bg-surface border rounded-lg px-3.5 py-3 transition-[border-color] duration-200 hover:translate-x-1 ${isMe ? 'bg-[rgba(124,58,237,0.06)]' : 'border-[var(--overlay-border)]'}`}
       style={{
-        animationDelay: `${animDelay}ms`,
         borderLeft: isMe ? `4px solid ${league.color}` : '4px solid transparent',
       }}
     >
@@ -201,6 +213,6 @@ function LeaderboardRow({
         <span className="text-lg" title={league.name}>{league.icon}</span>
         <span className="text-sm font-extrabold" style={{ color: league.color }}>{entry.elo}</span>
       </div>
-    </div>
+    </motion.div>
   )
 }
