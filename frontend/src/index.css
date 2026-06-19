@@ -289,6 +289,32 @@
   100% { box-shadow: 0 0 0 0 rgba(251, 113, 133, 0); }
 }
 
+/* Skill-tree dependency edges. These <line> elements in SkillTreePage rely on
+   these class names for their stroke; the Tailwind migration dropped the rules,
+   leaving the dependency paths invisible. */
+@layer components {
+  .skill-tree-edge {
+    stroke: rgba(124, 58, 237, 0.35);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-dasharray: 6 6;
+    transition: opacity 0.18s ease, stroke 0.18s ease, stroke-width 0.18s ease;
+  }
+  .skill-tree-edge--active {
+    stroke: rgba(245, 197, 24, 0.8);
+    stroke-dasharray: none;
+  }
+  .skill-tree-edge--dimmed {
+    opacity: 0.22;
+  }
+  .skill-tree-edge--focused {
+    opacity: 1;
+    stroke: rgba(245, 197, 24, 0.95);
+    stroke-width: 3;
+    stroke-dasharray: none;
+  }
+}
+
 /* Form field primitives. Most forms use Tailwind utilities directly, but
    PartyComponents.tsx (tournament/quest creation, invites) still consumes these
    class names — keep them defined so those fields stay styled. */
