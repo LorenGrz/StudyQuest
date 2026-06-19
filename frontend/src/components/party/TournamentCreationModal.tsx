@@ -112,8 +112,8 @@ export function TournamentCreationModal({ quest, onClose }: TournamentCreationMo
               <Button type="button" variant="ghost" className="flex-1" onClick={onClose}>
                 Cancelar
               </Button>
-              <Button type="submit" isLoading={isLoading} className="flex-1">
-                Crear 🏆
+              <Button type="submit" variant="primary" isLoading={isLoading} className="flex-1">
+                Crear ⚔️
               </Button>
             </div>
           </form>

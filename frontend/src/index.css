@@ -18,6 +18,7 @@
   --color-muted: var(--text-muted);
   --color-accent: var(--accent);
   --color-accent-light: var(--accent-light);
+  --color-on-accent: var(--text-on-accent);
   --color-success: var(--green);
   --color-warning: var(--yellow);
   --color-danger: var(--red);
@@ -88,6 +89,7 @@
   --accent-light:   #9d5df7;
   --accent-glow:    rgba(124, 58, 237, 0.3);
   --accent-bg:      rgba(124, 58, 237, 0.1);
+  --text-on-accent: #ffffff;
   
   --green:          #10b981;
   --green-bg:       rgba(16, 185, 129, 0.1);
@@ -141,6 +143,7 @@
   --accent-light: #6d28d9;
   --accent-glow: rgba(124, 58, 237, 0.2);
   --accent-bg: rgba(124, 58, 237, 0.08);
+  --text-on-accent: #ffffff;
 
   --green-bg: rgba(16, 185, 129, 0.12);
   --yellow-bg: rgba(245, 158, 11, 0.12);
@@ -284,6 +287,32 @@
   0% { box-shadow: 0 0 0 0 rgba(251, 113, 133, 0.55); }
   70% { box-shadow: 0 0 0 10px rgba(251, 113, 133, 0); }
   100% { box-shadow: 0 0 0 0 rgba(251, 113, 133, 0); }
+}
+
+/* Skill-tree dependency edges. These <line> elements in SkillTreePage rely on
+   these class names for their stroke; the Tailwind migration dropped the rules,
+   leaving the dependency paths invisible. */
+@layer components {
+  .skill-tree-edge {
+    stroke: rgba(124, 58, 237, 0.35);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-dasharray: 6 6;
+    transition: opacity 0.18s ease, stroke 0.18s ease, stroke-width 0.18s ease;
+  }
+  .skill-tree-edge--active {
+    stroke: rgba(245, 197, 24, 0.8);
+    stroke-dasharray: none;
+  }
+  .skill-tree-edge--dimmed {
+    opacity: 0.22;
+  }
+  .skill-tree-edge--focused {
+    opacity: 1;
+    stroke: rgba(245, 197, 24, 0.95);
+    stroke-width: 3;
+    stroke-dasharray: none;
+  }
 }
 
 /* Form field primitives. Most forms use Tailwind utilities directly, but
