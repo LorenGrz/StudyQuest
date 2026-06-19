@@ -52,7 +52,7 @@ export function SearchAnimation() {
         <div className="absolute rounded-full border border-[rgba(124,58,237,0.4)] animate-radar w-[120px] h-[120px] [animation-delay:0.5s]" />
         <div className="absolute rounded-full border border-[rgba(124,58,237,0.4)] animate-radar w-[180px] h-[180px] [animation-delay:1s]" />
         <div className="text-[32px] z-[1]">🧑‍💻</div>
-        <div className="radar-sweep" />
+        <div className="absolute inset-0 rounded-full border-2 border-[rgba(124,58,237,0.6)] border-t-transparent animate-spin" style={{ animationDuration: '2s' }} />
       </div>
       <p className="text-lg font-bold">Buscando compañeros de estudio...</p>
       <p className="text-sm text-muted">Puede tomar unos segundos</p>

@@ -297,7 +297,7 @@ export function ErrorState({ message, onRetry }: ErrorStateProps) {
       <span className="text-[52px] leading-none">⚠️</span>
       <p className="text-[20px] font-extrabold text-white">Algo salió mal</p>
       <p className="text-muted text-sm max-w-[260px] leading-relaxed">{message ?? 'Error desconocido'}</p>
-      <button className="btn btn-primary btn-md mt-2" onClick={onRetry}>Reintentar</button>
+      <button className="mt-2 px-5 py-2.5 rounded-lg bg-accent text-white font-bold text-sm hover:bg-accent-light transition-colors min-h-[44px]" onClick={onRetry}>Reintentar</button>
     </div>
   )
 }
@@ -310,7 +310,7 @@ export function EmptyState({ onCreateParty }: { onCreateParty: () => void }) {
       <div className="text-[56px] leading-none">✨</div>
       <p className="text-[20px] font-extrabold text-white">¡Ya recorriste todo!</p>
       <p className="text-muted text-sm max-w-[260px] leading-relaxed">No hay más squads disponibles en tus materias.</p>
-      <button className="btn btn-primary btn-md mt-2" onClick={onCreateParty}>
+      <button className="mt-2 px-5 py-2.5 rounded-lg bg-accent text-white font-bold text-sm hover:bg-accent-light transition-colors min-h-[44px]" onClick={onCreateParty}>
         ⚡ Crear mi party
       </button>
     </div>
