@@ -12,7 +12,7 @@ export function MobileLayout({ children }: Props) {
 export function AuthLayout({ children }: Props) {
   return (
     <div className="h-full flex items-center justify-center p-4 bg-gradient-to-t from-base via-base to-purple-950/15 overflow-y-auto">
-      <div className="w-full max-w-[420px] bg-surface border border-white/8 rounded-3xl p-8 flex flex-col gap-6">
+      <div className="w-full max-w-[420px] bg-surface border border-[var(--overlay-border)] rounded-3xl p-8 flex flex-col gap-6">
         <div className="text-center">
           <span className="text-[48px] block mb-2">⚡</span>
           <h1 className="text-[28px] font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-purple-700">StudyQuest</h1>

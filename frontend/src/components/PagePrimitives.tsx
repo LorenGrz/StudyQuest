@@ -97,7 +97,7 @@ export function Alert({
       {actionLabel && onAction && (
         <button
           onClick={onAction}
-          className="self-start inline-flex items-center justify-center min-h-11 px-4 rounded-lg bg-accent text-white font-semibold text-sm transition-colors hover:bg-accent-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="self-start inline-flex items-center justify-center min-h-11 px-4 rounded-lg bg-accent text-primary font-semibold text-sm transition-colors hover:bg-accent-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
           {actionLabel}
         </button>
@@ -162,7 +162,7 @@ export function SegmentedTabs<T extends string>({
             onClick={() => onChange(tab.id)}
             className={`inline-flex items-center justify-center gap-1.5 min-h-11 px-4 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
               isActive
-                ? 'bg-accent text-white'
+                ? 'bg-accent text-primary'
                 : 'text-secondary hover:text-primary'
             }`}
           >

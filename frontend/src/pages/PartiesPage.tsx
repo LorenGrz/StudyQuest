@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MobileLayout } from '../components/Layouts'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Spinner, Badge, Button } from '../components/UI'
 import { PageContainer, PageHeader, EmptyState } from '../components/PagePrimitives'
 import { partyService, type Party } from '../services/partyService'
@@ -58,7 +59,13 @@ const PartiesPage = () => {
   return (
     <MobileLayout>
       <PageContainer>
-        <PageHeader
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.22, ease: 'easeOut' }}
+          className="flex flex-col flex-1"
+        >
+          <PageHeader
           title="Mis Parties"
           back={() => navigate('/dashboard')}
           action={
@@ -69,16 +76,29 @@ const PartiesPage = () => {
         />
 
         {/* Modal crear party */}
-        {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
-            <div className="w-full max-w-sm bg-elevated border border-edge rounded-xl p-6 flex flex-col gap-5">
+        <AnimatePresence>
+          {showModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6"
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                transition={{ type: 'spring', duration: 0.3 }}
+                className="w-full max-w-sm bg-elevated border border-edge rounded-xl p-6 flex flex-col gap-5"
+              >
               <h2 className="text-xl font-bold text-primary">🎮 Nueva Party</h2>
 
               {subjects.length > 0 ? (
-                <div className="input-group">
-                  <label className="input-label">Materia (opcional — por defecto tu primera materia)</label>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[13px] font-medium text-secondary">Materia (opcional — por defecto tu primera materia)</label>
                   <select
-                    className="input input-select"
+                    className="w-full min-h-[2.75rem] px-3.5 py-2.5 bg-[var(--bg-input)] border border-[var(--border)] rounded-lg text-primary text-sm cursor-pointer transition-[border-color,box-shadow] duration-200 outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30"
                     value={selectedSubjectId}
                     onChange={(e) => setSelectedSubjectId(e.target.value)}
                   >
@@ -128,9 +148,10 @@ const PartiesPage = () => {
                   {isCreating ? 'Creando…' : 'Crear Party'}
                 </Button>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
+        </AnimatePresence>
 
         {/* Lista */}
         {isLoading ? (
@@ -151,30 +172,38 @@ const PartiesPage = () => {
           />
         ) : (
           <div className="flex flex-col gap-3">
-            {parties.map(party => (
-              <div
-                key={party.id}
-                className="flex items-center justify-between gap-3 bg-surface border border-edge rounded-lg px-4 py-3 cursor-pointer hover:border-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-                onClick={() => navigate(`/party/${party.id}`)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate(`/party/${party.id}`) }}
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="font-semibold text-primary text-sm truncate">
-                    {party.subject?.name ?? 'Party'}
+            <AnimatePresence>
+              {parties.map((party, idx) => (
+                <motion.div
+                  key={party.id}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ delay: idx * 0.05 }}
+                  whileHover={{ scale: 1.01 }}
+                  className="flex items-center justify-between gap-3 bg-surface border border-edge rounded-lg px-4 py-3 cursor-pointer hover:border-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  onClick={() => navigate(`/party/${party.id}`)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate(`/party/${party.id}`) }}
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="font-semibold text-primary text-sm truncate">
+                      {party.subject?.name ?? 'Party'}
+                    </div>
+                    <div className="flex items-center gap-2 mt-1 text-xs text-secondary">
+                      <span>👥 {party.members?.length || 0}/{party.maxMembers} miembros</span>
+                      <span aria-hidden="true">•</span>
+                      {getStatusBadge(party.status)}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 mt-1 text-xs text-secondary">
-                    <span>👥 {party.members?.length || 0}/{party.maxMembers} miembros</span>
-                    <span aria-hidden="true">•</span>
-                    {getStatusBadge(party.status)}
-                  </div>
-                </div>
-                <span className="shrink-0 text-secondary text-lg" aria-hidden="true">›</span>
-              </div>
-            ))}
+                  <span className="shrink-0 text-secondary text-lg" aria-hidden="true">›</span>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         )}
+        </motion.div>
       </PageContainer>
     </MobileLayout>
   )

@@ -1,5 +1,5 @@
-import type { User } from '../services/userService'
-import { Button } from './UI'
+import type { User } from '../../services/userService'
+import { Button } from '../UI'
 
 // ─── SubjectSelector ─────────────────────────────────────────────────────────
 interface SubjectSelectorProps {
@@ -78,7 +78,7 @@ export function PartyPreview({ onAccept, party }: PartyPreviewProps) {
           const key = m.username ?? m.userId ?? i;
           return (
             <div key={key} className="flex flex-col items-center gap-1.5 text-[13px]">
-              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-accent to-blue-600 flex items-center justify-center font-extrabold text-lg text-white">{name[0]}</div>
+              <div className="w-11 h-11 rounded-full bg-gradient-to-br from-accent to-blue-600 flex items-center justify-center font-extrabold text-lg text-primary">{name[0]}</div>
               <p>{name}</p>
             </div>
           )
@@ -101,7 +101,7 @@ export function WaitingForAll({ confirmed = 0, total = 4 }: { confirmed?: number
         {Array.from({ length: total }).map((_, i) => (
           <div
             key={i}
-            className={`w-3.5 h-3.5 rounded-full border border-white/8 transition-all duration-300 ${i < confirmed ? 'bg-success border-success shadow-[0_0_8px_var(--color-success)]' : 'bg-elevated'}`}
+            className={`w-3.5 h-3.5 rounded-full border border-[var(--overlay-border)] transition-all duration-300 ${i < confirmed ? 'bg-success border-success shadow-[0_0_8px_var(--color-success)]' : 'bg-elevated'}`}
           />
         ))}
       </div>

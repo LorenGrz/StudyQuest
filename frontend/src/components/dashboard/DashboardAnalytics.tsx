@@ -1,6 +1,6 @@
 import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
-import { SectionTitle, Spinner } from './UI'
-import { useDashboardStats } from '../hooks/useDashboardStats'
+import { SectionTitle, Spinner } from '../UI'
+import { useDashboardStats } from '../../hooks/useDashboardStats'
 
 function formatDay(day: string) {
   return day.slice(5)

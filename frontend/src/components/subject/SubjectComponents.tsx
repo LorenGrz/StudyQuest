@@ -1,6 +1,6 @@
 import { Search } from 'lucide-react'
-import type { Subject } from '../services/userService'
-import { EmptyState } from './PagePrimitives'
+import type { Subject } from '../../services/userService'
+import { EmptyState } from '../PagePrimitives'
 
 // ─── SearchBar ────────────────────────────────────────────────────────────────
 export function SearchBar({ value, onChange }: { value: string; onChange: (v: string) => void }) {
@@ -12,7 +12,7 @@ export function SearchBar({ value, onChange }: { value: string; onChange: (v: st
         className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none"
       />
       <input
-        className="w-full min-h-11 pl-9 pr-3.5 py-3 bg-panel border border-white/8 rounded-lg text-primary text-[15px] placeholder:text-muted transition-[border-color,box-shadow] duration-200 outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30"
+        className="w-full min-h-11 pl-9 pr-3.5 py-3 bg-panel border border-[var(--overlay-border)] rounded-lg text-primary text-[15px] placeholder:text-muted transition-[border-color,box-shadow] duration-200 outline-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30"
         type="search"
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -37,8 +37,8 @@ export function FilterChips({ filters, onChange }: FilterChipsProps) {
       <button
         className={`flex-shrink-0 min-h-9 px-3.5 rounded-full text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
           !filters.semester
-            ? 'bg-accent text-white'
-            : 'bg-elevated text-secondary hover:text-primary border border-white/8'
+            ? 'bg-accent text-primary'
+            : 'bg-elevated text-secondary hover:text-primary border border-[var(--overlay-border)]'
         }`}
         onClick={() => onChange({ ...filters, semester: null })}
       >
@@ -49,8 +49,8 @@ export function FilterChips({ filters, onChange }: FilterChipsProps) {
           key={s}
           className={`flex-shrink-0 min-h-9 px-3.5 rounded-full text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
             filters.semester === s
-              ? 'bg-accent text-white'
-              : 'bg-elevated text-secondary hover:text-primary border border-white/8'
+              ? 'bg-accent text-primary'
+              : 'bg-elevated text-secondary hover:text-primary border border-[var(--overlay-border)]'
           }`}
           onClick={() => onChange({ ...filters, semester: s === filters.semester ? null : s })}
         >

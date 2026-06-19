@@ -8,7 +8,7 @@ import {
   ErrorState,
   LoadingState,
   PartyCard,
-} from '../components/MatchComponents'
+} from '../components/match/MatchComponents'
 import { useMatch } from '../hooks/useMatch'
 import { usePartyStore } from '../store/partyStore'
 import { MobileLayout } from '../components/Layouts'
@@ -88,11 +88,11 @@ export default function MatchPage() {
       {/* Header */}
       <header className="flex items-center justify-between px-5 pt-5 pb-2.5 shrink-0">
         <div>
-          <h1 className="text-[22px] font-extrabold text-white">Party Discovery</h1>
+          <h1 className="text-[22px] font-extrabold text-primary">Party Discovery</h1>
           <p className="text-[13px] text-muted mt-1">{subtitleByStatus}</p>
         </div>
         <button 
-          className="w-[38px] h-[38px] rounded-xl bg-surface border border-white/8 flex items-center justify-center text-muted transition-all duration-200 hover:border-purple-500 hover:text-purple-400 active:scale-95" 
+          className="w-[38px] h-[38px] rounded-xl bg-surface border border-[var(--overlay-border)] flex items-center justify-center text-muted transition-all duration-200 hover:border-purple-500 hover:text-purple-400 active:scale-95" 
           aria-label="Filtros"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">

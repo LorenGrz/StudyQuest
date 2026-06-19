@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { AuthLayout } from '../components/Layouts'
-import { LoginForm, RegisterForm } from '../components/AuthForms'
+import { LoginForm, RegisterForm } from '../components/auth/AuthForms'
 
 const AuthPage = () => {
   const [mode, setMode] = useState<'login' | 'register'>('login')

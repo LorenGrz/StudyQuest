@@ -1,5 +1,6 @@
 import React from 'react'
 import type { ReactNode, ButtonHTMLAttributes } from 'react'
+import { motion } from 'framer-motion'
 
 // ─── Button ──────────────────────────────────────────────────────────────────
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -13,9 +14,9 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<string, string> = {
   primary:
-    'bg-accent text-white hover:bg-accent-light hover:shadow-[0_0_24px_rgba(124,58,237,0.3)] hover:-translate-y-px disabled:opacity-50 disabled:cursor-not-allowed',
+    'bg-accent text-primary hover:bg-accent-light hover:shadow-[0_0_24px_rgba(124,58,237,0.3)] hover:-translate-y-px disabled:opacity-50 disabled:cursor-not-allowed',
   secondary:
-    'bg-elevated text-primary border border-white/8 hover:border-white/[0.15] hover:bg-panel disabled:opacity-50 disabled:cursor-not-allowed',
+    'bg-elevated text-primary border border-[var(--overlay-border)] hover:border-white/[0.15] hover:bg-panel disabled:opacity-50 disabled:cursor-not-allowed',
   ghost:
     'bg-transparent text-secondary hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed',
   danger:
@@ -40,14 +41,16 @@ export function Button({
   ...props
 }: ButtonProps) {
   return (
-    <button
+    <motion.button
       className={`inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-150 gap-1.5 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       disabled={disabled || isLoading}
       aria-busy={isLoading}
-      {...props}
+      whileHover={(!disabled && !isLoading) ? { scale: 1.02 } : undefined}
+      whileTap={(!disabled && !isLoading) ? { scale: 0.98 } : undefined}
+      {...(props as any)}
     >
       {isLoading ? (
-        <span className="inline-block w-4 h-4 rounded-full border-2 border-white/8 border-t-accent animate-spin" />
+        <span className="inline-block w-4 h-4 rounded-full border-2 border-[var(--overlay-border)] border-t-accent animate-spin" />
       ) : (
         <>
           {startIcon && <span aria-hidden="true">{startIcon}</span>}
@@ -55,7 +58,7 @@ export function Button({
           {endIcon && <span aria-hidden="true">{endIcon}</span>}
         </>
       )}
-    </button>
+    </motion.button>
   )
 }
 
@@ -93,7 +96,7 @@ const spinnerSizeClasses: Record<string, string> = {
 export function Spinner({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
   return (
     <div
-      className={`rounded-full border-2 border-white/8 border-t-accent animate-spin ${spinnerSizeClasses[size]}`}
+      className={`rounded-full border-2 border-[var(--overlay-border)] border-t-accent animate-spin ${spinnerSizeClasses[size]}`}
     />
   )
 }
@@ -123,7 +126,7 @@ export function Input({ label, error, className = '', id, ...props }: InputProps
       )}
       <input
         id={id}
-        className={`w-full min-h-11 px-3.5 py-3 bg-panel border border-white/8 rounded-lg text-primary text-[15px] transition-[border-color,box-shadow] duration-200 outline-none placeholder:text-muted focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 ${error ? 'border-danger' : ''} ${className}`}
+        className={`w-full min-h-11 px-3.5 py-3 bg-panel border border-[var(--overlay-border)] rounded-lg text-primary text-[15px] transition-[border-color,box-shadow] duration-200 outline-none placeholder:text-muted focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 ${error ? 'border-danger' : ''} ${className}`}
         {...props}
       />
       {error && <span className="text-[12px] text-danger">{error}</span>}
@@ -148,7 +151,7 @@ export function Select({ label, error, options, className = '', id, ...props }: 
       )}
       <select
         id={id}
-        className={`w-full min-h-11 px-3.5 py-3 bg-panel border border-white/8 rounded-lg text-primary text-[15px] transition-[border-color,box-shadow] duration-200 outline-none appearance-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 ${error ? 'border-danger' : ''} ${className}`}
+        className={`w-full min-h-11 px-3.5 py-3 bg-panel border border-[var(--overlay-border)] rounded-lg text-primary text-[15px] transition-[border-color,box-shadow] duration-200 outline-none appearance-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 ${error ? 'border-danger' : ''} ${className}`}
         {...props}
       >
         <option value="">Seleccionar...</option>

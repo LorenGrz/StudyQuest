@@ -1,4 +1,4 @@
-import type { Quest, QuizOption } from '../services/questService'
+import type { Quest, QuizOption } from '../../services/questService'
 
 // ─── ScoreHeader ─────────────────────────────────────────────────────────────
 interface ScoreHeaderProps {
@@ -13,7 +13,7 @@ export function ScoreHeader({ scores, timeLeft, currentIndex, total }: ScoreHead
   const timerColor = timeLeft > 10 ? '#10b981' : timeLeft > 5 ? '#f59e0b' : '#ef4444'
 
   return (
-    <div className="bg-surface px-4 py-3 flex flex-col gap-2 border-b border-white/8">
+    <div className="bg-surface px-4 py-3 flex flex-col gap-2 border-b border-[var(--overlay-border)]">
       <div className="text-xs font-semibold text-muted text-center uppercase tracking-[0.5px]">
         Pregunta {currentIndex + 1} / {total}
       </div>
@@ -74,7 +74,7 @@ export function OptionsGrid({ options, onSelect, disabled, correct, selectedId }
         return (
           <button
             key={opt.id}
-            className={`flex items-center gap-2.5 px-3 py-3.5 bg-white/[0.04] border border-white/8 rounded-[18px] text-left transition-all duration-150 text-primary text-sm font-medium cursor-pointer hover:enabled:bg-elevated hover:enabled:scale-[1.02] disabled:cursor-not-allowed${isCorrect ? ' !bg-[rgba(16,185,129,0.1)] !border-success' : ''}${isSelected && !isCorrect ? ' !bg-[rgba(239,68,68,0.1)] !border-danger' : ''}`}
+            className={`flex items-center gap-2.5 px-3 py-3.5 bg-white/[0.04] border border-[var(--overlay-border)] rounded-[18px] text-left transition-all duration-150 text-primary text-sm font-medium cursor-pointer hover:enabled:bg-elevated hover:enabled:scale-[1.02] disabled:cursor-not-allowed${isCorrect ? ' !bg-[rgba(16,185,129,0.1)] !border-success' : ''}${isSelected && !isCorrect ? ' !bg-[rgba(239,68,68,0.1)] !border-danger' : ''}`}
             style={{ '--opt-color': optionColors[i] } as React.CSSProperties}
             onClick={() => !disabled && onSelect(opt.id)}
             disabled={disabled}
@@ -93,8 +93,8 @@ export function FeedbackOverlay({ correct, explanation }: { correct: boolean; ex
   return (
     <div className={`fixed inset-0 flex flex-col items-center justify-center gap-3 text-center p-8 animate-slide-up z-[100] ${correct ? 'bg-[rgba(16,185,129,0.9)]' : 'bg-[rgba(239,68,68,0.9)]'}`}>
       <div className="text-[56px]">{correct ? '✅' : '❌'}</div>
-      <p className="text-[28px] font-extrabold text-white">{correct ? '¡Correcto!' : 'Incorrecto'}</p>
-      <p className="text-[15px] text-white/85 max-w-[300px] leading-[1.5]">{explanation}</p>
+      <p className="text-[28px] font-extrabold text-primary">{correct ? '¡Correcto!' : 'Incorrecto'}</p>
+      <p className="text-[15px] text-secondary max-w-[300px] leading-[1.5]">{explanation}</p>
     </div>
   )
 }
