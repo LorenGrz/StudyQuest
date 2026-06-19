@@ -21,12 +21,15 @@ import { config } from 'dotenv';
 config({ path: '../.env' }); // carga el .env desde la raíz del proyecto
 
 import 'reflect-metadata';
+import { readFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 import { User } from '../../modules/users/user.entity';
 import { FriendRequest } from '../../modules/users/friend-request.entity';
 import { Subject } from '../../modules/subjects/subject.entity';
+import { SkillNode } from '../../modules/skill-tree/skill-node.entity';
 import { Party } from '../../modules/parties/party.entity';
 import { PartyMember } from '../../modules/parties/party-member.entity';
 import { ChatMessage } from '../../modules/parties/chat-message.entity';
@@ -54,6 +57,7 @@ const AppDataSource = new DataSource({
     User,
     FriendRequest,
     Subject,
+    SkillNode,
     Party,
     PartyMember,
     ChatMessage,
@@ -618,6 +622,78 @@ const PROFILE_BORDERS_DATA = [
 ];
 
 // ─── Main ──────────────────────────────────────────────────────────────────────
+type SkillTreeNodeTemplate = {
+  topic: string;
+  name: string;
+  description?: string;
+  iconKey: string;
+  xpThreshold: number;
+  col: number;
+  row: number;
+  dependsOn?: string[];
+};
+
+function resolveSkillTreeTemplatePath(code?: string): string {
+  if (code) {
+    const perSubject = join(__dirname, 'skill-trees', `${code}.json`);
+    if (existsSync(perSubject)) {
+      return perSubject;
+    }
+  }
+  return join(__dirname, 'skill-tree.template.json');
+}
+
+function loadSkillTreeTemplate(code?: string): SkillTreeNodeTemplate[] {
+  const templatePath = resolveSkillTreeTemplatePath(code);
+  const raw = readFileSync(templatePath, 'utf-8');
+  const parsed = JSON.parse(raw) as unknown;
+
+  if (!Array.isArray(parsed)) {
+    throw new Error(`${templatePath} debe contener un arreglo de nodos`);
+  }
+
+  return parsed as SkillTreeNodeTemplate[];
+}
+
+async function seedSkillTreesForSubjects(subjects: Subject[]) {
+  const nodeRepo = AppDataSource.getRepository(SkillNode);
+
+  for (const subject of subjects) {
+    const existing = await nodeRepo.count({ where: { subjectId: subject.id } });
+    if (existing > 0) {
+      console.log(`   ⚠️  ${subject.code}: ya hay nodos cargados — omitido`);
+      continue;
+    }
+
+    const template = loadSkillTreeTemplate(subject.code);
+    const topicToId = new Map<string, string>();
+
+    for (const node of template) {
+      const prerequisiteIds = (node.dependsOn ?? [])
+        .map((topic) => topicToId.get(topic))
+        .filter((id): id is string => Boolean(id));
+
+      const saved = await nodeRepo.save(
+        nodeRepo.create({
+          subjectId: subject.id,
+          topic: node.topic,
+          name: node.name,
+          description: node.description ?? null,
+          iconKey: node.iconKey,
+          xpThreshold: node.xpThreshold,
+          prerequisiteIds,
+          col: node.col,
+          row: node.row,
+        }),
+      );
+
+      topicToId.set(node.topic, saved.id);
+    }
+
+    console.log(`   ✔  ${subject.code}: ${template.length} nodos cargados`);
+  }
+}
+
 async function seed() {
   console.log('🌱  Conectando a la base de datos...');
   await AppDataSource.initialize();
@@ -653,6 +729,9 @@ async function seed() {
     savedSubjects.push(await subjectRepo.save(subject));
     console.log(`   ✔  ${sd.name}`);
   }
+
+  console.log('\n🧭  Cargando árboles de habilidades...');
+  await seedSkillTreesForSubjects(savedSubjects);
 
   // ── 2. Usuarios ──────────────────────────────────────────────────────────────
   console.log('\n👥  Creando usuarios...');
