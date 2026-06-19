@@ -35,6 +35,34 @@ it.each(migratedFiles)('%s has no removed legacy layout classes', (file) => {
   expect(source).not.toMatch(/\b(search-bar|filter-chips|subject-list-item|page-header|card-body|row-gap|list-item|auth-switch|link-btn)\b/)
 })
 
+const migratedFiles8 = [
+  'src/pages/MatchPage.tsx',
+  'src/components/MatchComponents.tsx',
+  'src/components/MatchmakingComponents.tsx',
+  'src/pages/SkillTreePage.tsx',
+  'src/components/SkillTreeComponents.tsx',
+  'src/pages/QuizPage.tsx',
+  'src/components/QuizComponents.tsx',
+  'src/pages/TournamentsPage.tsx',
+  'src/pages/TournamentLivePage.tsx',
+  'src/pages/TournamentResultsPage.tsx',
+]
+
+const forbiddenClasses = [
+  'btn-primary',
+  'quiz-finished',
+  'leaderboard-item',
+  'skill-unlock-toast',
+  'radar-sweep',
+]
+
+it.each(forbiddenClasses)('removes legacy class %s', (className) => {
+  const sources = migratedFiles8
+    .map((file) => readFileSync(resolve(process.cwd(), file), 'utf8'))
+    .join('\n')
+  expect(sources).not.toContain(className)
+})
+
 describe('design-system cascade', () => {
   it('keeps global margin and padding resets inside Tailwind base layer', () => {
     const baseLayer = extractLayer(css, 'base')
