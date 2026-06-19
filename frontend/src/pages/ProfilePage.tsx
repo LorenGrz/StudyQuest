@@ -351,7 +351,7 @@ export default function ProfilePage() {
           </section>
 
           {/* Account */}
-          <section className="mb-[108px]">
+          <section className="mb-4">
             <h3 className="text-base font-bold text-secondary uppercase tracking-[1px] pb-2">
               Cuenta
             </h3>
