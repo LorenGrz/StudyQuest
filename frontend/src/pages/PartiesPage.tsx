@@ -150,7 +150,7 @@ const PartiesPage = () => {
             }
           />
         ) : (
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+          <div className="flex flex-col gap-3">
             {parties.map(party => (
               <div
                 key={party.id}

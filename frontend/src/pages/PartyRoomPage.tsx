@@ -90,7 +90,7 @@ const PartyRoomPage = () => {
 
   return (
     <MobileLayout>
-      <div className="flex flex-col flex-1 min-h-0 w-full max-w-3xl mx-auto">
+      <div className="flex flex-col flex-1 min-h-0">
         {/* Sticky header: party info + tabs */}
         <div className="sticky top-0 z-20 bg-gradient-to-b from-[rgba(11,11,24,0.98)] to-[rgba(11,11,24,0.94)] backdrop-blur-[14px] border-b border-edge">
           <div className="flex items-center gap-2 px-4 pt-3 pb-1">
