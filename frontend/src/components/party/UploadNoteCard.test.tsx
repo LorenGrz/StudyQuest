@@ -22,6 +22,26 @@ describe('UploadNoteCard', () => {
     expect(onUpload).not.toHaveBeenCalled()
   })
 
+  it('submits successfully when a PDF is selected and the note text is empty', async () => {
+    const onUpload = vi.fn().mockResolvedValue(undefined)
+    const file = new File(['pdf-content'], 'apunte.pdf', { type: 'application/pdf' })
+
+    render(<UploadNoteCard onUpload={onUpload} isLoading={false} />)
+
+    fireEvent.click(screen.getByRole('button', { name: /crear quest con ia/i }))
+    fireEvent.change(screen.getByLabelText(/título del quiz/i), {
+      target: { value: 'Bases de datos' },
+    })
+
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+    fireEvent.change(fileInput, { target: { files: [file] } })
+    fireEvent.click(screen.getByRole('button', { name: /generar quest/i }))
+
+    await waitFor(() => {
+      expect(onUpload).toHaveBeenCalledWith('Bases de datos', file, undefined)
+    })
+  })
+
   it('shows backend error messages returned by onUpload', async () => {
     const onUpload = vi.fn().mockRejectedValue(new Error('No se pudo generar'))
 

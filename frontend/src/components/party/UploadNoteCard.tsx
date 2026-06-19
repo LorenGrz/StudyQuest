@@ -13,16 +13,18 @@ export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
   const [error, setError] = useState<string | null>(null)
   const [expanded, setExpanded] = useState(false)
   const [fileName, setFileName] = useState<string | null>(null)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const clearFile = () => {
+    setSelectedFile(null)
     setFileName(null)
     if (fileRef.current) fileRef.current.value = ''
   }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const file = fileRef.current?.files?.[0]
+    const file = selectedFile
     const trimmedText = noteText.trim()
 
     if (!file && !trimmedText) {
@@ -38,7 +40,7 @@ export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
     setError(null)
 
     try {
-      await onUpload(title, file, trimmedText || undefined)
+      await onUpload(title, file ?? undefined, trimmedText || undefined)
       setTitle('')
       setNoteText('')
       setExpanded(false)
@@ -119,7 +121,11 @@ export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
               type="file"
               accept="application/pdf"
               className="sr-only"
-              onChange={(e) => setFileName(e.target.files?.[0]?.name ?? null)}
+              onChange={(e) => {
+                const file = e.target.files?.[0] ?? null
+                setSelectedFile(file)
+                setFileName(file?.name ?? null)
+              }}
             />
             <Paperclip size={16} aria-hidden="true" />
             Elegí un PDF
