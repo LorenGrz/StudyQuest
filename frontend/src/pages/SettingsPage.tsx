@@ -61,8 +61,8 @@ export default function SettingsPage() {
           ))}
         </div>
 
-        {/* Content panel */}
-        <div className="flex-1 bg-surface rounded-2xl p-4 mt-2 border border-edge md:rounded-xl md:p-6 md:mt-0 relative overflow-hidden">
+        {/* Content panel — sizes to its content (no forced full-height stretch) */}
+        <div className="bg-surface rounded-2xl p-4 mt-2 border border-edge md:rounded-xl md:p-6 md:mt-0 relative overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
