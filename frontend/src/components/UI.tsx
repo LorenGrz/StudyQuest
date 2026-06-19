@@ -25,7 +25,7 @@ const variantClasses: Record<string, string> = {
 const sizeClasses: Record<string, string> = {
   sm: 'min-h-11 py-[7px] px-3.5 text-[13px]',
   md: 'min-h-11 py-[11px] px-5 text-[15px]',
-  lg: 'min-h-11 py-3.5 px-6 text-base rounded-[18px]',
+  lg: 'min-h-11 py-3.5 px-6 text-base',
 }
 
 export function Button({

@@ -1,22 +1,5 @@
 import type { ReactNode } from 'react'
-
-function ChevronLeftIcon() {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <polyline points="15 18 9 12 15 6" />
-    </svg>
-  )
-}
+import { ChevronLeft } from 'lucide-react'
 
 // ─── PageContainer ───────────────────────────────────────────────────────────
 export function PageContainer({
@@ -53,9 +36,10 @@ export function PageHeader({
           <button
             onClick={back}
             aria-label="Volver"
+            title="Volver"
             className="flex items-center justify-center min-h-11 min-w-11 rounded-lg text-secondary hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
-            <ChevronLeftIcon />
+            <ChevronLeft size={20} aria-hidden="true" />
           </button>
         )}
         <div className="min-w-0">
