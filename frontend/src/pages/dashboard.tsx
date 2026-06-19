@@ -432,7 +432,7 @@ const DashboardPage = () => {
           <ActivePartyBanner party={activeParty} />
 
           {/* Responsive two-column grid (desktop) / single-column (mobile) */}
-          <div className="lg:grid lg:grid-cols-[minmax(0,1.5fr)_minmax(280px,0.8fr)] lg:gap-6">
+          <div className="flex flex-col gap-4">
             {/* ── Main column ── */}
             <div className="flex flex-col gap-3">
               {/* Quests para hoy */}

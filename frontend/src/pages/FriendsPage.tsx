@@ -123,7 +123,7 @@ const FriendsPage = () => {
         )}
 
         {/* Two-column grid at md */}
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="flex flex-col gap-4">
           {/* Left column: requests + party invitations */}
           <div className="flex flex-col gap-4">
             {/* Friend requests */}

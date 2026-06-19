@@ -97,7 +97,7 @@ export function MemberList({ members, partyId, isPrivate, currentUserId, onVisib
           </label>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div className="flex flex-col gap-2">
           {members.map((m) => {
             const avatarUrl = resolveAssetUrl(m.user.avatarUrl)
             const isLeaderRow = m.role === 'leader'

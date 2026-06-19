@@ -31,12 +31,11 @@ export default function SettingsPage() {
         Mobile: horizontal scrollable row (flex-row gap-2 overflow-x-auto)
         Desktop (md+): vertical rail beside the content panel (via parent flex-row)
       */}
-      <div className="md:flex md:gap-6 md:mt-2">
+      <div className="flex flex-col gap-4 mt-2">
         {/* Tab rail — horizontal on mobile, vertical on desktop */}
         <div
           role="tablist"
-          aria-orientation="vertical"
-          className="flex flex-row gap-2 overflow-x-auto pb-2 scrollbar-none md:flex-col md:overflow-visible md:pb-0 md:gap-1 md:w-48 md:shrink-0 md:bg-surface md:rounded-xl md:border md:border-edge md:p-2 md:h-fit"
+          className="flex flex-row gap-2 overflow-x-auto pb-2 scrollbar-none"
         >
           {TABS.map((tab) => (
             <button

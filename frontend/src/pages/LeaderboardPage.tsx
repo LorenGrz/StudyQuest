@@ -50,7 +50,7 @@ export default function LeaderboardPage() {
       ) : (
         <>
           {/* Subject tabs: scroll on mobile, wrap on desktop */}
-          <div className="flex gap-2 overflow-x-auto md:overflow-x-visible md:flex-wrap px-4 pb-3 scrollbar-none">
+          <div className="flex gap-2 overflow-x-auto px-4 pb-3 scrollbar-none">
             {subjects.map(s => (
               <button
                 key={s.id}
@@ -85,18 +85,18 @@ export default function LeaderboardPage() {
               Desktop: podium + ranked list side by side (2-col)
               Mobile: podium stacked above ranked list
             */
-            <div className="px-4 pb-8 lg:grid lg:grid-cols-[auto_1fr] lg:gap-6 lg:items-start">
+            <div className="px-4 pb-8">
               {/* Podium */}
               {entries.length >= 3 && (
-                <div className="flex justify-center items-end gap-2 py-5 pb-6 lg:py-0 lg:pb-0 lg:flex-col lg:justify-start lg:items-stretch lg:gap-3 lg:w-[280px] lg:shrink-0">
+                <div className="flex justify-center items-end gap-2 py-5 pb-6">
                   {/* Mobile/tablet: classic 2nd-1st-3rd arc */}
-                  <div className="lg:hidden flex justify-center items-end gap-2 w-full">
+                  <div className="flex justify-center items-end gap-2 w-full">
                     <PodiumCard entry={entries[1]} currentUserId={user?.id} position={2} />
                     <PodiumCard entry={entries[0]} currentUserId={user?.id} position={1} />
                     <PodiumCard entry={entries[2]} currentUserId={user?.id} position={3} />
                   </div>
                   {/* Desktop: stacked 1st-2nd-3rd */}
-                  <div className="hidden lg:flex lg:flex-col lg:gap-3">
+                  <div className="hidden">
                     <PodiumCard entry={entries[0]} currentUserId={user?.id} position={1} />
                     <PodiumCard entry={entries[1]} currentUserId={user?.id} position={2} />
                     <PodiumCard entry={entries[2]} currentUserId={user?.id} position={3} />
@@ -105,7 +105,7 @@ export default function LeaderboardPage() {
               )}
 
               {/* Ranked list */}
-              <div className="flex flex-col gap-2 mt-2 lg:mt-0">
+              <div className="flex flex-col gap-2 mt-2">
                 {entries.slice(entries.length >= 3 ? 3 : 0).map((entry, idx) => (
                   <LeaderboardRow
                     key={entry.userId}
@@ -139,11 +139,11 @@ function PodiumCard({
 
   return (
     <div
-      className={`flex flex-col items-center gap-1 rounded-xl border-2 bg-surface pt-3 px-2.5 pb-0 transition-transform duration-200 overflow-hidden flex-1 max-w-[120px] lg:max-w-none lg:flex-row lg:items-center lg:gap-3 lg:px-4 lg:py-3 lg:rounded-lg hover:-translate-y-0.5 lg:hover:translate-y-0 lg:hover:translate-x-1 ${isMe ? 'animate-pulse-border' : ''}`}
+      className={`flex flex-col items-center gap-1 rounded-xl border-2 bg-surface pt-3 px-2.5 pb-0 transition-transform duration-200 overflow-hidden flex-1 max-w-[120px] hover:-translate-y-0.5 ${isMe ? 'animate-pulse-border' : ''}`}
       style={{ borderColor: league.color, boxShadow: `0 0 16px ${league.glowColor}` }}
     >
-      <div className="text-[22px] lg:text-lg shrink-0">{medals[position]}</div>
-      <div className="lg:shrink-0">
+      <div className="text-[22px] shrink-0">{medals[position]}</div>
+      <div className="shrink-0">
         <AvatarWithBorder
           displayName={entry.displayName ?? '?'}
           avatarUrl={entry.avatarUrl}
@@ -152,13 +152,13 @@ function PodiumCard({
           glowColor={league.glowColor}
         />
       </div>
-      <div className="flex flex-col items-center lg:items-start flex-1 min-w-0">
-        <p className="text-xs font-bold text-center lg:text-left text-primary overflow-hidden text-ellipsis whitespace-nowrap max-w-[100px] lg:max-w-full w-full">{entry.displayName}</p>
+      <div className="flex flex-col items-center flex-1 min-w-0">
+        <p className="text-xs font-bold text-center text-primary overflow-hidden text-ellipsis whitespace-nowrap max-w-[100px] w-full">{entry.displayName}</p>
         <p className="text-[11px] font-semibold" style={{ color: league.color }}>{league.icon} {league.name}</p>
         <p className="text-[11px] text-muted font-semibold">{entry.elo} ELO</p>
       </div>
       {/* Mobile podium height bar */}
-      <div className="lg:hidden w-full mt-2 rounded-b-lg opacity-60" style={{ height: mobileHeights[position], background: league.gradient }} />
+      <div className="w-full mt-2 rounded-b-lg opacity-60" style={{ height: mobileHeights[position], background: league.gradient }} />
     </div>
   )
 }

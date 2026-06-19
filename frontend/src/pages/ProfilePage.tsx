@@ -142,7 +142,7 @@ export default function ProfilePage() {
       </div>
 
       {/* ─── Main two-column area: progression + league ─────────────── */}
-      <div className="lg:grid lg:grid-cols-[1fr_340px] lg:gap-6 mt-4">
+      <div className="flex flex-col gap-4 mt-4">
         {/* Left column: stats, medals, inventory, academic info, subjects */}
         <div className="flex flex-col gap-6">
 
@@ -151,7 +151,7 @@ export default function ProfilePage() {
             <h3 className="text-base font-bold text-secondary uppercase tracking-[1px] pb-2">
               Estadísticas
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <div
                 className="bg-surface border-2 rounded-lg p-4 flex flex-col items-center justify-center text-center bg-black/20"
                 style={{ borderColor: league.color }}

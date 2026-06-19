@@ -79,7 +79,7 @@ export function SubjectList({ subjects, renderAction }: SubjectListProps) {
   }
 
   return (
-    <div className="grid gap-3 md:grid-cols-2">
+    <div className="flex flex-col gap-3">
       {subjects.map((s) => (
         <div
           key={s.id}

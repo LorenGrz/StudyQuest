@@ -118,7 +118,7 @@ const PartyRoomPage = () => {
           {activeTab === 'quests' && (
             <div className="flex flex-col gap-3 p-4 overflow-y-auto min-h-0">
               <UploadNoteCard onUpload={uploadNote} isLoading={isGenerating} />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="flex flex-col gap-3">
                 {quests.map((q) => <QuestCard key={q.id} quest={q} />)}
               </div>
               {quests.length === 0 && !isGenerating && (
