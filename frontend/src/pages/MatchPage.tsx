@@ -11,6 +11,7 @@ import {
 } from '../components/MatchComponents'
 import { useMatch } from '../hooks/useMatch'
 import { usePartyStore } from '../store/partyStore'
+import { MobileLayout } from '../components/Layouts'
 
 export default function MatchPage() {
   const navigate = useNavigate()
@@ -81,7 +82,8 @@ export default function MatchPage() {
   }
 
   return (
-    <div className="w-full max-w-[480px] mx-auto self-center h-dvh flex flex-col bg-base overflow-hidden">
+    <MobileLayout>
+    <div className="w-full max-w-[480px] mx-auto self-center h-full flex flex-col bg-base overflow-hidden">
       
       {/* Header */}
       <header className="flex items-center justify-between px-5 pt-5 pb-2.5 shrink-0">
@@ -153,7 +155,8 @@ export default function MatchPage() {
 
       {/* Create Party Banner */}
       <CreatePartyBar onPress={() => navigate('/parties')} />
-      
+
     </div>
+    </MobileLayout>
   )
 }
