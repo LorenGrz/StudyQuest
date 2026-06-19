@@ -26,7 +26,7 @@ function extractLayer(source: string, name: string): string {
 
 const migratedFiles = [
   'src/pages/AuthPage.tsx',
-  'src/components/SubjectComponents.tsx',
+  'src/components/subject/SubjectComponents.tsx',
   'src/pages/FriendsPage.tsx',
 ]
 
@@ -37,12 +37,12 @@ it.each(migratedFiles)('%s has no removed legacy layout classes', (file) => {
 
 const migratedFiles8 = [
   'src/pages/MatchPage.tsx',
-  'src/components/MatchComponents.tsx',
-  'src/components/MatchmakingComponents.tsx',
+  'src/components/match/MatchComponents.tsx',
+  'src/components/match/MatchmakingComponents.tsx',
   'src/pages/SkillTreePage.tsx',
-  'src/components/SkillTreeComponents.tsx',
+  'src/components/skill-tree/SkillTreeComponents.tsx',
   'src/pages/QuizPage.tsx',
-  'src/components/QuizComponents.tsx',
+  'src/components/quiz/QuizComponents.tsx',
   'src/pages/TournamentsPage.tsx',
   'src/pages/TournamentLivePage.tsx',
   'src/pages/TournamentResultsPage.tsx',
