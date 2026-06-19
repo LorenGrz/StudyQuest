@@ -6,6 +6,8 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
   size?: 'sm' | 'md' | 'lg'
   isLoading?: boolean
+  startIcon?: ReactNode
+  endIcon?: ReactNode
   children: ReactNode
 }
 
@@ -21,15 +23,17 @@ const variantClasses: Record<string, string> = {
 }
 
 const sizeClasses: Record<string, string> = {
-  sm: 'py-[7px] px-3.5 text-[13px]',
-  md: 'py-[11px] px-5 text-[15px]',
-  lg: 'py-3.5 px-6 text-base rounded-[18px]',
+  sm: 'min-h-11 py-[7px] px-3.5 text-[13px]',
+  md: 'min-h-11 py-[11px] px-5 text-[15px]',
+  lg: 'min-h-11 py-3.5 px-6 text-base rounded-[18px]',
 }
 
 export function Button({
   variant = 'primary',
   size = 'md',
   isLoading,
+  startIcon,
+  endIcon,
   children,
   className = '',
   disabled,
@@ -37,14 +41,19 @@ export function Button({
 }: ButtonProps) {
   return (
     <button
-      className={`inline-flex items-center justify-center font-semibold rounded-[12px] transition-all duration-150 gap-1.5 whitespace-nowrap ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      className={`inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-150 gap-1.5 whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
       disabled={disabled || isLoading}
+      aria-busy={isLoading}
       {...props}
     >
       {isLoading ? (
         <span className="inline-block w-4 h-4 rounded-full border-2 border-white/8 border-t-accent animate-spin" />
       ) : (
-        children
+        <>
+          {startIcon && <span aria-hidden="true">{startIcon}</span>}
+          {children}
+          {endIcon && <span aria-hidden="true">{endIcon}</span>}
+        </>
       )}
     </button>
   )
@@ -114,7 +123,7 @@ export function Input({ label, error, className = '', id, ...props }: InputProps
       )}
       <input
         id={id}
-        className={`w-full px-3.5 py-3 bg-panel border border-white/8 rounded-[12px] text-primary text-[15px] transition-[border-color,box-shadow] duration-200 outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(124,58,237,0.3)] ${error ? 'border-danger' : ''} ${className}`}
+        className={`w-full min-h-11 px-3.5 py-3 bg-panel border border-white/8 rounded-lg text-primary text-[15px] transition-[border-color,box-shadow] duration-200 outline-none placeholder:text-muted focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 ${error ? 'border-danger' : ''} ${className}`}
         {...props}
       />
       {error && <span className="text-[12px] text-danger">{error}</span>}
@@ -139,7 +148,7 @@ export function Select({ label, error, options, className = '', id, ...props }: 
       )}
       <select
         id={id}
-        className={`w-full px-3.5 py-3 bg-panel border border-white/8 rounded-[12px] text-primary text-[15px] transition-[border-color,box-shadow] duration-200 outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(124,58,237,0.3)] appearance-none ${error ? 'border-danger' : ''} ${className}`}
+        className={`w-full min-h-11 px-3.5 py-3 bg-panel border border-white/8 rounded-lg text-primary text-[15px] transition-[border-color,box-shadow] duration-200 outline-none appearance-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 ${error ? 'border-danger' : ''} ${className}`}
         {...props}
       >
         <option value="">Seleccionar...</option>
