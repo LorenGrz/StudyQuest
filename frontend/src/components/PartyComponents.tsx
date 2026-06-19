@@ -291,7 +291,7 @@ export function InviteSheet({ partyId, onClose }: InviteSheetProps) {
     >
       {/* Sheet — bottom sheet on mobile, centered dialog on sm+ */}
       <div
-        className="w-full sm:w-auto sm:min-w-[360px] sm:max-w-sm bg-bg-elevated border border-edge rounded-t-2xl sm:rounded-xl p-6 flex flex-col gap-4 max-h-[90dvh] overflow-y-auto"
+        className="w-full sm:w-auto sm:min-w-[360px] sm:max-w-sm bg-elevated border border-edge rounded-t-2xl sm:rounded-xl p-6 flex flex-col gap-4 max-h-[90dvh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Handle (mobile only) */}
@@ -498,7 +498,7 @@ function TournamentCreationModal({ quest, onClose }: { quest: Quest; onClose: ()
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm bg-bg-elevated border border-edge rounded-xl p-6 flex flex-col gap-4"
+        className="w-full max-w-sm bg-elevated border border-edge rounded-xl p-6 flex flex-col gap-4"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-lg font-bold text-primary text-center">

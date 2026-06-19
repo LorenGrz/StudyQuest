@@ -71,7 +71,7 @@ const PartiesPage = () => {
         {/* Modal crear party */}
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
-            <div className="w-full max-w-sm bg-bg-elevated border border-edge rounded-xl p-6 flex flex-col gap-5">
+            <div className="w-full max-w-sm bg-elevated border border-edge rounded-xl p-6 flex flex-col gap-5">
               <h2 className="text-xl font-bold text-primary">🎮 Nueva Party</h2>
 
               {subjects.length > 0 ? (

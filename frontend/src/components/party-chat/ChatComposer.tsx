@@ -86,7 +86,7 @@ export function ChatComposer({ onSendText, onSendFile, onSendAudio }: Props) {
   }
 
   return (
-    <div className="sticky bottom-[env(safe-area-inset-bottom,0px)] z-10 border-t border-edge bg-bg-base px-3 py-2 pb-[calc(env(safe-area-inset-bottom,0px)+8px)]">
+    <div className="sticky bottom-[env(safe-area-inset-bottom,0px)] z-10 border-t border-edge bg-base px-3 py-2 pb-[calc(env(safe-area-inset-bottom,0px)+8px)]">
       <form className="flex items-end gap-2" onSubmit={submitText}>
         {/* Hidden native file input — labelled via <label htmlFor> so getByLabelText resolves it */}
         <label htmlFor="chat-file-input" className="sr-only">Adjuntar archivo</label>
