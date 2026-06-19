@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MobileLayout } from '../components/Layouts'
 import { Spinner, Badge, Button } from '../components/UI'
+import { PageContainer, PageHeader, EmptyState } from '../components/PagePrimitives'
 import { partyService, type Party } from '../services/partyService'
 import { useAuthStore } from '../store/authStore'
 
@@ -56,133 +57,125 @@ const PartiesPage = () => {
 
   return (
     <MobileLayout>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 0 8px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Button size="sm" variant="ghost" onClick={() => navigate('/dashboard')}>
-            ← Volver
-          </Button>
-          <h1 style={{ fontSize: '22px', fontWeight: 800 }}>Mis Parties</h1>
-        </div>
-        <Button size="sm" variant="primary" onClick={() => setShowModal(true)}>
-          + Crear
-        </Button>
-      </div>
+      <PageContainer>
+        <PageHeader
+          title="Mis Parties"
+          back={() => navigate('/dashboard')}
+          action={
+            <Button size="sm" variant="primary" onClick={() => setShowModal(true)}>
+              + Crear
+            </Button>
+          }
+        />
 
-      {/* Modal crear party */}
-      {showModal && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 200,
-          background: 'rgba(0,0,0,0.7)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: '24px',
-        }}>
-          <div style={{
-            background: 'var(--bg-elevated)',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-xl)',
-            padding: '28px',
-            width: '100%',
-            maxWidth: '380px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '20px',
-          }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 800 }}>🎮 Nueva Party</h2>
+        {/* Modal crear party */}
+        {showModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-6">
+            <div className="w-full max-w-sm bg-bg-elevated border border-edge rounded-xl p-6 flex flex-col gap-5">
+              <h2 className="text-xl font-bold text-primary">🎮 Nueva Party</h2>
 
-            {subjects.length > 0 ? (
-              <div className="input-group">
-                <label className="input-label">Materia (opcional — por defecto tu primera materia)</label>
-                <select
-                  className="input input-select"
-                  value={selectedSubjectId}
-                  onChange={(e) => setSelectedSubjectId(e.target.value)}
+              {subjects.length > 0 ? (
+                <div className="input-group">
+                  <label className="input-label">Materia (opcional — por defecto tu primera materia)</label>
+                  <select
+                    className="input input-select"
+                    value={selectedSubjectId}
+                    onChange={(e) => setSelectedSubjectId(e.target.value)}
+                  >
+                    <option value="">— Auto (primera materia) —</option>
+                    {subjects.map((s) => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <p className="text-sm text-secondary">
+                  ⚠️ No tenés materias inscriptas. Inscribite primero desde Explorar.
+                </p>
+              )}
+
+              <label
+                className="flex items-center gap-3 cursor-pointer"
+                onClick={() => setIsPrivate(!isPrivate)}
+              >
+                <input
+                  type="checkbox"
+                  checked={isPrivate}
+                  onChange={() => setIsPrivate(!isPrivate)}
+                  className="w-[18px] h-[18px] cursor-pointer"
+                />
+                <div className="flex flex-col">
+                  <span className="text-[15px] font-semibold text-primary">Party Privada 🔒</span>
+                  <span className="text-xs text-secondary">No aparecerá en Match. Solo se unen con link.</span>
+                </div>
+              </label>
+
+              <div className="flex gap-3">
+                <Button
+                  variant="secondary"
+                  className="flex-1"
+                  onClick={() => setShowModal(false)}
+                  disabled={isCreating}
                 >
-                  <option value="">— Auto (primera materia) —</option>
-                  {subjects.map((s) => (
-                    <option key={s.id} value={s.id}>{s.name}</option>
-                  ))}
-                </select>
+                  Cancelar
+                </Button>
+                <Button
+                  variant="primary"
+                  className="flex-1"
+                  onClick={handleCreate}
+                  disabled={isCreating || subjects.length === 0}
+                >
+                  {isCreating ? 'Creando…' : 'Crear Party'}
+                </Button>
               </div>
-            ) : (
-              <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
-                ⚠️ No tenés materias inscriptas. Inscribite primero desde Explorar.
-              </p>
-            )}
-
-            <div className="input-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={() => setIsPrivate(!isPrivate)}>
-              <input 
-                type="checkbox" 
-                checked={isPrivate} 
-                onChange={() => setIsPrivate(!isPrivate)}
-                style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-              />
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '15px', fontWeight: 600 }}>Party Privada 🔒</span>
-                <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>No aparecerá en Match. Solo se unen con link.</span>
-              </div>
-            </div>
-
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <Button
-                variant="secondary"
-                className="flex-1"
-                onClick={() => setShowModal(false)}
-                disabled={isCreating}
-              >
-                Cancelar
-              </Button>
-              <Button
-                variant="primary"
-                className="flex-1"
-                onClick={handleCreate}
-                disabled={isCreating || subjects.length === 0}
-              >
-                {isCreating ? 'Creando…' : 'Crear Party'}
-              </Button>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Lista */}
-      {isLoading ? (
-        <div className="center-spinner">
-          <Spinner size="lg" />
-        </div>
-      ) : parties.length === 0 ? (
-        <div className="empty-state">
-          <p className="empty-icon">👥</p>
-          <p className="empty-text">Aún no tenés parties</p>
-          <p className="empty-sub">Creá una nueva o buscá desde Match</p>
-          <div style={{ display: 'flex', gap: '10px', marginTop: '16px', justifyContent: 'center' }}>
-            <Button variant="secondary" onClick={() => navigate('/match')}>Buscar Party</Button>
-            <Button variant="primary" onClick={() => setShowModal(true)}>+ Crear</Button>
+        {/* Lista */}
+        {isLoading ? (
+          <div className="flex justify-center py-16">
+            <Spinner size="lg" />
           </div>
-        </div>
-      ) : (
-        <div className="party-list">
-          {parties.map(party => (
-            <div
-              key={party.id}
-              className="party-list-item"
-              onClick={() => navigate(`/party/${party.id}`)}
-            >
-              <div className="party-list-info">
-                <div className="party-list-name">
-                  {party.subject?.name ?? 'Party'}
-                </div>
-                <div className="party-list-meta">
-                  <span>👥 {party.members?.length || 0}/{party.maxMembers} miembros</span>
-                  <span>•</span>
-                  {getStatusBadge(party.status)}
-                </div>
+        ) : parties.length === 0 ? (
+          <EmptyState
+            icon="👥"
+            title="Aún no tenés parties"
+            description="Creá una nueva o buscá desde Match"
+            action={
+              <div className="flex gap-3 justify-center">
+                <Button variant="secondary" onClick={() => navigate('/match')}>Buscar Party</Button>
+                <Button variant="primary" onClick={() => setShowModal(true)}>+ Crear</Button>
               </div>
-              <div className="party-list-arrow">›</div>
-            </div>
-          ))}
-        </div>
-      )}
+            }
+          />
+        ) : (
+          <div className="flex flex-col gap-3">
+            {parties.map(party => (
+              <div
+                key={party.id}
+                className="flex items-center justify-between gap-3 bg-surface border border-edge rounded-lg px-4 py-3 cursor-pointer hover:border-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                onClick={() => navigate(`/party/${party.id}`)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate(`/party/${party.id}`) }}
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="font-semibold text-primary text-sm truncate">
+                    {party.subject?.name ?? 'Party'}
+                  </div>
+                  <div className="flex items-center gap-2 mt-1 text-xs text-secondary">
+                    <span>👥 {party.members?.length || 0}/{party.maxMembers} miembros</span>
+                    <span aria-hidden="true">•</span>
+                    {getStatusBadge(party.status)}
+                  </div>
+                </div>
+                <span className="shrink-0 text-secondary text-lg" aria-hidden="true">›</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </PageContainer>
     </MobileLayout>
   )
 }

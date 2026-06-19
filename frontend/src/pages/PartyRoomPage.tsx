@@ -3,20 +3,27 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { MobileLayout } from '../components/Layouts'
 import {
   PartyHeader,
-  TabBar,
   MemberList,
   UploadNoteCard,
   QuestCard,
   ActivityFeed,
 } from '../components/PartyComponents'
+import { SegmentedTabs } from '../components/PagePrimitives'
 import { ChatBox } from '../components/party-chat/ChatBox'
-import { Spinner } from '../components/UI'
+import { Spinner, Button } from '../components/UI'
 import { useParty } from '../hooks/useParty'
 import { useQuests } from '../hooks/useQuests'
 import { useActivity } from '../hooks/useActivity'
 import { partyService } from '../services/partyService'
 
 type ActiveTab = 'quests' | 'chat' | 'members' | 'activity'
+
+const TABS: Array<{ id: ActiveTab; label: string }> = [
+  { id: 'quests', label: 'Quests' },
+  { id: 'chat', label: 'Chat' },
+  { id: 'members', label: 'Miembros' },
+  { id: 'activity', label: 'Actividad' },
+]
 
 const PartyRoomPage = () => {
   const { partyId } = useParams<{ partyId: string }>()
@@ -36,13 +43,6 @@ const PartyRoomPage = () => {
   } = useParty(partyId ?? '')
   const { quests, uploadNote, isGenerating } = useQuests(partyId ?? '')
   const { activities, isLoading: activityLoading } = useActivity(partyId ?? '')
-
-  const tabs: Array<{ id: ActiveTab; label: string; ariaLabel: string }> = [
-    { id: 'quests', label: 'Quests', ariaLabel: 'Ver quests de la party' },
-    { id: 'chat', label: 'Chat', ariaLabel: 'Abrir chat de la party' },
-    { id: 'members', label: 'Miembros', ariaLabel: 'Ver miembros de la party' },
-    { id: 'activity', label: 'Actividad', ariaLabel: 'Ver actividad reciente de la party' },
-  ]
 
   const handleLeave = async () => {
     if (!party) return
@@ -79,33 +79,51 @@ const PartyRoomPage = () => {
 
   if (isPartyLoading) {
     return (
-      <div style={{ textAlign: 'center', padding: '20px' }}>
-        <Spinner size="lg" />
-        <p>Cargando la party...</p>
-      </div>
+      <MobileLayout>
+        <div className="flex flex-col items-center justify-center gap-3 py-16">
+          <Spinner size="lg" />
+          <p className="text-sm text-secondary">Cargando la party...</p>
+        </div>
+      </MobileLayout>
     )
   }
 
   return (
     <MobileLayout>
       <div className="flex flex-col flex-1 min-h-0">
-        <div className="sticky top-0 z-20 bg-gradient-to-b from-[rgba(11,11,24,0.98)] to-[rgba(11,11,24,0.94)] backdrop-blur-[14px]">
+        {/* Sticky header: party info + tabs */}
+        <div className="sticky top-0 z-20 bg-gradient-to-b from-[rgba(11,11,24,0.98)] to-[rgba(11,11,24,0.94)] backdrop-blur-[14px] border-b border-edge">
+          <div className="flex items-center gap-2 px-4 pt-3 pb-1">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => navigate('/parties')}
+              aria-label="Volver a parties"
+            >
+              ← Volver
+            </Button>
+          </div>
           <PartyHeader party={party} />
-          <TabBar
-            tabs={tabs}
-            active={activeTab}
-            onChange={(tab) => setActiveTab(tab)}
-          />
+          <div className="px-4 pb-3 overflow-x-auto">
+            <SegmentedTabs
+              tabs={TABS}
+              active={activeTab}
+              onChange={(tab) => setActiveTab(tab)}
+              label="Secciones de la party"
+            />
+          </div>
         </div>
 
         <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
           {activeTab === 'quests' && (
             <div className="flex flex-col gap-3 p-4 overflow-y-auto min-h-0">
               <UploadNoteCard onUpload={uploadNote} isLoading={isGenerating} />
-              {quests.map((q) => <QuestCard key={q.id} quest={q} />)}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {quests.map((q) => <QuestCard key={q.id} quest={q} />)}
+              </div>
               {quests.length === 0 && !isGenerating && (
                 <div className="text-center py-10 px-5">
-                  <p className="text-5xl block mb-3">⚡</p>
+                  <p className="text-5xl block mb-3" aria-hidden="true">⚡</p>
                   <p className="text-lg font-semibold text-primary">No hay quests todavía</p>
                   <p className="text-sm text-muted mt-1.5">Subí un apunte para generar el primero</p>
                 </div>
@@ -126,9 +144,9 @@ const PartyRoomPage = () => {
           )}
 
           {activeTab === 'members' && (
-            <MemberList 
-              members={party?.members ?? []} 
-              partyId={partyId ?? ''} 
+            <MemberList
+              members={party?.members ?? []}
+              partyId={partyId ?? ''}
               isPrivate={party?.isPrivate ?? false}
               currentUserId={currentUserId}
               onVisibilityChange={(isPrivate) => {
