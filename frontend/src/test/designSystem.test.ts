@@ -4,9 +4,29 @@ import { describe, expect, it } from 'vitest'
 
 const css = readFileSync(resolve(process.cwd(), 'src/index.css'), 'utf8')
 
+/**
+ * Extracts the full content of an `@layer <name> { ... }` block by counting
+ * brace depth, so nested rules containing `}` do not prematurely end the match.
+ */
+function extractLayer(source: string, name: string): string {
+  const start = source.search(new RegExp(`@layer\\s+${name}\\s*\\{`))
+  if (start === -1) return ''
+  const openBrace = source.indexOf('{', start)
+  if (openBrace === -1) return ''
+  let depth = 0
+  for (let i = openBrace; i < source.length; i++) {
+    if (source[i] === '{') depth++
+    else if (source[i] === '}') {
+      depth--
+      if (depth === 0) return source.slice(start, i + 1)
+    }
+  }
+  return '' // unclosed block — treat as not found
+}
+
 describe('design-system cascade', () => {
   it('keeps global margin and padding resets inside Tailwind base layer', () => {
-    const baseLayer = css.match(/@layer base\s*\{[\s\S]*?\n\}/)?.[0] ?? ''
+    const baseLayer = extractLayer(css, 'base')
     expect(baseLayer).toContain('box-sizing: border-box')
     expect(baseLayer).toContain('margin: 0')
     expect(baseLayer).toContain('padding: 0')
