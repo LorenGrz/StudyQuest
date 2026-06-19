@@ -131,12 +131,12 @@ export default function TournamentLivePage() {
             </button>
             <div>
               <h1 className="text-base font-black text-white truncate max-w-[200px]">{tournament.title}</h1>
-              <p className="text-muted text-[10px] uppercase font-bold tracking-wider">🔴 COMPETENCIA EN VIVO</p>
+              <p className="text-muted text-[11px] uppercase font-bold tracking-wider">🔴 COMPETENCIA EN VIVO</p>
             </div>
           </div>
 
           <div className="bg-red-500/10 border border-red-500/25 px-3 py-1.5 rounded-2xl flex flex-col items-center shrink-0">
-            <span className="text-[#ff5c5c] text-[8px] font-bold uppercase tracking-wider">Tiempo Restante</span>
+            <span className="text-[#ff5c5c] text-[11px] font-bold uppercase tracking-wider">Tiempo Restante</span>
             <Countdown targetDate={tournament.endsAt} onComplete={() => navigate(`/tournament/${id}/results`)} />
           </div>
         </div>
@@ -193,7 +193,7 @@ export default function TournamentLivePage() {
                       <p className={`text-xs font-bold truncate ${isMyEntry ? 'text-purple-400' : 'text-white'}`}>
                         {entry.partyName}
                       </p>
-                      {isMyEntry && <p className="text-[9px] text-accent-light font-semibold">Tu Party</p>}
+                      {isMyEntry && <p className="text-[11px] text-accent-light font-semibold">Tu Party</p>}
                     </div>
 
                     <div className="text-right shrink-0">

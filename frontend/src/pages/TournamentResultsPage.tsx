@@ -101,7 +101,7 @@ export default function TournamentResultsPage() {
           </button>
           <div>
             <h1 className="text-base font-black text-white truncate max-w-[260px]">{tournament.title}</h1>
-            <p className="text-muted text-[10px] uppercase font-bold tracking-wider">🏆 Resultados del Torneo</p>
+            <p className="text-muted text-[11px] uppercase font-bold tracking-wider">🏆 Resultados del Torneo</p>
           </div>
         </div>
 
@@ -116,8 +116,8 @@ export default function TournamentResultsPage() {
               className="flex flex-col items-center flex-1"
             >
               <span className="text-xl mb-1">🥈</span>
-              <span className="text-[10px] font-bold text-muted truncate max-w-[80px]">{secondPlace.partyName}</span>
-              <span className="text-[9px] text-muted">{secondPlace.score} pts</span>
+              <span className="text-[11px] font-bold text-muted truncate max-w-[80px]">{secondPlace.partyName}</span>
+              <span className="text-[11px] text-muted">{secondPlace.score} pts</span>
               <div className="w-full h-20 bg-gradient-to-t from-elevated to-elevated border-t border-white/10 rounded-t-xl mt-2 flex items-center justify-center shadow-lg">
                 <span className="text-white font-extrabold text-sm">#2</span>
               </div>
@@ -134,7 +134,7 @@ export default function TournamentResultsPage() {
             >
               <span className="text-3xl mb-1 filter drop-shadow-[0_0_8px_rgba(234,179,8,0.5)]">👑</span>
               <span className="text-[11px] font-black text-yellow-400 truncate max-w-[90px]">{firstPlace.partyName}</span>
-              <span className="text-[10px] text-yellow-400 font-bold">{firstPlace.score} pts</span>
+              <span className="text-[11px] text-yellow-400 font-bold">{firstPlace.score} pts</span>
               <div className="w-full h-28 bg-gradient-to-t from-[#4a3f1a] to-[#78350f] border-t border-yellow-500/30 rounded-t-2xl mt-2 flex items-center justify-center shadow-[0_0_15px_rgba(234,179,8,0.15)]">
                 <span className="text-yellow-400 font-black text-lg">#1</span>
               </div>
@@ -150,8 +150,8 @@ export default function TournamentResultsPage() {
               className="flex flex-col items-center flex-1"
             >
               <span className="text-xl mb-1">🥉</span>
-              <span className="text-[10px] font-bold text-[#b45309] truncate max-w-[80px]">{thirdPlace.partyName}</span>
-              <span className="text-[9px] text-[#b45309]">{thirdPlace.score} pts</span>
+              <span className="text-[11px] font-bold text-[#b45309] truncate max-w-[80px]">{thirdPlace.partyName}</span>
+              <span className="text-[11px] text-[#b45309]">{thirdPlace.score} pts</span>
               <div className="w-full h-14 bg-gradient-to-t from-[#271c19] to-[#451a03] border-t border-orange-500/10 rounded-t-xl mt-2 flex items-center justify-center shadow-lg">
                 <span className="text-orange-400 font-extrabold text-xs">#3</span>
               </div>
@@ -167,7 +167,7 @@ export default function TournamentResultsPage() {
             transition={{ delay: 0.8 }}
             className="bg-gradient-to-br from-purple-950/30 to-indigo-950/30 border border-purple-500/40 p-4 rounded-3xl flex flex-col gap-2 items-center text-center shrink-0"
           >
-            <span className="text-accent-light text-[10px] font-bold uppercase tracking-widest">Recompensa Obtenida</span>
+            <span className="text-accent-light text-[11px] font-bold uppercase tracking-widest">Recompensa Obtenida</span>
             <h4 className="text-white font-extrabold text-sm">Puesto #{myPartyRank} en el Podio</h4>
             
             <div className="flex gap-4 mt-1">
@@ -197,11 +197,11 @@ export default function TournamentResultsPage() {
                   key={entry.partyId}
                   className="flex items-center justify-between p-2.5 bg-elevated/40 border border-white/5 rounded-xl text-xs"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-muted font-bold w-6">#{entry.rank}</span>
-                    <span className="text-white font-semibold">{entry.partyName}</span>
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <span className="text-muted font-bold w-6 shrink-0">#{entry.rank}</span>
+                    <span className="text-white font-semibold truncate">{entry.partyName}</span>
                   </div>
-                  <span className="text-white font-bold">{entry.score} pts</span>
+                  <span className="text-white font-bold shrink-0 ml-2">{entry.score} pts</span>
                 </div>
               ))}
             </div>

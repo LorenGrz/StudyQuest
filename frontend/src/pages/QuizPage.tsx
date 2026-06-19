@@ -38,7 +38,7 @@ const QuizPage = () => {
   if (isLoading) {
     return (
       <GameLayout>
-        <div className="center-spinner"><Spinner size="lg" /></div>
+        <div className="flex justify-center items-center min-h-[60vh]"><Spinner size="lg" /></div>
       </GameLayout>
     )
   }
@@ -46,10 +46,10 @@ const QuizPage = () => {
   if (loadError || !quest) {
     return (
       <GameLayout>
-        <div className="quiz-finished">
-          <div className="quiz-finished-icon">⚠️</div>
-          <h1 className="quiz-finished-title">No se pudo abrir la quest</h1>
-          <p>{loadError ?? 'La quest no está disponible en este momento.'}</p>
+        <div className="flex flex-col items-center gap-4 px-4 py-8 text-center max-w-lg mx-auto">
+          <div className="text-[56px] leading-none">⚠️</div>
+          <h1 className="text-[22px] font-extrabold text-white">No se pudo abrir la quest</h1>
+          <p className="text-muted text-sm">{loadError ?? 'La quest no está disponible en este momento.'}</p>
           <Button onClick={() => navigate(-1)}>Volver a la Party</Button>
         </div>
       </GameLayout>
@@ -59,38 +59,40 @@ const QuizPage = () => {
   if (isFinished) {
     return (
       <GameLayout>
-        <div className="quiz-finished">
-          <div className="quiz-finished-icon">🏆</div>
-          <h1 className="quiz-finished-title">¡Quest completada!</h1>
-          <div className="quiz-leaderboard">
-            <div className="leaderboard-item">
-              <span className="leaderboard-rank">•</span>
-              <span className="leaderboard-name">Puntaje del intento</span>
-              <span className="leaderboard-score">{quest.latestAttempt?.score ?? quest.myLastScore ?? 0} pts</span>
+        <div className="flex flex-col items-center gap-4 px-4 py-8 text-center max-w-lg mx-auto">
+          <div className="text-[56px] leading-none">🏆</div>
+          <h1 className="text-[22px] font-extrabold text-white">¡Quest completada!</h1>
+          <div className="w-full flex flex-col gap-1.5">
+            <div className="flex items-center gap-3 px-3 py-2 bg-elevated rounded-lg">
+              <span className="text-[11px] font-bold text-muted w-6 shrink-0">•</span>
+              <span className="flex-1 text-[13px] text-white truncate text-left">Puntaje del intento</span>
+              <span className="text-[13px] font-bold text-accent-light shrink-0">{quest.latestAttempt?.score ?? quest.myLastScore ?? 0} pts</span>
             </div>
-            <div className="leaderboard-item">
-              <span className="leaderboard-rank">•</span>
-              <span className="leaderboard-name">Aciertos</span>
-              <span className="leaderboard-score">
+            <div className="flex items-center gap-3 px-3 py-2 bg-elevated rounded-lg">
+              <span className="text-[11px] font-bold text-muted w-6 shrink-0">•</span>
+              <span className="flex-1 text-[13px] text-white truncate text-left">Aciertos</span>
+              <span className="text-[13px] font-bold text-accent-light shrink-0">
                 {quest.latestAttempt?.correctAnswers ?? 0}/{quest.questionCount ?? quest.questions.length}
               </span>
             </div>
-            <div className="leaderboard-item">
-              <span className="leaderboard-rank">•</span>
-              <span className="leaderboard-name">Mejor puntaje</span>
-              <span className="leaderboard-score">{quest.myBestScore ?? 0} pts</span>
+            <div className="flex items-center gap-3 px-3 py-2 bg-elevated rounded-lg">
+              <span className="text-[11px] font-bold text-muted w-6 shrink-0">•</span>
+              <span className="flex-1 text-[13px] text-white truncate text-left">Mejor puntaje</span>
+              <span className="text-[13px] font-bold text-accent-light shrink-0">{quest.myBestScore ?? 0} pts</span>
             </div>
           </div>
-          <div className="quiz-leaderboard">
-            {quest?.leaderboard?.map((s, i) => (
-              <div key={s.userId} className="leaderboard-item">
-                <span className="leaderboard-rank">#{i + 1}</span>
-                <span className="leaderboard-name">{s.username}</span>
-                <span className="leaderboard-score">{s.score} pts</span>
-              </div>
-            ))}
-          </div>
-          <div className="upload-actions" style={{ marginTop: '16px' }}>
+          {quest?.leaderboard?.length > 0 && (
+            <div className="w-full flex flex-col gap-1.5 mt-1">
+              {quest.leaderboard.map((s, i) => (
+                <div key={s.userId} className="flex items-center gap-3 px-3 py-2 bg-elevated rounded-lg">
+                  <span className="text-[11px] font-bold text-muted w-6 shrink-0">#{i + 1}</span>
+                  <span className="flex-1 text-[13px] text-white truncate text-left">{s.username}</span>
+                  <span className="text-[13px] font-bold text-accent-light shrink-0">{s.score} pts</span>
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="flex gap-2 flex-wrap justify-center mt-2">
             <Button onClick={() => navigate(0)}>Volver a intentar</Button>
             <Button variant="ghost" onClick={() => navigate(-1)}>Volver a la Party</Button>
           </div>
@@ -101,10 +103,10 @@ const QuizPage = () => {
 
   return (
     <GameLayout>
-      <div className="upload-actions" style={{ marginBottom: '12px', justifyContent: 'space-between' }}>
+      <div className="flex gap-2 justify-between items-center mb-3">
         <Button variant="ghost" onClick={() => navigate(-1)}>← Volver</Button>
         {quest.myStatus === 'in_progress' && (
-          <span className="text-small" style={{ color: 'var(--accent-light)' }}>Intento en curso</span>
+          <span className="text-sm" style={{ color: 'var(--accent-light)' }}>Intento en curso</span>
         )}
       </div>
       <ScoreHeader

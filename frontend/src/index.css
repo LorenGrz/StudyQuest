@@ -23,6 +23,8 @@
   --color-danger: var(--red);
   --color-info: var(--blue);
   --color-edge: var(--border);
+  --color-content: var(--text-primary);
+  --color-faint: var(--text-muted);
 }
 
 /* ─── Custom Utilities (sin equivalente nativo en Tailwind) ──────────────── */
@@ -155,30 +157,33 @@
    specificity — e.g. `* { padding:0 }` killed all p-*/m-*, and
    `button { background:none }` killed bg-* on every button. */
 @layer base {
-  html {
-    transition:
-      background 0.2s ease,
-      color 0.2s ease;
-  }
-
   *,
   *::before,
   *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
   }
 
-  *::-webkit-scrollbar {
-    display: none;
+  html {
+    min-width: 320px;
+    background: var(--bg-base);
+    transition: background 0.2s ease, color 0.2s ease;
   }
 
   body {
-    background: var(--bg-base);
+    min-width: 320px;
     height: 100dvh;
     overflow: hidden;
+    background: var(--bg-base);
+    color: var(--text-primary);
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
   }
 
   #root {
@@ -204,14 +209,32 @@
   }
   button {
     cursor: pointer;
-    font-family: inherit;
     border: none;
     background: none;
   }
-  input,
-  textarea,
-  select {
-    font-family: inherit;
+}
+
+/* ─── Scrollbar hiding ───────────────────────────────────────────────────────
+   Kept outside @layer base so it doesn't compete with scrollbar utilities */
+*,
+*::before,
+*::after {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
@@ -261,4 +284,64 @@
   0% { box-shadow: 0 0 0 0 rgba(251, 113, 133, 0.55); }
   70% { box-shadow: 0 0 0 10px rgba(251, 113, 133, 0); }
   100% { box-shadow: 0 0 0 0 rgba(251, 113, 133, 0); }
+}
+
+/* Form field primitives — restored after the Tailwind migration removed them.
+   Several forms (quest creation, party creation, invites, dashboard search)
+   still consume these class names. */
+@layer components {
+  .input {
+    width: 100%;
+    min-height: 2.75rem;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 0.625rem 0.875rem;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    line-height: 1.4;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .input:focus-visible,
+  .input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .input-textarea {
+    min-height: 6rem;
+    resize: vertical;
+    line-height: 1.5;
+  }
+
+  .input-select {
+    cursor: pointer;
+  }
+
+  .input-error {
+    border-color: var(--red);
+  }
+
+  .input-error:focus-visible,
+  .input-error:focus {
+    box-shadow: 0 0 0 3px var(--red-bg);
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .input-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
 }

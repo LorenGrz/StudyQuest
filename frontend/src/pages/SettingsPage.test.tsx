@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import SettingsPage from './SettingsPage'
 
@@ -43,6 +44,8 @@ function renderPage() {
   )
 }
 
+const renderSettings = renderPage
+
 describe('SettingsPage', () => {
   beforeEach(() => {
     localStorage.clear()
@@ -80,6 +83,14 @@ describe('SettingsPage', () => {
     expect(
       screen.getByRole('button', { name: 'Cambiar contraseña' }),
     ).toBeDisabled()
+  })
+
+  it('keeps profile text on semantic theme colors', async () => {
+    renderSettings()
+    await userEvent.click(screen.getByRole('tab', { name: 'Apariencia' }))
+    await userEvent.click(screen.getByRole('switch', { name: 'Cambiar tema' }))
+    expect(document.documentElement).toHaveAttribute('data-theme', 'light')
+    expect(screen.getByText('Tema claro')).toHaveClass('text-primary')
   })
 
   it('toggles the theme and persists it', () => {

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { MobileLayout } from '../components/Layouts'
 import { SearchBar, FilterChips, SubjectList } from '../components/SubjectComponents'
 import { Badge, Button } from '../components/UI'
+import { PageHeader, PageContainer } from '../components/PagePrimitives'
 import { useSubjectExplorer, type SubjectFilters } from '../hooks/useSubjectExplorer'
 import type { Subject } from '../services/userService'
 
@@ -18,7 +19,7 @@ const SubjectExplorerPage = () => {
 
   const renderAction = (s: Subject) =>
     isEnrolled(s.id) ? (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      <div className="flex flex-col items-end gap-1">
         <Badge variant="success">Inscripto</Badge>
         <Button
           size="sm"
@@ -36,10 +37,14 @@ const SubjectExplorerPage = () => {
 
   return (
     <MobileLayout>
-      <h1 className="page-title">Explorar Materias</h1>
-      <SearchBar value={search} onChange={setSearch} />
-      <FilterChips filters={filters} onChange={setFilters} />
-      <SubjectList subjects={subjects} renderAction={renderAction} />
+      <PageContainer>
+        <PageHeader title="Explorar Materias" />
+        <div className="flex flex-col gap-4">
+          <SearchBar value={search} onChange={setSearch} />
+          <FilterChips filters={filters} onChange={setFilters} />
+          <SubjectList subjects={subjects} renderAction={renderAction} />
+        </div>
+      </PageContainer>
     </MobileLayout>
   )
 }

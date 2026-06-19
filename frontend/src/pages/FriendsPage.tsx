@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MobileLayout } from '../components/Layouts'
-import { Button, SectionTitle, Input, Spinner } from '../components/UI'
+import { Button, Input, Spinner } from '../components/UI'
+import { PageHeader, PageContainer, Surface, EmptyState } from '../components/PagePrimitives'
 import { friendService, type FriendRequest } from '../services/friendService'
 import { partyService, type PartyInvitation } from '../services/partyService'
 import type { User } from '../services/userService'
@@ -91,108 +92,150 @@ const FriendsPage = () => {
 
   return (
     <MobileLayout>
-      <div className="page-header">
-        <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>Volver</Button>
-        <SectionTitle>Amigos</SectionTitle>
-      </div>
+      <PageContainer>
+        <PageHeader
+          title="Amigos"
+          back={() => navigate('/dashboard')}
+        />
 
-      <div className="card">
-        <div className="card-body">
-          <p className="card-label">Enviar solicitud</p>
-          <div className="row-gap">
+        {/* Add-friend form — full-width top surface */}
+        <Surface className="mb-4">
+          <p className="text-[13px] font-medium text-secondary mb-3">Enviar solicitud de amistad</p>
+          <div className="flex gap-2">
             <Input
               value={newFriendUsername}
               onChange={(event) => setNewFriendUsername(event.target.value)}
-              placeholder="Username"
+              placeholder="@username"
+              className="flex-1"
             />
             <Button onClick={handleSendRequest} disabled={isLoading}>Enviar</Button>
           </div>
-          <p className="text-small">Usá el username para invitar a un amigo directo.</p>
-        </div>
-      </div>
+          <p className="text-[12px] text-muted mt-2">Ingresá el @username para invitar a un amigo.</p>
+        </Surface>
 
-      {error && <div className="alert alert-danger">{error}</div>}
+        {error && (
+          <div
+            role="alert"
+            className="px-4 py-3 rounded-lg text-sm bg-[rgba(239,68,68,0.1)] text-danger border border-[rgba(239,68,68,0.2)] mb-4"
+          >
+            {error}
+          </div>
+        )}
 
-      <div className="card">
-        <div className="card-header">
-          <h3>Solicitudes recibidas</h3>
-        </div>
-        <div className="card-body">
-          {isLoading ? (
-            <Spinner />
-          ) : requests.length ? (
-            requests.map((request) => (
-              <div key={request.id} className="list-item">
-                <div>
-                  <strong>{request.requester?.displayName ?? request.requesterId}</strong>
-                  <p className="text-small">{request.requester?.username ?? ''}</p>
-                </div>
-                <div className="button-group">
-                  <Button size="sm" variant="primary" onClick={() => handleResponse(request.id, true)}>Aceptar</Button>
-                  <Button size="sm" variant="ghost" onClick={() => handleResponse(request.id, false)}>Rechazar</Button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="empty-sub">No tenés solicitudes pendientes.</p>
-          )}
-        </div>
-      </div>
+        {/* Two-column grid at md */}
+        <div className="flex flex-col gap-4">
+          {/* Left column: requests + party invitations */}
+          <div className="flex flex-col gap-4">
+            {/* Friend requests */}
+            <Surface>
+              <h3 className="text-[15px] font-bold text-primary mb-3">Solicitudes recibidas</h3>
+              {isLoading ? (
+                <div className="flex justify-center py-4"><Spinner /></div>
+              ) : requests.length ? (
+                <ul className="flex flex-col divide-y divide-white/5">
+                  {requests.map((request) => (
+                    <li key={request.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                      <div className="min-w-0">
+                        <strong className="text-[14px] font-semibold text-primary block truncate">
+                          {request.requester?.displayName ?? request.requesterId}
+                        </strong>
+                        {request.requester?.username && (
+                          <p className="text-[12px] text-secondary truncate">
+                            @{request.requester.username}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex gap-1.5 flex-shrink-0">
+                        <Button size="sm" variant="primary" onClick={() => handleResponse(request.id, true)}>Aceptar</Button>
+                        <Button size="sm" variant="ghost" onClick={() => handleResponse(request.id, false)}>Rechazar</Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <EmptyState
+                  icon="📨"
+                  title="Sin solicitudes pendientes"
+                  description="Cuando alguien te agregue, aparecerá acá."
+                />
+              )}
+            </Surface>
 
-      <div className="card">
-        <div className="card-header">
-          <h3>Invitaciones directas a parties</h3>
-        </div>
-        <div className="card-body">
-          {isLoading ? (
-            <Spinner />
-          ) : partyInvitations.length ? (
-            partyInvitations.map((inv) => (
-              <div key={inv.id} className="list-item">
-                <div>
-                  <strong>{inv.party?.name ?? 'Party privada'}</strong>
-                  <p className="text-small">Invitado por {inv.inviter?.displayName ?? inv.inviterId}</p>
-                </div>
-                <div className="button-group">
-                  <Button size="sm" variant="primary" onClick={() => handleAcceptPartyInvitation(inv.id)}>
-                    Aceptar
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => handleRejectPartyInvitation(inv.id)}>
-                    Rechazar
-                  </Button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="empty-sub">No tenés invitaciones directas a parties.</p>
-          )}
-        </div>
-      </div>
+            {/* Party invitations */}
+            <Surface>
+              <h3 className="text-[15px] font-bold text-primary mb-3">Invitaciones a parties</h3>
+              {isLoading ? (
+                <div className="flex justify-center py-4"><Spinner /></div>
+              ) : partyInvitations.length ? (
+                <ul className="flex flex-col divide-y divide-white/5">
+                  {partyInvitations.map((inv) => (
+                    <li key={inv.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                      <div className="min-w-0">
+                        <strong className="text-[14px] font-semibold text-primary block truncate">
+                          {inv.party?.name ?? 'Party privada'}
+                        </strong>
+                        <p className="text-[12px] text-secondary truncate">
+                          Invitado por {inv.inviter?.displayName ?? inv.inviterId}
+                        </p>
+                      </div>
+                      <div className="flex gap-1.5 flex-shrink-0">
+                        <Button size="sm" variant="primary" onClick={() => handleAcceptPartyInvitation(inv.id)}>
+                          Aceptar
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={() => handleRejectPartyInvitation(inv.id)}>
+                          Rechazar
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <EmptyState
+                  icon="🎉"
+                  title="Sin invitaciones a parties"
+                  description="Las invitaciones directas aparecerán acá."
+                />
+              )}
+            </Surface>
+          </div>
 
-      <div className="card">
-        <div className="card-header">
-          <h3>Mis amigos</h3>
+          {/* Right column: friend list */}
+          <Surface>
+            <h3 className="text-[15px] font-bold text-primary mb-3">Mis amigos</h3>
+            {isLoading ? (
+              <div className="flex justify-center py-4"><Spinner /></div>
+            ) : friends.length ? (
+              <ul className="flex flex-col divide-y divide-white/5">
+                {friends.map((friend) => (
+                  <li key={friend.id} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                    <div className="min-w-0">
+                      <strong className="text-[14px] font-semibold text-primary block truncate">
+                        {friend.displayName}
+                      </strong>
+                      <p className="text-[12px] text-secondary truncate">
+                        @{friend.username}
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => friendService.removeFriend(friend.id).then(load)}
+                    >
+                      Eliminar
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <EmptyState
+                icon="👥"
+                title="Aún no tenés amigos"
+                description="Buscá a tus compañeros por @username y empezá a conectar."
+              />
+            )}
+          </Surface>
         </div>
-        <div className="card-body">
-          {isLoading ? (
-            <Spinner />
-          ) : friends.length ? (
-            friends.map((friend) => (
-              <div key={friend.id} className="list-item">
-                <div>
-                  <strong>{friend.displayName}</strong>
-                  <p className="text-small">{friend.username}</p>
-                </div>
-                <Button size="sm" variant="ghost" onClick={() => friendService.removeFriend(friend.id).then(load)}>
-                  Eliminar
-                </Button>
-              </div>
-            ))
-          ) : (
-            <p className="empty-sub">Aún no tenés amigos en StudyQuest.</p>
-          )}
-        </div>
-      </div>
+      </PageContainer>
     </MobileLayout>
   )
 }

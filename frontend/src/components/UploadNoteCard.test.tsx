@@ -8,10 +8,10 @@ describe('UploadNoteCard', () => {
     render(<UploadNoteCard onUpload={onUpload} isLoading={false} />)
 
     fireEvent.click(screen.getByRole('button', { name: /crear quest con ia/i }))
-    fireEvent.change(screen.getByPlaceholderText(/título del quiz/i), {
+    fireEvent.change(screen.getByLabelText(/título del quiz/i), {
       target: { value: 'Bases de datos' },
     })
-    fireEvent.change(screen.getByPlaceholderText(/pegá el texto del apunte/i), {
+    fireEvent.change(screen.getByLabelText(/texto del apunte/i), {
       target: { value: 'bases de datos' },
     })
     fireEvent.click(screen.getByRole('button', { name: /generar quest/i }))
@@ -28,10 +28,10 @@ describe('UploadNoteCard', () => {
     render(<UploadNoteCard onUpload={onUpload} isLoading={false} />)
 
     fireEvent.click(screen.getByRole('button', { name: /crear quest con ia/i }))
-    fireEvent.change(screen.getByPlaceholderText(/título del quiz/i), {
+    fireEvent.change(screen.getByLabelText(/título del quiz/i), {
       target: { value: 'Bases de datos' },
     })
-    fireEvent.change(screen.getByPlaceholderText(/pegá el texto del apunte/i), {
+    fireEvent.change(screen.getByLabelText(/texto del apunte/i), {
       target: {
         value:
           'Bases de datos relacionales con SQL, joins, indices, claves primarias, claves foraneas y normalizacion.',
