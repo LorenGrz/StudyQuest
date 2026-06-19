@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react'
+import { Paperclip, Send, Mic, Square } from 'lucide-react'
 import { isAllowedChatFile } from './chatMessageGuards'
 
 type Props = {
@@ -85,89 +86,77 @@ export function ChatComposer({ onSendText, onSendFile, onSendAudio }: Props) {
   }
 
   return (
-    <div className="chat-composer">
-      <form className="chat-input-row" onSubmit={submitText}>
-        <div className={`chat-input-shell${isRecording ? ' chat-input-shell-recording' : ''}`}>
-          <button
-            type="button"
-            className="chat-icon-btn chat-icon-btn-muted"
-            aria-label="Adjuntar archivo"
-            onClick={() => fileInputRef.current?.click()}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M12 5a1 1 0 0 1 1 1v5h5a1 1 0 1 1 0 2h-5v5a1 1 0 1 1-2 0v-5H6a1 1 0 1 1 0-2h5V6a1 1 0 0 1 1-1Z"
-                fill="currentColor"
-              />
-            </svg>
-          </button>
+    <div className="sticky bottom-[env(safe-area-inset-bottom,0px)] z-10 border-t border-edge bg-bg-base px-3 py-2 pb-[calc(env(safe-area-inset-bottom,0px)+8px)]">
+      <form className="flex items-end gap-2" onSubmit={submitText}>
+        {/* Hidden native file input — labelled via <label htmlFor> so getByLabelText resolves it */}
+        <label htmlFor="chat-file-input" className="sr-only">Adjuntar archivo</label>
+        <input
+          id="chat-file-input"
+          ref={fileInputRef}
+          type="file"
+          className="sr-only"
+          accept=".pdf,.txt,.doc,.docx,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          onChange={(e) => { void handleFile(e.target.files?.[0]) }}
+        />
 
-          <input
-            ref={fileInputRef}
-            type="file"
-            className="chat-file-input"
-            aria-label="Adjuntar archivo"
-            accept=".pdf,.txt,.doc,.docx,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            onChange={(e) => { void handleFile(e.target.files?.[0]) }}
+        {/* Attach button — accessible name comes from inner sr-only span so getByLabelText('Adjuntar archivo') only resolves the file input */}
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          className="size-11 shrink-0 flex items-center justify-center rounded-lg border border-edge text-secondary hover:text-primary hover:border-accent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        >
+          <Paperclip size={18} aria-hidden="true" />
+          <span className="sr-only">Adjuntar archivo</span>
+        </button>
+
+        <div className={`flex-1 flex flex-col min-w-0 rounded-lg border transition-colors ${isRecording ? 'border-danger/60 bg-danger/5' : 'border-edge bg-surface'}`}>
+          {isRecording && (
+            <div className="flex items-center gap-2 px-3 pt-2 text-xs text-danger" aria-live="polite">
+              <span className="inline-block w-2 h-2 rounded-full bg-danger animate-pulse" aria-hidden="true" />
+              <span>Grabando audio...</span>
+            </div>
+          )}
+
+          <textarea
+            ref={messageInputRef}
+            className="w-full resize-none bg-transparent px-3 py-2 text-sm text-primary placeholder:text-secondary focus:outline-none"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={isRecording ? 'Tu nota de voz se está grabando' : 'Escribí un mensaje'}
+            aria-label="Escribí un mensaje"
+            rows={1}
           />
-
-          <div className="chat-input-content">
-            {isRecording && (
-              <div className="chat-recording-indicator" aria-live="polite">
-                <span className="chat-recording-dot" />
-                <span>Grabando audio...</span>
-              </div>
-            )}
-
-            <textarea
-              ref={messageInputRef}
-              className="chat-input"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={isRecording ? 'Tu nota de voz se está grabando' : 'Escribí un mensaje'}
-              aria-label="Escribí un mensaje"
-              rows={1}
-            />
-          </div>
         </div>
 
         {trimmedText ? (
           <button
             type="submit"
-            className="chat-icon-btn chat-icon-btn-primary"
             aria-label="Enviar mensaje"
+            className="size-11 shrink-0 flex items-center justify-center rounded-lg bg-accent text-white border border-accent hover:bg-accent-light transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M3.4 20.4 20.5 13a1 1 0 0 0 0-1.8L3.4 3.7a.9.9 0 0 0-1.3.9l1.1 6.2a1 1 0 0 0 .8.8l8.1 1.3-8.1 1.3a1 1 0 0 0-.8.8l-1.1 6.2a.9.9 0 0 0 1.3.9Z"
-                fill="currentColor"
-              />
-            </svg>
+            <Send size={18} aria-hidden="true" />
           </button>
         ) : (
           <button
             type="button"
-            className={`chat-icon-btn ${isRecording ? 'chat-icon-btn-danger' : 'chat-icon-btn-primary'}`}
             aria-label={isRecording ? 'Detener grabación' : 'Grabar nota de voz'}
             onClick={() => void (isRecording ? stopRecording() : startRecording())}
+            className={`size-11 shrink-0 flex items-center justify-center rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+              isRecording
+                ? 'bg-danger/10 border-danger/50 text-danger hover:bg-danger/20'
+                : 'bg-accent text-white border-accent hover:bg-accent-light'
+            }`}
           >
             {isRecording ? (
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor" />
-              </svg>
+              <Square size={16} aria-hidden="true" />
             ) : (
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  d="M12 15a3 3 0 0 0 3-3V7a3 3 0 1 0-6 0v5a3 3 0 0 0 3 3Zm5-3a1 1 0 1 1 2 0 7 7 0 1 1-14 0 1 1 0 1 1 2 0 5 5 0 1 0 10 0Zm-4 8a1 1 0 1 1-2 0v-2.1a7.9 7.9 0 0 0 2 0V20Z"
-                  fill="currentColor"
-                />
-              </svg>
+              <Mic size={18} aria-hidden="true" />
             )}
           </button>
         )}
       </form>
-      {error && <p className="chat-error">{error}</p>}
+      {error && <p className="mt-1 text-xs text-danger px-1">{error}</p>}
     </div>
   )
 }
