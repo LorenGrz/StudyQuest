@@ -9,7 +9,8 @@ import { Button, Spinner } from '../UI'
 import { AvatarWithBorder } from '../AvatarWithBorder'
 import { useNavigate } from 'react-router-dom'
 import { SegmentedTabs } from '../PagePrimitives'
-import { TournamentCreationModal } from './TournamentCreationModal'
+import { TournamentCreationModal as TournamentCreationModalBase } from './TournamentCreationModal'
+import { tournamentService } from '../../services/tournamentService'
 export { ChatBox } from '../party-chat/ChatBox'
 
 // Re-export SegmentedTabs as TabBar so callers don't need to change imports
@@ -508,7 +509,7 @@ export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
   )
 }
 
-function TournamentCreationModal({ quest, onClose }: { quest: Quest; onClose: () => void }) {
+function TournamentCreationModalLocal({ quest, onClose }: { quest: Quest; onClose: () => void }) {
   const [title, setTitle] = useState(`Torneo de ${quest.title}`)
   const [delayMin, setDelayMin] = useState(2)
   const [durationMin, setDurationMin] = useState(5)
@@ -703,7 +704,7 @@ export function QuestCard({ quest }: { quest: Quest }) {
       </div>
 
       {showModal && (
-        <TournamentCreationModal quest={quest} onClose={() => setShowModal(false)} />
+        <TournamentCreationModalBase quest={quest} onClose={() => setShowModal(false)} />
       )}
     </>
   )
