@@ -166,7 +166,8 @@ export class SubmitAnswerDto {
   @IsUUID() questId: string;
   @IsOptional() @IsUUID() attemptId?: string;
   @IsNumber() @Min(0) questionIndex: number;
-  @IsNumber() @Min(0) @Max(3) selectedOption: number;
+  // -1 = sin respuesta (se agotó el tiempo); cuenta como incorrecta.
+  @IsNumber() @Min(-1) @Max(3) selectedOption: number;
   @IsNumber() @Min(0) timeSpentMs: number;
 }
 

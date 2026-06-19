@@ -3,7 +3,7 @@ import { AxiosError } from 'axios'
 import { questService, type Quest, type QuizQuestion, type AnswerResult } from '../services/questService'
 import { skillTreeService } from '../services/skillTreeService'
 
-const QUESTION_TIME_MS = 20000
+const QUESTION_TIME_MS = 10000
 
 export function useQuiz(questId: string) {
   const [quest, setQuest] = useState<Quest | null>(null)
@@ -17,6 +17,8 @@ export function useQuiz(questId: string) {
   const [loadError, setLoadError] = useState<string | null>(null)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const startTimeRef = useRef<number>(0)
+  // Guards against double-submit (e.g. a click landing the same instant the timer expires).
+  const lockRef = useRef(false)
   const currentQ: QuizQuestion | null = quest?.questions[currentIndex] ?? null
 
   useEffect(() => {
@@ -65,28 +67,12 @@ export function useQuiz(questId: string) {
     }
   }, [questId])
 
-  // Timer por pregunta
-  useEffect(() => {
-    if (!quest || isFinished || !currentQ) return
-    setTimeLeft(QUESTION_TIME_MS / 1000)
-    startTimeRef.current = Date.now()
-
-    timerRef.current = setInterval(() => {
-      const elapsed = Date.now() - startTimeRef.current
-      const remaining = Math.max(0, QUESTION_TIME_MS - elapsed)
-      setTimeLeft(Math.ceil(remaining / 1000))
-      if (remaining === 0) clearInterval(timerRef.current!)
-    }, 200)
-
-    return () => clearInterval(timerRef.current!)
-  }, [currentIndex, quest, isFinished, currentQ])
-
-  const answer = useCallback(async (optionId: string) => {
-    if (!currentQ || result || !attemptId) return
+  // Envía una selección (opción real, o -1 si se agotó el tiempo) y avanza tras una pausa.
+  const submitSelection = useCallback(async (selectedOption: number) => {
+    if (!currentQ || !attemptId || lockRef.current) return
+    lockRef.current = true
     clearInterval(timerRef.current!)
     const elapsedMs = Date.now() - startTimeRef.current
-    const selectedOption = currentQ.options.findIndex((option) => option.id === optionId)
-    if (selectedOption < 0) return
 
     const res = await questService.submitAnswer(
       questId,
@@ -122,8 +108,39 @@ export function useQuiz(questId: string) {
         setAttemptId('')
         setIsFinished(true)
       }
+      lockRef.current = false
     }, 2500)
-  }, [attemptId, currentQ, result, currentIndex, quest, questId])
+  }, [attemptId, currentQ, currentIndex, quest, questId])
+
+  // Latest submit fn for the timer interval, without re-arming the timer on every change.
+  const submitRef = useRef(submitSelection)
+  submitRef.current = submitSelection
+
+  const answer = useCallback((optionId: string) => {
+    const selectedOption = currentQ?.options.findIndex((option) => option.id === optionId) ?? -1
+    if (selectedOption < 0) return
+    void submitSelection(selectedOption)
+  }, [currentQ, submitSelection])
+
+  // Timer por pregunta — al llegar a 0 envía -1 (sin respuesta) y salta a la siguiente.
+  useEffect(() => {
+    if (!quest || isFinished || !currentQ) return
+    lockRef.current = false
+    setTimeLeft(QUESTION_TIME_MS / 1000)
+    startTimeRef.current = Date.now()
+
+    timerRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTimeRef.current
+      const remaining = Math.max(0, QUESTION_TIME_MS - elapsed)
+      setTimeLeft(Math.ceil(remaining / 1000))
+      if (remaining === 0) {
+        clearInterval(timerRef.current!)
+        void submitRef.current(-1)
+      }
+    }, 200)
+
+    return () => clearInterval(timerRef.current!)
+  }, [currentIndex, quest, isFinished, currentQ])
 
   return {
     quest,
