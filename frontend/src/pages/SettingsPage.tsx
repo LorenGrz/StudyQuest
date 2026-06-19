@@ -35,6 +35,7 @@ export default function SettingsPage() {
         {/* Tab rail — horizontal on mobile, vertical on desktop */}
         <div
           role="tablist"
+          aria-orientation="vertical"
           className="flex flex-row gap-2 overflow-x-auto pb-2 scrollbar-none md:flex-col md:overflow-visible md:pb-0 md:gap-1 md:w-48 md:shrink-0 md:bg-surface md:rounded-xl md:border md:border-edge md:p-2 md:h-fit"
         >
           {TABS.map((tab) => (
