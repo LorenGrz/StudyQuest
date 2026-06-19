@@ -20,17 +20,26 @@ interface MemberAvatarProps {
 
 export function MemberAvatar({ member, size = 28 }: MemberAvatarProps) {
   const bs = size > 40 ? 'md' : 'sm'
-  const baseSize = bs === 'md' ? 44 : 36
-  const scale = size / baseSize
+  // AvatarWithBorder renders an outer frame box (not just the avatar): 52px (sm)
+  // / 64px (md). Scale from that real size and pin the layout box to `size`, so
+  // the scaled avatar doesn't overflow and collide with presence dots / the
+  // overlapping avatar stack.
+  const wrapSize = bs === 'md' ? 64 : 52
+  const scale = size / wrapSize
 
   return (
-    <div className="inline-flex origin-center" style={{ transform: `scale(${scale})` }}>
-      <AvatarWithBorder
-        displayName={member.user?.displayName ?? '?'}
-        avatarUrl={member.user?.avatarUrl}
-        borderImageUrl={member.user?.activeCosmetics?.borderImageUrl}
-        size={bs}
-      />
+    <div
+      className="inline-flex items-center justify-center shrink-0"
+      style={{ width: size, height: size }}
+    >
+      <div className="origin-center shrink-0" style={{ transform: `scale(${scale})` }}>
+        <AvatarWithBorder
+          displayName={member.user?.displayName ?? '?'}
+          avatarUrl={member.user?.avatarUrl}
+          borderImageUrl={member.user?.activeCosmetics?.borderImageUrl}
+          size={bs}
+        />
+      </div>
     </div>
   )
 }
