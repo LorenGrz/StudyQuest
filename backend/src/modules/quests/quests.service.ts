@@ -14,6 +14,8 @@ import { QuizQuestion } from './quiz-question.entity';
 import { QuizOption } from './quiz-option.entity';
 import { PlayerResult } from './player-result.entity';
 import { AiService } from '../ai/ai.service';
+import { MarkitdownService } from '../ai/markitdown.service';
+import { QuizGenerationOptions, RawQuestion } from '../ai/ai.types';
 import { PartiesService } from '../parties/parties.service';
 import { UsersService } from '../users/users.service';
 import { SkillTreeService } from '../skill-tree/skill-tree.service';
@@ -22,6 +24,10 @@ import { CreateQuestDto, SubmitAnswerDto } from '../../common/dto';
 const XP_CORRECT_BASE = 100;
 const XP_SPEED_BONUS = 50;
 const XP_SPEED_FAST_MS = 5000;
+
+// Below this, assume MarkItDown failed to extract anything useful (e.g. a scanned
+// PDF) and fall back to the native multimodal PDF path.
+const MIN_MARKDOWN_CHARS = 50;
 
 type QuestAttemptSummary = {
   id: string;
@@ -51,6 +57,7 @@ export class QuestsService {
     private readonly resultRepo: Repository<PlayerResult>,
     private readonly dataSource: DataSource,
     private readonly aiService: AiService,
+    private readonly markitdownService: MarkitdownService,
     private readonly partiesService: PartiesService,
     private readonly usersService: UsersService,
     private readonly skillTreeService: SkillTreeService,
@@ -104,10 +111,7 @@ export class QuestsService {
         },
       };
       const rawQuestions = pdfBuffer
-        ? await this.aiService.generateQuestionsFromPdf(
-            pdfBuffer,
-            generationOptions,
-          )
+        ? await this.generateFromPdf(pdfBuffer, generationOptions)
         : await this.aiService.generateQuestionsFromText(
             textContent!,
             generationOptions,
@@ -153,6 +157,32 @@ export class QuestsService {
       });
       this.eventEmitter.emit('quest.failed', { questId, error: err.message });
     }
+  }
+
+  /**
+   * Convert the PDF to Markdown with the MarkItDown sidecar and generate from
+   * that clean text. Falls back to the native multimodal PDF path if the sidecar
+   * is unreachable or returns too little text, so a misbehaving sidecar never
+   * blocks quest generation.
+   */
+  private async generateFromPdf(
+    pdfBuffer: Buffer,
+    options: QuizGenerationOptions,
+  ): Promise<RawQuestion[]> {
+    try {
+      const markdown = await this.markitdownService.toMarkdown(pdfBuffer);
+      if (markdown.trim().length >= MIN_MARKDOWN_CHARS) {
+        return await this.aiService.generateQuestionsFromText(markdown, options);
+      }
+      this.logger.warn(
+        `markitdown devolvió muy poco texto (${markdown.trim().length} chars); uso el PDF nativo`,
+      );
+    } catch (err) {
+      this.logger.warn(
+        `markitdown falló (${err.message}); uso el PDF nativo como fallback`,
+      );
+    }
+    return this.aiService.generateQuestionsFromPdf(pdfBuffer, options);
   }
 
   private async resolvePdfBuffer(

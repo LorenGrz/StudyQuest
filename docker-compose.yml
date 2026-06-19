@@ -45,6 +45,22 @@ services:
     networks:
       - studyquest-net
 
+  markitdown:
+    build:
+      context: ./markitdown-service
+      dockerfile: Dockerfile
+    container_name: studyquest-markitdown
+    restart: unless-stopped
+    ports:
+      - "3001:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0) if urllib.request.urlopen('http://localhost:8000/health').status==200 else sys.exit(1)"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - studyquest-net
+
   api:
     build:
       context: ./backend
@@ -72,6 +88,7 @@ services:
       JWT_EXPIRES_IN: 7d
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       GEMINI_MODEL: ${GEMINI_MODEL:-gemini-1.5-flash}
+      MARKITDOWN_URL: http://markitdown:8000
       CORS_ORIGIN: http://localhost:5173
       CI: "true"
       PNPM_CONFIG_VERIFY_DEPS_BEFORE_RUN: "false"
@@ -84,6 +101,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      markitdown:
+        condition: service_started
     command: sh -c "pnpm install && pnpm run start:dev"
     networks:
       - studyquest-net

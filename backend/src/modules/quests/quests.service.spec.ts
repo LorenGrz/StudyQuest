@@ -8,6 +8,7 @@ import { QuizQuestion } from './quiz-question.entity';
 import { QuizOption } from './quiz-option.entity';
 import { PlayerResult } from './player-result.entity';
 import { AiService } from '../ai/ai.service';
+import { MarkitdownService } from '../ai/markitdown.service';
 import { PartiesService } from '../parties/parties.service';
 import { UsersService } from '../users/users.service';
 import { SkillTreeService } from '../skill-tree/skill-tree.service';
@@ -24,6 +25,7 @@ jest.mock('node:fs/promises', () => ({
 describe('QuestsService AI abstraction', () => {
   let service: QuestsService;
   let aiService: jest.Mocked<AiService>;
+  let markitdownService: jest.Mocked<MarkitdownService>;
   let questRepo: jest.Mocked<Repository<Quest>>;
   let partiesService: jest.Mocked<PartiesService>;
 
@@ -65,6 +67,12 @@ describe('QuestsService AI abstraction', () => {
           },
         },
         {
+          provide: MarkitdownService,
+          useValue: {
+            toMarkdown: jest.fn(),
+          },
+        },
+        {
           provide: PartiesService,
           useValue: {
             findById: jest.fn(),
@@ -79,6 +87,7 @@ describe('QuestsService AI abstraction', () => {
 
     service = moduleRef.get(QuestsService);
     aiService = moduleRef.get(AiService);
+    markitdownService = moduleRef.get(MarkitdownService);
     questRepo = moduleRef.get(getRepositoryToken(Quest));
     partiesService = moduleRef.get(PartiesService);
   });
@@ -114,9 +123,11 @@ describe('QuestsService AI abstraction', () => {
     expect(aiService.generateQuestionsFromPdf).not.toHaveBeenCalled();
   });
 
-  it('delegates pdf generation to the AI facade', async () => {
+  it('converts pdf to markdown via markitdown then delegates to text generation', async () => {
     const pdfBuffer = Buffer.from('fake pdf');
-    (aiService.generateQuestionsFromPdf as jest.Mock).mockResolvedValue([
+    const markdown = '# Apunte\n'.repeat(40);
+    markitdownService.toMarkdown.mockResolvedValue(markdown);
+    (aiService.generateQuestionsFromText as jest.Mock).mockResolvedValue([
       {
         text: 'Pregunta pdf?',
         options: ['A', 'B', 'C', 'D'],
@@ -134,13 +145,45 @@ describe('QuestsService AI abstraction', () => {
       'Quest PDF',
     );
 
-    expect(aiService.generateQuestionsFromPdf).toHaveBeenCalledWith(
-      pdfBuffer,
+    expect(markitdownService.toMarkdown).toHaveBeenCalledWith(pdfBuffer);
+    expect(aiService.generateQuestionsFromText).toHaveBeenCalledWith(
+      markdown,
       expect.objectContaining({
         metadata: expect.objectContaining({
           questTitle: 'Quest PDF',
           sourceType: 'pdf',
         }),
+      }),
+    );
+    expect(aiService.generateQuestionsFromPdf).not.toHaveBeenCalled();
+  });
+
+  it('falls back to native pdf generation when markitdown fails', async () => {
+    const pdfBuffer = Buffer.from('fake pdf');
+    markitdownService.toMarkdown.mockRejectedValue(new Error('sidecar caído'));
+    (aiService.generateQuestionsFromPdf as jest.Mock).mockResolvedValue([
+      {
+        text: 'Pregunta pdf?',
+        options: ['A', 'B', 'C', 'D'],
+        correctIndex: 0,
+        explanation: 'Explicacion',
+        topic: 'PDF',
+        difficulty: 'medium',
+      },
+    ]);
+
+    await (service as any).generateInBackground(
+      'quest-2b',
+      undefined,
+      pdfBuffer,
+      'Quest PDF',
+    );
+
+    expect(markitdownService.toMarkdown).toHaveBeenCalledWith(pdfBuffer);
+    expect(aiService.generateQuestionsFromPdf).toHaveBeenCalledWith(
+      pdfBuffer,
+      expect.objectContaining({
+        metadata: expect.objectContaining({ sourceType: 'pdf' }),
       }),
     );
     expect(aiService.generateQuestionsFromText).not.toHaveBeenCalled();
@@ -149,9 +192,10 @@ describe('QuestsService AI abstraction', () => {
   it('reads pdf bytes from disk-backed uploads before delegating to AI', async () => {
     const pdfBuffer = Buffer.from('pdf from disk');
     (fs.readFile as jest.Mock).mockResolvedValue(pdfBuffer);
+    markitdownService.toMarkdown.mockResolvedValue('# Apunte\n'.repeat(40));
     partiesService.findById.mockResolvedValue({ subjectId: 'subject-1' } as any);
     questRepo.save.mockResolvedValue({ id: 'quest-3' } as Quest);
-    (aiService.generateQuestionsFromPdf as jest.Mock).mockResolvedValue([
+    (aiService.generateQuestionsFromText as jest.Mock).mockResolvedValue([
       {
         text: 'Pregunta disco?',
         options: ['A', 'B', 'C', 'D'],
@@ -183,8 +227,9 @@ describe('QuestsService AI abstraction', () => {
         sourcePdfUrl: '/uploads/quest.pdf',
       }),
     );
-    expect(aiService.generateQuestionsFromPdf).toHaveBeenCalledWith(
-      pdfBuffer,
+    expect(markitdownService.toMarkdown).toHaveBeenCalledWith(pdfBuffer);
+    expect(aiService.generateQuestionsFromText).toHaveBeenCalledWith(
+      expect.any(String),
       expect.objectContaining({
         metadata: expect.objectContaining({
           questTitle: 'Quest PDF',
