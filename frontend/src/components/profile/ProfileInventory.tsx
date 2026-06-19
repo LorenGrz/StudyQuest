@@ -38,7 +38,7 @@ export function ProfileInventory({
             <p className="text-[13px] font-medium text-secondary mb-2">Títulos</p>
             <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-2">
               <button
-                className="btn btn-secondary"
+                className="inline-flex items-center justify-center border text-sm font-semibold text-primary cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={() => equipTitle(null)}
                 disabled={isUpdatingCosmetics}
                 style={{
@@ -54,7 +54,7 @@ export function ProfileInventory({
               {inventory.titles.map((title) => (
                 <button
                   key={title.code}
-                  className="btn btn-secondary"
+                  className="inline-flex items-center justify-center border text-sm font-semibold text-primary cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={() => equipTitle(title.code)}
                   disabled={isUpdatingCosmetics}
                   style={{

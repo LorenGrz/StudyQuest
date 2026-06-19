@@ -97,7 +97,7 @@ export function Alert({
       {actionLabel && onAction && (
         <button
           onClick={onAction}
-          className="self-start inline-flex items-center justify-center min-h-11 px-4 rounded-lg bg-accent text-primary font-semibold text-sm transition-colors hover:bg-accent-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="self-start inline-flex items-center justify-center min-h-11 px-4 rounded-lg bg-accent text-on-accent font-semibold text-sm transition-colors hover:bg-accent-light focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
           {actionLabel}
         </button>

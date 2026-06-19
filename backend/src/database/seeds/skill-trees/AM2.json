@@ -1,0 +1,81 @@
+[
+  {
+    "topic": "Funciones de Varias Variables",
+    "name": "Funciones de Varias Variables",
+    "description": "Dominio, curvas de nivel y representación en R³.",
+    "iconKey": "target",
+    "xpThreshold": 80,
+    "col": 2,
+    "row": 0
+  },
+  {
+    "topic": "Límites y Continuidad",
+    "name": "Límites y Continuidad",
+    "description": "Límites dobles, trayectorias y continuidad en varias variables.",
+    "iconKey": "link",
+    "xpThreshold": 100,
+    "col": 1,
+    "row": 1,
+    "dependsOn": ["Funciones de Varias Variables"]
+  },
+  {
+    "topic": "Derivadas Parciales",
+    "name": "Derivadas Parciales",
+    "description": "Derivadas parciales, regla de la cadena y derivadas direccionales.",
+    "iconKey": "trending-up",
+    "xpThreshold": 120,
+    "col": 3,
+    "row": 1,
+    "dependsOn": ["Funciones de Varias Variables"]
+  },
+  {
+    "topic": "Gradiente y Optimización",
+    "name": "Gradiente y Optimización",
+    "description": "Gradiente, extremos y multiplicadores de Lagrange.",
+    "iconKey": "star",
+    "xpThreshold": 150,
+    "col": 4,
+    "row": 2,
+    "dependsOn": ["Derivadas Parciales"]
+  },
+  {
+    "topic": "Integrales Múltiples",
+    "name": "Integrales Dobles y Triples",
+    "description": "Integración en regiones, cambio de orden y coordenadas polares.",
+    "iconKey": "sigma",
+    "xpThreshold": 150,
+    "col": 2,
+    "row": 2,
+    "dependsOn": ["Límites y Continuidad", "Derivadas Parciales"]
+  },
+  {
+    "topic": "Series y Ecuaciones Diferenciales",
+    "name": "Series y Ecuaciones Diferenciales",
+    "description": "Series numéricas, de potencias y EDO de primer orden.",
+    "iconKey": "trending-up",
+    "xpThreshold": 160,
+    "col": 0,
+    "row": 2,
+    "dependsOn": ["Derivadas Parciales"]
+  },
+  {
+    "topic": "Integrales de Línea y Superficie",
+    "name": "Integrales de Línea y Superficie",
+    "description": "Campos vectoriales, circulación y flujo.",
+    "iconKey": "sigma",
+    "xpThreshold": 170,
+    "col": 2,
+    "row": 3,
+    "dependsOn": ["Integrales Múltiples", "Gradiente y Optimización"]
+  },
+  {
+    "topic": "Teoremas Integrales",
+    "name": "Teoremas de Green, Stokes y Gauss",
+    "description": "Teoremas fundamentales del cálculo vectorial y sus aplicaciones.",
+    "iconKey": "rocket",
+    "xpThreshold": 210,
+    "col": 2,
+    "row": 4,
+    "dependsOn": ["Integrales de Línea y Superficie"]
+  }
+]

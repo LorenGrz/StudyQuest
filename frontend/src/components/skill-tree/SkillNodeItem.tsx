@@ -1,4 +1,5 @@
 import type { SkillNode } from '../../services/skillTreeService'
+import { Badge } from '../../components/UI'
 import { nodeStatus, nodeStatusLabel, nodeIcon, pointForNode } from './utils'
 
 interface SkillNodeItemProps {
@@ -46,7 +47,7 @@ export function SkillNodeItem({
       <div className="text-2xl leading-none">{nodeIcon(node.iconKey)}</div>
       <div className="text-xs font-bold text-center text-primary">{node.name}</div>
       {node.unlocked ? (
-        <div className="badge badge-success">Desbloqueado</div>
+        <Badge variant="success">Desbloqueado</Badge>
       ) : (
         <>
           <div className="w-full h-[5px] rounded-full bg-elevated overflow-hidden">

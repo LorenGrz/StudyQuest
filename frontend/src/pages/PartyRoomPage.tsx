@@ -4,10 +4,10 @@ import { MobileLayout } from '../components/Layouts'
 import {
   PartyHeader,
   MemberList,
-  UploadNoteCard,
   QuestCard,
   ActivityFeed,
 } from '../components/party/PartyComponents'
+import { UploadNoteCard } from '../components/party/UploadNoteCard'
 import { SegmentedTabs } from '../components/PagePrimitives'
 import { ChatBox } from '../components/party-chat/ChatBox'
 import { Spinner, Button } from '../components/UI'

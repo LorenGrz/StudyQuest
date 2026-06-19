@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { Sparkles, FileText, X, Paperclip } from 'lucide-react'
 import type { Party, PartyMember, Activity } from '../../services/partyService'
 import { partyService } from '../../services/partyService'
 import { friendService } from '../../services/friendService'
@@ -7,9 +8,8 @@ import type { Quest } from '../../services/questService'
 import { Button, Spinner } from '../UI'
 import { AvatarWithBorder } from '../AvatarWithBorder'
 import { useNavigate } from 'react-router-dom'
-import { tournamentService } from '../../services/tournamentService'
 import { SegmentedTabs } from '../PagePrimitives'
-import { Paperclip, FileText, X, Sparkles } from 'lucide-react'
+import { TournamentCreationModal } from './TournamentCreationModal'
 export { ChatBox } from '../party-chat/ChatBox'
 
 // Re-export SegmentedTabs as TabBar so callers don't need to change imports
@@ -366,8 +366,6 @@ export function InviteSheet({ partyId, onClose }: InviteSheetProps) {
     </div>
   )
 }
-
-
 
 // ─── UploadNoteCard ───────────────────────────────────────────────────────────
 interface UploadNoteCardProps {

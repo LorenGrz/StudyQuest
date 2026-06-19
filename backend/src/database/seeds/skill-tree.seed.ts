@@ -3,19 +3,10 @@ import { config } from 'dotenv';
 config({ path: '../.env' });
 
 import 'reflect-metadata';
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { DataSource } from 'typeorm';
-import { User } from '../../modules/users/user.entity';
 import { Subject } from '../../modules/subjects/subject.entity';
-import { Party } from '../../modules/parties/party.entity';
-import { PartyMember } from '../../modules/parties/party-member.entity';
-import { ChatMessage } from '../../modules/parties/chat-message.entity';
-import { PartyActivity } from '../../modules/parties/party-activity.entity';
-import { Quest } from '../../modules/quests/quest.entity';
-import { QuizQuestion } from '../../modules/quests/quiz-question.entity';
-import { QuizOption } from '../../modules/quests/quiz-option.entity';
-import { PlayerResult } from '../../modules/quests/player-result.entity';
 import { SkillNode } from '../../modules/skill-tree/skill-node.entity';
 
 const AppDataSource = new DataSource({
@@ -25,19 +16,7 @@ const AppDataSource = new DataSource({
   username: process.env.POSTGRES_USER ?? 'studyquest',
   password: process.env.POSTGRES_PASSWORD ?? 'studyquest_pass',
   database: process.env.POSTGRES_DB ?? 'studyquest',
-  entities: [
-    User,
-    Subject,
-    Party,
-    PartyMember,
-    ChatMessage,
-    PartyActivity,
-    Quest,
-    QuizQuestion,
-    QuizOption,
-    PlayerResult,
-    SkillNode,
-  ],
+  entities: [__dirname + '/../../**/*.entity{.ts,.js}'],
   synchronize: true,
   logging: false,
 });
@@ -53,13 +32,23 @@ type NodeTemplate = {
   dependsOn?: string[];
 };
 
-function loadTemplate(): NodeTemplate[] {
-  const templatePath = join(__dirname, 'skill-tree.template.json');
+function resolveTemplatePath(code?: string): string {
+  if (code) {
+    const perSubject = join(__dirname, 'skill-trees', `${code}.json`);
+    if (existsSync(perSubject)) {
+      return perSubject;
+    }
+  }
+  return join(__dirname, 'skill-tree.template.json');
+}
+
+function loadTemplate(code?: string): NodeTemplate[] {
+  const templatePath = resolveTemplatePath(code);
   const raw = readFileSync(templatePath, 'utf-8');
   const parsed = JSON.parse(raw) as unknown;
 
   if (!Array.isArray(parsed)) {
-    throw new Error('skill-tree.template.json debe contener un arreglo de nodos');
+    throw new Error(`${templatePath} debe contener un arreglo de nodos`);
   }
 
   return parsed as NodeTemplate[];
@@ -68,17 +57,23 @@ function loadTemplate(): NodeTemplate[] {
 async function seedSkillTreeForSubject(subjectId: string) {
   const subjectRepo = AppDataSource.getRepository(Subject);
   const nodeRepo = AppDataSource.getRepository(SkillNode);
-  const template = loadTemplate();
 
   const subject = await subjectRepo.findOneBy({ id: subjectId });
   if (!subject) {
     throw new Error(`Materia no encontrada: ${subjectId}`);
   }
 
+  const template = loadTemplate(subject.code);
+  const force = process.argv.includes('--force');
+
   const existing = await nodeRepo.count({ where: { subjectId } });
   if (existing > 0) {
-    console.log(`⚠️  La materia ${subject.name} ya tiene nodos. Se omite.`);
-    return;
+    if (!force) {
+      console.log(`⚠️  La materia ${subject.name} ya tiene nodos. Se omite (usá --force para regenerar).`);
+      return;
+    }
+    await nodeRepo.delete({ subjectId });
+    console.log(`♻️  ${subject.name}: ${existing} nodos previos eliminados (--force).`);
   }
 
   const topicToId = new Map<string, string>();
@@ -120,7 +115,7 @@ async function seedSkillTreeAllSubjects() {
 async function main() {
   await AppDataSource.initialize();
 
-  const subjectIdArg = process.argv[2];
+  const subjectIdArg = process.argv.slice(2).find((arg) => !arg.startsWith('--'));
   if (subjectIdArg) {
     await seedSkillTreeForSubject(subjectIdArg);
   } else {
