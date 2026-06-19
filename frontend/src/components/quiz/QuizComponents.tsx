@@ -9,8 +9,8 @@ interface ScoreHeaderProps {
 }
 
 export function ScoreHeader({ scores, timeLeft, currentIndex, total }: ScoreHeaderProps) {
-  const timerPct = (timeLeft / 20) * 100
-  const timerColor = timeLeft > 10 ? '#10b981' : timeLeft > 5 ? '#f59e0b' : '#ef4444'
+  const timerPct = (timeLeft / 10) * 100
+  const timerColor = timeLeft > 6 ? '#10b981' : timeLeft > 3 ? '#f59e0b' : '#ef4444'
 
   return (
     <div className="bg-surface px-4 py-3 flex flex-col gap-2 border-b border-[var(--overlay-border)]">

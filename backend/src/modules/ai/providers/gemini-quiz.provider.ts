@@ -83,7 +83,7 @@ export class GeminiQuizProvider implements QuizAiProvider {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: options?.model ?? this.cfg.get('GEMINI_MODEL', 'gemini-1.5-flash'),
+      model: options?.model ?? this.cfg.get('GEMINI_MODEL', 'gemini-2.0-flash'),
     });
 
     const result = await model.generateContent(
