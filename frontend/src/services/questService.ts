@@ -110,4 +110,8 @@ export const questService = {
     const { data } = await api.post<Quest>(`/quests/${questId}/complete`)
     return data
   },
+
+  async delete(questId: string): Promise<void> {
+    await api.delete(`/quests/${questId}`)
+  },
 }

@@ -26,6 +26,7 @@
   --color-edge: var(--border);
   --color-content: var(--text-primary);
   --color-faint: var(--text-muted);
+  --shadow-card: var(--shadow-card);
 }
 
 /* ─── Custom Utilities (sin equivalente nativo en Tailwind) ──────────────── */
@@ -108,6 +109,7 @@
   
   --shadow-sm:      0 1px 3px rgba(0, 0, 0, 0.4);
   --shadow-md:      0 4px 16px rgba(0, 0, 0, 0.5);
+  --shadow-card:    0 8px 32px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
   --shadow-accent:  0 0 24px var(--accent-glow);
   
   --navbar-height:  70px;
@@ -152,13 +154,14 @@
 
   --shadow-sm: 0 1px 3px rgba(20, 20, 40, 0.1);
   --shadow-md: 0 4px 16px rgba(20, 20, 40, 0.12);
+  --shadow-card: 0 8px 24px rgba(20, 20, 40, 0.08), inset 0 0 0 1px rgba(20, 20, 40, 0.02);
   --shadow-accent: 0 0 24px var(--accent-glow);
 }
 
 /* Element defaults & reset live in @layer base so Tailwind's utilities (a later
    layer) always win. Unlayered, these beat every utility regardless of
-   specificity — e.g. `* { padding:0 }` killed all p-*/m-*, and
-   `button { background:none }` killed bg-* on every button. */
+   specificity — e.g. `* { padding:0 }` killed all spacing utilities, and
+   `button { background:none }` killed bg-colors on every button. */
 @layer base {
   *,
   *::before,

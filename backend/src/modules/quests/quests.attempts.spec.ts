@@ -8,6 +8,7 @@ import { QuizQuestion } from './quiz-question.entity';
 import { QuizOption } from './quiz-option.entity';
 import { PlayerResult } from './player-result.entity';
 import { AiService } from '../ai/ai.service';
+import { MarkitdownService } from '../ai/markitdown.service';
 import { PartiesService } from '../parties/parties.service';
 import { UsersService } from '../users/users.service';
 import { SkillTreeService } from '../skill-tree/skill-tree.service';
@@ -66,6 +67,10 @@ describe('QuestsService attempts and progress', () => {
           useValue: {},
         },
         {
+          provide: MarkitdownService,
+          useValue: {},
+        },
+        {
           provide: PartiesService,
           useValue: {},
         },
@@ -101,7 +106,7 @@ describe('QuestsService attempts and progress', () => {
       status: 'active',
       questions: [{ id: 'q1' }, { id: 'q2' }] as any,
       results: [],
-    } as Quest);
+    } as unknown as Quest);
     resultRepo.findOne.mockResolvedValue({
       id: 'attempt-1',
       questId: 'quest-1',
@@ -115,7 +120,7 @@ describe('QuestsService attempts and progress', () => {
       xpEarned: 0,
       totalTimeMs: 1000,
       createdAt: new Date(),
-    } as PlayerResult);
+    } as unknown as PlayerResult);
 
     const attempt = await service.startQuest('quest-1', 'user-1');
 
@@ -136,7 +141,7 @@ describe('QuestsService attempts and progress', () => {
       status: 'completed',
       questions: [{ id: 'q1' }, { id: 'q2' }, { id: 'q3' }] as any,
       results: [],
-    } as Quest);
+    } as unknown as Quest);
     resultRepo.findOne.mockResolvedValue(null);
     resultRepo.find.mockResolvedValue([
       {
@@ -145,7 +150,7 @@ describe('QuestsService attempts and progress', () => {
         userId: 'user-1',
         attemptNumber: 1,
         status: 'completed',
-      } as PlayerResult,
+      } as unknown as PlayerResult,
     ]);
     resultRepo.save.mockResolvedValue({
       id: 'attempt-2',
@@ -155,7 +160,7 @@ describe('QuestsService attempts and progress', () => {
       status: 'in_progress',
       answeredQuestionIndices: [],
       totalQuestions: 3,
-    } as PlayerResult);
+    } as unknown as PlayerResult);
 
     const attempt = await service.startQuest('quest-1', 'user-1');
 
@@ -224,11 +229,11 @@ describe('QuestsService attempts and progress', () => {
       correctIndex: 0,
       explanation: 'Porque sí',
       topic: 'ACID',
-    } as QuizQuestion);
+    } as unknown as QuizQuestion);
     questRepo.findOne.mockResolvedValue({
       id: 'quest-1',
       subjectId: 'subject-1',
-    } as Quest);
+    } as unknown as Quest);
     resultRepo.findOne.mockResolvedValue({
       id: 'attempt-1',
       questId: 'quest-1',
@@ -242,7 +247,7 @@ describe('QuestsService attempts and progress', () => {
       totalQuestions: 2,
       xpEarned: 0,
       createdAt: new Date(),
-    } as PlayerResult);
+    } as unknown as PlayerResult);
 
     await service.submitAnswer(
       {

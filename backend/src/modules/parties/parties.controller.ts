@@ -50,6 +50,13 @@ export class PartiesController {
     'audio/ogg',
     'audio/mp4',
     'audio/mpeg',
+    'audio/wav',
+    'audio/x-wav',
+    'audio/x-m4a',
+    'audio/m4a',
+    'audio/3gpp',
+    'audio/aac',
+    'application/octet-stream',
   ]
 
   private static chatUploadStorage = diskStorage({

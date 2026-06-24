@@ -10,7 +10,7 @@ import { AvatarWithBorder } from '../AvatarWithBorder'
 import { useNavigate } from 'react-router-dom'
 import { SegmentedTabs } from '../PagePrimitives'
 import { TournamentCreationModal as TournamentCreationModalBase } from './TournamentCreationModal'
-import { tournamentService } from '../../services/tournamentService'
+
 export { ChatBox } from '../party-chat/ChatBox'
 
 // Re-export SegmentedTabs as TabBar so callers don't need to change imports
@@ -27,13 +27,27 @@ function resolveAssetUrl(url: string | null | undefined): string | null {
 
 // ─── PartyHeader ─────────────────────────────────────────────────────────────
 export function PartyHeader({ party }: { party: Party | null }) {
+  const navigate = useNavigate()
   if (!party) return null
   return (
     <div className="flex items-center justify-between gap-3 px-4 py-3">
       <div className="min-w-0 flex-1">
-        <h1 className="text-lg font-bold text-primary truncate">
-          {party.name ?? party.subject?.name ?? 'Party'}
-        </h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-lg font-bold text-primary truncate">
+            {party.name ?? party.subject?.name ?? 'Party'}
+          </h1>
+          <button
+            onClick={() => navigate(`/party/${party.id}/details`)}
+            className="text-muted hover:text-accent p-1 transition-colors rounded-full hover:bg-surface border border-transparent hover:border-edge active:scale-95 cursor-pointer"
+            aria-label="Ver detalles del grupo"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+          </button>
+        </div>
         <div className="flex items-center gap-2 mt-0.5 flex-wrap">
           <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full border ${
             party.status === 'active'
@@ -509,125 +523,13 @@ export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
   )
 }
 
-function TournamentCreationModalLocal({ quest, onClose }: { quest: Quest; onClose: () => void }) {
-  const [title, setTitle] = useState(`Torneo de ${quest.title}`)
-  const [delayMin, setDelayMin] = useState(2)
-  const [durationMin, setDurationMin] = useState(5)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError(null)
-
-    const startsAt = new Date(Date.now() + delayMin * 60 * 1000).toISOString()
-    const endsAt = new Date(Date.now() + (delayMin + durationMin) * 60 * 1000).toISOString()
-
-    try {
-      await tournamentService.create({
-        title,
-        questId: quest.id,
-        startsAt,
-        endsAt,
-      })
-      setSuccess(true)
-      setTimeout(() => {
-        onClose()
-      }, 1500)
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al crear el torneo')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-      onClick={onClose}
-    >
-      <div
-        className="w-full max-w-sm bg-elevated border border-edge rounded-xl p-6 flex flex-col gap-4"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 className="text-lg font-bold text-primary text-center">
-          🏆 Crear Torneo por Tiempo
-        </h2>
-        <p className="text-sm text-secondary text-center -mt-2">
-          Múltiples parties competirán resolviendo esta quest en simultáneo.
-        </p>
-
-        {success ? (
-          <div className="text-center py-6 text-success font-bold">
-            ✓ ¡Torneo creado con éxito!
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div className="input-group">
-              <label className="label">Título del Torneo</label>
-              <input
-                className="input"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Ej. Torneo de Álgebra..."
-                required
-              />
-            </div>
-
-            <div className="input-group">
-              <label className="label">¿Cuándo empieza? (Cuenta regresiva)</label>
-              <select
-                className="input"
-                value={delayMin}
-                onChange={(e) => setDelayMin(Number(e.target.value))}
-              >
-                <option value={1}>En 1 minuto</option>
-                <option value={2}>En 2 minutos</option>
-                <option value={5}>En 5 minutos</option>
-                <option value={10}>En 10 minutos</option>
-              </select>
-            </div>
-
-            <div className="input-group">
-              <label className="label">¿Cuánto dura la competencia?</label>
-              <select
-                className="input"
-                value={durationMin}
-                onChange={(e) => setDurationMin(Number(e.target.value))}
-              >
-                <option value={3}>3 minutos</option>
-                <option value={5}>5 minutos</option>
-                <option value={10}>10 minutos</option>
-                <option value={20}>20 minutos</option>
-                <option value={30}>30 minutos</option>
-              </select>
-            </div>
-
-            {error && (
-              <p className="text-sm text-danger text-center">{error}</p>
-            )}
-
-            <div className="flex gap-3">
-              <Button type="button" variant="ghost" className="flex-1" onClick={onClose}>
-                Cancelar
-              </Button>
-              <Button type="submit" variant="primary" className="flex-1" isLoading={isLoading}>
-                Crear ⚔️
-              </Button>
-            </div>
-          </form>
-        )}
-      </div>
-    </div>
-  )
-}
 
 // ─── QuestCard ───────────────────────────────────────────────────────────────
-export function QuestCard({ quest }: { quest: Quest }) {
+export function QuestCard({ quest, onDelete }: { quest: Quest; onDelete?: (questId: string) => Promise<void> }) {
   const navigate = useNavigate()
   const [showModal, setShowModal] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const questionCount = quest.questionCount ?? quest.questions?.length ?? 0
   const sourceLabel = quest.sourceType === 'pdf' || quest.sourcePdfUrl ? 'PDF adjunto' : 'Texto'
   const isGenerating = quest.status === 'generating' || quest.status === 'pending'
@@ -671,13 +573,13 @@ export function QuestCard({ quest }: { quest: Quest }) {
           {statusHint && <p className="text-xs text-secondary">{statusHint}</p>}
           {quest.sourcePdfUrl && (
             <a
-              className="text-xs text-accent underline"
+              className="self-start mt-1 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-secondary/10 text-secondary border border-secondary/30 text-xs font-bold hover:bg-secondary/20 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
               href={new URL(quest.sourcePdfUrl, 'http://localhost:3000').toString()}
               target="_blank"
               rel="noreferrer"
               onClick={(event) => event.stopPropagation()}
             >
-              Ver PDF
+              📄 Ver PDF
             </a>
           )}
           {canPlay && (
@@ -689,6 +591,27 @@ export function QuestCard({ quest }: { quest: Quest }) {
               }}
             >
               🏆 Iniciar Torneo
+            </button>
+          )}
+          {isFailed && onDelete && (
+            <button
+              className="self-start mt-1 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-danger/10 text-danger border border-danger/30 text-xs font-bold hover:bg-danger/25 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+              disabled={isDeleting}
+              onClick={async (e) => {
+                e.stopPropagation()
+                if (window.confirm('¿Estás seguro de que querés eliminar esta quest fallida?')) {
+                  setIsDeleting(true)
+                  try {
+                    await onDelete(quest.id)
+                  } catch (err) {
+                    alert('Error al eliminar la quest')
+                  } finally {
+                    setIsDeleting(false)
+                  }
+                }
+              }}
+            >
+              {isDeleting ? 'Eliminando...' : '🗑️ Eliminar'}
             </button>
           )}
         </div>

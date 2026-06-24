@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Delete,
   Param,
   Body,
   UseGuards,
@@ -79,4 +80,10 @@ export class QuestsController {
   complete(@Param('id') id: string, @Request() req: any) {
     return this.questsService.completeQuest(id, req.user.userId);
   }
+
+  @Delete(':id')
+  delete(@Param('id') id: string, @Request() req: any) {
+    return this.questsService.deleteQuest(id, req.user.userId);
+  }
 }
+

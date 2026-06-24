@@ -29,7 +29,7 @@ export default function SettingsPage() {
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.22, ease: 'easeOut' }}
-        className="flex flex-col flex-1"
+        className="flex flex-col flex-1 px-4 pb-10"
       >
         <h1 className="text-xl font-bold text-primary mt-4 mb-3">Configuración</h1>
 
@@ -341,13 +341,13 @@ function AppearanceTab() {
         aria-checked={isDark}
         aria-label="Cambiar tema"
         onClick={toggle}
-        className={`relative w-12 h-7 rounded-full transition-colors min-h-[44px] min-w-[44px] flex items-center ${
-          isDark ? 'bg-accent' : 'bg-muted'
+        className={`relative w-14 h-8 rounded-full transition-colors flex items-center cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+          isDark ? 'bg-accent' : 'bg-input border border-edge'
         }`}
       >
         <span
-          className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-all flex items-center justify-center text-[10px] ${
-            isDark ? 'left-6' : 'left-1'
+          className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-md transition-all flex items-center justify-center text-[12px] ${
+            isDark ? 'left-7' : 'left-1'
           }`}
         >
           {isDark ? '🌙' : '☀️'}

@@ -24,6 +24,7 @@ import { ProfileStatsGrid } from "../components/profile/ProfileStatsGrid"
 import { EditProfileModal } from "../components/profile/EditProfileModal"
 import { ProfileMedals } from "../components/profile/ProfileMedals"
 import { ProfileInventory } from "../components/profile/ProfileInventory"
+import { PageContainer } from "../components/PagePrimitives"
 import { AnimatePresence } from "framer-motion"
 
 export default function ProfilePage() {
@@ -102,25 +103,27 @@ export default function ProfilePage() {
 
   return (
     <MobileLayout>
-      {/* ─── Settings link ─────────────────────────────────────────── */}
-      <div className="flex justify-end mt-4">
-        <Link
-          to="/settings"
-          aria-label="Configuración"
-          className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-surface text-muted text-sm border border-edge min-h-[44px]"
-        >
-          <Settings size={14} aria-hidden="true" />
-          Configuración
-        </Link>
-      </div>
+      <PageContainer>
+        <div className="pb-10 flex flex-col gap-4">
+          {/* ─── Settings link ─────────────────────────────────────────── */}
+          <div className="flex justify-end">
+            <Link
+              to="/settings"
+              aria-label="Configuración"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-surface text-muted text-sm border border-edge min-h-[44px]"
+            >
+              <Settings size={14} aria-hidden="true" />
+              Configuración
+            </Link>
+          </div>
 
-      {/* ─── User Card — full width ─────────────────────────────────── */}
-      <div className="mt-4">
-        <ProfileHeader user={user} stats={stats} league={league} />
-      </div>
+          {/* ─── User Card — full width ─────────────────────────────────── */}
+          <div>
+            <ProfileHeader user={user} stats={stats} league={league} />
+          </div>
 
-      {/* ─── Main two-column area: progression + league ─────────────── */}
-      <div className="flex flex-col gap-4 mt-4">
+          {/* ─── Main two-column area: progression + league ─────────────── */}
+          <div className="flex flex-col gap-4">
         {/* Left column: stats, medals, inventory, academic info, subjects */}
         <div className="flex flex-col gap-6">
 
@@ -209,9 +212,9 @@ export default function ProfilePage() {
                 <Pencil size={14} aria-hidden="true" className="mr-1" /> Editar Perfil
               </Button>
 
-              <div className="flex items-center justify-between gap-4 px-4 py-3.5 rounded-lg border border-[rgba(239,68,68,0.18)] bg-gradient-to-b from-[rgba(127,29,29,0.18)] to-[rgba(12,12,22,0.35)]">
+              <div className="flex items-center justify-between gap-4 px-4 py-3.5 rounded-lg border border-danger/20 bg-danger/5">
                 <div className="flex flex-col gap-1 min-w-0">
-                  <span className="text-sm font-bold text-[#f5c2c7]">Cerrar sesión</span>
+                  <span className="text-sm font-bold text-danger">Cerrar sesión</span>
                   <span className="text-[13px] leading-[1.4] text-secondary">
                     Salí de tu cuenta en este dispositivo cuando quieras.
                   </span>
@@ -281,6 +284,8 @@ export default function ProfilePage() {
           />
         )}
       </AnimatePresence>
+        </div>
+      </PageContainer>
     </MobileLayout>
   )
 }

@@ -1,4 +1,5 @@
 import type { Quest, QuizOption } from '../../services/questService'
+import { motion } from 'framer-motion'
 
 // ─── ScoreHeader ─────────────────────────────────────────────────────────────
 interface ScoreHeaderProps {
@@ -9,8 +10,8 @@ interface ScoreHeaderProps {
 }
 
 export function ScoreHeader({ scores, timeLeft, currentIndex, total }: ScoreHeaderProps) {
-  const timerPct = (timeLeft / 10) * 100
-  const timerColor = timeLeft > 6 ? '#10b981' : timeLeft > 3 ? '#f59e0b' : '#ef4444'
+  const timerPct = (timeLeft / 20) * 100
+  const timerColor = timeLeft > 12 ? '#10b981' : timeLeft > 6 ? '#f59e0b' : '#ef4444'
 
   return (
     <div className="bg-surface px-4 py-3 flex flex-col gap-2 border-b border-[var(--overlay-border)]">
@@ -89,12 +90,52 @@ export function OptionsGrid({ options, onSelect, disabled, correct, selectedId }
 }
 
 // ─── FeedbackOverlay ─────────────────────────────────────────────────────────
-export function FeedbackOverlay({ correct, explanation }: { correct: boolean; explanation: string }) {
+export function FeedbackOverlay({
+  correct,
+  explanation,
+  correctOptionLabel,
+  correctOptionText,
+  onContinue,
+}: {
+  correct: boolean
+  explanation: string
+  correctOptionLabel?: string
+  correctOptionText?: string
+  onContinue: () => void
+}) {
   return (
-    <div className={`fixed inset-0 flex flex-col items-center justify-center gap-3 text-center p-8 animate-slide-up z-[100] ${correct ? 'bg-[rgba(16,185,129,0.9)]' : 'bg-[rgba(239,68,68,0.9)]'}`}>
-      <div className="text-[56px]">{correct ? '✅' : '❌'}</div>
-      <p className="text-[28px] font-extrabold text-primary">{correct ? '¡Correcto!' : 'Incorrecto'}</p>
-      <p className="text-[15px] text-secondary max-w-[300px] leading-[1.5]">{explanation}</p>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 150 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 150 }}
+      transition={{ type: 'spring', damping: 25, stiffness: 180 }}
+      className="fixed inset-x-0 bottom-0 bg-surface/95 backdrop-blur-md border-t border-[var(--overlay-border)] p-5 z-[100] shadow-md flex flex-col gap-4 max-w-lg mx-auto rounded-t-2xl"
+    >
+      <div className="flex items-center gap-3">
+        <span className="text-3xl shrink-0">{correct ? '✅' : '❌'}</span>
+        <div className="text-left">
+          <p className={`text-lg font-extrabold ${correct ? 'text-success' : 'text-danger'}`}>
+            {correct ? '¡Correcto!' : 'Incorrecto'}
+          </p>
+          {!correct && correctOptionLabel && correctOptionText && (
+            <p className="text-xs text-primary font-semibold mt-0.5">
+              La correcta era: <span className="text-accent-light font-bold">{correctOptionLabel}</span> - {correctOptionText}
+            </p>
+          )}
+        </div>
+      </div>
+      
+      <div className="text-left bg-elevated rounded-xl p-3.5 border border-white/[0.04]">
+        <p className="text-xs font-bold text-muted uppercase tracking-[0.5px] mb-1.5">Explicación</p>
+        <p className="text-xs text-secondary leading-relaxed">{explanation}</p>
+      </div>
+
+      <button 
+        onClick={onContinue}
+        className="w-full py-3 bg-accent hover:bg-accent-light active:scale-[0.98] text-white font-extrabold rounded-[12px] text-sm transition-all shadow-md cursor-pointer flex items-center justify-center gap-2"
+      >
+        Continuar ➔
+      </button>
+    </motion.div>
   )
 }

@@ -41,7 +41,7 @@ const PartyRoomPage = () => {
     chatError,
     currentUserId,
   } = useParty(partyId ?? '')
-  const { quests, uploadNote, isGenerating } = useQuests(partyId ?? '')
+  const { quests, uploadNote, isGenerating, deleteQuest } = useQuests(partyId ?? '')
   const { activities, isLoading: activityLoading } = useActivity(partyId ?? '')
 
   const handleLeave = async () => {
@@ -119,7 +119,7 @@ const PartyRoomPage = () => {
             <div className="flex flex-col gap-3 p-4 overflow-y-auto min-h-0">
               <UploadNoteCard onUpload={uploadNote} isLoading={isGenerating} />
               <div className="flex flex-col gap-3">
-                {quests.map((q) => <QuestCard key={q.id} quest={q} />)}
+                {quests.map((q) => <QuestCard key={q.id} quest={q} onDelete={deleteQuest} />)}
               </div>
               {quests.length === 0 && !isGenerating && (
                 <div className="text-center py-10 px-5">

@@ -1,98 +1,122 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# StudyQuest Backend 🚀
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Servidor API RESTful y WebSockets en tiempo real construido con **NestJS 11** y **TypeScript**. Se encarga de la lógica de dominio, matchmaking, procesamiento de archivos, autenticación, y generación de cuestionarios interactivos por Inteligencia Artificial.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Tecnologías y Herramientas
+* **Framework**: NestJS 11
+* **Lenguaje**: TypeScript
+* **Bases de datos**:
+  * **PostgreSQL 16**: Almacenamiento transaccional persistente (usuarios, materias, quests, chat persistente, resultados).
+  * **Redis 7.2**: Gestión de colas de matchmaking en tiempo real y persistencia de estados de presencia efímeros.
+* **ORM**: TypeORM 0.3 (con sincronización automática en desarrollo)
+* **Sockets**: Socket.IO (integrado mediante `@nestjs/platform-socket.io`)
+* **Integración IA**:
+  * **Google Generative AI SDK**: Conexión nativa con Google Gemini (modelo optimizado: `gemini-2.5-flash`).
+  * **MarkItDown API Client**: Cliente de integración para convertir archivos PDF en Markdown limpio antes de enviarlos al LLM.
+* **Autenticación**: Passport JWT (Tokens de acceso y Refresh Tokens)
+* **Gestión de Archivos**: Multer con almacenamiento local (`/uploads`)
+* **Testing**: Jest (unitario y e2e)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+---
 
-## Project setup
+## Estructura de Módulos (`src/modules/`)
 
-```bash
-$ pnpm install
+El servidor está estructurado en módulos NestJS autocontenidos:
+
+### 1. `auth` (Autenticación)
+* Maneja el registro en 2 pasos, login de usuarios, generación de JWT y refresco seguro de tokens (`RefreshToken`).
+* Guards y estrategias personalizadas (`JwtAuthGuard`, `JwtStrategy`).
+
+### 2. `users` (Gestión de Usuarios y Gamificación)
+* Perfiles de usuario, administración de relaciones de amigos (`friends`), adición de XP, cálculo de streak de días consecutivos y actualización de rango de ELO competitivo (sistema dinámico de ranking).
+
+### 3. `subjects` (Catálogo de Materias)
+* Registro de universidades, carreras y asignaturas académicas.
+* Implementa búsquedas rápidas con algoritmos de coincidencia de texto (trigram search).
+
+### 4. `parties` (Salas de Estudio)
+* Gestión de salas de estudio colaborativas.
+* **Chat Grupal Enriquecido**: Envío de mensajes de texto en tiempo real, notas de voz de audio (con reproductor integrado) y archivos adjuntos (PDFs u otros). Los archivos y audios se suben vía REST (`POST /api/v1/parties/:id/chat/file` / `POST /api/v1/parties/:id/chat/audio`), se almacenan bajo `/uploads` y se anuncian al canal WebSocket de la sala.
+
+### 5. `quests` (Cuestionarios generados por IA)
+* Generación en segundo plano de cuestionarios interactivos a partir de texto o PDFs.
+* Utiliza el microservicio **MarkItDown** para extraer el texto estructurado del PDF. Si el servicio no está disponible o el archivo tiene poco texto plano, aplica un fallback usando el parser de PDFs nativo (`pdf-parse`) para alimentar al prompt del LLM.
+
+### 6. `skill-tree` (Árbol de Habilidades)
+* Sistema de progreso donde los estudiantes desbloquean nodos del árbol de conocimientos de cada materia según el XP obtenido en temas específicos al responder quests.
+
+### 7. `matchmaking` (Gateway WebSockets)
+* El gateway principal (`matchmaking.gateway.ts`) gestiona la conexión Socket.IO, une a los usuarios a salas de espera según sus materias deseadas, avisa emparejamientos confirmados (`match:found`), procesa aceptaciones/rechazos y conecta a los participantes directamente a su nueva **Party**.
+
+---
+
+## Scripts Disponibles
+
+* **Instalar Dependencias**:
+  ```bash
+  pnpm install
+  ```
+* **Iniciar Servidor en Desarrollo (con hot-reload)**:
+  ```bash
+  pnpm run start:dev
+  ```
+* **Iniciar Servidor en Producción**:
+  ```bash
+  pnpm run start:prod
+  ```
+* **Ejecutar Pruebas Unitarias**:
+  ```bash
+  pnpm run test
+  ```
+* **Ejecutar Pruebas e2e (End-to-End)**:
+  ```bash
+  pnpm run test:e2e
+  ```
+* **Poblar Base de Datos (Semilla base)**:
+  ```bash
+  pnpm run seed
+  ```
+* **Poblar Árbol de Habilidades**:
+  ```bash
+  pnpm run seed:skill-tree
+  ```
+
+---
+
+## Configuración y Variables de Entorno
+
+El backend utiliza un archivo `.env` en la raíz del proyecto. Las variables más importantes de este componente son:
+
+```ini
+# Configuración del Servidor
+PORT=3000
+NODE_ENV=development
+
+# Base de datos PostgreSQL
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_USER=studyquest
+POSTGRES_PASSWORD=studyquest_pass
+POSTGRES_DB=studyquest
+TYPEORM_SYNC=true
+
+# Redis (Caché y matchmaking)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=redispass
+
+# Secretos JWT
+JWT_SECRET=tu-secreto-super-seguro
+JWT_EXPIRES_IN=7d
+
+# Proveedor de IA y API Keys
+AI_PROVIDER=gemini  # Opciones: gemini, openai, anthropic, groq, mock
+GEMINI_API_KEY=tu-api-key-de-google-studio
+GEMINI_MODEL=gemini-2.5-flash
+
+# Sidecar de conversión de PDFs
+MARKITDOWN_URL=http://localhost:3001
+MARKITDOWN_TIMEOUT_MS=30000
 ```
-
-## Compile and run the project
-
-```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
-```
-
-## Run tests
-
-```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).

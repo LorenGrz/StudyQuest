@@ -27,13 +27,18 @@ const QuizPage = () => {
     loadError,
     newlyUnlockedNames,
     clearNewlyUnlocked,
+    nextQuestion,
   } = useQuiz(questId ?? '')
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined)
 
   const handleAnswer = (optionId: string) => {
     setSelectedId(optionId)
     answer(optionId)
-    setTimeout(() => setSelectedId(undefined), 2500)
+  }
+
+  const handleContinue = () => {
+    setSelectedId(undefined)
+    nextQuestion()
   }
 
   if (isLoading) {
@@ -161,7 +166,13 @@ const QuizPage = () => {
         </AnimatePresence>
         <AnimatePresence>
           {result && (
-            <FeedbackOverlay correct={result.isCorrect} explanation={result.explanation} />
+            <FeedbackOverlay
+              correct={result.isCorrect}
+              explanation={result.explanation}
+              correctOptionLabel={result.correctIndex !== undefined ? ['A', 'B', 'C', 'D'][result.correctIndex] : undefined}
+              correctOptionText={result.correctIndex !== undefined && currentQ ? currentQ.options[result.correctIndex]?.text : undefined}
+              onContinue={handleContinue}
+            />
           )}
         </AnimatePresence>
         <SkillUnlockToast nodeNames={newlyUnlockedNames} onDismiss={clearNewlyUnlocked} />

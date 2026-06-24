@@ -75,5 +75,15 @@ export function useQuests(partyId: string) {
     }
   }, [partyId])
 
-  return { quests, isLoading, isGenerating, uploadNote, refresh: load }
+  const deleteQuest = useCallback(async (questId: string) => {
+    try {
+      await questService.delete(questId)
+      setQuests((prev) => prev.filter((q) => q.id !== questId))
+    } catch (error) {
+      console.error('No se pudo eliminar la quest:', error)
+      throw new Error('No se pudo eliminar la quest')
+    }
+  }, [])
+
+  return { quests, isLoading, isGenerating, uploadNote, refresh: load, deleteQuest }
 }

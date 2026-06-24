@@ -3,7 +3,7 @@ import { AxiosError } from 'axios'
 import { questService, type Quest, type QuizQuestion, type AnswerResult } from '../services/questService'
 import { skillTreeService } from '../services/skillTreeService'
 
-const QUESTION_TIME_MS = 10000
+const QUESTION_TIME_MS = 20000
 
 export function useQuiz(questId: string) {
   const [quest, setQuest] = useState<Quest | null>(null)
@@ -97,19 +97,6 @@ export function useQuiz(questId: string) {
     }
 
     setResult(res)
-
-    setTimeout(async () => {
-      setResult(null)
-      if (quest && currentIndex + 1 < quest.questions.length) {
-        setCurrentIndex((i) => i + 1)
-      } else {
-        const completedQuest = await questService.complete(questId)
-        setQuest(completedQuest)
-        setAttemptId('')
-        setIsFinished(true)
-      }
-      lockRef.current = false
-    }, 2500)
   }, [attemptId, currentQ, currentIndex, quest, questId])
 
   // Latest submit fn for the timer interval, without re-arming the timer on every change.
@@ -142,6 +129,27 @@ export function useQuiz(questId: string) {
     return () => clearInterval(timerRef.current!)
   }, [currentIndex, quest, isFinished, currentQ])
 
+  const nextQuestion = useCallback(async () => {
+    if (!result) return
+    setResult(null)
+    if (quest && currentIndex + 1 < quest.questions.length) {
+      setCurrentIndex((i) => i + 1)
+    } else {
+      setIsLoading(true)
+      try {
+        const completedQuest = await questService.complete(questId)
+        setQuest(completedQuest)
+        setAttemptId('')
+        setIsFinished(true)
+      } catch (err) {
+        console.error('Error completing quest:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    lockRef.current = false
+  }, [currentIndex, quest, questId, result])
+
   return {
     quest,
     currentQ,
@@ -154,5 +162,6 @@ export function useQuiz(questId: string) {
     loadError,
     newlyUnlockedNames,
     clearNewlyUnlocked: () => setNewlyUnlockedNames([]),
+    nextQuestion,
   }
 }

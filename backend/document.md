@@ -1,134 +1,226 @@
-Informe de Paradigmas de Programación
+Aquí está el texto reformateado, limpio y listo para copiar y pegar en Word:
 
-Orientados a Objetos
+Paradigmas de Programación — Repaso
+General
 
-Universidad Nacional de San Martin (UNSAM)
+1) General
+a) Dos diferencias entre lenguajes de programación y paradigmas
 
-Escuela de Ciencia y Tecnología (ECyT)
+• Nivel de abstracción / Concepto vs. Implementación: Un paradigma es un modelo, enfoque o
 
-Tecnicatura en
+filosofía de desarrollo que determina cómo se estructura el pensamiento para resolver un
+problema (un plano mental). Un lenguaje de programación es una herramienta concreta, con
+sintaxis y semántica específicas, utilizada para escribir código siguiendo uno o más paradigmas.
 
-Programación Informática
+• Cardinalidad y Relación: Los paradigmas son conceptos universales y abstractos (no se
+"ejecutan"). Los lenguajes son tecnologías tangibles. Un lenguaje puede adoptar un único
+paradigma (puro) o múltiples (multiparadigma), pero un paradigma existe de forma
+independiente a cualquier lenguaje.
 
-Paradigmas de Programación
+b) Dos paradigmas vistos en clase y ejemplos de lenguajes
 
-Alumno: Julian Barberis
+• Paradigma Funcional: Centrado en la evaluación de funciones matemáticas puras, evitando el
 
-Docente: Gaston Aguilera
+cambio de estado y los datos mutables. Ejemplo: Haskell (puro).
 
-________________________________________________________________________________________________
+• Paradigma Lógico: Basado en la lógica de predicados de primer orden. Los programas se
 
-Introducción al Paradigma
+estructuran mediante hechos y reglas, y el motor de inferencia busca soluciones por unificación
+y backtracking. Ejemplo: Prolog.
 
-La Programación Orientada a Objetos (POO) es un paradigma o modelo de programación que organiza
-el diseño de software en torno a datos u "objetos", en lugar de funciones y lógica pura. Surgió como
-una respuesta a la creciente complejidad del software en los paradigmas estructurados, ofreciendo
-una forma más intuitiva de modelar problemas del mundo real. Al dividir un sistema complejo en
-entidades modulares e independientes, la POO facilita la creación de código más seguro, mantenible y
-escalable.
+c) ¿Existen lenguajes híbridos? Enumere dos.
 
-Conceptos Base: Clases y Objetos
+Sí, existen. Se los conoce como lenguajes multiparadigma. Son lenguajes diseñados para combinar
+características de diferentes enfoques (por ejemplo, Objetos + Funcional) para dar mayor flexibilidad al
+desarrollador.
 
-  Clase: Actúa como un molde, plantilla o plano arquitectónico. Define las características (atributos o
-propiedades) y los comportamientos (métodos o funciones) que tendrán las entidades creadas a
-partir de ella.
+Ejemplos: Python (soporta imperativo, objetos y elementos funcionales) y JavaScript (soporta
+prototipos/objetos y funcional).
 
-  Objeto (Instancia): Es la materialización de una clase en la memoria del sistema durante la
-ejecución. Cada objeto posee su propio estado (los valores específicos de sus atributos) pero
-comparte la estructura y el comportamiento definidos por su clase.
+d) Ejemplo de función partida
 
-Los 4 Pilares de la POO
+Una función partida (o definida por tramos) es aquella que posee diferentes fórmulas de resolución
+según el valor o las condiciones de sus argumentos de entrada.
 
-Para que un lenguaje o diseño sea considerado verdaderamente orientado a objetos, debe basarse en cuatro
-principios fundamentales:
+Ejemplo en Haskell:
 
-1.  Encapsulamiento
+funcionPartida :: Int -> Int
+funcionPartida x
+  | x > 0     = x * 2
+  | otherwise = 0
 
-Es la práctica de agrupar los datos (atributos) y los métodos que operan sobre esos datos en una
-sola unidad (la clase), restringiendo el acceso directo a los componentes internos del objeto. Esto
-protege el estado interno de modificaciones accidentales o no autorizadas, exponiendo solo lo
-necesario a través de una interfaz pública controlada.
+2) Funcional
+a) Dominio e imagen de las siguientes funciones
 
-2.  Abstracción
+Asumiendo que largoDeListon es una constante numérica:
 
-Consiste en aislar un elemento de su contexto o del resto de los elementos que lo acompañan.
-Consiste en modelar solo las características y comportamientos relevantes de una entidad para el
-problema específico que se está resolviendo, ocultando los detalles de implementación más
-complejos.
+• meAlcanza largo = largo <= largoDeListon
 
-________________________________________________________________________________________________
-2
+• Dominio: El tipo del parámetro largo. Debe pertenecer a la clase Ord (ej: Float,
 
-Informe de POO – Paradigmas de Programación
+Int).
+Imagen: Bool (True o False), ya que usa un operador de comparación (<=).
 
-________________________________________________________________________________________________
+•
 
-3.  Herencia
+• cuantoMeSobra cantidad = largoDeListon – cantidad
 
-Es el mecanismo mediante el cual una clase (denominada subclase o clase hija) deriva de otra
-(superclase o clase padre). La subclase hereda los atributos y métodos de la superclase, pudiendo
-añadir los suyos propios o modificar los heredados. Esto fomenta enormemente la reutilización de
-código y la creación de jerarquías lógicas.
+• Dominio: El tipo del parámetro cantidad. Debe pertenecer a la clase Num, ya que se
 
-4.  Polimorfismo
+aplica una resta.
+Imagen: El mismo tipo numérico que la entrada (Float, Int, etc.).
 
-Es la capacidad que tienen los objetos de diferentes clases de responder al mismo mensaje (o llamada
-a método) de distintas maneras, según su propia implementación específica. Permite que el código
-sea agnóstico respecto al tipo exacto del objeto con el que está interactuando, siempre y cuando
-comparta una superclase o interfaz común.
+•
 
-Ventajas y Desventajas
+b) ¿Para qué se utiliza la Unicidad y la Existencia?
 
-Ventajas:
+• Existencia ( ):∃  Verifica si al menos un elemento de un conjunto cumple una condición. En
 
-o  Reutilización de código: Gracias a la herencia y la modularidad, se evita reescribir la misma
+Haskell se implementa con any.
 
-lógica.
+• Unicidad ( !):∃
 
-o  Mantenibilidad: Los errores son más fáciles de localizar y corregir, ya que el código está
+ Asegura que exactamente uno (y solo uno) de los elementos cumple la
 
-encapsulado en objetos específicos.
+condición. En Haskell se resuelve filtrando la lista y verificando que su longitud sea
+exactamente 1: length (filter condicion lista) == 1.
 
-o  Escalabilidad: Añadir nuevas funcionalidades suele ser tan sencillo como crear nuevas
+c) ¿Qué implica el principio de sustitución?
 
-clases que extiendan o interactúen con las existentes.
+Derivado de la Transparencia Referencial, implica que el valor de una expresión depende únicamente
+de sus argumentos y no del momento o contexto de ejecución. Por ende, cualquier expresión puede ser
+sustituida por su resultado en cualquier parte del programa sin alterar su comportamiento. No existen
+los "efectos colaterales".
 
-o  Modelado natural: Facilita la transición desde la conceptualización humana de un problema
+d) ¿Qué es el Pattern Matching?
 
-hasta su representación en código.
+El Pattern Matching (emparejamiento de patrones) es un mecanismo que permite deconstruir datos y
+ramificar la ejecución de una función según la "forma" o estructura del argumento de entrada. Permite
+verificar si un valor coincide con una estructura dada (un valor directo, una tupla, una lista vacía [], o
+una cabeza y cola (x:xs)) y, de ser así, ligar variables a sus partes internas.
 
-Desventajas:
+e) Tres tipos de datos usados en Haskell
 
-o  Curva de aprendizaje: Comprender correctamente los patrones de diseño y los cuatro
+• Int / Integer: Enteros (de precisión fija o arbitraria).
+• Bool: Valores lógicos (True o False).
+• Char: Un único carácter unicode (ej: 'a').
 
-pilares exige más esfuerzo inicial que la programación estructurada.
+f) ¿Qué significa inferencia de tipos sobre una función dada?
 
-o  Rendimiento y tamaño: Las aplicaciones orientadas a objetos suelen ser más extensas en
+Es la capacidad del compilador (como GHC) de deducir automáticamente el tipo más genérico y seguro
+de una función, analizando las operaciones que se aplican sobre sus variables de entrada, sin necesidad
+de que el programador declare explícitamente la firma de tipos.
 
-líneas de código y pueden requerir más recursos de memoria debido a la creación constante
-de instancias y punteros.
+g) Diferencia entre declarar una Tupla y un Data
 
-o  Riesgo de sobre diseño: Es común caer en la trampa de crear jerarquías de clases
+• Tupla: Es un tipo de dato anónimo y estructural. Se define agrupando componentes por
+posición (Valor1, Valor2). No tiene nombre propio; su identidad está dada por la
+estructura y orden de sus tipos (ej: (String, Int)).
 
-innecesariamente profundas o abstractas.
+• Data (Tipos algebraicos de datos): Es un tipo nominativo y explícito. Permite crear un tipo
 
-________________________________________________________________________________________________
-3
+con nombre propio (ej: data Persona = ...) y definir constructores con
+etiquetas/nombres de campos (Record Syntax), ganando expresividad, tipado semántico y
+control sobre el dominio del problema.
 
-Informe de POO – Paradigmas de Programación
+h) Diferencia entre Aplicación Parcial y Composición de Funciones
 
-________________________________________________________________________________________________
+• Aplicación Parcial: Consiste en pasarle a una función menos argumentos de los que requiere
+formalmente. Debido al currying, esto devuelve una nueva función que espera los parámetros
+restantes. (Ej: sumar 3 devuelve una función que suma 3 a lo que reciba.)
 
-Conclusión
+• Composición de Funciones (.): Es el acto de combinar dos o más funciones para crear una
+nueva, donde la salida de una se convierte en la entrada de la otra (matemáticamente f(g(x))).
+(Ej: esPar . longitud toma una lista, calcula su tamaño y verifica si es par.)
 
-El paradigma de Programación Orientada a Objetos sigue siendo el estándar principal en la industria del
-desarrollo de software moderno. Lenguajes como Kotlin demuestran cómo los principios clásicos de
-abstracción, encapsulamiento, herencia y polimorfismo pueden aplicarse mediante sintaxis limpia y segura.
-Dominar la POO no solo implica conocer la sintaxis de un lenguaje, sino desarrollar la capacidad de pensar y
-abstraer problemas en términos de entidades colaborativas.
+i) ¿A qué se denomina Recursividad? Ejemplo.
 
-________________________________________________________________________________________________
-4
+Es una técnica donde una función se define en términos de sí misma, llamándose a sí misma dentro de
+su propio cuerpo para resolver subproblemas más pequeños, hasta alcanzar un caso base que detiene la
+recursión.
 
-Informe de POO – Paradigmas de Programación
+Ejemplo (Factorial):
+
+factorial :: Int -> Int
+factorial 0 = 1                      -- Caso Base
+factorial n = n * factorial (n - 1)  -- Caso Recursivo
+
+j) ¿A qué se denomina Orden Superior? Dos funciones.
+
+Una función es de Orden Superior si cumple al menos una de estas condiciones: recibe una o más
+funciones como parámetros, o devuelve una función como resultado.
+
+• map: Recibe una función y una lista; aplica la función a cada elemento.
+• filter: Recibe un predicado (a -> Bool) y una lista; devuelve los elementos que cumplen
+
+la condición.
+
+3) Lógico
+a) Diferencia entre un predicado y una función de Haskell
+
+• Una función de Haskell toma valores de entrada y, mediante un mapeo determinista, genera un
+
+único valor de salida. Trabaja de forma direccional (Entrada → Salida).
+
+• Un predicado lógico no produce un valor de salida; expresa una relación entre términos que
+puede ser verdadera o falsa. Además, es inversible: sus argumentos no tienen dirección fija,
+permitiendo usar un parámetro tanto para validar (dato fijo) como para generar (variable libre).
+
+b) ¿A qué se llama evaluación EAGER?
+
+La evaluación Eager (o ansiosa/estricta) es una estrategia donde los argumentos de una función son
+calculados por completo antes de que la función sea ejecutada. Es el opuesto de la evaluación perezosa
+(Lazy Evaluation) de Haskell. Los paradigmas Imperativo y de Objetos suelen ser puramente Eager.
+
+c) ¿A qué se denomina Átomo, Hechos y Reglas?
+
+Son los componentes esenciales de una base de conocimientos en Prolog:
+
+• Átomo: Identificador constante que empieza con minúscula (ej: juan, sabana). Representa
+
+una entidad concreta del universo del discurso.
+
+• Hechos: Afirmaciones incondicionales que establecen una relación entre términos, siempre
+
+verdaderas (ej: habita(leon, sabana).).
+
+• Reglas: Afirmaciones condicionales con una cabeza (conclusión) y un cuerpo (condiciones). Se
+lee: "la cabeza es verdadera si el cuerpo es verdadero" (ej: abuelo(X, Y) :- padre(X,
+Z), padre(Z, Y).).
+
+d) Diferencia entre consultas individuales y existenciales
+
+• Consultas Individuales (verificación): Se pasan únicamente constantes. El motor responde de
+forma booleana (true o false), verificando si esa tupla pertenece a la relación. (Ej: ?-
+habita(leon, sabana).)
+
+• Consultas Existenciales (generación): Se pasa al menos una Variable (con mayúscula). El
+
+motor busca qué elementos pueden unificar con esa variable para hacer verdadera la consulta,
+devolviendo los valores encontrados. (Ej: ?- habita(X, sabana).)
+
+e) ¿Cómo se mezcla la aritmética en Prolog? ¿Cómo se usa el =?
+
+Prolog no es un lenguaje de cálculo nativo, por lo que la aritmética requiere un tratamiento especial:
+
+• El operador = realiza unificación: intenta igualar estructuras sin resolver la matemática. X = 2
+
++ 2 da como resultado la estructura X = 2 + 2, no 4.
+
+• Para evaluar expresiones aritméticas, se utiliza el operador is, que evalúa la expresión de la
+derecha y unifica el resultado numérico con el término de la izquierda. (Ej: X is 2 + 2.
+asigna 4 a X.)
+
+f) ¿Cómo se relacionan los functores con el orden superior de funcional?
+
+• Un functor en Prolog es un constructor de datos compuestos: un átomo que agrupa otros
+
+términos (ej: fecha(2, junio, 2026)). No es código ejecutable, sino una estructura de
+datos polimórfica.
+
+• Relación conceptual: Ambos permiten modelar abstracciones complejas envolviendo lógica o
+
+datos. Sin embargo, el verdadero equivalente al "Orden Superior" en Prolog no son los
+functores, sino predicados como forall/2, findall/3 o maplist/2, que reciben otros
+predicados como argumentos para operar sobre ellos.
 

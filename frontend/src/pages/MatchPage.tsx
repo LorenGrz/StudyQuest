@@ -150,6 +150,7 @@ export default function MatchPage() {
       <ActionButtons
         onDiscard={() => top && handleDiscard(top.id, true)}
         onJoin={() => top && handleJoin(top.id, true)}
+        onInfo={() => top && navigate(`/party/${top.id}/details`)}
         disabled={!showCard}
       />
 

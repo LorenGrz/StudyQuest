@@ -85,7 +85,7 @@ export function ProgressBar({ pct }: { pct: number }) {
 
 // ─── PartyCard (Issue 3) ──────────────────────────────────────────────────────
 
-function getCoverImageUrl(subjectName?: string | null, partyId?: string): string {
+export function getCoverImageUrl(subjectName?: string | null, partyId?: string): string {
   const n = (subjectName ?? '').toLowerCase()
   if (n.includes('matemát') || n.includes('cálculo') || n.includes('álgebra'))
     return 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=600&fit=crop&q=80'
@@ -112,7 +112,7 @@ function getCoverImageUrl(subjectName?: string | null, partyId?: string): string
   return `https://picsum.photos/seed/${seed}/400/600`
 }
 
-function getSubjectIcon(name?: string | null): string {
+export function getSubjectIcon(name?: string | null): string {
   if (!name) return '📚'
   const n = name.toLowerCase()
   if (n.includes('matemát') || n.includes('cálculo') || n.includes('álgebra')) return '📐'
@@ -143,7 +143,7 @@ export function PartyCard({ party }: { party: Party }) {
   )) : 0
 
   return (
-    <div className="w-full h-full rounded-[24px] bg-surface border border-[var(--overlay-border)] overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.6),inset_0_0_0_1px_rgba(255,255,255,0.04)] select-none flex flex-col group">
+    <div className="w-full h-full rounded-[24px] bg-surface border border-[var(--overlay-border)] overflow-hidden shadow-card select-none flex flex-col group">
       
       {/* ── Cover con imagen real ──────────────────────────────── */}
       <div className="flex-1 min-h-[180px] relative overflow-hidden">
@@ -237,10 +237,11 @@ export function PartyCard({ party }: { party: Party }) {
 interface ActionButtonsProps {
   onDiscard: () => void
   onJoin: () => void
+  onInfo?: () => void
   disabled: boolean
 }
 
-export function ActionButtons({ onDiscard, onJoin, disabled }: ActionButtonsProps) {
+export function ActionButtons({ onDiscard, onJoin, onInfo, disabled }: ActionButtonsProps) {
   return (
     <div className={`flex justify-center items-center gap-5 px-5 py-4 shrink-0 transition-opacity duration-300 ease-out ${disabled ? 'opacity-30 pointer-events-none' : 'opacity-100 pointer-events-auto'}`}>
       <button
@@ -256,14 +257,16 @@ export function ActionButtons({ onDiscard, onJoin, disabled }: ActionButtonsProp
       </button>
 
       <button
-        id="mc-btn-undo"
-        className="rounded-full flex items-center justify-center border-2 transition-all duration-200 shrink-0 w-[48px] h-[48px] border-[var(--overlay-border)] bg-surface text-faint opacity-35 cursor-not-allowed"
-        disabled
-        aria-label="Deshacer"
+        id="mc-btn-info"
+        className="rounded-full flex items-center justify-center border-2 transition-all duration-200 shrink-0 w-[48px] h-[48px] border-purple-500/40 bg-purple-500/8 text-purple-400 hover:not-disabled:bg-purple-500/18 hover:not-disabled:scale-115 hover:not-disabled:shadow-[0_0_18px_rgba(124,58,237,0.3)] active:scale-90"
+        onClick={onInfo}
+        disabled={disabled}
+        aria-label="Ver detalles"
       >
         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="1 4 1 10 7 10" />
-          <path d="M3.51 15a9 9 0 1 0 .49-4" />
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="16" x2="12" y2="12" />
+          <line x1="12" y1="8" x2="12.01" y2="8" />
         </svg>
       </button>
 

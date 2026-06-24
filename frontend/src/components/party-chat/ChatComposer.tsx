@@ -52,7 +52,17 @@ export function ChatComposer({ onSendText, onSendFile, onSendAudio }: Props) {
       return
     }
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-    const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' })
+    
+    const options: MediaRecorderOptions = {}
+    if (typeof MediaRecorder.isTypeSupported === 'function') {
+      if (MediaRecorder.isTypeSupported('audio/webm')) {
+        options.mimeType = 'audio/webm'
+      } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        options.mimeType = 'audio/mp4'
+      }
+    }
+
+    const recorder = new MediaRecorder(stream, options)
     chunksRef.current = []
     startedAtRef.current = Date.now()
     recorder.ondataavailable = (event) => {
@@ -60,8 +70,10 @@ export function ChatComposer({ onSendText, onSendFile, onSendAudio }: Props) {
     }
     recorder.onstop = async () => {
       const durationMs = Date.now() - (startedAtRef.current ?? Date.now())
-      const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
-      const file = new File([blob], `voice-${Date.now()}.webm`, { type: 'audio/webm' })
+      const actualMimeType = recorder.mimeType || 'audio/webm'
+      const extension = actualMimeType.includes('mp4') ? 'mp4' : (actualMimeType.includes('ogg') ? 'ogg' : 'webm')
+      const blob = new Blob(chunksRef.current, { type: actualMimeType })
+      const file = new File([blob], `voice-${Date.now()}.${extension}`, { type: actualMimeType })
       await onSendAudio(file, durationMs)
       stream.getTracks().forEach((track) => track.stop())
     }

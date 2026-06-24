@@ -601,4 +601,18 @@ export class QuestsService {
       (result.score > 0 || result.correctAnswers > 0)
     );
   }
+
+  async deleteQuest(id: string, userId: string): Promise<void> {
+    const quest = await this.questRepo.findOne({
+      where: { id },
+    });
+    if (!quest) {
+      throw new NotFoundException('Quest no encontrado');
+    }
+    const party = await this.partiesService.findById(quest.partyId);
+    this.partiesService.assertMember(party, userId);
+
+    await this.questRepo.remove(quest);
+  }
 }
+

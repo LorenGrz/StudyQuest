@@ -8,7 +8,7 @@ Reglas:
 2. Cada pregunta tiene exactamente 4 opciones.
 3. Solo UNA opcion es correcta.
 4. Las opciones incorrectas deben ser plausibles.
-5. La explicacion debe ser educativa, de 1-3 oraciones.
+5. La explicacion debe ser educativa, de 1-3 oraciones. EVITÁ empezar o usar frases como "el texto dice que...", "según el texto...", "el fragmento indica que...", etc. Explicá el concepto directamente como un hecho verídico y objetivo (facto).
 6. El topic debe ser el subtema especifico (ej: "Teorema de Bayes").
 7. Distribui dificultades: 30% easy, 50% medium, 20% hard.
 
