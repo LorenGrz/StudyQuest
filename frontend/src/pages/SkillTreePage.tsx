@@ -358,13 +358,13 @@ const SkillTreePage = () => {
         <>
       <div className="flex flex-wrap gap-2 mb-2.5">
         <span className="inline-flex items-center gap-1.5 text-xs text-secondary">
-          <span className="w-[9px] h-[9px] rounded-full bg-[#f5c518]" /> Desbloqueado
+          <span className="w-[9px] h-[9px] rounded-full bg-warning" /> Desbloqueado
         </span>
         <span className="inline-flex items-center gap-1.5 text-xs text-secondary">
           <span className="w-[9px] h-[9px] rounded-full bg-accent-light" /> Disponible
         </span>
         <span className="inline-flex items-center gap-1.5 text-xs text-secondary">
-          <span className="w-[9px] h-[9px] rounded-full bg-[#6f7287]" /> Bloqueado
+          <span className="w-[9px] h-[9px] rounded-full bg-muted" /> Bloqueado
         </span>
       </div>
 
