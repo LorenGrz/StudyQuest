@@ -59,18 +59,19 @@ describe('SettingsPage', () => {
     }
   })
 
-  it('shows the password form on the Seguridad tab', () => {
+  it('shows the password form on the Seguridad tab', async () => {
     renderPage()
     fireEvent.click(screen.getByRole('tab', { name: 'Seguridad' }))
-    expect(screen.getByLabelText('Contraseña actual')).toBeInTheDocument()
+    // Tab content mounts asynchronously (AnimatePresence mode="wait").
+    expect(await screen.findByLabelText('Contraseña actual')).toBeInTheDocument()
     expect(screen.getByLabelText('Nueva contraseña')).toBeInTheDocument()
     expect(screen.getByLabelText('Confirmar nueva contraseña')).toBeInTheDocument()
   })
 
-  it('disables submit when passwords do not match', () => {
+  it('disables submit when passwords do not match', async () => {
     renderPage()
     fireEvent.click(screen.getByRole('tab', { name: 'Seguridad' }))
-    fireEvent.change(screen.getByLabelText('Contraseña actual'), {
+    fireEvent.change(await screen.findByLabelText('Contraseña actual'), {
       target: { value: 'oldpassword' },
     })
     fireEvent.change(screen.getByLabelText('Nueva contraseña'), {
@@ -88,15 +89,15 @@ describe('SettingsPage', () => {
   it('keeps profile text on semantic theme colors', async () => {
     renderSettings()
     await userEvent.click(screen.getByRole('tab', { name: 'Apariencia' }))
-    await userEvent.click(screen.getByRole('switch', { name: 'Cambiar tema' }))
+    await userEvent.click(await screen.findByRole('switch', { name: 'Cambiar tema' }))
     expect(document.documentElement).toHaveAttribute('data-theme', 'light')
     expect(screen.getByText('Tema claro')).toHaveClass('text-primary')
   })
 
-  it('toggles the theme and persists it', () => {
+  it('toggles the theme and persists it', async () => {
     renderPage()
     fireEvent.click(screen.getByRole('tab', { name: 'Apariencia' }))
-    const toggle = screen.getByRole('switch', { name: 'Cambiar tema' })
+    const toggle = await screen.findByRole('switch', { name: 'Cambiar tema' })
     fireEvent.click(toggle)
     expect(document.documentElement.getAttribute('data-theme')).toBe('light')
     expect(localStorage.getItem('studyquest-theme')).toBe('light')
