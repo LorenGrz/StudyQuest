@@ -33,11 +33,11 @@ const semesters = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 
 export function FilterChips({ filters, onChange }: FilterChipsProps) {
   return (
-    <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-none">
+    <div className="flex flex-wrap gap-2 pb-1">
       <button
         className={`flex-shrink-0 min-h-9 px-3.5 rounded-full text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
           !filters.semester
-            ? 'bg-accent text-primary'
+            ? 'bg-accent text-on-accent'
             : 'bg-elevated text-secondary hover:text-primary border border-[var(--overlay-border)]'
         }`}
         onClick={() => onChange({ ...filters, semester: null })}
@@ -49,7 +49,7 @@ export function FilterChips({ filters, onChange }: FilterChipsProps) {
           key={s}
           className={`flex-shrink-0 min-h-9 px-3.5 rounded-full text-[13px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
             filters.semester === s
-              ? 'bg-accent text-primary'
+              ? 'bg-accent text-on-accent'
               : 'bg-elevated text-secondary hover:text-primary border border-[var(--overlay-border)]'
           }`}
           onClick={() => onChange({ ...filters, semester: s === filters.semester ? null : s })}

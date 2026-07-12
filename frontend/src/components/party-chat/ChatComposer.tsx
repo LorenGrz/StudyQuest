@@ -174,7 +174,7 @@ export function ChatComposer({ onSendText, onSendFile, onSendAudio }: Props) {
             className={`size-11 shrink-0 flex items-center justify-center rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
               isRecording
                 ? 'bg-danger/10 border-danger/50 text-danger hover:bg-danger/20'
-                : 'bg-accent text-primary border-accent hover:bg-accent-light'
+                : 'bg-accent text-on-accent border-accent hover:bg-accent-light'
             }`}
           >
             {isRecording ? (

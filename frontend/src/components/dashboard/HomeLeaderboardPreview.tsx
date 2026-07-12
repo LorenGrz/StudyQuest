@@ -60,7 +60,7 @@ export const HomeLeaderboardPreview = ({ subjects }: { subjects: Subject[] }) =>
           onClick={() => setSelectedTab('global')}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
             selectedTab === 'global' 
-              ? 'bg-accent text-primary shadow-accent/20 shadow-lg' 
+              ? 'bg-accent text-on-accent shadow-accent/20 shadow-lg'
               : 'bg-elevated text-muted border border-[var(--overlay-border)] hover:border-[var(--overlay-border)]'
           }`}
         >
@@ -74,7 +74,7 @@ export const HomeLeaderboardPreview = ({ subjects }: { subjects: Subject[] }) =>
             onClick={() => setSelectedTab(sub.id)}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
               selectedTab === sub.id 
-                ? 'bg-accent text-primary shadow-accent/20 shadow-lg' 
+                ? 'bg-accent text-on-accent shadow-accent/20 shadow-lg'
                 : 'bg-elevated text-muted border border-[var(--overlay-border)] hover:border-[var(--overlay-border)]'
             }`}
           >

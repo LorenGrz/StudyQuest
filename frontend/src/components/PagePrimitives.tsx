@@ -150,7 +150,7 @@ export function SegmentedTabs<T extends string>({
     <div
       role="tablist"
       aria-label={label}
-      className="inline-flex items-center gap-1 bg-surface border border-edge rounded-lg p-1"
+      className="flex w-full items-center gap-1 bg-[var(--overlay-subtle)] border border-edge rounded-lg p-1"
     >
       {tabs.map((tab) => {
         const isActive = tab.id === active
@@ -160,9 +160,9 @@ export function SegmentedTabs<T extends string>({
             role="tab"
             aria-selected={isActive}
             onClick={() => onChange(tab.id)}
-            className={`inline-flex items-center justify-center gap-1.5 min-h-11 px-4 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+            className={`flex-1 inline-flex items-center justify-center gap-1.5 min-h-11 px-2 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
               isActive
-                ? 'bg-accent text-primary'
+                ? 'bg-accent text-on-accent'
                 : 'text-secondary hover:text-primary'
             }`}
           >

@@ -61,7 +61,7 @@ export default function LeaderboardPage() {
               <button
                 key={s.id}
                 id={`lb-tab-${s.id}`}
-                className={`py-[7px] px-4 rounded-full border border-[var(--overlay-border)] bg-surface text-secondary text-[13px] font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer hover:border-accent hover:text-accent-light min-h-[44px] ${selectedSubjectId === s.id ? 'bg-accent border-accent text-primary shadow-[0_0_12px_rgba(124,58,237,0.4)]' : ''}`}
+                className={`py-[7px] px-4 rounded-full border border-[var(--overlay-border)] bg-surface text-secondary text-[13px] font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer hover:border-accent hover:text-accent-light min-h-[44px] ${selectedSubjectId === s.id ? 'bg-accent border-accent text-on-accent shadow-[0_0_12px_rgba(124,58,237,0.4)]' : ''}`}
                 onClick={() => setSelectedSubjectId(s.id)}
               >
                 {s.name}
