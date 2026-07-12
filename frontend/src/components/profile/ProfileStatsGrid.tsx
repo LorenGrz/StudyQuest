@@ -18,10 +18,10 @@ export function ProfileStatsGrid({ elo, winRate, stats, leagueColor }: ProfileSt
       </h3>
       <div className="grid grid-cols-2 gap-3">
         <div
-          className="bg-surface border-2 rounded-lg p-4 flex flex-col items-center justify-center text-center bg-black/20"
+          className="bg-surface border-2 rounded-lg p-4 flex flex-col items-center justify-center text-center"
           style={{ borderColor: leagueColor }}
         >
-          <span className="text-2xl font-extrabold drop-shadow-md" style={{ color: leagueColor }}>
+          <span className="text-2xl font-extrabold text-primary">
             {elo}
           </span>
           <span className="text-xs text-muted mt-1">ELO</span>
