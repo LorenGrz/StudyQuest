@@ -56,12 +56,12 @@ export default function LeaderboardPage() {
       ) : (
         <>
           {/* Subject tabs: scroll on mobile, wrap on desktop */}
-          <div className="flex gap-2 overflow-x-auto px-4 pb-3 scrollbar-none">
+          <div className="flex flex-wrap gap-2 px-4 pb-3">
             {subjects.map(s => (
               <button
                 key={s.id}
                 id={`lb-tab-${s.id}`}
-                className={`py-[7px] px-4 rounded-full border border-[var(--overlay-border)] bg-surface text-secondary text-[13px] font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer hover:border-accent hover:text-accent-light min-h-[44px] ${selectedSubjectId === s.id ? 'bg-accent border-accent text-primary shadow-[0_0_12px_rgba(124,58,237,0.4)]' : ''}`}
+                className={`py-[7px] px-4 rounded-full border border-[var(--overlay-border)] bg-surface text-secondary text-[13px] font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer hover:border-accent hover:text-accent-light min-h-[44px] ${selectedSubjectId === s.id ? 'bg-accent border-accent text-on-accent shadow-[0_0_12px_rgba(124,58,237,0.4)]' : ''}`}
                 onClick={() => setSelectedSubjectId(s.id)}
               >
                 {s.name}
@@ -211,7 +211,7 @@ function LeaderboardRow({
       </div>
       <div className="flex flex-col items-end gap-0.5 shrink-0">
         <span className="text-lg" title={league.name}>{league.icon}</span>
-        <span className="text-sm font-extrabold" style={{ color: league.color }}>{entry.elo}</span>
+        <span className="text-sm font-extrabold text-primary">{entry.elo}</span>
       </div>
     </motion.div>
   )

@@ -50,7 +50,7 @@ export function ActivePartyBanner({ party }: { party: Party | null }) {
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full shadow-[0_0_8px_#10b981] animate-pulse" />
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] text-emerald-400 font-semibold uppercase tracking-wide">Party Activa</p>
+          <p className="text-[11px] text-success font-semibold uppercase tracking-wide">Party Activa</p>
           <p className="text-[15px] font-bold text-primary truncate">{party.name ?? party.subject?.name ?? 'Party activa'}</p>
         </div>
       </div>
@@ -80,7 +80,7 @@ function SubjectCard({ subject }: { subject: Subject }) {
         <p className="font-semibold text-[15px] text-primary truncate">{subject.name}</p>
         <p className="text-xs text-muted mt-0.5">Sem. {subject.semester}</p>
         <button
-          className="text-xs text-emerald-400 font-semibold flex items-center gap-1 mt-1 cursor-pointer hover:underline"
+          className="text-xs text-success font-semibold flex items-center gap-1 mt-1 cursor-pointer hover:underline"
           onClick={(event) => {
             event.stopPropagation()
             navigate(`/subjects/${subject.id}/skill-tree`)

@@ -16,7 +16,7 @@ const variantClasses: Record<string, string> = {
   primary:
     'bg-accent text-on-accent hover:bg-accent-light hover:shadow-[0_0_24px_rgba(124,58,237,0.3)] hover:-translate-y-px disabled:opacity-50 disabled:cursor-not-allowed',
   secondary:
-    'bg-elevated text-primary border border-[var(--overlay-border)] hover:border-white/[0.15] hover:bg-panel disabled:opacity-50 disabled:cursor-not-allowed',
+    'bg-elevated text-primary border border-[var(--overlay-border)] hover:border-[var(--border-hover)] hover:bg-panel disabled:opacity-50 disabled:cursor-not-allowed',
   ghost:
     'bg-transparent text-secondary hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed',
   danger:

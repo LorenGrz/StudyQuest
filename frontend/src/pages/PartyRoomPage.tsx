@@ -104,7 +104,7 @@ const PartyRoomPage = () => {
             </Button>
           </div>
           <PartyHeader party={party} />
-          <div className="px-4 pb-3 overflow-x-auto">
+          <div className="px-4 pb-3">
             <SegmentedTabs
               tabs={TABS}
               active={activeTab}

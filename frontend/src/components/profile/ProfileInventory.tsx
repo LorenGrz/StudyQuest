@@ -75,7 +75,7 @@ export function ProfileInventory({
             <p className="text-[13px] font-medium text-secondary mb-2">Bordes</p>
             <div className="grid grid-cols-[repeat(auto-fill,minmax(80px,1fr))] gap-4 mt-3">
               <div
-                className={`flex flex-col items-center gap-2 px-2 py-3 border-2 border-[var(--overlay-border)] rounded-lg bg-transparent cursor-pointer transition-all duration-200 hover:border-accent hover:bg-white/[0.05] ${!user.activeCosmetics?.borderCode ? 'border-accent bg-[rgba(99,102,241,0.1)] shadow-[0_0_16px_rgba(99,102,241,0.2)]' : ''}`}
+                className={`flex flex-col items-center gap-2 px-2 py-3 border-2 border-[var(--overlay-border)] rounded-lg bg-transparent cursor-pointer transition-all duration-200 hover:border-accent hover:bg-[var(--overlay-subtle)] ${!user.activeCosmetics?.borderCode ? 'border-accent bg-[rgba(99,102,241,0.1)] shadow-[0_0_16px_rgba(99,102,241,0.2)]' : ''}`}
                 onClick={() => equipBorder(null)}
                 style={{ opacity: isUpdatingCosmetics ? 0.5 : 1 }}
               >
@@ -87,7 +87,7 @@ export function ProfileInventory({
               {inventory.borders?.map((border) => (
                 <div
                   key={border.code}
-                  className={`flex flex-col items-center gap-2 px-2 py-3 border-2 border-[var(--overlay-border)] rounded-lg bg-transparent cursor-pointer transition-all duration-200 hover:border-accent hover:bg-white/[0.05] ${user.activeCosmetics?.borderCode === border.code ? 'border-accent bg-[rgba(99,102,241,0.1)] shadow-[0_0_16px_rgba(99,102,241,0.2)]' : ''}`}
+                  className={`flex flex-col items-center gap-2 px-2 py-3 border-2 border-[var(--overlay-border)] rounded-lg bg-transparent cursor-pointer transition-all duration-200 hover:border-accent hover:bg-[var(--overlay-subtle)] ${user.activeCosmetics?.borderCode === border.code ? 'border-accent bg-[rgba(99,102,241,0.1)] shadow-[0_0_16px_rgba(99,102,241,0.2)]' : ''}`}
                   onClick={() => equipBorder(border.code)}
                   style={{ opacity: isUpdatingCosmetics ? 0.5 : 1 }}
                 >

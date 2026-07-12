@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
 import {
-  Settings,
   Pencil,
   BookOpen,
   GraduationCap,
@@ -104,20 +102,8 @@ export default function ProfilePage() {
   return (
     <MobileLayout>
       <PageContainer>
-        <div className="pb-10 flex flex-col gap-4">
-          {/* ─── Settings link ─────────────────────────────────────────── */}
-          <div className="flex justify-end">
-            <Link
-              to="/settings"
-              aria-label="Configuración"
-              className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-surface text-muted text-sm border border-edge min-h-[44px]"
-            >
-              <Settings size={14} aria-hidden="true" />
-              Configuración
-            </Link>
-          </div>
-
-          {/* ─── User Card — full width ─────────────────────────────────── */}
+        <div className="pb-4 flex flex-col gap-4">
+          {/* ─── User Card — full width (gear links to Settings) ────────── */}
           <div>
             <ProfileHeader user={user} stats={stats} league={league} />
           </div>
@@ -196,43 +182,9 @@ export default function ProfilePage() {
               )}
             </div>
           </section>
-
-          {/* Account */}
-          <section className="mb-4">
-            <h3 className="text-base font-bold text-secondary uppercase tracking-[1px] pb-2">
-              Cuenta
-            </h3>
-            <div className="bg-surface border border-[var(--overlay-border)] rounded-xl p-4 flex flex-col gap-3.5">
-              <Button
-                variant="secondary"
-                onClick={() => setIsEditing(true)}
-                className="w-full"
-                size="lg"
-              >
-                <Pencil size={14} aria-hidden="true" className="mr-1" /> Editar Perfil
-              </Button>
-
-              <div className="flex items-center justify-between gap-4 px-4 py-3.5 rounded-lg border border-danger/20 bg-danger/5">
-                <div className="flex flex-col gap-1 min-w-0">
-                  <span className="text-sm font-bold text-danger">Cerrar sesión</span>
-                  <span className="text-[13px] leading-[1.4] text-secondary">
-                    Salí de tu cuenta en este dispositivo cuando quieras.
-                  </span>
-                </div>
-                <Button
-                  variant="danger"
-                  onClick={logout}
-                  className="shrink-0 min-w-24"
-                  size="md"
-                >
-                  <LogOut size={14} aria-hidden="true" className="mr-1" /> Salir
-                </Button>
-              </div>
-            </div>
-          </section>
         </div>
 
-        {/* Right column (lg+): League Ladder */}
+        {/* League Ladder */}
         <aside>
           <h3 className="text-base font-bold text-secondary uppercase tracking-[1px] pb-2 mt-6 lg:mt-0">
             Ligas
@@ -271,9 +223,41 @@ export default function ProfilePage() {
             ))}
           </div>
         </aside>
-      </div>
 
-      <div aria-hidden="true" style={{ height: "20px", flexShrink: 0 }} />
+        {/* Account — placed after Ligas so it sits at the bottom of the profile */}
+        <section className="mb-4">
+          <h3 className="text-base font-bold text-secondary uppercase tracking-[1px] pb-2">
+            Cuenta
+          </h3>
+          <div className="bg-surface border border-[var(--overlay-border)] rounded-xl p-4 flex flex-col gap-3.5">
+            <Button
+              variant="secondary"
+              onClick={() => setIsEditing(true)}
+              className="w-full"
+              size="lg"
+            >
+              <Pencil size={14} aria-hidden="true" className="mr-1" /> Editar Perfil
+            </Button>
+
+            <div className="flex items-center justify-between gap-4 px-4 py-3.5 rounded-lg border border-danger/20 bg-danger/5">
+              <div className="flex flex-col gap-1 min-w-0">
+                <span className="text-sm font-bold text-danger">Cerrar sesión</span>
+                <span className="text-[13px] leading-[1.4] text-secondary">
+                  Salí de tu cuenta en este dispositivo cuando quieras.
+                </span>
+              </div>
+              <Button
+                variant="danger"
+                onClick={logout}
+                className="shrink-0 min-w-24"
+                size="md"
+              >
+                <LogOut size={14} aria-hidden="true" className="mr-1" /> Salir
+              </Button>
+            </div>
+          </div>
+        </section>
+      </div>
 
       <AnimatePresence>
         {isEditing && (

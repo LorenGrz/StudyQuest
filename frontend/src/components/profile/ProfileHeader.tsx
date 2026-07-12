@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+import { Settings } from 'lucide-react'
 import { Badge } from '../../components/UI'
 import { AvatarWithBorder } from '../../components/AvatarWithBorder'
 
@@ -10,9 +12,16 @@ interface ProfileHeaderProps {
 export function ProfileHeader({ user, stats, league }: ProfileHeaderProps) {
   return (
     <div
-      className="bg-surface border border-[var(--overlay-border)] rounded-xl p-6 flex gap-4 items-center"
+      className="relative bg-surface border border-[var(--overlay-border)] rounded-xl p-6 pr-14 flex gap-4 items-center"
       style={{ borderTop: `3px solid ${league.color}` }}
     >
+      <Link
+        to="/settings"
+        aria-label="Configuración"
+        className="absolute top-3 right-3 flex items-center justify-center size-11 rounded-lg text-muted transition-colors hover:text-primary hover:bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      >
+        <Settings size={18} aria-hidden="true" />
+      </Link>
       <AvatarWithBorder
         displayName={user.displayName}
         avatarUrl={user.avatarUrl}
@@ -27,10 +36,14 @@ export function ProfileHeader({ user, stats, league }: ProfileHeaderProps) {
           <Badge variant="primary">Nivel {stats.level}</Badge>
           <Badge variant="success">⚡ {stats.xp} XP</Badge>
           <span
-            className="inline-flex items-center justify-center gap-1 px-3.5 py-1.5 rounded-full text-[13px] font-bold text-primary text-shadow-[0_1px_3px_rgba(0,0,0,0.4)] tracking-[0.3px] relative z-[1]"
+            className="inline-flex items-center justify-center gap-1 px-3.5 py-1.5 rounded-full text-[13px] font-bold text-white tracking-[0.3px] relative z-[1]"
             style={{
-              background: league.gradient,
+              // Subtle dark veil over the gradient so the pill reads as a solid
+              // colored chip (not a washed pastel) and white text stays legible
+              // on the light end of the league gradients (e.g. Platino's cyan).
+              background: `linear-gradient(rgba(0,0,0,0.14), rgba(0,0,0,0.14)), ${league.gradient}`,
               boxShadow: `0 0 8px ${league.glowColor}`,
+              textShadow: '0 1px 3px rgba(0,0,0,0.65), 0 0 2px rgba(0,0,0,0.5)',
             }}
           >
             {league.icon} {league.name}

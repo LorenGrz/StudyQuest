@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { Paperclip, Send, Mic, Square } from 'lucide-react'
 import { isAllowedChatFile } from './chatMessageGuards'
+import { useFileDrop } from '../../hooks/useFileDrop'
 
 type Props = {
   onSendText: (text: string) => void
@@ -45,6 +46,13 @@ export function ChatComposer({ onSendText, onSendFile, onSendAudio }: Props) {
     await onSendFile(file)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
+
+  // Paste a file (Ctrl/Cmd+V) into the message box. Drag-and-drop is handled
+  // one level up in ChatBox so it covers the whole chat area (WhatsApp-style).
+  const { onPaste } = useFileDrop({
+    onFile: (file) => { void handleFile(file) },
+    disabled: isRecording,
+  })
 
   const startRecording = async () => {
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
@@ -135,6 +143,7 @@ export function ChatComposer({ onSendText, onSendFile, onSendAudio }: Props) {
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
+            onPaste={onPaste}
             placeholder={isRecording ? 'Tu nota de voz se está grabando' : 'Escribí un mensaje'}
             aria-label="Escribí un mensaje"
             rows={1}
@@ -157,7 +166,7 @@ export function ChatComposer({ onSendText, onSendFile, onSendAudio }: Props) {
             className={`size-11 shrink-0 flex items-center justify-center rounded-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
               isRecording
                 ? 'bg-danger/10 border-danger/50 text-danger hover:bg-danger/20'
-                : 'bg-accent text-primary border-accent hover:bg-accent-light'
+                : 'bg-accent text-on-accent border-accent hover:bg-accent-light'
             }`}
           >
             {isRecording ? (

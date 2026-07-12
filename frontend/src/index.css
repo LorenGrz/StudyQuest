@@ -147,6 +147,9 @@
   --accent-bg: rgba(124, 58, 237, 0.08);
   --text-on-accent: #ffffff;
 
+  /* Darker green than the dark-theme #10b981 so success text/icons stay legible
+     on light backgrounds. */
+  --green: #059669;
   --green-bg: rgba(16, 185, 129, 0.12);
   --yellow-bg: rgba(245, 158, 11, 0.12);
   --red-bg: rgba(239, 68, 68, 0.12);

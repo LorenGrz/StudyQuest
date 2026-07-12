@@ -23,7 +23,7 @@ export function ChatMessageItem({ message, isOwn }: { message: ChatMessage; isOw
       {message.type === 'file' && message.attachment && (
         <div className="flex flex-col gap-2.5 w-full">
           <div className="flex items-start gap-2.5">
-            <span className="w-9 h-9 rounded-lg inline-flex items-center justify-center bg-white/[0.08] shrink-0 text-lg" aria-hidden="true">📄</span>
+            <span className="w-9 h-9 rounded-lg inline-flex items-center justify-center bg-[var(--overlay-soft)] shrink-0 text-lg" aria-hidden="true">📄</span>
             <div className="min-w-0 flex flex-col gap-0.5">
               <a
                 href={message.attachment.url}
@@ -44,7 +44,7 @@ export function ChatMessageItem({ message, isOwn }: { message: ChatMessage; isOw
       {isAudioMessage(message) && message.attachment && (
         <div className="flex flex-col gap-2.5 w-full">
           <div className="flex items-start gap-2.5">
-            <span className="w-9 h-9 rounded-lg inline-flex items-center justify-center bg-white/[0.08] shrink-0 text-lg" aria-hidden="true">🎙️</span>
+            <span className="w-9 h-9 rounded-lg inline-flex items-center justify-center bg-[var(--overlay-soft)] shrink-0 text-lg" aria-hidden="true">🎙️</span>
             <div className="min-w-0 flex flex-col gap-0.5">
               <strong className="text-sm text-primary">Nota de voz</strong>
               <span className="text-xs text-muted">

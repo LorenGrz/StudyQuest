@@ -39,10 +39,11 @@ export default function SettingsPage() {
         Desktop (md+): vertical rail beside the content panel (via parent flex-row)
       */}
       <div className="flex flex-col flex-1 min-h-0 gap-4 mt-2">
-        {/* Tab rail — horizontal on mobile, vertical on desktop */}
+        {/* Tab grid — 2×2 so all tabs fit the phone column at every width
+            (no horizontal scroll / clipped labels on narrow screens). */}
         <div
           role="tablist"
-          className="flex flex-row gap-2 overflow-x-auto pb-2 scrollbar-none"
+          className="grid grid-cols-2 gap-2"
         >
           {TABS.map((tab) => (
             <button
@@ -50,10 +51,10 @@ export default function SettingsPage() {
               role="tab"
               aria-selected={activeTab === tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-colors min-h-[44px] md:rounded-lg md:text-left md:whitespace-normal md:w-full ${
+              className={`px-3 py-2 rounded-lg text-sm text-center transition-colors min-h-[44px] ${
                 activeTab === tab.id
-                  ? 'bg-accent text-primary font-semibold'
-                  : 'bg-surface text-muted md:bg-transparent md:hover:bg-elevated md:hover:text-primary'
+                  ? 'bg-accent text-on-accent font-semibold'
+                  : 'bg-surface text-muted hover:bg-elevated hover:text-primary'
               }`}
             >
               {tab.label}

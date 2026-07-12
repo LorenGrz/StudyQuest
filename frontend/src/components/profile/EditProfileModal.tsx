@@ -54,7 +54,7 @@ export function EditProfileModal({ user, onClose, onUpdate }: EditProfileModalPr
         exit={{ y: "100%" }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
       >
-        <div className="w-9 h-1 rounded-sm bg-white/[0.15] mx-auto -mb-2" />
+        <div className="w-9 h-1 rounded-sm bg-[var(--overlay-border)] mx-auto -mb-2" />
         <h2 className="text-lg font-extrabold">Editar Perfil</h2>
 
         {error && <div className="px-4 py-3 rounded-lg text-sm bg-[rgba(239,68,68,0.1)] text-danger border border-[rgba(239,68,68,0.2)]">{error}</div>}

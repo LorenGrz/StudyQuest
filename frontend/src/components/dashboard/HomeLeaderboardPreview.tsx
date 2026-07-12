@@ -53,14 +53,14 @@ export const HomeLeaderboardPreview = ({ subjects }: { subjects: Subject[] }) =>
       </div>
       
       {/* Tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none relative">
+      <div className="flex flex-wrap gap-2 pb-1 relative">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => setSelectedTab('global')}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
             selectedTab === 'global' 
-              ? 'bg-accent text-primary shadow-accent/20 shadow-lg' 
+              ? 'bg-accent text-on-accent shadow-accent/20 shadow-lg'
               : 'bg-elevated text-muted border border-[var(--overlay-border)] hover:border-[var(--overlay-border)]'
           }`}
         >
@@ -74,7 +74,7 @@ export const HomeLeaderboardPreview = ({ subjects }: { subjects: Subject[] }) =>
             onClick={() => setSelectedTab(sub.id)}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
               selectedTab === sub.id 
-                ? 'bg-accent text-primary shadow-accent/20 shadow-lg' 
+                ? 'bg-accent text-on-accent shadow-accent/20 shadow-lg'
                 : 'bg-elevated text-muted border border-[var(--overlay-border)] hover:border-[var(--overlay-border)]'
             }`}
           >
@@ -87,7 +87,7 @@ export const HomeLeaderboardPreview = ({ subjects }: { subjects: Subject[] }) =>
       <div className="min-h-[220px]">
         {isLoading ? (
           <div className="flex justify-center items-center h-full py-10">
-            <div className="w-8 h-8 border-2 border-[var(--overlay-border)] border-t-[#7c3aed] rounded-full animate-spin" />
+            <div className="w-8 h-8 border-2 border-[var(--overlay-border)] border-t-accent rounded-full animate-spin" />
           </div>
         ) : error ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-400 text-xs text-center py-4 bg-red-500/10 rounded-xl border border-red-500/20">
@@ -128,9 +128,9 @@ export const HomeLeaderboardPreview = ({ subjects }: { subjects: Subject[] }) =>
                     <p className="text-primary text-[13px] font-semibold truncate group-hover:text-accent-light transition-colors">{entry.displayName}</p>
                     <p className="text-muted text-[10px] truncate">@{entry.username}</p>
                   </div>
-                  <div className="text-right shrink-0 bg-black/20 px-2 py-1 rounded-md">
+                  <div className="text-right shrink-0 bg-[var(--overlay-soft)] px-2 py-1 rounded-md">
                     <span className="text-xs font-bold text-[10px] mr-1.5" title={league.name}>{league.icon}</span>
-                    <span className="text-xs font-bold drop-shadow-md" style={{ color: league.color }}>{entry.elo} ELO</span>
+                    <span className="text-xs font-bold text-primary">{entry.elo} ELO</span>
                   </div>
                 </motion.div>
               );

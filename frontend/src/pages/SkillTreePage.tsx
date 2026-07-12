@@ -18,6 +18,7 @@ import {
 } from '../components/skill-tree/utils'
 import { SkillDetailsModal } from '../components/skill-tree/SkillDetailsModal'
 import { SkillNodeItem } from '../components/skill-tree/SkillNodeItem'
+import { EmptyState } from '../components/PagePrimitives'
 
 const SkillTreePage = () => {
   const navigate = useNavigate()
@@ -347,15 +348,23 @@ const SkillTreePage = () => {
         </article>
       </section>
 
+      {nodes.length === 0 ? (
+        <EmptyState
+          icon="🌱"
+          title="Este árbol todavía no tiene habilidades"
+          description="Cuando esta materia tenga nodos vas a poder desbloquearlos completando quests."
+        />
+      ) : (
+        <>
       <div className="flex flex-wrap gap-2 mb-2.5">
         <span className="inline-flex items-center gap-1.5 text-xs text-secondary">
-          <span className="w-[9px] h-[9px] rounded-full bg-[#f5c518]" /> Desbloqueado
+          <span className="w-[9px] h-[9px] rounded-full bg-warning" /> Desbloqueado
         </span>
         <span className="inline-flex items-center gap-1.5 text-xs text-secondary">
           <span className="w-[9px] h-[9px] rounded-full bg-accent-light" /> Disponible
         </span>
         <span className="inline-flex items-center gap-1.5 text-xs text-secondary">
-          <span className="w-[9px] h-[9px] rounded-full bg-[#6f7287]" /> Bloqueado
+          <span className="w-[9px] h-[9px] rounded-full bg-muted" /> Bloqueado
         </span>
       </div>
 
@@ -376,7 +385,7 @@ const SkillTreePage = () => {
 
       <div
         ref={canvasRef}
-        className="relative mb-[18px] bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.12),transparent_55%)] border border-white/[0.06] rounded-[24px] min-h-[58vh] overflow-hidden cursor-grab touch-none active:cursor-grabbing"
+        className="relative mb-[18px] bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.12),transparent_55%)] border border-[var(--overlay-border)] rounded-[24px] min-h-[58vh] overflow-hidden cursor-grab touch-none active:cursor-grabbing"
         aria-label="Mapa interactivo del árbol de habilidades"
         onPointerDown={onCanvasPointerDown}
         onPointerMove={onCanvasPointerMove}
@@ -424,6 +433,8 @@ const SkillTreePage = () => {
           </div>
         </div>
       </div>
+        </>
+      )}
 
       <SkillDetailsModal
         selectedNode={selectedNode}

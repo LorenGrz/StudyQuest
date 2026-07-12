@@ -41,7 +41,7 @@ export function SkillNodeItem({
         onSelect(node.id)
       }}
     >
-      <span className={`absolute top-1.5 right-1.5 text-[9px] rounded-full px-1.5 py-0.5 border border-transparent text-secondary bg-[var(--overlay-soft)] ${node.unlocked ? 'bg-[rgba(245,197,24,0.2)] border-[rgba(245,197,24,0.4)] text-[#d97706] dark:text-[#f5c518]' : node.prerequisitesMet ? 'bg-[rgba(124,58,237,0.2)] border-[rgba(124,58,237,0.45)] text-accent-light' : 'bg-[var(--overlay-subtle)] border-[var(--overlay-border)] text-muted'}`}>
+      <span className={`absolute top-1.5 right-1.5 text-[9px] rounded-full px-1.5 py-0.5 border border-transparent text-secondary bg-[var(--overlay-soft)] ${node.unlocked ? 'bg-[rgba(245,197,24,0.2)] border-[rgba(245,197,24,0.4)] text-warning' : node.prerequisitesMet ? 'bg-[rgba(124,58,237,0.2)] border-[rgba(124,58,237,0.45)] text-accent-light' : 'bg-[var(--overlay-subtle)] border-[var(--overlay-border)] text-muted'}`}>
         {nodeStatusLabel(node)}
       </span>
       <div className="text-2xl leading-none">{nodeIcon(node.iconKey)}</div>
