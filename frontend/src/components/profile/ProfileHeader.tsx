@@ -36,10 +36,14 @@ export function ProfileHeader({ user, stats, league }: ProfileHeaderProps) {
           <Badge variant="primary">Nivel {stats.level}</Badge>
           <Badge variant="success">⚡ {stats.xp} XP</Badge>
           <span
-            className="inline-flex items-center justify-center gap-1 px-3.5 py-1.5 rounded-full text-[13px] font-bold text-on-accent text-shadow-[0_1px_3px_rgba(0,0,0,0.4)] tracking-[0.3px] relative z-[1]"
+            className="inline-flex items-center justify-center gap-1 px-3.5 py-1.5 rounded-full text-[13px] font-bold text-white tracking-[0.3px] relative z-[1]"
             style={{
-              background: league.gradient,
+              // Subtle dark veil over the gradient so the pill reads as a solid
+              // colored chip (not a washed pastel) and white text stays legible
+              // on the light end of the league gradients (e.g. Platino's cyan).
+              background: `linear-gradient(rgba(0,0,0,0.14), rgba(0,0,0,0.14)), ${league.gradient}`,
               boxShadow: `0 0 8px ${league.glowColor}`,
+              textShadow: '0 1px 3px rgba(0,0,0,0.65), 0 0 2px rgba(0,0,0,0.5)',
             }}
           >
             {league.icon} {league.name}
