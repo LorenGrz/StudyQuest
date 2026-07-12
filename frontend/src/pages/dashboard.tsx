@@ -423,7 +423,7 @@ const DashboardPage = () => {
               {isTournamentsLoading ? (
                 <div style={{ display: 'flex', justifyContent: 'center', padding: '16px' }}><Spinner /></div>
               ) : tournaments.length === 0 ? (
-                <div className="text-center py-4 px-4 bg-surface rounded-2xl border border-white/[0.05]">
+                <div className="text-center py-4 px-4 bg-surface rounded-2xl border border-[var(--overlay-border)]">
                   <p className="text-sm text-muted" style={{ margin: 0 }}>No hay torneos activos en este momento.</p>
                 </div>
               ) : (

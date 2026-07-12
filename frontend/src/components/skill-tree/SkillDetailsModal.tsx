@@ -36,11 +36,11 @@ export function SkillDetailsModal({
             style={{ width: `${selectedNode.progressPercent}%` }}
           />
         </div>
-        <p className="text-[13px] text-[#ccd0e5]">
+        <p className="text-[13px] text-secondary">
           Progreso: {selectedNode.topicXp}/{selectedNode.xpThreshold} XP · {selectedNode.progressPercent}%
         </p>
       </div>
-      {nextStepText && <p className="text-[13px] text-primary bg-white/[0.04] border border-[var(--overlay-border)] rounded-[12px] p-3">Siguiente paso: {nextStepText}</p>}
+      {nextStepText && <p className="text-[13px] text-primary bg-[var(--overlay-subtle)] border border-[var(--overlay-border)] rounded-[12px] p-3">Siguiente paso: {nextStepText}</p>}
 
       {!selectedNode.unlocked && !selectedNode.prerequisitesMet && (
         <div className="mt-1 text-[13px]">

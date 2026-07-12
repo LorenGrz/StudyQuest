@@ -376,7 +376,7 @@ const SkillTreePage = () => {
 
       <div
         ref={canvasRef}
-        className="relative mb-[18px] bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.12),transparent_55%)] border border-white/[0.06] rounded-[24px] min-h-[58vh] overflow-hidden cursor-grab touch-none active:cursor-grabbing"
+        className="relative mb-[18px] bg-[radial-gradient(circle_at_top,rgba(124,58,237,0.12),transparent_55%)] border border-[var(--overlay-border)] rounded-[24px] min-h-[58vh] overflow-hidden cursor-grab touch-none active:cursor-grabbing"
         aria-label="Mapa interactivo del árbol de habilidades"
         onPointerDown={onCanvasPointerDown}
         onPointerMove={onCanvasPointerMove}

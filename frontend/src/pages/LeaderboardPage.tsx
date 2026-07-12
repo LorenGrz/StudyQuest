@@ -56,7 +56,7 @@ export default function LeaderboardPage() {
       ) : (
         <>
           {/* Subject tabs: scroll on mobile, wrap on desktop */}
-          <div className="flex gap-2 overflow-x-auto px-4 pb-3 scrollbar-none">
+          <div className="flex flex-wrap gap-2 px-4 pb-3">
             {subjects.map(s => (
               <button
                 key={s.id}
@@ -211,7 +211,7 @@ function LeaderboardRow({
       </div>
       <div className="flex flex-col items-end gap-0.5 shrink-0">
         <span className="text-lg" title={league.name}>{league.icon}</span>
-        <span className="text-sm font-extrabold" style={{ color: league.color }}>{entry.elo}</span>
+        <span className="text-sm font-extrabold text-primary">{entry.elo}</span>
       </div>
     </motion.div>
   )

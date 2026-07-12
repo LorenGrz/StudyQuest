@@ -75,7 +75,7 @@ export function OptionsGrid({ options, onSelect, disabled, correct, selectedId }
         return (
           <button
             key={opt.id}
-            className={`flex items-center gap-2.5 px-3 py-3.5 bg-white/[0.04] border border-[var(--overlay-border)] rounded-[18px] text-left transition-all duration-150 text-primary text-sm font-medium cursor-pointer hover:enabled:bg-elevated hover:enabled:scale-[1.02] disabled:cursor-not-allowed${isCorrect ? ' !bg-[rgba(16,185,129,0.1)] !border-success' : ''}${isSelected && !isCorrect ? ' !bg-[rgba(239,68,68,0.1)] !border-danger' : ''}`}
+            className={`flex items-center gap-2.5 px-3 py-3.5 bg-[var(--overlay-subtle)] border border-[var(--overlay-border)] rounded-[18px] text-left transition-all duration-150 text-primary text-sm font-medium cursor-pointer hover:enabled:bg-elevated hover:enabled:scale-[1.02] disabled:cursor-not-allowed${isCorrect ? ' !bg-[rgba(16,185,129,0.1)] !border-success' : ''}${isSelected && !isCorrect ? ' !bg-[rgba(239,68,68,0.1)] !border-danger' : ''}`}
             style={{ '--opt-color': optionColors[i] } as React.CSSProperties}
             onClick={() => !disabled && onSelect(opt.id)}
             disabled={disabled}
@@ -125,7 +125,7 @@ export function FeedbackOverlay({
         </div>
       </div>
       
-      <div className="text-left bg-elevated rounded-xl p-3.5 border border-white/[0.04]">
+      <div className="text-left bg-elevated rounded-xl p-3.5 border border-[var(--overlay-border)]">
         <p className="text-xs font-bold text-muted uppercase tracking-[0.5px] mb-1.5">Explicación</p>
         <p className="text-xs text-secondary leading-relaxed">{explanation}</p>
       </div>
