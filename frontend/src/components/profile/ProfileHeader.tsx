@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom'
+import { Settings } from 'lucide-react'
 import { Badge } from '../../components/UI'
 import { AvatarWithBorder } from '../../components/AvatarWithBorder'
 
@@ -10,9 +12,16 @@ interface ProfileHeaderProps {
 export function ProfileHeader({ user, stats, league }: ProfileHeaderProps) {
   return (
     <div
-      className="bg-surface border border-[var(--overlay-border)] rounded-xl p-6 flex gap-4 items-center"
+      className="relative bg-surface border border-[var(--overlay-border)] rounded-xl p-6 pr-14 flex gap-4 items-center"
       style={{ borderTop: `3px solid ${league.color}` }}
     >
+      <Link
+        to="/settings"
+        aria-label="Configuración"
+        className="absolute top-3 right-3 flex items-center justify-center size-11 rounded-lg text-muted transition-colors hover:text-primary hover:bg-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      >
+        <Settings size={18} aria-hidden="true" />
+      </Link>
       <AvatarWithBorder
         displayName={user.displayName}
         avatarUrl={user.avatarUrl}

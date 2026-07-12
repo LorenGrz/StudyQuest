@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
 import {
-  Settings,
   Pencil,
   BookOpen,
   GraduationCap,
@@ -105,19 +103,7 @@ export default function ProfilePage() {
     <MobileLayout>
       <PageContainer>
         <div className="pb-4 flex flex-col gap-4">
-          {/* ─── Settings link ─────────────────────────────────────────── */}
-          <div className="flex justify-end">
-            <Link
-              to="/settings"
-              aria-label="Configuración"
-              className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-surface text-muted text-sm border border-edge min-h-[44px]"
-            >
-              <Settings size={14} aria-hidden="true" />
-              Configuración
-            </Link>
-          </div>
-
-          {/* ─── User Card — full width ─────────────────────────────────── */}
+          {/* ─── User Card — full width (gear links to Settings) ────────── */}
           <div>
             <ProfileHeader user={user} stats={stats} league={league} />
           </div>
