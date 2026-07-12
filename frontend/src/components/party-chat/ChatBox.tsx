@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import toast from 'react-hot-toast'
 import type { ChatMessage } from '../../services/partyService'
 import { ChatComposer } from './ChatComposer'
@@ -20,10 +20,22 @@ type Props = {
 
 export function ChatBox({ messages, isLoading, error, currentUserId = '', onSendText, onSendFile, onSendAudio }: Props) {
   const endRef = useRef<HTMLDivElement>(null)
+  const [isUploadingFile, setIsUploadingFile] = useState(false)
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages.length])
+  }, [messages.length, isUploadingFile])
+
+  // Wraps the file send with an "uploading" state so all entry points
+  // (drop, attach button, paste) show a pending indicator until it lands.
+  const handleSendFile = useCallback(async (file: File) => {
+    setIsUploadingFile(true)
+    try {
+      await onSendFile(file)
+    } finally {
+      setIsUploadingFile(false)
+    }
+  }, [onSendFile])
 
   // Drag a file anywhere over the chat to send it (WhatsApp-style).
   const { isDragging, dropZoneProps } = useFileDrop({
@@ -32,7 +44,7 @@ export function ChatBox({ messages, isLoading, error, currentUserId = '', onSend
         toast.error('Solo PDF, TXT, DOC o DOCX')
         return
       }
-      void onSendFile(file)
+      void handleSendFile(file)
     },
   })
 
@@ -72,13 +84,19 @@ export function ChatBox({ messages, isLoading, error, currentUserId = '', onSend
             />
           ))
         )}
+        {isUploadingFile && (
+          <div className="self-end flex items-center gap-2 bg-[rgba(124,58,237,0.10)] border border-[rgba(124,58,237,0.30)] rounded-2xl px-3 py-2 text-sm text-secondary">
+            <Spinner size="sm" />
+            Subiendo archivo…
+          </div>
+        )}
         <div ref={endRef} />
       </div>
 
       {/* Sticky composer — sticks above mobile nav via safe-area padding in ChatComposer */}
       <ChatComposer
         onSendText={onSendText}
-        onSendFile={onSendFile}
+        onSendFile={handleSendFile}
         onSendAudio={onSendAudio}
       />
     </div>
