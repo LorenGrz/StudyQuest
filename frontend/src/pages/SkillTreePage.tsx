@@ -18,6 +18,7 @@ import {
 } from '../components/skill-tree/utils'
 import { SkillDetailsModal } from '../components/skill-tree/SkillDetailsModal'
 import { SkillNodeItem } from '../components/skill-tree/SkillNodeItem'
+import { EmptyState } from '../components/PagePrimitives'
 
 const SkillTreePage = () => {
   const navigate = useNavigate()
@@ -347,6 +348,14 @@ const SkillTreePage = () => {
         </article>
       </section>
 
+      {nodes.length === 0 ? (
+        <EmptyState
+          icon="🌱"
+          title="Este árbol todavía no tiene habilidades"
+          description="Cuando esta materia tenga nodos vas a poder desbloquearlos completando quests."
+        />
+      ) : (
+        <>
       <div className="flex flex-wrap gap-2 mb-2.5">
         <span className="inline-flex items-center gap-1.5 text-xs text-secondary">
           <span className="w-[9px] h-[9px] rounded-full bg-[#f5c518]" /> Desbloqueado
@@ -424,6 +433,8 @@ const SkillTreePage = () => {
           </div>
         </div>
       </div>
+        </>
+      )}
 
       <SkillDetailsModal
         selectedNode={selectedNode}
