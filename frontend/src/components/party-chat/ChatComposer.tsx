@@ -47,8 +47,9 @@ export function ChatComposer({ onSendText, onSendFile, onSendAudio }: Props) {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  // Drag-and-drop + paste — reuses handleFile (which validates and reports errors).
-  const { isDragging, dropZoneProps, onPaste } = useFileDrop({
+  // Paste a file (Ctrl/Cmd+V) into the message box. Drag-and-drop is handled
+  // one level up in ChatBox so it covers the whole chat area (WhatsApp-style).
+  const { onPaste } = useFileDrop({
     onFile: (file) => { void handleFile(file) },
     disabled: isRecording,
   })
@@ -105,16 +106,7 @@ export function ChatComposer({ onSendText, onSendFile, onSendAudio }: Props) {
   }
 
   return (
-    <div
-      {...dropZoneProps}
-      className={`relative shrink-0 z-10 border-t bg-base px-3 py-2 pb-[calc(env(safe-area-inset-bottom,0px)+8px)] transition-colors ${isDragging ? 'border-accent bg-accent-bg' : 'border-edge'}`}
-    >
-      {isDragging && (
-        <div className="pointer-events-none absolute inset-1 z-20 flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-accent bg-base/85 text-sm font-medium text-accent-light">
-          <Paperclip size={16} aria-hidden="true" />
-          Soltá el archivo para adjuntarlo
-        </div>
-      )}
+    <div className="shrink-0 z-10 border-t border-edge bg-base px-3 py-2 pb-[calc(env(safe-area-inset-bottom,0px)+8px)]">
       <form className="flex items-end gap-2" onSubmit={submitText}>
         {/* Hidden native file input — labelled via <label htmlFor> so getByLabelText resolves it */}
         <label htmlFor="chat-file-input" className="sr-only">Adjuntar archivo</label>
