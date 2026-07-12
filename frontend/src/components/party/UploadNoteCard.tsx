@@ -1,6 +1,10 @@
 import { useState, useRef } from 'react'
 import { Sparkles, FileText, X, Paperclip } from 'lucide-react'
 import { Button } from '../../components/UI'
+import { useFileDrop } from '../../hooks/useFileDrop'
+
+const isPdf = (file: File) =>
+  file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
 
 interface UploadNoteCardProps {
   onUpload: (title: string, file?: File, textContent?: string) => Promise<unknown>
@@ -21,6 +25,20 @@ export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
     setFileName(null)
     if (fileRef.current) fileRef.current.value = ''
   }
+
+  const pickFile = (file: File) => {
+    setSelectedFile(file)
+    setFileName(file.name)
+    if (error) setError(null)
+  }
+
+  // Drag-and-drop + paste of a PDF anywhere on the card.
+  const { isDragging, dropZoneProps, onPaste } = useFileDrop({
+    onFile: pickFile,
+    accept: isPdf,
+    onReject: () => setError('Solo se aceptan archivos PDF.'),
+    disabled: isLoading,
+  })
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -64,7 +82,12 @@ export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
   }
 
   return (
-    <form className="flex flex-col gap-3 bg-surface border border-edge rounded-lg p-4" onSubmit={submit}>
+    <form
+      {...dropZoneProps}
+      onPaste={onPaste}
+      className={`flex flex-col gap-3 bg-surface border rounded-lg p-4 transition-colors ${isDragging ? 'border-accent bg-accent-bg' : 'border-edge'}`}
+      onSubmit={submit}
+    >
       <h3 className="text-base font-bold text-primary">Nueva Quest</h3>
 
       <div className="flex flex-col gap-1.5">
@@ -122,13 +145,12 @@ export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
               accept="application/pdf"
               className="sr-only"
               onChange={(e) => {
-                const file = e.target.files?.[0] ?? null
-                setSelectedFile(file)
-                setFileName(file?.name ?? null)
+                const file = e.target.files?.[0]
+                if (file) pickFile(file)
               }}
             />
             <Paperclip size={16} aria-hidden="true" />
-            Elegí un PDF
+            Elegí un PDF, arrastralo o pegalo (Ctrl+V)
           </label>
         )}
       </div>

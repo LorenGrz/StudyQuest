@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { Paperclip, Send, Mic, Square } from 'lucide-react'
 import { isAllowedChatFile } from './chatMessageGuards'
+import { useFileDrop } from '../../hooks/useFileDrop'
 
 type Props = {
   onSendText: (text: string) => void
@@ -45,6 +46,12 @@ export function ChatComposer({ onSendText, onSendFile, onSendAudio }: Props) {
     await onSendFile(file)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
+
+  // Drag-and-drop + paste — reuses handleFile (which validates and reports errors).
+  const { isDragging, dropZoneProps, onPaste } = useFileDrop({
+    onFile: (file) => { void handleFile(file) },
+    disabled: isRecording,
+  })
 
   const startRecording = async () => {
     if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
@@ -98,7 +105,16 @@ export function ChatComposer({ onSendText, onSendFile, onSendAudio }: Props) {
   }
 
   return (
-    <div className="shrink-0 z-10 border-t border-edge bg-base px-3 py-2 pb-[calc(env(safe-area-inset-bottom,0px)+8px)]">
+    <div
+      {...dropZoneProps}
+      className={`relative shrink-0 z-10 border-t bg-base px-3 py-2 pb-[calc(env(safe-area-inset-bottom,0px)+8px)] transition-colors ${isDragging ? 'border-accent bg-accent-bg' : 'border-edge'}`}
+    >
+      {isDragging && (
+        <div className="pointer-events-none absolute inset-1 z-20 flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-accent bg-base/85 text-sm font-medium text-accent-light">
+          <Paperclip size={16} aria-hidden="true" />
+          Soltá el archivo para adjuntarlo
+        </div>
+      )}
       <form className="flex items-end gap-2" onSubmit={submitText}>
         {/* Hidden native file input — labelled via <label htmlFor> so getByLabelText resolves it */}
         <label htmlFor="chat-file-input" className="sr-only">Adjuntar archivo</label>
@@ -135,6 +151,7 @@ export function ChatComposer({ onSendText, onSendFile, onSendAudio }: Props) {
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
+            onPaste={onPaste}
             placeholder={isRecording ? 'Tu nota de voz se está grabando' : 'Escribí un mensaje'}
             aria-label="Escribí un mensaje"
             rows={1}
