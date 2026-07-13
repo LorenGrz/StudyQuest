@@ -10,9 +10,8 @@ import {
   RawQuestion,
 } from '../ai.types';
 import {
-  chunkSourceText,
-  deduplicateRawQuestions,
   extractTextFromPdf,
+  generateQuestionsFromChunks,
   safeParseQuestionsJson,
 } from '../raw-question.utils';
 import { QUIZ_PROMPT, buildQuizUserPrompt } from '../quiz-prompt';
@@ -45,26 +44,18 @@ export abstract class OpenAiCompatibleQuizProvider
     rawText: string,
     options?: QuizGenerationOptions,
   ): Promise<RawQuestion[]> {
-    const chunks = chunkSourceText(rawText, 3000);
-    const maxChunks = Math.min(chunks.length, 3);
-    const allQuestions: RawQuestion[] = [];
-
-    for (let i = 0; i < maxChunks; i++) {
-      try {
-        const questions = await this.callChatCompletions(chunks[i], options);
-        allQuestions.push(...questions);
-      } catch (err) {
-        this.logger.error(`Error en fragmento ${i + 1}: ${err.message}`);
-      }
-    }
-
-    if (allQuestions.length === 0) {
-      throw new InternalServerErrorException(
-        'No se pudieron generar preguntas',
-      );
-    }
-
-    return deduplicateRawQuestions(allQuestions);
+    return generateQuestionsFromChunks(
+      rawText,
+      (chunk) => this.callChatCompletions(chunk, options),
+      {
+        maxChunks: Number(this.cfg.get('AI_MAX_CHUNKS', 3)),
+        chunkTokens: Number(this.cfg.get('AI_CHUNK_TOKENS', 3000)),
+        onError: (i, err) =>
+          this.logger.error(
+            `Error en fragmento ${i + 1}: ${(err as Error)?.message}`,
+          ),
+      },
+    );
   }
 
   protected abstract getApiKeyEnv(): string;
@@ -96,6 +87,7 @@ export abstract class OpenAiCompatibleQuizProvider
       body: JSON.stringify({
         model,
         temperature: options?.temperature ?? 0.2,
+        max_tokens: Number(this.cfg.get('AI_MAX_OUTPUT_TOKENS', 4096)),
         messages: [
           {
             role: 'system',

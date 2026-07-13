@@ -49,6 +49,50 @@ function safeParseJson(str: string): any {
   }
 }
 
+export interface ChunkGenerationConfig {
+  /** Max number of chunks to send to the model (bounds cost per quest). */
+  maxChunks?: number;
+  /** Approximate tokens per chunk (chunk size = tokens * 4 chars). */
+  chunkTokens?: number;
+  /** Called when a single chunk fails, so callers can log without aborting. */
+  onError?: (index: number, error: unknown) => void;
+}
+
+/**
+ * Splits the source text into chunks and generates questions for each one in
+ * PARALLEL (they're independent, so wall-clock is one round-trip instead of the
+ * sum). Skips failed chunks, throws only if every chunk failed, and dedupes.
+ * Shared by every real provider so the chunk/cap/dedupe policy lives in one place.
+ */
+export async function generateQuestionsFromChunks(
+  rawText: string,
+  generateForChunk: (chunk: string) => Promise<RawQuestion[]>,
+  config: ChunkGenerationConfig = {},
+): Promise<RawQuestion[]> {
+  const chunkTokens = config.chunkTokens ?? 3000;
+  const maxChunks = config.maxChunks ?? 3;
+  const chunks = chunkSourceText(rawText, chunkTokens).slice(0, maxChunks);
+
+  const settled = await Promise.allSettled(
+    chunks.map((chunk) => generateForChunk(chunk)),
+  );
+
+  const questions: RawQuestion[] = [];
+  settled.forEach((result, index) => {
+    if (result.status === 'fulfilled') {
+      questions.push(...result.value);
+    } else {
+      config.onError?.(index, result.reason);
+    }
+  });
+
+  if (questions.length === 0) {
+    throw new InternalServerErrorException('No se pudieron generar preguntas');
+  }
+
+  return deduplicateRawQuestions(questions);
+}
+
 export function chunkSourceText(text: string, maxTokens: number): string[] {
   const maxChars = maxTokens * 4;
   const paragraphs = text
