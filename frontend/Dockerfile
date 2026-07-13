@@ -8,6 +8,10 @@ CMD ["pnpm", "run", "dev", "--host", "0.0.0.0"]
 
 FROM node:22-alpine AS build
 WORKDIR /app
+# VITE_API_URL must be present at BUILD time — Vite inlines VITE_* vars when compiling.
+# Railway passes the service variable of the same name as a build arg.
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
 COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* .npmrc* ./
 RUN corepack enable && pnpm install --frozen-lockfile
 COPY . .
