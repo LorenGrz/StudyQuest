@@ -12,9 +12,8 @@ import {
   RawQuestion,
 } from '../ai.types';
 import {
-  chunkSourceText,
-  deduplicateRawQuestions,
   extractTextFromPdf,
+  generateQuestionsFromChunks,
   safeParseQuestionsJson,
 } from '../raw-question.utils';
 import { QUIZ_PROMPT, buildQuizUserPrompt } from '../quiz-prompt';
@@ -43,31 +42,18 @@ export class GeminiQuizProvider implements QuizAiProvider {
     rawText: string,
     options?: QuizGenerationOptions,
   ): Promise<RawQuestion[]> {
-    const chunks = chunkSourceText(rawText, 3000);
-    const maxChunks = Math.min(chunks.length, 3);
-    this.logger.log(`Generando preguntas de ${maxChunks} fragmento(s)...`);
-
-    const allQuestions: RawQuestion[] = [];
-
-    for (let i = 0; i < maxChunks; i++) {
-      try {
-        const questions = await this.callGemini(chunks[i], options);
-        allQuestions.push(...questions);
-        this.logger.log(
-          `Fragmento ${i + 1}/${maxChunks}: ${questions.length} preguntas`,
-        );
-      } catch (err) {
-        this.logger.error(`Error en fragmento ${i + 1}: ${err.message}`);
-      }
-    }
-
-    if (allQuestions.length === 0) {
-      throw new InternalServerErrorException(
-        'No se pudieron generar preguntas',
-      );
-    }
-
-    return deduplicateRawQuestions(allQuestions);
+    return generateQuestionsFromChunks(
+      rawText,
+      (chunk) => this.callGemini(chunk, options),
+      {
+        maxChunks: Number(this.cfg.get('AI_MAX_CHUNKS', 3)),
+        chunkTokens: Number(this.cfg.get('AI_CHUNK_TOKENS', 3000)),
+        onError: (i, err) =>
+          this.logger.error(
+            `Error en fragmento ${i + 1}: ${(err as Error)?.message}`,
+          ),
+      },
+    );
   }
 
   private async callGemini(
@@ -84,6 +70,10 @@ export class GeminiQuizProvider implements QuizAiProvider {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
       model: options?.model ?? this.cfg.get('GEMINI_MODEL', 'gemini-2.0-flash'),
+      generationConfig: {
+        temperature: options?.temperature ?? 0.2,
+        maxOutputTokens: Number(this.cfg.get('AI_MAX_OUTPUT_TOKENS', 4096)),
+      },
     });
 
     const result = await model.generateContent(
