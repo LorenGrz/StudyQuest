@@ -574,7 +574,7 @@ export function QuestCard({ quest, onDelete }: { quest: Quest; onDelete?: (quest
           {quest.sourcePdfUrl && (
             <a
               className="self-start mt-1 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-secondary/10 text-secondary border border-secondary/30 text-xs font-bold hover:bg-secondary/20 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-              href={new URL(quest.sourcePdfUrl, 'http://localhost:3000').toString()}
+              href={resolveAssetUrl(quest.sourcePdfUrl) ?? undefined}
               target="_blank"
               rel="noreferrer"
               onClick={(event) => event.stopPropagation()}
