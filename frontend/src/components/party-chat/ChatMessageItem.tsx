@@ -1,6 +1,17 @@
 import type { ChatMessage } from '../../services/partyService'
 import { formatBytes, isAudioMessage } from './chatMessageGuards'
 
+const API_ORIGIN = import.meta.env.VITE_API_URL ?? 'http://localhost:3000'
+
+// Attachment URLs come from the API as relative paths (e.g. /uploads/x.webm).
+// Prefix them with the backend origin so they don't resolve against the frontend host.
+function resolveAssetUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined
+  if (/^https?:\/\//i.test(url)) return url
+  if (url.startsWith('/')) return `${API_ORIGIN}${url}`
+  return `${API_ORIGIN}/${url}`
+}
+
 export function ChatMessageItem({ message, isOwn }: { message: ChatMessage; isOwn: boolean }) {
   return (
     <div
@@ -26,7 +37,7 @@ export function ChatMessageItem({ message, isOwn }: { message: ChatMessage; isOw
             <span className="w-9 h-9 rounded-lg inline-flex items-center justify-center bg-[var(--overlay-soft)] shrink-0 text-lg" aria-hidden="true">📄</span>
             <div className="min-w-0 flex flex-col gap-0.5">
               <a
-                href={message.attachment.url}
+                href={resolveAssetUrl(message.attachment.url)}
                 target="_blank"
                 rel="noreferrer"
                 className="text-sm text-accent-light underline truncate block"
@@ -52,7 +63,7 @@ export function ChatMessageItem({ message, isOwn }: { message: ChatMessage; isOw
               </span>
             </div>
           </div>
-          <audio className="w-full block" controls src={message.attachment.url} />
+          <audio className="w-full block" controls src={resolveAssetUrl(message.attachment.url)} />
         </div>
       )}
 
