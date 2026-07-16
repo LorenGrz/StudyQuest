@@ -44,6 +44,7 @@ import { UserAchievement } from '../../modules/achievements/user-achievement.ent
 import { UserTitle } from '../../modules/cosmetics/user-title.entity';
 import { UserInventory } from '../../modules/cosmetics/user-inventory.entity';
 import { ProfileBorder } from '../../modules/cosmetics/profile-border.entity';
+import { DEFAULT_ELO } from '../../common/leagues';
 
 // ─── Conexión ──────────────────────────────────────────────────────────────────
 const AppDataSource = new DataSource({
@@ -757,7 +758,7 @@ async function seed() {
       stats: {
         xp: 0,
         level: 0,
-        elo: 1200,
+        elo: DEFAULT_ELO,
         quizzesPlayed: 0,
         quizzesWon: 0,
         currentStreak: 0,
@@ -1026,7 +1027,7 @@ async function seed() {
   const allUsers = await userRepo.find();
 
   for (const u of allUsers) {
-    const elo: number = (u.stats as any)?.elo ?? 1200;
+    const elo: number = (u.stats as any)?.elo ?? DEFAULT_ELO;
 
     // grant all tiers the user has reached (cumulative)
     const earnedTiers = LEAGUE_TIERS.filter((lt) => elo >= lt.minElo);

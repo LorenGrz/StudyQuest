@@ -1,3 +1,5 @@
+import { Difficulty } from '../modules/quests/quiz-question.entity';
+
 export interface League {
   tier: number;
   name: string;
@@ -17,8 +19,29 @@ export const LEAGUES: League[] = [
   { tier: 7, name: 'QuestMaster', minElo: 2400, maxElo: Infinity, icon: '👑',  color: '#f59e0b' },
 ];
 
-export const DEFAULT_ELO = 1200;
+export const DEFAULT_ELO = 0;
 export const ELO_K_FACTOR = 32;
+
+export const DIFFICULTY_RATINGS: Record<Difficulty, number> = {
+  easy: 400,
+  medium: 1200,
+  hard: 2000,
+};
+
+export function questRatingFromDifficulties(difficulties: Difficulty[]): number {
+  if (!difficulties.length) return DIFFICULTY_RATINGS.medium;
+  const sum = difficulties.reduce((a, d) => a + DIFFICULTY_RATINGS[d], 0);
+  return Math.round(sum / difficulties.length);
+}
+
+export function calculateSoloEloDelta(
+  currentElo: number,
+  accuracy: number,
+  questRating: number,
+): number {
+  const expected = expectedScore(currentElo, questRating);
+  return Math.round(ELO_K_FACTOR * (accuracy - expected));
+}
 
 export function getLeague(elo: number): League {
   for (let i = LEAGUES.length - 1; i >= 0; i--) {
