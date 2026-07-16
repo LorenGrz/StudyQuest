@@ -775,7 +775,9 @@ export class UsersService {
       .andWhere('subject.isActive = true', queryParams)
       .groupBy('q.id')
       .addGroupBy('subject.id')
-      .orderBy('playCount', 'DESC')
+      // Quote the alias: Postgres folds an unquoted `playCount` to `playcount`,
+      // which doesn't match the quoted "playCount" select alias (42703).
+      .orderBy('"playCount"', 'DESC')
       .addOrderBy('q.createdAt', 'DESC')
       .offset(offset)
       .limit(limit);
