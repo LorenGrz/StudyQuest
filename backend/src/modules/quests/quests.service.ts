@@ -20,6 +20,10 @@ import { PartiesService } from '../parties/parties.service';
 import { UsersService } from '../users/users.service';
 import { SkillTreeService } from '../skill-tree/skill-tree.service';
 import { CreateQuestDto, SubmitAnswerDto } from '../../common/dto';
+import {
+  calculateSoloEloDelta,
+  questRatingFromDifficulties,
+} from '../../common/leagues';
 
 const XP_CORRECT_BASE = 100;
 const XP_SPEED_BONUS = 50;
@@ -447,9 +451,19 @@ export class QuestsService {
       score: activeAttempt.score,
     });
 
+    let eloDelta = 0;
+    let eloAfter = 0;
     if (activeAttempt.attemptNumber === 1) {
       await this.usersService.addXp(userId, totalXp);
       await this.usersService.updateStreak(userId);
+
+      const currentElo = await this.usersService.getElo(userId);
+      const questRating = questRatingFromDifficulties(
+        quest.questions.map((q) => q.difficulty),
+      );
+      eloDelta = calculateSoloEloDelta(currentElo, accuracy, questRating);
+      await this.usersService.updateElo(userId, eloDelta);
+      eloAfter = Math.max(0, currentElo + eloDelta);
     }
 
     if (quest.status !== 'completed') {
@@ -464,7 +478,9 @@ export class QuestsService {
       userId,
       attemptId: activeAttempt.id,
     });
-    return this.getQuestForPlay(questId, userId);
+
+    const questForPlay = await this.getQuestForPlay(questId, userId);
+    return { ...questForPlay, eloDelta, eloAfter };
   }
 
   private assertQuestPlayable(quest: Quest) {
