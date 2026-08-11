@@ -10,22 +10,16 @@ import { join } from 'path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: false });
+  const app = await NestFactory.create(AppModule);
   const cfg = app.get(ConfigService);
   const port = cfg.get<number>('PORT', 3000);
 
-  // Raw CORS — corre antes de Helmet y de cualquier guard de NestJS.
-  // Refleja el Origin del request para soportar cualquier dominio con credentials.
-  app.use((req: any, res: any, next: any) => {
-    const origin = req.headers['origin'];
-    if (origin) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-      res.setHeader('Access-Control-Allow-Credentials', 'true');
-      res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
-    }
-    if (req.method === 'OPTIONS') { res.statusCode = 204; return res.end(); }
-    next();
+  app.enableCors({
+    origin: true,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    optionsSuccessStatus: 204,
   });
 
   app.use(helmet({ crossOriginResourcePolicy: false }));
