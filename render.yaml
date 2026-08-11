@@ -92,7 +92,7 @@ services:
     repo: https://github.com/LorenGrz/StudyQuest
     branch: dev
     rootDir: frontend
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build
+    buildCommand: npm install -g pnpm@11 && pnpm install --frozen-lockfile && pnpm build
     staticPublishPath: ./dist
     envVars:
       - key: VITE_API_URL
