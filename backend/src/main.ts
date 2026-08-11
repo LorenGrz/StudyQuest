@@ -13,20 +13,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const cfg = app.get(ConfigService);
   const port = cfg.get<number>('PORT', 3000);
-  const corsOriginRaw = cfg.get<string>('CORS_ORIGIN', 'http://localhost:5173');
-  const corsOrigins = new Set(
-    corsOriginRaw
-      .split(',')
-      .map((o) => o.trim())
-      .filter(Boolean),
-  );
-  corsOrigins.add('http://localhost:5173');
-  corsOrigins.add('http://localhost:5174');
-  const corsOrigin = Array.from(corsOrigins);
-
   // CORS debe ir ANTES de helmet para que no sobreescriba las cabeceras
   app.enableCors({
-    origin: corsOrigin,
+    origin: true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

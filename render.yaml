@@ -45,8 +45,6 @@ services:
         value: gemini-2.5-flash
       - key: MARKITDOWN_URL
         value: https://studyquest-markitdown.onrender.com
-      - key: CORS_ORIGIN
-        value: https://studyquest.onrender.com
       - key: POSTGRES_HOST
         fromDatabase:
           name: studyquest-db
