@@ -32,7 +32,7 @@ services:
     branch: dev
     rootDir: backend
     dockerfilePath: ./Dockerfile
-    healthCheckPath: /api/v1
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production

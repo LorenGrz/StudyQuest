@@ -1,6 +1,6 @@
 import './polyfill';
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { RequestMethod, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { ConfigService } from '@nestjs/config';
@@ -42,7 +42,9 @@ async function bootstrap() {
     }),
   );
   app.useWebSocketAdapter(new IoAdapter(app));
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix('api/v1', {
+    exclude: [{ path: 'health', method: RequestMethod.GET }],
+  });
 
   if (cfg.get('NODE_ENV') !== 'production') {
     const swaggerConfig = new DocumentBuilder()
