@@ -20,7 +20,10 @@ export function useAuth() {
       setUser(user)
       navigate('/dashboard')
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'Error al iniciar sesión')
+      setError(
+        err?.response?.data?.message ??
+        'No se pudo conectar con el servidor. Si es la primera carga del día, el servidor tarda ~1 minuto en despertar. Intentá de nuevo.'
+      )
     } finally {
       setIsLoading(false)
     }
@@ -36,7 +39,10 @@ export function useAuth() {
       setUser(user)
       navigate('/dashboard')
     } catch (err: any) {
-      setError(err?.response?.data?.message ?? 'Error al registrarse')
+      setError(
+        err?.response?.data?.message ??
+        'No se pudo conectar con el servidor. Si es la primera carga del día, el servidor tarda ~1 minuto en despertar. Intentá de nuevo.'
+      )
     } finally {
       setIsLoading(false)
     }
