@@ -30,9 +30,9 @@ A continuación se detallan las interfaces principales de la plataforma:
 
 El proyecto está diseñado siguiendo una arquitectura limpia y desacoplada en dos componentes principales y servicios de soporte:
 
-- **`backend/`**: Servidor API RESTful y WebSocket en tiempo real construido con **NestJS 11** y **TypeScript**. Administra la persistencia de datos con **PostgreSQL 16** mediante **TypeORM** y el control de flujos efímeros con **Redis**. La generación de Quests utiliza **Google Gemini API** (usando `gemini-2.5-flash`) y un servicio microservicio **MarkItDown** de conversión de documentos.
+- **`backend/`**: Servidor API RESTful y WebSocket en tiempo real construido con **NestJS 11** y **TypeScript**. Administra la persistencia de datos con **PostgreSQL 16** mediante **TypeORM**. La generación de Quests utiliza **Google Gemini API** (usando `gemini-2.5-flash`) y un microservicio **MarkItDown** de conversión de documentos.
 - **`frontend/`**: Aplicación Single Page Application (SPA) responsiva y mobile-first construida con **React 19**, **Vite 8** y **Tailwind CSS 4**. Utiliza **Zustand 5** para la gestión de estado global ligero y persistente, y **Framer Motion 12** para animaciones interactivas de alta fidelidad.
-- **`docker-compose.yml`**: Configuración de servicios locales virtualizados que incluye base de datos PostgreSQL, servidor de caché Redis y el motor MarkItDown Service.
+- **`docker-compose.yml`**: Configuración de servicios locales virtualizados que incluye base de datos PostgreSQL y el motor MarkItDown Service.
 
 ---
 
@@ -40,9 +40,7 @@ El proyecto está diseñado siguiendo una arquitectura limpia y desacoplada en d
 
 ### Backend Stack
 * **Framework**: NestJS 11 (TypeScript)
-* **Bases de datos**:
-  * **PostgreSQL 16**: Datos transaccionales y relacionales normalizados.
-  * **Redis 7.2**: Cola de matchmaking en tiempo real y persistencia volátil de socket presences.
+* **Base de datos**: PostgreSQL 16 (datos transaccionales y relacionales normalizados)
 * **ORM**: TypeORM 0.3
 * **Comunicación en Tiempo Real**: Socket.IO (Nest Websockets)
 * **IA y Parseo**:
@@ -60,16 +58,6 @@ El proyecto está diseñado siguiendo una arquitectura limpia y desacoplada en d
 * **Tiempo Real**: Socket.IO Client 4
 * **Animaciones**: Framer Motion 12
 * **Pruebas**: Vitest + Testing Library
-
----
-
-## ¿Por qué se utiliza Redis?
-
-[Redis](https://redis.io/) es un motor de bases de datos en memoria ultrarrápido que opera directamente sobre la RAM, logrando latencias inferiores al milisegundo.
-
-En **StudyQuest**, Redis cumple las siguientes funciones fundamentales:
-1. **Matchmaking en tiempo real**: Alberga la cola activa de estudiantes buscando grupos de estudio de forma ágil, evitando sobrecargar PostgreSQL con consultas y escrituras constantes de intervalos cortos.
-2. **Presencia y WebSockets**: Mantiene el registro dinámico de qué usuarios están conectados en las salas de estudio y facilita la distribución de eventos en tiempo real.
 
 ---
 
@@ -96,7 +84,7 @@ Asegúrate de configurar las variables base, especialmente `GEMINI_API_KEY` (deb
 ### 2. Iniciar Infraestructura (Docker)
 Inicia los servicios de bases de datos y microservicios ejecutando en la raíz del proyecto:
 ```bash
-docker compose up -d postgres redis markitdown
+docker compose up -d postgres markitdown
 ```
 
 ### 3. Iniciar el Servidor Backend

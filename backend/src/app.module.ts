@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -40,19 +40,28 @@ import { TournamentsModule } from './modules/tournaments/tournaments.module';
 
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (cfg: ConfigService) => ({
-        type: 'postgres',
-        host: cfg.get('POSTGRES_HOST', 'localhost'),
-        port: cfg.get<number>('POSTGRES_PORT', 5432),
-        username: cfg.get('POSTGRES_USER', 'studyquest'),
-        password: cfg.get('POSTGRES_PASSWORD'),
-        database: cfg.get('POSTGRES_DB', 'studyquest'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        migrations: [__dirname + '/database/migrations/*{.ts,.js}'],
-        synchronize: cfg.get('TYPEORM_SYNC') === 'true',
-        logging: cfg.get('TYPEORM_LOGGING') === 'true',
-        extra: { max: 10 },
-      }),
+      useFactory: (cfg: ConfigService): TypeOrmModuleOptions => {
+        const url = cfg.get<string>('DATABASE_URL');
+        const base = {
+          type: 'postgres' as const,
+          entities: [__dirname + '/**/*.entity{.ts,.js}'],
+          migrations: [__dirname + '/database/migrations/*{.ts,.js}'],
+          synchronize: cfg.get<string>('TYPEORM_SYNC') === 'true',
+          logging: cfg.get<string>('TYPEORM_LOGGING') === 'true',
+          extra: { max: 5 },
+        };
+        if (url) {
+          return { ...base, url, ssl: { rejectUnauthorized: false } };
+        }
+        return {
+          ...base,
+          host: cfg.get<string>('POSTGRES_HOST', 'localhost'),
+          port: cfg.get<number>('POSTGRES_PORT', 5432),
+          username: cfg.get<string>('POSTGRES_USER', 'studyquest'),
+          password: cfg.get<string>('POSTGRES_PASSWORD'),
+          database: cfg.get<string>('POSTGRES_DB', 'studyquest'),
+        };
+      },
     }),
 
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),

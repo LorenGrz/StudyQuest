@@ -9,7 +9,7 @@ export function getSocket(): Socket {
     const token = localStorage.getItem('accessToken')
     socket = io(BASE_URL, {
       auth: { token },
-      transports: ['websocket'],
+      transports: ['polling', 'websocket'],
       autoConnect: false,
     })
   }
