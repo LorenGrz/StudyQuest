@@ -241,8 +241,8 @@ export function InviteSheet({ partyId, onClose }: InviteSheetProps) {
       try {
         const { token } = await partyService.generateInvite(partyId)
         if (!active) return
-        const base = window.location.origin
-        setLink(`${base}/join/${token}`)
+        const base = window.location.origin + import.meta.env.BASE_URL
+        setLink(`${base}join/${token}`)
       } catch {
         if (active) setError('No se pudo generar el link')
       } finally {

@@ -33,7 +33,7 @@ api.interceptors.response.use(
       } catch {
         localStorage.removeItem('accessToken')
         localStorage.removeItem('refreshToken')
-        window.location.href = '/auth'
+        window.location.href = `${import.meta.env.BASE_URL}auth`
       }
     }
     return Promise.reject(error)
