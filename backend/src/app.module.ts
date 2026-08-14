@@ -4,6 +4,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -27,6 +29,8 @@ import { SearchModule } from './modules/search/search.module';
 import { TournamentsModule } from './modules/tournaments/tournaments.module';
 
 @Module({
+  controllers: [AppController],
+  providers: [AppService],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
