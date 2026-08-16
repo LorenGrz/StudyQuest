@@ -239,6 +239,7 @@ export class QuestsService {
         id: quest.id,
         title: quest.title,
         status: quest.status,
+        errorMessage: quest.errorMessage,
         sourcePdfUrl: quest.sourcePdfUrl,
         sourceType: quest.sourcePdfUrl ? 'pdf' : 'text',
         questionCount: quest.questions?.length ?? 0,
