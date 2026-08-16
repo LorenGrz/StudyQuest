@@ -18,13 +18,14 @@
 services:
   - type: web
     name: studyquest-api
-    runtime: docker
+    runtime: node
     plan: free
     region: oregon
     repo: https://github.com/LorenGrz/StudyQuest
     branch: dev
     rootDir: backend
-    dockerfilePath: ./Dockerfile
+    buildCommand: npm install -g pnpm@11 && pnpm install --frozen-lockfile && pnpm build
+    startCommand: node dist/main
     envVars:
       - key: NODE_ENV
         value: production
