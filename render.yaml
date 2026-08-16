@@ -4,23 +4,16 @@
 #   studyquest-api         → https://studyquest-api.onrender.com        (Docker / NestJS)
 #   studyquest-markitdown  → https://studyquest-markitdown.onrender.com  (Docker / Python)
 #   studyquest-web         → https://studyquest.onrender.com             (Static Site / Vite)
-#   studyquest-db          → PostgreSQL free (~90 días, TypeORM sync recrea el esquema)
+#
+# DB: Neon free tier (3 GB) — la Render PostgreSQL free expiraba a los 90 días.
 #
 # Secrets que se cargan A MANO en el dashboard de Render (nunca en el repo):
+#   DATABASE_URL    → connection string de Neon (postgresql://...neon.tech/neondb?sslmode=require)
 #   JWT_SECRET      → string aleatorio ≥32 caracteres
 #   GEMINI_API_KEY  → clave de Google AI Studio
 #
 # Nota: el plan free duerme tras 15 min de inactividad (cold start ~60s).
 #       Las conexiones WebSocket se cortan durante el sleep y reconectan al despertar.
-#       El free PostgreSQL expira a los 90 días — los datos se pierden, el esquema
-#       se recrea solo porque TYPEORM_SYNC=true.
-
-databases:
-  - name: studyquest-db
-    plan: free
-    region: oregon
-    databaseName: studyquest
-    user: studyquest
 
 services:
   - type: web
@@ -45,26 +38,8 @@ services:
         value: gemini-2.5-flash
       - key: MARKITDOWN_URL
         value: https://studyquest-markitdown.onrender.com
-      - key: POSTGRES_HOST
-        fromDatabase:
-          name: studyquest-db
-          property: host
-      - key: POSTGRES_PORT
-        fromDatabase:
-          name: studyquest-db
-          property: port
-      - key: POSTGRES_USER
-        fromDatabase:
-          name: studyquest-db
-          property: user
-      - key: POSTGRES_PASSWORD
-        fromDatabase:
-          name: studyquest-db
-          property: password
-      - key: POSTGRES_DB
-        fromDatabase:
-          name: studyquest-db
-          property: database
+      - key: DATABASE_URL
+        sync: false
       - key: JWT_SECRET
         sync: false
       - key: GEMINI_API_KEY
