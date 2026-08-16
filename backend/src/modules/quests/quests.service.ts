@@ -155,11 +155,18 @@ export class QuestsService {
         `Quest ${questId}: ${rawQuestions.length} preguntas generadas`,
       );
     } catch (err) {
+      const msg =
+        err instanceof Error
+          ? err.message
+          : typeof err === 'string'
+            ? err
+            : JSON.stringify(err);
+      this.logger.error(`Quest ${questId} generation failed: ${msg}`, err instanceof Error ? err.stack : undefined);
       await this.questRepo.update(questId, {
         status: 'failed',
-        errorMessage: err.message,
+        errorMessage: msg,
       });
-      this.eventEmitter.emit('quest.failed', { questId, error: err.message });
+      this.eventEmitter.emit('quest.failed', { questId, error: msg });
     }
   }
 
