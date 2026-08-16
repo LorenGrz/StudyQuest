@@ -33,7 +33,7 @@ jobs:
       - name: Build
         working-directory: frontend
         env:
-          VITE_API_URL: https://studyquest-api.onrender.com
+          VITE_API_URL: https://studyquest-api-sjc1.onrender.com
         run: pnpm build
 
       - name: SPA routing
