@@ -37,7 +37,17 @@ export function deduplicateRawQuestions(questions: RawQuestion[]): RawQuestion[]
 export function safeParseQuestionsJson(str: string): RawQuestion[] {
   const parsed = safeParseJson(str);
   const questions: RawQuestion[] = parsed?.questions ?? [];
-  return questions.filter(validateRawQuestion);
+  return questions.filter(validateRawQuestion).map(shuffleOptions);
+}
+
+function shuffleOptions(q: RawQuestion): RawQuestion {
+  const correct = q.options[q.correctIndex];
+  const shuffled = [...q.options];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return { ...q, options: shuffled, correctIndex: shuffled.indexOf(correct) };
 }
 
 function safeParseJson(str: string): any {
