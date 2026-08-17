@@ -36,7 +36,7 @@ services:
       - key: JWT_EXPIRES_IN
         value: 7d
       - key: GEMINI_MODEL
-        value: gemini-flash-latest
+        value: gemini-3.1-flash-lite
       - key: MARKITDOWN_URL
         value: https://studyquest-markitdown.onrender.com
       - key: DATABASE_URL

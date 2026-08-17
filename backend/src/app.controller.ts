@@ -23,7 +23,7 @@ export class AppController {
   @Get('ai-test')
   async aiTest(): Promise<object> {
     const apiKey = this.cfg.get<string>('GEMINI_API_KEY');
-    const model = this.cfg.get<string>('GEMINI_MODEL', 'gemini-flash-latest');
+    const model = this.cfg.get<string>('GEMINI_MODEL', 'gemini-3.1-flash-lite');
     if (!apiKey) return { ok: false, error: 'GEMINI_API_KEY not set', model };
     try {
       const genAI = new GoogleGenerativeAI(apiKey);

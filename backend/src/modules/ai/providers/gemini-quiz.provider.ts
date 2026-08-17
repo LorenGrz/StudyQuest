@@ -69,17 +69,28 @@ export class GeminiQuizProvider implements QuizAiProvider {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: options?.model ?? this.cfg.get('GEMINI_MODEL', 'gemini-flash-latest'),
+      model: options?.model ?? this.cfg.get('GEMINI_MODEL', 'gemini-3.1-flash-lite'),
       generationConfig: {
         temperature: options?.temperature ?? 0.2,
-        maxOutputTokens: Number(this.cfg.get('AI_MAX_OUTPUT_TOKENS', 4096)),
+        maxOutputTokens: Number(this.cfg.get('AI_MAX_OUTPUT_TOKENS', 8192)),
       },
     });
 
-    const result = await model.generateContent(
-      `${QUIZ_PROMPT}\n\n${buildQuizUserPrompt(chunk, options)}`,
-    );
+    const fullPrompt = `${QUIZ_PROMPT}\n\n${buildQuizUserPrompt(chunk, options)}`;
 
-    return safeParseQuestionsJson(result.response.text());
+    let lastErr: unknown;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      try {
+        const result = await model.generateContent(fullPrompt);
+        return safeParseQuestionsJson(result.response.text());
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (!msg.includes('503') || attempt === 2) throw err;
+        this.logger.warn(`Gemini 503, reintentando (${attempt + 1}/3)...`);
+        await new Promise((r) => setTimeout(r, 3000 * (attempt + 1)));
+        lastErr = err;
+      }
+    }
+    throw lastErr;
   }
 }
