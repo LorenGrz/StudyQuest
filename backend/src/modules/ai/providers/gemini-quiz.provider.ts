@@ -69,7 +69,7 @@ export class GeminiQuizProvider implements QuizAiProvider {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: options?.model ?? this.cfg.get('GEMINI_MODEL', 'gemini-2.0-flash'),
+      model: options?.model ?? this.cfg.get('GEMINI_MODEL', 'gemini-flash-latest'),
       generationConfig: {
         temperature: options?.temperature ?? 0.2,
         maxOutputTokens: Number(this.cfg.get('AI_MAX_OUTPUT_TOKENS', 4096)),
