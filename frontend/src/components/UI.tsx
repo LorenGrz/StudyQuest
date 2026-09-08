@@ -169,7 +169,9 @@ export function Select({ label, error, options, className = '', id, ...props }: 
 
 // ─── Reveal ──────────────────────────────────────────────────────────────────
 // Fade + slide-up on mount. Give siblings an increasing `delay` to stagger a
-// list of sections so the page unfolds instead of snapping in.
+// list of sections so the page unfolds instead of snapping in. Pure CSS
+// animation (see `@utility reveal` in index.css) so it can never get stuck at
+// opacity 0 the way a JS animation can if its frame loop is throttled.
 export function Reveal({
   children,
   delay = 0,
@@ -180,14 +182,9 @@ export function Reveal({
   className?: string
 }) {
   return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay, ease: [0.22, 1, 0.36, 1] }}
-    >
+    <div className={`reveal ${className}`} style={{ animationDelay: `${delay}s` }}>
       {children}
-    </motion.div>
+    </div>
   )
 }
 

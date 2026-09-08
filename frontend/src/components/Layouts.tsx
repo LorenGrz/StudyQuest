@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { AppShell } from './AppShell'
+import { DesktopSidebar } from './nav/AppNav'
 
 interface Props {
   children: ReactNode
@@ -25,10 +26,16 @@ export function AuthLayout({ children }: Props) {
 }
 
 export function GameLayout({ children }: Props) {
+  // Quiz = focus view: the desktop sidebar for navigation, but no bottom bar.
   // Same width scale as AppShell so the quiz doesn't look narrower than the app.
   return (
-    <div className="h-full bg-gradient-to-b from-base to-elevated flex flex-col w-full max-w-[480px] md:max-w-2xl lg:max-w-4xl mx-auto self-center overflow-y-auto">
-      {children}
+    <div className="h-dvh w-full bg-base text-primary flex overflow-hidden">
+      <DesktopSidebar />
+      <div className="flex-1 min-h-0 overflow-y-auto bg-gradient-to-b from-base to-elevated flex flex-col">
+        <div className="w-full max-w-[480px] md:max-w-2xl lg:max-w-4xl mx-auto self-center flex flex-col flex-1">
+          {children}
+        </div>
+      </div>
     </div>
   )
 }

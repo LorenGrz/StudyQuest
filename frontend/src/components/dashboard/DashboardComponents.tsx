@@ -140,13 +140,11 @@ export function GetStartedNotice() {
 export function QuickActions() {
   const navigate = useNavigate()
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2, duration: 0.3 }}
-      className="grid grid-cols-2 gap-3 py-2 pb-5"
+    <div
+      className="reveal grid grid-cols-2 gap-3 py-2 pb-5"
+      style={{ animationDelay: '0.06s' }}
     >
-      <motion.button 
+      <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         className="flex flex-col items-center gap-2 p-[18px_12px] rounded-2xl border bg-gradient-to-br from-violet-500/10 to-blue-500/10 border-violet-500/20 hover:border-violet-500/40 text-primary font-semibold text-sm cursor-pointer shadow-lg hover:shadow-xl"
@@ -182,6 +180,6 @@ export function QuickActions() {
         <span className="text-[26px]">🤝</span>
         <span>Amigos</span>
       </motion.button>
-    </motion.div>
+    </div>
   )
 }
