@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { ChevronLeft } from 'lucide-react'
 import { GameLayout } from '../components/Layouts'
 import {
   ScoreHeader,
@@ -132,10 +133,19 @@ const QuizPage = () => {
         transition={{ duration: 0.3 }}
         className="flex flex-col flex-1"
       >
-        <div className="flex gap-2 justify-between items-center mb-3">
-          <Button variant="ghost" onClick={() => navigate(-1)}>← Volver</Button>
+        <div className="flex gap-2 justify-between items-center mb-3 px-4 pt-3">
+          <button
+            onClick={() => navigate(-1)}
+            aria-label="Volver"
+            className="flex items-center gap-1 -ml-1.5 pl-1.5 pr-2.5 h-9 rounded-lg text-secondary hover:text-primary hover:bg-elevated transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            <ChevronLeft size={18} aria-hidden="true" />
+            <span className="text-sm font-semibold">Volver</span>
+          </button>
           {quest.myStatus === 'in_progress' && (
-            <span className="text-sm" style={{ color: 'var(--accent-light)' }}>Intento en curso</span>
+            <span className="text-xs font-semibold uppercase tracking-wide text-accent-light">
+              Intento en curso
+            </span>
           )}
         </div>
         <ScoreHeader

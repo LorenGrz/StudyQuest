@@ -40,13 +40,13 @@ function NavLink({ path, label, Icon }: { path: string; label: string; Icon: typ
   )
 }
 
-// Phone-framed shell: a centered, fixed-width column at every viewport width.
-// On desktop it stays a phone-sized column (the product's intended look); the
-// bottom navigation lives at the foot of that column, never a desktop rail.
+// Centered column: phone-width on mobile, roomier on tablet/desktop so pages
+// don't look stuck in a phone frame on a big screen. The bottom navigation stays
+// a phone-width strip at the foot of the column, never a desktop rail.
 export function AppShell({ children }: Props) {
   return (
     <div className="h-dvh w-full bg-base text-primary flex justify-center">
-      <div className="flex h-dvh w-full max-w-[480px] flex-col overflow-hidden bg-base">
+      <div className="flex h-dvh w-full max-w-[480px] md:max-w-2xl lg:max-w-4xl flex-col overflow-hidden bg-base">
         <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden flex flex-col">
           {children}
         </main>
@@ -54,7 +54,7 @@ export function AppShell({ children }: Props) {
           className="shrink-0 border-t border-edge bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
           aria-label="Navegación principal"
         >
-          <div className="flex justify-around">
+          <div className="flex justify-around mx-auto w-full max-w-[480px]">
             {destinations.map(({ path, label, Icon }) => (
               <NavLink key={path} path={path} label={label} Icon={Icon} />
             ))}
