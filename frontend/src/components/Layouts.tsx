@@ -31,8 +31,8 @@ export function GameLayout({ children }: Props) {
   return (
     <div className="h-dvh w-full bg-base text-primary flex overflow-hidden">
       <DesktopSidebar />
-      <div className="flex-1 min-h-0 overflow-y-auto bg-gradient-to-b from-base to-elevated flex flex-col">
-        <div className="w-full max-w-[480px] md:max-w-2xl lg:max-w-4xl mx-auto self-center flex flex-col flex-1">
+      <div className="flex-1 min-h-0 overflow-y-auto bg-gradient-to-b from-base to-elevated flex flex-col lg:px-4">
+        <div className="w-full mx-auto flex flex-col flex-1 max-w-[480px] md:max-w-2xl lg:max-w-4xl lg:mx-0">
           {children}
         </div>
       </div>
