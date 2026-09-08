@@ -6,6 +6,7 @@ import {
   ActivePartyBanner,
   SubjectCardGrid,
   QuickActions,
+  GetStartedNotice,
 } from '../components/dashboard/DashboardComponents'
 import { SectionTitle, Spinner, Button } from '../components/UI'
 import { Alert, PageContainer } from '../components/PagePrimitives'
@@ -146,8 +147,14 @@ const DashboardPage = () => {
     <MobileLayout>
       <PageContainer>
         <div className="flex flex-col gap-3 pb-11">
-          {/* Full-width: greeting, search, active party */}
+          {/* Full-width: greeting, quick actions, search, active party */}
           <GreetingHeader user={user} />
+
+          {/* Accesos rápidos arriba de todo */}
+          <QuickActions />
+
+          {/* Onboarding: si no está inscripto en ninguna materia */}
+          {!isSubjectsLoading && subjects.length === 0 && <GetStartedNotice />}
 
           {/* Search Bar & Inline Results */}
           <div className="relative mb-2">
@@ -253,7 +260,7 @@ const DashboardPage = () => {
                                   }}
                                 >
                                   <strong style={{ fontSize: '14px', color: 'var(--text-primary)' }}>{s.name}</strong>
-                                  <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: 0 }}>{s.code} • Semestre {s.semester}</p>
+                                  <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: 0 }}>{s.code} • Año {s.year}</p>
                                 </div>
                               ))}
                             </div>
@@ -462,8 +469,6 @@ const DashboardPage = () => {
               <HomeLeaderboardPreview subjects={subjects} />
             </div>
           </div>
-
-          <QuickActions />
         </div>
       </PageContainer>
     </MobileLayout>

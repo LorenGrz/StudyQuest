@@ -112,6 +112,30 @@ export function SubjectCardGrid({ subjects }: { subjects: Subject[] }) {
   )
 }
 
+// ─── GetStartedNotice ────────────────────────────────────────────────────────
+// Se muestra en el dashboard cuando el usuario no está inscripto en ninguna
+// materia, para que entienda por dónde arrancar.
+export function GetStartedNotice() {
+  const navigate = useNavigate()
+  return (
+    <div className="flex flex-col gap-2 bg-gradient-to-r from-violet-500/15 to-blue-500/10 border border-violet-500/30 rounded-2xl p-4">
+      <p className="text-[15px] font-bold text-primary">👋 ¿Por dónde empiezo?</p>
+      <p className="text-[13px] text-secondary">
+        Anotate en tus materias: con materias vas a ver quests para practicar,
+        podés armar parties de estudio y subir en la liga.
+      </p>
+      <Button
+        size="sm"
+        variant="primary"
+        className="self-start mt-1"
+        onClick={() => navigate('/subjects')}
+      >
+        Explorar materias →
+      </Button>
+    </div>
+  )
+}
+
 // ─── QuickActions ─────────────────────────────────────────────────────────────
 export function QuickActions() {
   const navigate = useNavigate()

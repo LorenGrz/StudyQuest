@@ -15,7 +15,7 @@ export interface SearchResultSubjectDto {
   code: string
   university: string
   career: string
-  semester: number
+  year: number
   enrolledCount: number
 }
 
