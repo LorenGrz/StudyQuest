@@ -86,21 +86,9 @@ export default function MatchPage() {
     <div className="w-full mx-auto self-center h-full flex flex-col bg-base overflow-hidden">
 
       {/* Header */}
-      <header className="flex items-center justify-between px-5 pt-5 pb-2.5 shrink-0">
-        <div>
-          <h1 className="text-[22px] font-extrabold text-primary">Party Discovery</h1>
-          <p className="text-[13px] text-muted mt-1">{subtitleByStatus}</p>
-        </div>
-        <button 
-          className="w-[38px] h-[38px] rounded-xl bg-surface border border-[var(--overlay-border)] flex items-center justify-center text-muted transition-all duration-200 hover:border-purple-500 hover:text-purple-400 active:scale-95" 
-          aria-label="Filtros"
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="7" y1="12" x2="17" y2="12" />
-            <line x1="10" y1="18" x2="14" y2="18" />
-          </svg>
-        </button>
+      <header className="px-5 pt-5 pb-2.5 shrink-0">
+        <h1 className="text-[22px] font-extrabold text-primary">Party Discovery</h1>
+        <p className="text-[13px] text-muted mt-1">{subtitleByStatus}</p>
       </header>
 
       {/* Main Deck Container */}
