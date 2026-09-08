@@ -5,6 +5,7 @@ import { QuizQuestion } from './quiz-question.entity';
 import { QuizOption } from './quiz-option.entity';
 import { PlayerResult } from './player-result.entity';
 import { QuestsService } from './quests.service';
+import { QuestRetentionService } from './quest-retention.service';
 import { QuestsController } from './quests.controller';
 import { AiModule } from '../ai/ai.module';
 import { PartiesModule } from '../parties/parties.module';
@@ -20,7 +21,7 @@ import { SkillTreeModule } from '../skill-tree/skill-tree.module';
     SkillTreeModule,
   ],
   controllers: [QuestsController],
-  providers: [QuestsService],
+  providers: [QuestsService, QuestRetentionService],
   exports: [QuestsService],
 })
 export class QuestsModule {}

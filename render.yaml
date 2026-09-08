@@ -5,10 +5,12 @@
 #   studyquest-markitdown  → https://studyquest-markitdown.onrender.com  (Docker / Python)
 #   studyquest-web         → https://studyquest.onrender.com             (Static Site / Vite)
 #
-# DB: Neon free tier (3 GB) — la Render PostgreSQL free expiraba a los 90 días.
+# DB: Aiven free tier (PostgreSQL, 1 GB) — migrado desde Neon por límite de espacio.
+#     QuestRetentionService borra quests + PDFs con más de QUEST_RETENTION_DAYS días
+#     para no volver a llenar el free tier.
 #
 # Secrets que se cargan A MANO en el dashboard de Render (nunca en el repo):
-#   DATABASE_URL    → connection string de Neon (postgresql://...neon.tech/neondb?sslmode=require)
+#   DATABASE_URL    → connection string de Aiven (postgres://avnadmin:...aivencloud.com:.../defaultdb?sslmode=require)
 #   JWT_SECRET      → string aleatorio ≥32 caracteres
 #   GEMINI_API_KEY  → clave de Google AI Studio
 #
@@ -39,6 +41,8 @@ services:
         value: gemini-3.1-flash-lite
       - key: MARKITDOWN_URL
         value: https://studyquest-markitdown.onrender.com
+      - key: QUEST_RETENTION_DAYS
+        value: "7"
       - key: DATABASE_URL
         sync: false
       - key: JWT_SECRET
