@@ -4,6 +4,8 @@ import {
   MinLength,
   MaxLength,
   IsNumber,
+  IsInt,
+  IsIn,
   IsArray,
   IsOptional,
   IsBoolean,
@@ -14,6 +16,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { CAREERS } from '../careers';
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -43,15 +46,20 @@ export class RegisterDto {
   @IsString()
   university: string;
 
-  @ApiProperty({ example: 'Ciencias de la Computación' })
-  @IsString()
+  @ApiProperty({ example: 'Ciencias de la Computación', enum: CAREERS })
+  @IsIn(CAREERS)
   career: string;
 
-  @ApiProperty({ example: 3, minimum: 1, maximum: 8 })
-  @IsNumber()
+  @ApiProperty({
+    example: 2,
+    minimum: 1,
+    maximum: 7,
+    description: 'Año actual',
+  })
+  @IsInt()
   @Min(1)
-  @Max(8)
-  semester: number;
+  @Max(7)
+  year: number;
 }
 
 export class LoginDto {
@@ -76,8 +84,8 @@ export class UpdateProfileDto {
   @IsOptional() @IsString() @MaxLength(60) displayName?: string;
   @IsOptional() @IsString() avatarUrl?: string;
   @IsOptional() @IsString() university?: string;
-  @IsOptional() @IsString() career?: string;
-  @IsOptional() @IsNumber() @Min(1) @Max(8) semester?: number;
+  @IsOptional() @IsIn(CAREERS) career?: string;
+  @IsOptional() @IsInt() @Min(1) @Max(7) year?: number;
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
@@ -86,8 +94,16 @@ export class UpdateProfileDto {
 }
 
 export class ChangePasswordDto {
-  @ApiProperty() @IsString() @MinLength(8) @MaxLength(64) currentPassword: string;
-  @ApiProperty({ minLength: 8 }) @IsString() @MinLength(8) @MaxLength(64) newPassword: string;
+  @ApiProperty()
+  @IsString()
+  @MinLength(8)
+  @MaxLength(64)
+  currentPassword: string;
+  @ApiProperty({ minLength: 8 })
+  @IsString()
+  @MinLength(8)
+  @MaxLength(64)
+  newPassword: string;
 }
 
 export class EnrollSubjectDto {
@@ -106,15 +122,15 @@ export class CreateSubjectDto {
   @IsString() @MinLength(2) @MaxLength(20) code: string;
   @IsOptional() @IsString() description?: string;
   @IsString() university: string;
-  @IsString() career: string;
-  @IsNumber() @Min(1) @Max(8) semester: number;
+  @IsIn(CAREERS) career: string;
+  @IsInt() @Min(1) @Max(7) year: number;
 }
 
 export class SubjectQueryDto {
   @IsOptional() @IsString() search?: string;
   @IsOptional() @IsString() university?: string;
-  @IsOptional() @IsString() career?: string;
-  @IsOptional() @IsNumber() @Min(1) @Max(8) semester?: number;
+  @IsOptional() @IsIn(CAREERS) career?: string;
+  @IsOptional() @IsNumber() @Min(1) @Max(7) year?: number;
   @IsOptional() @IsNumber() @Min(1) page?: number;
   @IsOptional() @IsNumber() @Min(1) @Max(50) limit?: number;
 }
@@ -276,7 +292,7 @@ export class SearchResultSubjectDto {
   career: string;
 
   @ApiProperty()
-  semester: number;
+  year: number;
 
   @ApiProperty()
   enrolledCount: number;

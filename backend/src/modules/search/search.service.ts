@@ -56,7 +56,7 @@ export class SearchService {
         's.code',
         's.university',
         's.career',
-        's.semester',
+        's.year',
         's.enrolled_count',
       ])
       .where('s.is_active = true')
@@ -85,7 +85,9 @@ export class SearchService {
         'q.created_at',
       ])
       .leftJoin('q.subject', 's')
-      .where('q.status IN (:...statuses)', { statuses: ['ready', 'active', 'completed'] })
+      .where('q.status IN (:...statuses)', {
+        statuses: ['ready', 'active', 'completed'],
+      })
       .andWhere(
         `(similarity(q.title, :search) > 0.2
         OR q.title ILIKE :likeSearch)`,
@@ -111,7 +113,7 @@ export class SearchService {
       code: s.s_code,
       university: s.s_university,
       career: s.s_career,
-      semester: s.s_semester,
+      year: s.s_year,
       enrolledCount: s.s_enrolled_count,
     }));
 

@@ -28,7 +28,7 @@ export class SubjectsController {
   }
 
   @Get('careers')
-  getCareers(@Query('university') university: string) {
+  getCareers(@Query('university') university?: string) {
     return this.subjectsService.getCareers(university);
   }
 

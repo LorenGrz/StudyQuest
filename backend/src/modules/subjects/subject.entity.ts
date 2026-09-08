@@ -14,7 +14,7 @@ import { Party } from '../parties/party.entity';
 
 @Entity('subjects')
 @Unique(['code', 'university'])
-@Index(['university', 'career', 'semester'])
+@Index(['career', 'year'])
 export class Subject {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -35,7 +35,7 @@ export class Subject {
   career: string;
 
   @Column({ type: 'smallint' })
-  semester: number;
+  year: number;
 
   @Column({ name: 'enrolled_count', default: 0 })
   enrolledCount: number;

@@ -39,7 +39,7 @@ export interface ActiveCosmetics {
 }
 
 @Entity('users')
-@Index(['university', 'career'])
+@Index(['career'])
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -75,7 +75,7 @@ export class User {
   career: string;
 
   @Column({ type: 'smallint', default: 1 })
-  semester: number;
+  year: number;
 
   @Column({ type: 'varchar', length: 10, default: Role.USER })
   role: Role;

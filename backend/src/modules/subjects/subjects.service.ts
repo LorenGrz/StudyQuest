@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Subject } from './subject.entity';
 import { CreateSubjectDto, SubjectQueryDto } from '../../common/dto';
+import { CAREERS } from '../../common/careers';
 
 @Injectable()
 export class SubjectsService {
@@ -12,14 +13,7 @@ export class SubjectsService {
   ) {}
 
   async findAll(query: SubjectQueryDto) {
-    const {
-      search,
-      university,
-      career,
-      semester,
-      page = 1,
-      limit = 20,
-    } = query;
+    const { search, university, career, year, page = 1, limit = 20 } = query;
 
     const qb = this.subjectRepo
       .createQueryBuilder('s')
@@ -39,9 +33,9 @@ export class SubjectsService {
 
     if (university)
       qb.andWhere('s.university ILIKE :uni', { uni: `%${university}%` });
-    if (career)
-      qb.andWhere('s.career ILIKE :career', { career: `%${career}%` });
-    if (semester) qb.andWhere('s.semester = :semester', { semester });
+    // `career` es una lista cerrada (CAREERS) → match exacto.
+    if (career) qb.andWhere('s.career = :career', { career });
+    if (year) qb.andWhere('s.year = :year', { year });
 
     const [items, total] = await qb
       .skip((page - 1) * limit)
@@ -76,15 +70,9 @@ export class SubjectsService {
     return rows.map((r) => r.university);
   }
 
-  async getCareers(university: string): Promise<string[]> {
-    const rows = await this.subjectRepo
-      .createQueryBuilder('s')
-      .select('DISTINCT s.career', 'career')
-      .where('s.university ILIKE :uni AND s.is_active = true', {
-        uni: `%${university}%`,
-      })
-      .orderBy('s.career', 'ASC')
-      .getRawMany();
-    return rows.map((r) => r.career);
+  // Lista cerrada de carreras. `university` se acepta por compatibilidad pero
+  // se ignora (la carrera ya no depende de la universidad).
+  getCareers(_university?: string): string[] {
+    return [...CAREERS];
   }
 }
