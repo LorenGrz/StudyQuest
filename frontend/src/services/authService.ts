@@ -12,7 +12,7 @@ export interface RegisterPayload {
   displayName: string
   university: string
   career: string
-  semester: number
+  year: number
   avatarUrl?: string
 }
 

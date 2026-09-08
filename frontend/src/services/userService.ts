@@ -22,7 +22,7 @@ export interface Subject {
   code: string
   career: string
   university: string
-  semester: number
+  year: number
   description?: string
 }
 
@@ -83,7 +83,7 @@ export interface User {
   bio: string | null
   university: string
   career: string
-  semester: number
+  year: number
   enrolledSubjects: Subject[]
   availability: AvailabilitySlot[]
   stats: UserStats
@@ -100,7 +100,7 @@ export interface UpdateProfilePayload {
   avatarUrl?: string
   university?: string
   career?: string
-  semester?: number
+  year?: number
   availability?: AvailabilitySlot[]
 }
 

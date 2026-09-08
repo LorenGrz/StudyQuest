@@ -150,9 +150,9 @@ export default function ProfilePage() {
               </div>
               <div className="flex justify-between items-center gap-2">
                 <span className="text-sm text-muted flex items-center gap-1.5">
-                  <BookOpen size={14} aria-hidden="true" /> Semestre
+                  <BookOpen size={14} aria-hidden="true" /> Año
                 </span>
-                <span className="text-sm font-semibold text-primary text-right">{user.semester}</span>
+                <span className="text-sm font-semibold text-primary text-right">{user.year}</span>
               </div>
             </div>
           </section>

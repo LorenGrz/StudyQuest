@@ -5,7 +5,7 @@ import { useAuthStore } from '../store/authStore'
 
 export interface SubjectFilters {
   career: string
-  semester: number | null
+  year: number | null
   university?: string
 }
 
@@ -21,7 +21,7 @@ export function useSubjectExplorer(filters: SubjectFilters, search = '') {
     const query: SubjectQuery = { search: search || undefined }
     if (filters.career) query.career = filters.career
     if (filters.university) query.university = filters.university
-    if (filters.semester != null) query.semester = filters.semester
+    if (filters.year != null) query.year = filters.year
 
     subjectService
       .findAll(query)
@@ -30,7 +30,7 @@ export function useSubjectExplorer(filters: SubjectFilters, search = '') {
       .finally(() => { if (!cancelled) setIsLoading(false) })
 
     return () => { cancelled = true }
-  }, [filters.career, filters.semester, filters.university, search])
+  }, [filters.career, filters.year, filters.university, search])
 
   const enrolledIds = new Set(user?.enrolledSubjects?.map((s) => s.id) ?? [])
 

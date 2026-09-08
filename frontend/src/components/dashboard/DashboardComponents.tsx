@@ -78,7 +78,7 @@ function SubjectCard({ subject }: { subject: Subject }) {
       </div>
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-[15px] text-primary truncate">{subject.name}</p>
-        <p className="text-xs text-muted mt-0.5">Sem. {subject.semester}</p>
+        <p className="text-xs text-muted mt-0.5">Año {subject.year}</p>
         <button
           className="text-xs text-success font-semibold flex items-center gap-1 mt-1 cursor-pointer hover:underline"
           onClick={(event) => {

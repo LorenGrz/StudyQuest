@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
-import { Button, Input } from '../UI'
+import { useCareers } from '../../hooks/useUniversities'
+import { Button, Input, Select } from '../UI'
 
 export function LoginForm() {
   const { login, isLoading, error } = useAuth()
@@ -55,6 +56,7 @@ interface RegisterFormProps {
 
 export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   const { register, isLoading, error } = useAuth()
+  const { careers } = useCareers()
   const [step, setStep] = useState(1)
   const [form, setForm] = useState({
     email: '',
@@ -62,7 +64,7 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
     confirmPassword: '',
     university: '',
     career: '',
-    semester: 1,
+    year: 1,
     username: '',
     displayName: '',
     avatarUrl: '',
@@ -95,7 +97,7 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
       displayName: form.displayName,
       university: form.university,
       career: form.career,
-      semester: form.semester,
+      year: form.year,
       avatarUrl: form.avatarUrl || undefined,
     })
   }
@@ -142,10 +144,11 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
         <>
           <Input id="reg-uni" label="Universidad" value={form.university}
             onChange={(e) => set('university', e.target.value)} placeholder="UBA, UTN, UNC..." required />
-          <Input id="reg-career" label="Carrera" value={form.career}
-            onChange={(e) => set('career', e.target.value)} placeholder="Ingeniería, Sistemas..." required />
-          <Input id="reg-semester" label="Semestre / Año" type="number" value={form.semester}
-            onChange={(e) => set('semester', parseInt(e.target.value))} min={1} max={12} required />
+          <Select id="reg-career" label="Carrera" value={form.career}
+            onChange={(e) => set('career', e.target.value)}
+            options={careers.map((c) => ({ value: c, label: c }))} required />
+          <Input id="reg-year" label="Año actual" type="number" value={form.year}
+            onChange={(e) => set('year', parseInt(e.target.value))} min={1} max={7} required />
         </>
       )}
 

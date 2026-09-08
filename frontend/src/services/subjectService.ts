@@ -5,7 +5,7 @@ export interface SubjectQuery {
   search?: string
   career?: string
   university?: string
-  semester?: number
+  year?: number
 }
 
 export const subjectService = {
@@ -26,10 +26,8 @@ export const subjectService = {
     return data
   },
 
-  async getCareers(university: string): Promise<string[]> {
-    const { data } = await api.get<string[]>('/subjects/careers', {
-      params: { university },
-    })
+  async getCareers(): Promise<string[]> {
+    const { data } = await api.get<string[]>('/subjects/careers')
     return data
   },
 }
