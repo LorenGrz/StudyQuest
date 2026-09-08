@@ -44,14 +44,27 @@ import { UserAchievement } from '../../modules/achievements/user-achievement.ent
 import { UserTitle } from '../../modules/cosmetics/user-title.entity';
 import { UserInventory } from '../../modules/cosmetics/user-inventory.entity';
 import { ProfileBorder } from '../../modules/cosmetics/profile-border.entity';
+import { Tournament } from '../../modules/tournaments/tournament.entity';
+import { TournamentParticipant } from '../../modules/tournaments/tournament-participant.entity';
 import { DEFAULT_ELO } from '../../common/leagues';
+import { CAREER_CATALOG } from './data/subjects-catalog';
 
 // ─── Conexión ──────────────────────────────────────────────────────────────────
 const _dbUrl = process.env.DATABASE_URL;
+// pg >=8.16 trata `sslmode=require` como `verify-full` y rechaza las cadenas de
+// CA autofirmadas de Aiven/Neon/Supabase. Quitamos ese parámetro y usamos
+// `ssl.rejectUnauthorized: false`.
+const _dbUrlSanitized = ((): string | undefined => {
+  if (!_dbUrl) return undefined;
+  const parsed = new URL(_dbUrl);
+  parsed.searchParams.delete('sslmode');
+  parsed.searchParams.delete('ssl');
+  return parsed.toString();
+})();
 const AppDataSource = new DataSource({
   type: 'postgres',
-  ...(_dbUrl
-    ? { url: _dbUrl, ssl: { rejectUnauthorized: false } }
+  ...(_dbUrlSanitized
+    ? { url: _dbUrlSanitized, ssl: { rejectUnauthorized: false } }
     : {
         host: process.env.POSTGRES_HOST ?? 'localhost',
         port: Number(process.env.POSTGRES_PORT ?? 5432),
@@ -78,6 +91,8 @@ const AppDataSource = new DataSource({
     UserTitle,
     UserInventory,
     ProfileBorder,
+    Tournament,
+    TournamentParticipant,
   ],
   synchronize: false,
   logging: false,
@@ -158,58 +173,385 @@ interface SubjectSeedRow {
 
 const EXTRA_SUBJECTS: SubjectSeedRow[] = [
   // ── UBA – Ciencias de la Computación ───────────────────────────────────────
-  { university: 'Universidad de Buenos Aires', career: 'Ciencias de la Computación', code: 'UBA-INTROPROG', name: 'Introducción a la Programación', semester: 1, description: 'Fundamentos de programación con Python.' },
-  { university: 'Universidad de Buenos Aires', career: 'Ciencias de la Computación', code: 'UBA-ALG1', name: 'Álgebra I', semester: 1, description: 'Aritmética, álgebra lineal y estructuras algebraicas básicas.' },
-  { university: 'Universidad de Buenos Aires', career: 'Ciencias de la Computación', code: 'UBA-AM1', name: 'Análisis Matemático I', semester: 1, description: 'Límites, derivadas e integrales en una variable.' },
-  { university: 'Universidad de Buenos Aires', career: 'Ciencias de la Computación', code: 'UBA-AED1', name: 'Algoritmos y Estructuras de Datos I', semester: 2, description: 'Diseño de algoritmos, listas, árboles y grafos.' },
-  { university: 'Universidad de Buenos Aires', career: 'Ciencias de la Computación', code: 'UBA-PP', name: 'Paradigmas de Programación', semester: 3, description: 'Funcional, lógico, orientado a objetos y concurrente.' },
-  { university: 'Universidad de Buenos Aires', career: 'Ciencias de la Computación', code: 'UBA-ORG', name: 'Organización del Computador', semester: 3, description: 'Arquitectura, circuitos y lenguaje ensamblador.' },
-  { university: 'Universidad de Buenos Aires', career: 'Ciencias de la Computación', code: 'UBA-BD', name: 'Bases de Datos', semester: 4, description: 'Modelado relacional, SQL, transacciones y recuperación.' },
-  { university: 'Universidad de Buenos Aires', career: 'Ciencias de la Computación', code: 'UBA-PROB', name: 'Probabilidad y Estadística', semester: 4, description: 'Variables aleatorias, distribuciones y estadística inferencial.' },
-  { university: 'Universidad de Buenos Aires', career: 'Ciencias de la Computación', code: 'UBA-LC', name: 'Lógica y Computabilidad', semester: 4, description: 'Cálculo proposicional, predicados, autómatas y computabilidad.' },
-  { university: 'Universidad de Buenos Aires', career: 'Ciencias de la Computación', code: 'UBA-SO', name: 'Sistemas Operativos', semester: 5, description: 'Procesos, scheduling, memoria virtual y filesystems.' },
-  { university: 'Universidad de Buenos Aires', career: 'Ciencias de la Computación', code: 'UBA-TL', name: 'Teoría de Lenguajes', semester: 5, description: 'Gramáticas formales, autómatas y análisis léxico-sintáctico.' },
-  { university: 'Universidad de Buenos Aires', career: 'Ciencias de la Computación', code: 'UBA-REDES', name: 'Redes', semester: 6, description: 'Modelo TCP/IP, protocolos de red y seguridad.' },
-  { university: 'Universidad de Buenos Aires', career: 'Ciencias de la Computación', code: 'UBA-COMP', name: 'Compiladores', semester: 6, description: 'Análisis léxico, sintáctico, semántico y generación de código.' },
-  { university: 'Universidad de Buenos Aires', career: 'Ciencias de la Computación', code: 'UBA-IS', name: 'Ingeniería de Software I', semester: 6, description: 'Ciclo de vida, metodologías ágiles y patrones de diseño.' },
+  {
+    university: 'Universidad de Buenos Aires',
+    career: 'Ciencias de la Computación',
+    code: 'UBA-INTROPROG',
+    name: 'Introducción a la Programación',
+    semester: 1,
+    description: 'Fundamentos de programación con Python.',
+  },
+  {
+    university: 'Universidad de Buenos Aires',
+    career: 'Ciencias de la Computación',
+    code: 'UBA-ALG1',
+    name: 'Álgebra I',
+    semester: 1,
+    description:
+      'Aritmética, álgebra lineal y estructuras algebraicas básicas.',
+  },
+  {
+    university: 'Universidad de Buenos Aires',
+    career: 'Ciencias de la Computación',
+    code: 'UBA-AM1',
+    name: 'Análisis Matemático I',
+    semester: 1,
+    description: 'Límites, derivadas e integrales en una variable.',
+  },
+  {
+    university: 'Universidad de Buenos Aires',
+    career: 'Ciencias de la Computación',
+    code: 'UBA-AED1',
+    name: 'Algoritmos y Estructuras de Datos I',
+    semester: 2,
+    description: 'Diseño de algoritmos, listas, árboles y grafos.',
+  },
+  {
+    university: 'Universidad de Buenos Aires',
+    career: 'Ciencias de la Computación',
+    code: 'UBA-PP',
+    name: 'Paradigmas de Programación',
+    semester: 3,
+    description: 'Funcional, lógico, orientado a objetos y concurrente.',
+  },
+  {
+    university: 'Universidad de Buenos Aires',
+    career: 'Ciencias de la Computación',
+    code: 'UBA-ORG',
+    name: 'Organización del Computador',
+    semester: 3,
+    description: 'Arquitectura, circuitos y lenguaje ensamblador.',
+  },
+  {
+    university: 'Universidad de Buenos Aires',
+    career: 'Ciencias de la Computación',
+    code: 'UBA-BD',
+    name: 'Bases de Datos',
+    semester: 4,
+    description: 'Modelado relacional, SQL, transacciones y recuperación.',
+  },
+  {
+    university: 'Universidad de Buenos Aires',
+    career: 'Ciencias de la Computación',
+    code: 'UBA-PROB',
+    name: 'Probabilidad y Estadística',
+    semester: 4,
+    description:
+      'Variables aleatorias, distribuciones y estadística inferencial.',
+  },
+  {
+    university: 'Universidad de Buenos Aires',
+    career: 'Ciencias de la Computación',
+    code: 'UBA-LC',
+    name: 'Lógica y Computabilidad',
+    semester: 4,
+    description:
+      'Cálculo proposicional, predicados, autómatas y computabilidad.',
+  },
+  {
+    university: 'Universidad de Buenos Aires',
+    career: 'Ciencias de la Computación',
+    code: 'UBA-SO',
+    name: 'Sistemas Operativos',
+    semester: 5,
+    description: 'Procesos, scheduling, memoria virtual y filesystems.',
+  },
+  {
+    university: 'Universidad de Buenos Aires',
+    career: 'Ciencias de la Computación',
+    code: 'UBA-TL',
+    name: 'Teoría de Lenguajes',
+    semester: 5,
+    description: 'Gramáticas formales, autómatas y análisis léxico-sintáctico.',
+  },
+  {
+    university: 'Universidad de Buenos Aires',
+    career: 'Ciencias de la Computación',
+    code: 'UBA-REDES',
+    name: 'Redes',
+    semester: 6,
+    description: 'Modelo TCP/IP, protocolos de red y seguridad.',
+  },
+  {
+    university: 'Universidad de Buenos Aires',
+    career: 'Ciencias de la Computación',
+    code: 'UBA-COMP',
+    name: 'Compiladores',
+    semester: 6,
+    description:
+      'Análisis léxico, sintáctico, semántico y generación de código.',
+  },
+  {
+    university: 'Universidad de Buenos Aires',
+    career: 'Ciencias de la Computación',
+    code: 'UBA-IS',
+    name: 'Ingeniería de Software I',
+    semester: 6,
+    description: 'Ciclo de vida, metodologías ágiles y patrones de diseño.',
+  },
 
   // ── UTN FRBA – Ingeniería en Sistemas de Información ───────────────────────
-  { university: 'Universidad Tecnológica Nacional – FRBA', career: 'Ingeniería en Sistemas de Información', code: 'UTN-AM1', name: 'Análisis Matemático I', semester: 1, description: 'Cálculo diferencial e integral en una variable.' },
-  { university: 'Universidad Tecnológica Nacional – FRBA', career: 'Ingeniería en Sistemas de Información', code: 'UTN-AGA', name: 'Álgebra y Geometría Analítica', semester: 1, description: 'Sistemas lineales, matrices, vectores y geometría analítica.' },
-  { university: 'Universidad Tecnológica Nacional – FRBA', career: 'Ingeniería en Sistemas de Información', code: 'UTN-SYO', name: 'Sistemas y Organizaciones', semester: 1, description: 'Teoría general de sistemas aplicada a organizaciones.' },
-  { university: 'Universidad Tecnológica Nacional – FRBA', career: 'Ingeniería en Sistemas de Información', code: 'UTN-AM2', name: 'Análisis Matemático II', semester: 2, description: 'Cálculo en varias variables, ecuaciones diferenciales.' },
-  { university: 'Universidad Tecnológica Nacional – FRBA', career: 'Ingeniería en Sistemas de Información', code: 'UTN-FIS1', name: 'Física I', semester: 2, description: 'Mecánica clásica, termodinámica y electromagnetismo.' },
-  { university: 'Universidad Tecnológica Nacional – FRBA', career: 'Ingeniería en Sistemas de Información', code: 'UTN-AED', name: 'Algoritmos y Estructuras de Datos', semester: 2, description: 'Diseño algorítmico, complejidad y estructuras clásicas.' },
-  { university: 'Universidad Tecnológica Nacional – FRBA', career: 'Ingeniería en Sistemas de Información', code: 'UTN-BD', name: 'Bases de Datos', semester: 3, description: 'Diseño relacional, SQL, normalización y bases NoSQL.' },
-  { university: 'Universidad Tecnológica Nacional – FRBA', career: 'Ingeniería en Sistemas de Información', code: 'UTN-PP', name: 'Paradigmas de Programación', semester: 3, description: 'OOP, funcional y declarativo con casos prácticos.' },
-  { university: 'Universidad Tecnológica Nacional – FRBA', career: 'Ingeniería en Sistemas de Información', code: 'UTN-IS', name: 'Ingeniería de Software', semester: 4, description: 'Metodologías, modelado UML y pruebas de software.' },
-  { university: 'Universidad Tecnológica Nacional – FRBA', career: 'Ingeniería en Sistemas de Información', code: 'UTN-REDES', name: 'Redes de Información', semester: 4, description: 'Arquitecturas de red, protocolos y administración.' },
-  { university: 'Universidad Tecnológica Nacional – FRBA', career: 'Ingeniería en Sistemas de Información', code: 'UTN-IA', name: 'Inteligencia Artificial', semester: 5, description: 'Búsqueda, aprendizaje automático y redes neuronales.' },
-  { university: 'Universidad Tecnológica Nacional – FRBA', career: 'Ingeniería en Sistemas de Información', code: 'UTN-SGE', name: 'Sistemas de Gestión', semester: 5, description: 'ERP, CRM, gestión de proyectos y procesos de negocio.' },
-  { university: 'Universidad Tecnológica Nacional – FRBA', career: 'Ingeniería en Sistemas de Información', code: 'UTN-SEG', name: 'Seguridad Informática', semester: 6, description: 'Criptografía, amenazas, hardening y normativas de seguridad.' },
-  { university: 'Universidad Tecnológica Nacional – FRBA', career: 'Ingeniería en Sistemas de Información', code: 'UTN-ARQSW', name: 'Arquitectura de Software', semester: 6, description: 'Patrones arquitectónicos, microservicios y escalabilidad.' },
+  {
+    university: 'Universidad Tecnológica Nacional – FRBA',
+    career: 'Ingeniería en Sistemas de Información',
+    code: 'UTN-AM1',
+    name: 'Análisis Matemático I',
+    semester: 1,
+    description: 'Cálculo diferencial e integral en una variable.',
+  },
+  {
+    university: 'Universidad Tecnológica Nacional – FRBA',
+    career: 'Ingeniería en Sistemas de Información',
+    code: 'UTN-AGA',
+    name: 'Álgebra y Geometría Analítica',
+    semester: 1,
+    description: 'Sistemas lineales, matrices, vectores y geometría analítica.',
+  },
+  {
+    university: 'Universidad Tecnológica Nacional – FRBA',
+    career: 'Ingeniería en Sistemas de Información',
+    code: 'UTN-SYO',
+    name: 'Sistemas y Organizaciones',
+    semester: 1,
+    description: 'Teoría general de sistemas aplicada a organizaciones.',
+  },
+  {
+    university: 'Universidad Tecnológica Nacional – FRBA',
+    career: 'Ingeniería en Sistemas de Información',
+    code: 'UTN-AM2',
+    name: 'Análisis Matemático II',
+    semester: 2,
+    description: 'Cálculo en varias variables, ecuaciones diferenciales.',
+  },
+  {
+    university: 'Universidad Tecnológica Nacional – FRBA',
+    career: 'Ingeniería en Sistemas de Información',
+    code: 'UTN-FIS1',
+    name: 'Física I',
+    semester: 2,
+    description: 'Mecánica clásica, termodinámica y electromagnetismo.',
+  },
+  {
+    university: 'Universidad Tecnológica Nacional – FRBA',
+    career: 'Ingeniería en Sistemas de Información',
+    code: 'UTN-AED',
+    name: 'Algoritmos y Estructuras de Datos',
+    semester: 2,
+    description: 'Diseño algorítmico, complejidad y estructuras clásicas.',
+  },
+  {
+    university: 'Universidad Tecnológica Nacional – FRBA',
+    career: 'Ingeniería en Sistemas de Información',
+    code: 'UTN-BD',
+    name: 'Bases de Datos',
+    semester: 3,
+    description: 'Diseño relacional, SQL, normalización y bases NoSQL.',
+  },
+  {
+    university: 'Universidad Tecnológica Nacional – FRBA',
+    career: 'Ingeniería en Sistemas de Información',
+    code: 'UTN-PP',
+    name: 'Paradigmas de Programación',
+    semester: 3,
+    description: 'OOP, funcional y declarativo con casos prácticos.',
+  },
+  {
+    university: 'Universidad Tecnológica Nacional – FRBA',
+    career: 'Ingeniería en Sistemas de Información',
+    code: 'UTN-IS',
+    name: 'Ingeniería de Software',
+    semester: 4,
+    description: 'Metodologías, modelado UML y pruebas de software.',
+  },
+  {
+    university: 'Universidad Tecnológica Nacional – FRBA',
+    career: 'Ingeniería en Sistemas de Información',
+    code: 'UTN-REDES',
+    name: 'Redes de Información',
+    semester: 4,
+    description: 'Arquitecturas de red, protocolos y administración.',
+  },
+  {
+    university: 'Universidad Tecnológica Nacional – FRBA',
+    career: 'Ingeniería en Sistemas de Información',
+    code: 'UTN-IA',
+    name: 'Inteligencia Artificial',
+    semester: 5,
+    description: 'Búsqueda, aprendizaje automático y redes neuronales.',
+  },
+  {
+    university: 'Universidad Tecnológica Nacional – FRBA',
+    career: 'Ingeniería en Sistemas de Información',
+    code: 'UTN-SGE',
+    name: 'Sistemas de Gestión',
+    semester: 5,
+    description: 'ERP, CRM, gestión de proyectos y procesos de negocio.',
+  },
+  {
+    university: 'Universidad Tecnológica Nacional – FRBA',
+    career: 'Ingeniería en Sistemas de Información',
+    code: 'UTN-SEG',
+    name: 'Seguridad Informática',
+    semester: 6,
+    description: 'Criptografía, amenazas, hardening y normativas de seguridad.',
+  },
+  {
+    university: 'Universidad Tecnológica Nacional – FRBA',
+    career: 'Ingeniería en Sistemas de Información',
+    code: 'UTN-ARQSW',
+    name: 'Arquitectura de Software',
+    semester: 6,
+    description: 'Patrones arquitectónicos, microservicios y escalabilidad.',
+  },
 
   // ── UNSAM – Informática ─────────────────────────────────────────────────────
-  { university: 'Universidad Nacional de San Martín', career: 'Informática', code: 'UNSAM-IPC', name: 'Introducción al Pensamiento Computacional', semester: 1, description: 'Resolución de problemas y pensamiento algorítmico.' },
-  { university: 'Universidad Nacional de San Martín', career: 'Informática', code: 'UNSAM-MAT1', name: 'Matemática I', semester: 1, description: 'Álgebra, funciones y cálculo introductorio.' },
-  { university: 'Universidad Nacional de San Martín', career: 'Informática', code: 'UNSAM-PI', name: 'Programación Imperativa', semester: 1, description: 'Variables, control de flujo, funciones y recursión.' },
-  { university: 'Universidad Nacional de San Martín', career: 'Informática', code: 'UNSAM-ED', name: 'Estructuras de Datos', semester: 2, description: 'Listas, árboles, grafos, heaps y tablas hash.' },
-  { university: 'Universidad Nacional de San Martín', career: 'Informática', code: 'UNSAM-POO', name: 'Programación Orientada a Objetos', semester: 2, description: 'Clases, herencia, polimorfismo y principios SOLID.' },
-  { university: 'Universidad Nacional de San Martín', career: 'Informática', code: 'UNSAM-MAT2', name: 'Matemática II', semester: 2, description: 'Álgebra lineal, probabilidad y estadística descriptiva.' },
-  { university: 'Universidad Nacional de San Martín', career: 'Informática', code: 'UNSAM-DS', name: 'Diseño de Software', semester: 3, description: 'Patrones de diseño, arquitecturas y principios de clean code.' },
-  { university: 'Universidad Nacional de San Martín', career: 'Informática', code: 'UNSAM-BD', name: 'Bases de Datos', semester: 3, description: 'Modelo relacional, SQL, índices y optimización de consultas.' },
-  { university: 'Universidad Nacional de San Martín', career: 'Informática', code: 'UNSAM-RYC', name: 'Redes y Comunicaciones', semester: 4, description: 'Protocolos de red, Internet, HTTP y seguridad en capas.' },
-  { university: 'Universidad Nacional de San Martín', career: 'Informática', code: 'UNSAM-IS', name: 'Ingeniería de Software', semester: 4, description: 'Metodologías ágiles, testing, CI/CD y despliegue.' },
-  { university: 'Universidad Nacional de San Martín', career: 'Informática', code: 'UNSAM-SO', name: 'Sistemas Operativos', semester: 5, description: 'Kernels, concurrencia, memoria virtual y contenedores.' },
-  { university: 'Universidad Nacional de San Martín', career: 'Informática', code: 'UNSAM-WEB', name: 'Desarrollo Web', semester: 5, description: 'Frontend, backend, APIs REST y bases de datos en la web.' },
+  {
+    university: 'Universidad Nacional de San Martín',
+    career: 'Informática',
+    code: 'UNSAM-IPC',
+    name: 'Introducción al Pensamiento Computacional',
+    semester: 1,
+    description: 'Resolución de problemas y pensamiento algorítmico.',
+  },
+  {
+    university: 'Universidad Nacional de San Martín',
+    career: 'Informática',
+    code: 'UNSAM-MAT1',
+    name: 'Matemática I',
+    semester: 1,
+    description: 'Álgebra, funciones y cálculo introductorio.',
+  },
+  {
+    university: 'Universidad Nacional de San Martín',
+    career: 'Informática',
+    code: 'UNSAM-PI',
+    name: 'Programación Imperativa',
+    semester: 1,
+    description: 'Variables, control de flujo, funciones y recursión.',
+  },
+  {
+    university: 'Universidad Nacional de San Martín',
+    career: 'Informática',
+    code: 'UNSAM-ED',
+    name: 'Estructuras de Datos',
+    semester: 2,
+    description: 'Listas, árboles, grafos, heaps y tablas hash.',
+  },
+  {
+    university: 'Universidad Nacional de San Martín',
+    career: 'Informática',
+    code: 'UNSAM-POO',
+    name: 'Programación Orientada a Objetos',
+    semester: 2,
+    description: 'Clases, herencia, polimorfismo y principios SOLID.',
+  },
+  {
+    university: 'Universidad Nacional de San Martín',
+    career: 'Informática',
+    code: 'UNSAM-MAT2',
+    name: 'Matemática II',
+    semester: 2,
+    description: 'Álgebra lineal, probabilidad y estadística descriptiva.',
+  },
+  {
+    university: 'Universidad Nacional de San Martín',
+    career: 'Informática',
+    code: 'UNSAM-DS',
+    name: 'Diseño de Software',
+    semester: 3,
+    description:
+      'Patrones de diseño, arquitecturas y principios de clean code.',
+  },
+  {
+    university: 'Universidad Nacional de San Martín',
+    career: 'Informática',
+    code: 'UNSAM-BD',
+    name: 'Bases de Datos',
+    semester: 3,
+    description: 'Modelo relacional, SQL, índices y optimización de consultas.',
+  },
+  {
+    university: 'Universidad Nacional de San Martín',
+    career: 'Informática',
+    code: 'UNSAM-RYC',
+    name: 'Redes y Comunicaciones',
+    semester: 4,
+    description: 'Protocolos de red, Internet, HTTP y seguridad en capas.',
+  },
+  {
+    university: 'Universidad Nacional de San Martín',
+    career: 'Informática',
+    code: 'UNSAM-IS',
+    name: 'Ingeniería de Software',
+    semester: 4,
+    description: 'Metodologías ágiles, testing, CI/CD y despliegue.',
+  },
+  {
+    university: 'Universidad Nacional de San Martín',
+    career: 'Informática',
+    code: 'UNSAM-SO',
+    name: 'Sistemas Operativos',
+    semester: 5,
+    description: 'Kernels, concurrencia, memoria virtual y contenedores.',
+  },
+  {
+    university: 'Universidad Nacional de San Martín',
+    career: 'Informática',
+    code: 'UNSAM-WEB',
+    name: 'Desarrollo Web',
+    semester: 5,
+    description: 'Frontend, backend, APIs REST y bases de datos en la web.',
+  },
 
   // ── UNC – Ingeniería en Sistemas (materias adicionales) ────────────────────
-  { university: 'Universidad Nacional de Córdoba', career: 'Ingeniería en Sistemas de Información', code: 'AM1', name: 'Análisis Matemático I', semester: 1, description: 'Límites, derivadas e integrales en una variable.' },
-  { university: 'Universidad Nacional de Córdoba', career: 'Ingeniería en Sistemas de Información', code: 'ALG', name: 'Álgebra y Geometría Analítica', semester: 1, description: 'Sistemas de ecuaciones, matrices, vectores y geometría.' },
-  { university: 'Universidad Nacional de Córdoba', career: 'Ingeniería en Sistemas de Información', code: 'INTRO', name: 'Introducción a la Ingeniería', semester: 1, description: 'Fundamentos de la ingeniería y ética profesional.' },
-  { university: 'Universidad Nacional de Córdoba', career: 'Ingeniería en Sistemas de Información', code: 'PP', name: 'Paradigmas de Programación', semester: 3, description: 'Funcional, lógico, orientado a objetos y comparación.' },
-  { university: 'Universidad Nacional de Córdoba', career: 'Ingeniería en Sistemas de Información', code: 'IS', name: 'Ingeniería de Software', semester: 5, description: 'Metodologías, modelado, pruebas y gestión de proyectos.' },
-  { university: 'Universidad Nacional de Córdoba', career: 'Ingeniería en Sistemas de Información', code: 'IA', name: 'Inteligencia Artificial', semester: 6, description: 'Búsqueda heurística, aprendizaje automático y NLP.' },
+  {
+    university: 'Universidad Nacional de Córdoba',
+    career: 'Ingeniería en Sistemas de Información',
+    code: 'AM1',
+    name: 'Análisis Matemático I',
+    semester: 1,
+    description: 'Límites, derivadas e integrales en una variable.',
+  },
+  {
+    university: 'Universidad Nacional de Córdoba',
+    career: 'Ingeniería en Sistemas de Información',
+    code: 'ALG',
+    name: 'Álgebra y Geometría Analítica',
+    semester: 1,
+    description: 'Sistemas de ecuaciones, matrices, vectores y geometría.',
+  },
+  {
+    university: 'Universidad Nacional de Córdoba',
+    career: 'Ingeniería en Sistemas de Información',
+    code: 'INTRO',
+    name: 'Introducción a la Ingeniería',
+    semester: 1,
+    description: 'Fundamentos de la ingeniería y ética profesional.',
+  },
+  {
+    university: 'Universidad Nacional de Córdoba',
+    career: 'Ingeniería en Sistemas de Información',
+    code: 'PP',
+    name: 'Paradigmas de Programación',
+    semester: 3,
+    description: 'Funcional, lógico, orientado a objetos y comparación.',
+  },
+  {
+    university: 'Universidad Nacional de Córdoba',
+    career: 'Ingeniería en Sistemas de Información',
+    code: 'IS',
+    name: 'Ingeniería de Software',
+    semester: 5,
+    description: 'Metodologías, modelado, pruebas y gestión de proyectos.',
+  },
+  {
+    university: 'Universidad Nacional de Córdoba',
+    career: 'Ingeniería en Sistemas de Información',
+    code: 'IA',
+    name: 'Inteligencia Artificial',
+    semester: 6,
+    description: 'Búsqueda heurística, aprendizaje automático y NLP.',
+  },
 ];
 
 const USERS_DATA = [
@@ -814,6 +1156,27 @@ async function seed() {
     await subjectRepo.save(subjectRepo.create(sd));
     console.log(`   ✔  [${sd.university.split(' ').pop()}] ${sd.name}`);
   }
+
+  console.log(
+    `\n📚  Creando catálogo amplio de carreras (${CAREER_CATALOG.length} materias)...`,
+  );
+  let catalogCreated = 0;
+  let catalogSkipped = 0;
+  for (const sd of CAREER_CATALOG) {
+    const existing = await subjectRepo.findOneBy({
+      code: sd.code,
+      university: sd.university,
+    });
+    if (existing) {
+      catalogSkipped += 1;
+      continue;
+    }
+    await subjectRepo.save(subjectRepo.create(sd));
+    catalogCreated += 1;
+  }
+  console.log(
+    `   ✔  ${catalogCreated} materias nuevas, ${catalogSkipped} ya existían`,
+  );
 
   console.log('\n🧭  Cargando árboles de habilidades...');
   await seedSkillTreesForSubjects(savedSubjects);
