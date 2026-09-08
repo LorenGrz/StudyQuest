@@ -100,6 +100,9 @@ const AppDataSource = new DataSource({
 
 async function ensureBootstrapSchema(): Promise<void> {
   await AppDataSource.query('CREATE EXTENSION IF NOT EXISTS pgcrypto;');
+  // pg_trgm: la búsqueda global y el explorador de materias usan similarity().
+  await AppDataSource.query('CREATE EXTENSION IF NOT EXISTS pg_trgm;');
+  await AppDataSource.query('CREATE EXTENSION IF NOT EXISTS unaccent;');
 
   await AppDataSource.query(`
     ALTER TABLE IF EXISTS users

@@ -52,20 +52,33 @@ async function bootstrap() {
 
   app.enableShutdownHooks();
 
+  // La búsqueda global y el explorador de materias usan similarity() de pg_trgm.
+  // Neon/Docker lo traían; en Aiven hay que crearlo. Idempotente y no fatal.
+  try {
+    const { DataSource } = await import('typeorm');
+    const ds = app.get(DataSource);
+    await ds.query('CREATE EXTENSION IF NOT EXISTS pg_trgm');
+    await ds.query('CREATE EXTENSION IF NOT EXISTS unaccent');
+  } catch (err) {
+    console.error('⚠️ No se pudo asegurar pg_trgm/unaccent:', err);
+  }
+
   if (cfg.get('NODE_ENV') === 'development') {
     try {
       const { DataSource } = await import('typeorm');
       const dataSource = app.get(DataSource);
-      
+
       const tableCheck = await dataSource.query(`
         SELECT EXISTS (
           SELECT FROM information_schema.tables 
           WHERE table_schema = 'public' AND table_name = 'users'
         ) as "exists"
       `);
-      
+
       if (tableCheck[0]?.exists) {
-        const [{ count }] = await dataSource.query('SELECT COUNT(*)::int as count FROM users');
+        const [{ count }] = await dataSource.query(
+          'SELECT COUNT(*)::int as count FROM users',
+        );
         if (count === 0) {
           console.log('🌱 No users found in database. Running seed script...');
           const { execSync } = await import('child_process');
@@ -74,7 +87,10 @@ async function bootstrap() {
         }
       }
     } catch (err) {
-      console.error('⚠️ Failed to check database or run seed automatically:', err);
+      console.error(
+        '⚠️ Failed to check database or run seed automatically:',
+        err,
+      );
     }
   }
 
