@@ -69,7 +69,8 @@ export class GeminiQuizProvider implements QuizAiProvider {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: options?.model ?? this.cfg.get('GEMINI_MODEL', 'gemini-3.1-flash-lite'),
+      model:
+        options?.model ?? this.cfg.get('GEMINI_MODEL', 'gemini-flash-latest'),
       generationConfig: {
         temperature: options?.temperature ?? 0.2,
         maxOutputTokens: Number(this.cfg.get('AI_MAX_OUTPUT_TOKENS', 8192)),
@@ -78,17 +79,22 @@ export class GeminiQuizProvider implements QuizAiProvider {
 
     const fullPrompt = `${QUIZ_PROMPT}\n\n${buildQuizUserPrompt(chunk, options)}`;
 
+    const MAX_ATTEMPTS = 4;
     let lastErr: unknown;
-    for (let attempt = 0; attempt < 3; attempt++) {
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
       try {
         const result = await model.generateContent(fullPrompt);
         return safeParseQuestionsJson(result.response.text());
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : String(err);
-        if (!msg.includes('503') || attempt === 2) throw err;
-        this.logger.warn(`Gemini 503, reintentando (${attempt + 1}/3)...`);
-        await new Promise((r) => setTimeout(r, 3000 * (attempt + 1)));
         lastErr = err;
+        const msg = err instanceof Error ? err.message : String(err);
+        // 429 rate limit / 500 / 503 overload → transitorios, reintentar con backoff.
+        const transient = /\b(429|500|503)\b/.test(msg);
+        if (!transient || attempt === MAX_ATTEMPTS - 1) throw err;
+        this.logger.warn(
+          `Gemini transitorio (${msg.slice(0, 80)}), reintento ${attempt + 1}/${MAX_ATTEMPTS - 1}...`,
+        );
+        await new Promise((r) => setTimeout(r, 3000 * (attempt + 1)));
       }
     }
     throw lastErr;
