@@ -122,6 +122,25 @@ async function ensureBootstrapSchema(): Promise<void> {
   await AppDataSource.query('DROP TABLE IF EXISTS user_titles CASCADE;');
   await AppDataSource.query('DROP TABLE IF EXISTS profile_borders CASCADE;');
 
+  // `semester` → `year`: rename in-place (idempotente) para que `synchronize`
+  // no intente dropear/crear la columna sobre tablas con datos.
+  for (const table of ['subjects', 'users']) {
+    await AppDataSource.query(`
+      DO $$
+      BEGIN
+        IF EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_name = '${table}' AND column_name = 'semester'
+        ) AND NOT EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_name = '${table}' AND column_name = 'year'
+        ) THEN
+          ALTER TABLE ${table} RENAME COLUMN semester TO year;
+        END IF;
+      END $$;
+    `);
+  }
+
   await AppDataSource.synchronize();
 }
 
@@ -170,6 +189,9 @@ interface SubjectSeedRow {
   university: string;
   career: string;
 }
+
+// Las filas viejas traen `semester` (1..6); la entidad Subject usa `year` (1..7).
+const toYear = (semester: number): number => Math.ceil(semester / 2);
 
 const EXTRA_SUBJECTS: SubjectSeedRow[] = [
   // ── UBA – Ciencias de la Computación ───────────────────────────────────────
@@ -1135,7 +1157,10 @@ async function seed() {
       continue;
     }
     const subject = subjectRepo.create({
-      ...sd,
+      name: sd.name,
+      code: sd.code,
+      description: sd.description,
+      year: toYear(sd.semester),
       university: UNIVERSITY,
       career: CAREER,
     });
@@ -1153,7 +1178,10 @@ async function seed() {
       console.log(`   ⚠️  "${sd.code}" (${sd.university}) ya existe — omitida`);
       continue;
     }
-    await subjectRepo.save(subjectRepo.create(sd));
+    const { semester, ...rest } = sd;
+    await subjectRepo.save(
+      subjectRepo.create({ ...rest, year: toYear(semester) }),
+    );
     console.log(`   ✔  [${sd.university.split(' ').pop()}] ${sd.name}`);
   }
 
@@ -1199,7 +1227,7 @@ async function seed() {
       displayName: ud.displayName,
       university: UNIVERSITY,
       career: CAREER,
-      semester: ud.semester,
+      year: toYear(ud.semester),
       role: (ud as any).role ?? 'USER',
       passwordHash,
       stats: {

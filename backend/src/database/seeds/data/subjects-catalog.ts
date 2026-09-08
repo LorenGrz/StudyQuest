@@ -8,13 +8,15 @@
  * Reglas:
  *  - `code` <= 20 caracteres y único por universidad (constraint de la entidad).
  *    Convención: <TAG><NN>, TAG corto por carrera (ej. UBAMED01).
- *  - `semester` 1..6 aprox.
+ *  - `year` 1..7: año de la carrera. Los bloques viejos traen `semester` 1..6 y
+ *    se convierten con `year = ceil(semester / 2)`; los bloques nuevos traen
+ *    `year` directo.
  */
 
 export interface SubjectSeedRow {
   name: string;
   code: string;
-  semester: number;
+  year: number;
   description?: string;
   university: string;
   career: string;
@@ -23,22 +25,34 @@ export interface SubjectSeedRow {
 type RawSubject = {
   name: string;
   code: string;
-  semester: number;
+  year?: number;
+  semester?: number;
   description?: string;
 };
+
+const yearOf = (s: RawSubject): number =>
+  s.year ?? Math.ceil((s.semester ?? 2) / 2);
 
 const career = (
   university: string,
   careerName: string,
   subjects: RawSubject[],
 ): SubjectSeedRow[] =>
-  subjects.map((s) => ({ ...s, university, career: careerName }));
+  subjects.map((s) => ({
+    name: s.name,
+    code: s.code,
+    year: yearOf(s),
+    description: s.description,
+    university,
+    career: careerName,
+  }));
 
 const UBA = 'Universidad de Buenos Aires';
 const UNC = 'Universidad Nacional de Córdoba';
 const UTN = 'Universidad Tecnológica Nacional';
 const UNLP = 'Universidad Nacional de La Plata';
 const UNR = 'Universidad Nacional de Rosario';
+const UNSAM = 'Universidad Nacional de San Martín';
 
 export const CAREER_CATALOG: SubjectSeedRow[] = [
   // ─────────────────────────── UBA ───────────────────────────
@@ -1498,6 +1512,1268 @@ export const CAREER_CATALOG: SubjectSeedRow[] = [
       semester: 4,
       name: 'Finanzas de Empresas',
       description: 'Inversión, financiamiento y valor.',
+    },
+  ]),
+
+  // ═══════════════════════ UBA — carreras nuevas ═══════════════════════
+  ...career(UBA, 'Ciencias de la Computación', [
+    {
+      code: 'UBACC01',
+      year: 1,
+      name: 'Algoritmos y Estructuras de Datos I',
+      description: 'Diseño de algoritmos, recursión y TADs.',
+    },
+    {
+      code: 'UBACC02',
+      year: 1,
+      name: 'Álgebra Lineal Computacional',
+      description: 'Matrices, sistemas lineales y métodos numéricos.',
+    },
+    {
+      code: 'UBACC03',
+      year: 1,
+      name: 'Análisis Matemático I',
+      description: 'Límites, derivadas e integrales en una variable.',
+    },
+    {
+      code: 'UBACC04',
+      year: 1,
+      name: 'Introducción a la Estadística y Ciencia de Datos',
+      description: 'Datos, probabilidad y visualización.',
+    },
+    {
+      code: 'UBACC05',
+      year: 2,
+      name: 'Algoritmos y Estructuras de Datos II',
+      description: 'Árboles, grafos, hashing y complejidad.',
+    },
+    {
+      code: 'UBACC06',
+      year: 2,
+      name: 'Organización del Computador',
+      description: 'Arquitectura, ensamblador y jerarquía de memoria.',
+    },
+    {
+      code: 'UBACC07',
+      year: 2,
+      name: 'Lógica y Computabilidad',
+      description: 'Cálculo de predicados, autómatas y decidibilidad.',
+    },
+    {
+      code: 'UBACC08',
+      year: 2,
+      name: 'Análisis Matemático II',
+      description: 'Cálculo en varias variables y series.',
+    },
+    {
+      code: 'UBACC09',
+      year: 3,
+      name: 'Algoritmos y Estructuras de Datos III',
+      description: 'Técnicas algorítmicas avanzadas y NP-completitud.',
+    },
+    {
+      code: 'UBACC10',
+      year: 3,
+      name: 'Sistemas Operativos',
+      description: 'Procesos, memoria virtual, concurrencia y FS.',
+    },
+    {
+      code: 'UBACC11',
+      year: 3,
+      name: 'Teoría de Lenguajes',
+      description: 'Gramáticas, parsing y análisis léxico-sintáctico.',
+    },
+    {
+      code: 'UBACC12',
+      year: 3,
+      name: 'Base de Datos',
+      description: 'Modelo relacional, SQL, transacciones e índices.',
+    },
+  ]),
+  ...career(UBA, 'Licenciatura en Ciencias Físicas', [
+    {
+      code: 'UBAFIS01',
+      year: 1,
+      name: 'Análisis Matemático I',
+      description: 'Cálculo de una variable.',
+    },
+    {
+      code: 'UBAFIS02',
+      year: 1,
+      name: 'Álgebra I',
+      description: 'Lógica, conjuntos, complejos y estructuras algebraicas.',
+    },
+    {
+      code: 'UBAFIS03',
+      year: 1,
+      name: 'Física I (Mecánica)',
+      description: 'Cinemática, dinámica y conservación.',
+    },
+    {
+      code: 'UBAFIS04',
+      year: 1,
+      name: 'Química General',
+      description: 'Estructura de la materia y reacciones.',
+    },
+    {
+      code: 'UBAFIS05',
+      year: 2,
+      name: 'Análisis Matemático II',
+      description: 'Cálculo vectorial y ecuaciones diferenciales.',
+    },
+    {
+      code: 'UBAFIS06',
+      year: 2,
+      name: 'Física II (Electromagnetismo)',
+      description: 'Campos eléctricos y magnéticos, ecuaciones de Maxwell.',
+    },
+    {
+      code: 'UBAFIS07',
+      year: 2,
+      name: 'Laboratorio de Física I',
+      description: 'Medición, error experimental e informes.',
+    },
+    {
+      code: 'UBAFIS08',
+      year: 2,
+      name: 'Álgebra Lineal',
+      description: 'Espacios vectoriales, operadores y autovalores.',
+    },
+    {
+      code: 'UBAFIS09',
+      year: 3,
+      name: 'Física III (Ondas y Óptica)',
+      description: 'Oscilaciones, ondas mecánicas y ópticas.',
+    },
+    {
+      code: 'UBAFIS10',
+      year: 3,
+      name: 'Mecánica Clásica',
+      description: 'Formalismo lagrangiano y hamiltoniano.',
+    },
+    {
+      code: 'UBAFIS11',
+      year: 3,
+      name: 'Termodinámica y Física Estadística',
+      description: 'Ensambles, entropía y potenciales.',
+    },
+    {
+      code: 'UBAFIS12',
+      year: 3,
+      name: 'Métodos Matemáticos de la Física',
+      description: 'Series de Fourier, EDPs y funciones especiales.',
+    },
+  ]),
+  ...career(UBA, 'Licenciatura en Ciencias Matemáticas', [
+    {
+      code: 'UBAMAT01',
+      year: 1,
+      name: 'Análisis I',
+      description: 'Sucesiones, continuidad y cálculo diferencial.',
+    },
+    {
+      code: 'UBAMAT02',
+      year: 1,
+      name: 'Álgebra I',
+      description: 'Conjuntos, combinatoria, complejos y polinomios.',
+    },
+    {
+      code: 'UBAMAT03',
+      year: 1,
+      name: 'Análisis II',
+      description: 'Integración, series y cálculo en varias variables.',
+    },
+    {
+      code: 'UBAMAT04',
+      year: 1,
+      name: 'Álgebra Lineal',
+      description: 'Espacios vectoriales, matrices y formas.',
+    },
+    {
+      code: 'UBAMAT05',
+      year: 2,
+      name: 'Análisis Complejo',
+      description: 'Funciones holomorfas, residuos y series de Laurent.',
+    },
+    {
+      code: 'UBAMAT06',
+      year: 2,
+      name: 'Cálculo Avanzado',
+      description: 'Formas diferenciales y teoremas de Stokes.',
+    },
+    {
+      code: 'UBAMAT07',
+      year: 2,
+      name: 'Probabilidades y Estadística',
+      description: 'Espacios de probabilidad y variables aleatorias.',
+    },
+    {
+      code: 'UBAMAT08',
+      year: 2,
+      name: 'Álgebra II',
+      description: 'Grupos, anillos y cuerpos.',
+    },
+    {
+      code: 'UBAMAT09',
+      year: 3,
+      name: 'Análisis Real',
+      description: 'Medida e integral de Lebesgue.',
+    },
+    {
+      code: 'UBAMAT10',
+      year: 3,
+      name: 'Topología',
+      description: 'Espacios topológicos, compacidad y conexión.',
+    },
+    {
+      code: 'UBAMAT11',
+      year: 3,
+      name: 'Ecuaciones Diferenciales',
+      description: 'EDOs, sistemas dinámicos y estabilidad.',
+    },
+    {
+      code: 'UBAMAT12',
+      year: 3,
+      name: 'Álgebra Lineal Numérica',
+      description: 'Métodos numéricos para sistemas y autovalores.',
+    },
+  ]),
+  ...career(UBA, 'Sociología', [
+    {
+      code: 'UBASOC01',
+      year: 1,
+      name: 'Introducción al Conocimiento de la Sociedad y el Estado',
+      description: 'Sociedad, poder y Estado moderno.',
+    },
+    {
+      code: 'UBASOC02',
+      year: 1,
+      name: 'Sociología General',
+      description: 'Conceptos centrales y objeto de la disciplina.',
+    },
+    {
+      code: 'UBASOC03',
+      year: 1,
+      name: 'Historia Social General',
+      description: 'Procesos históricos de la modernidad.',
+    },
+    {
+      code: 'UBASOC04',
+      year: 1,
+      name: 'Metodología de la Investigación Social I',
+      description: 'Diseño de investigación y problematización.',
+    },
+    {
+      code: 'UBASOC05',
+      year: 2,
+      name: 'Teoría Sociológica Clásica',
+      description: 'Marx, Durkheim y Weber.',
+    },
+    {
+      code: 'UBASOC06',
+      year: 2,
+      name: 'Estadística',
+      description: 'Descripción de datos y asociación.',
+    },
+    {
+      code: 'UBASOC07',
+      year: 2,
+      name: 'Historia Social Argentina y Latinoamericana',
+      description: 'Formación de las sociedades locales.',
+    },
+    {
+      code: 'UBASOC08',
+      year: 2,
+      name: 'Antropología Social y Cultural',
+      description: 'Cultura, alteridad y etnografía.',
+    },
+    {
+      code: 'UBASOC09',
+      year: 3,
+      name: 'Teoría Sociológica Contemporánea',
+      description: 'Bourdieu, Giddens, Habermas y otros.',
+    },
+    {
+      code: 'UBASOC10',
+      year: 3,
+      name: 'Metodología Cuantitativa',
+      description: 'Encuestas, muestreo y análisis multivariado.',
+    },
+    {
+      code: 'UBASOC11',
+      year: 3,
+      name: 'Metodología Cualitativa',
+      description: 'Entrevistas, observación y análisis de discurso.',
+    },
+    {
+      code: 'UBASOC12',
+      year: 3,
+      name: 'Sociología Política',
+      description: 'Poder, Estado, ciudadanía y movimientos sociales.',
+    },
+  ]),
+  ...career(UBA, 'Ciencia Política', [
+    {
+      code: 'UBACP01',
+      year: 1,
+      name: 'Introducción al Conocimiento de la Sociedad y el Estado',
+      description: 'Sociedad, poder y Estado.',
+    },
+    {
+      code: 'UBACP02',
+      year: 1,
+      name: 'Introducción a la Ciencia Política',
+      description: 'Objeto, corrientes y métodos.',
+    },
+    {
+      code: 'UBACP03',
+      year: 1,
+      name: 'Teoría Política I',
+      description: 'Pensamiento político clásico.',
+    },
+    {
+      code: 'UBACP04',
+      year: 1,
+      name: 'Historia Política Contemporánea',
+      description: 'Siglo XX y orden internacional.',
+    },
+    {
+      code: 'UBACP05',
+      year: 2,
+      name: 'Teoría Política II',
+      description: 'Pensamiento político moderno.',
+    },
+    {
+      code: 'UBACP06',
+      year: 2,
+      name: 'Sistemas Políticos Comparados',
+      description: 'Regímenes, partidos y sistemas electorales.',
+    },
+    {
+      code: 'UBACP07',
+      year: 2,
+      name: 'Estadística Aplicada a la Ciencia Política',
+      description: 'Datos políticos y análisis cuantitativo.',
+    },
+    {
+      code: 'UBACP08',
+      year: 2,
+      name: 'Historia Política Argentina',
+      description: 'Del orden conservador a la democracia.',
+    },
+    {
+      code: 'UBACP09',
+      year: 3,
+      name: 'Teoría Política III',
+      description: 'Debates políticos contemporáneos.',
+    },
+    {
+      code: 'UBACP10',
+      year: 3,
+      name: 'Administración y Políticas Públicas',
+      description: 'Ciclo de políticas y gestión estatal.',
+    },
+    {
+      code: 'UBACP11',
+      year: 3,
+      name: 'Teoría del Estado',
+      description: 'Formación, capacidades y crisis del Estado.',
+    },
+    {
+      code: 'UBACP12',
+      year: 3,
+      name: 'Opinión Pública',
+      description: 'Formación de la opinión, medios y sondeos.',
+    },
+  ]),
+  ...career(UBA, 'Odontología', [
+    {
+      code: 'UBAODO01',
+      year: 1,
+      name: 'Anatomía',
+      description: 'Anatomía general, de cabeza y cuello.',
+    },
+    {
+      code: 'UBAODO02',
+      year: 1,
+      name: 'Histología y Embriología',
+      description: 'Tejidos y desarrollo bucodental.',
+    },
+    {
+      code: 'UBAODO03',
+      year: 1,
+      name: 'Biología Celular y Genética',
+      description: 'Célula, ADN y herencia.',
+    },
+    {
+      code: 'UBAODO04',
+      year: 1,
+      name: 'Química Biológica',
+      description: 'Biomoléculas y metabolismo.',
+    },
+    {
+      code: 'UBAODO05',
+      year: 2,
+      name: 'Fisiología',
+      description: 'Funciones orgánicas y del sistema estomatognático.',
+    },
+    {
+      code: 'UBAODO06',
+      year: 2,
+      name: 'Microbiología y Parasitología',
+      description: 'Microbiota bucal y patógenos.',
+    },
+    {
+      code: 'UBAODO07',
+      year: 2,
+      name: 'Bioquímica Estomatológica',
+      description: 'Bioquímica de tejidos duros y saliva.',
+    },
+    {
+      code: 'UBAODO08',
+      year: 2,
+      name: 'Anatomía Patológica',
+      description: 'Lesiones y patología bucal.',
+    },
+    {
+      code: 'UBAODO09',
+      year: 3,
+      name: 'Operatoria Dental I',
+      description: 'Preparaciones y restauraciones.',
+    },
+    {
+      code: 'UBAODO10',
+      year: 3,
+      name: 'Materiales Dentales',
+      description: 'Propiedades y manipulación de biomateriales.',
+    },
+    {
+      code: 'UBAODO11',
+      year: 3,
+      name: 'Farmacología y Terapéutica',
+      description: 'Fármacos de uso odontológico.',
+    },
+    {
+      code: 'UBAODO12',
+      year: 3,
+      name: 'Periodoncia I',
+      description: 'Encía, periodonto y enfermedad periodontal.',
+    },
+  ]),
+  ...career(UBA, 'Licenciatura en Nutrición', [
+    {
+      code: 'UBANUT01',
+      year: 1,
+      name: 'Anatomía',
+      description: 'Anatomía del cuerpo humano por sistemas.',
+    },
+    {
+      code: 'UBANUT02',
+      year: 1,
+      name: 'Química General e Inorgánica',
+      description: 'Enlaces, soluciones y reacciones.',
+    },
+    {
+      code: 'UBANUT03',
+      year: 1,
+      name: 'Biología',
+      description: 'Célula, tejidos y genética.',
+    },
+    {
+      code: 'UBANUT04',
+      year: 1,
+      name: 'Introducción a la Nutrición',
+      description: 'Nutrientes, alimentación y salud pública.',
+    },
+    {
+      code: 'UBANUT05',
+      year: 2,
+      name: 'Fisiología',
+      description: 'Digestión, absorción y metabolismo.',
+    },
+    {
+      code: 'UBANUT06',
+      year: 2,
+      name: 'Química Biológica',
+      description: 'Metabolismo de macro y micronutrientes.',
+    },
+    {
+      code: 'UBANUT07',
+      year: 2,
+      name: 'Bromatología',
+      description: 'Composición, calidad y rotulado de alimentos.',
+    },
+    {
+      code: 'UBANUT08',
+      year: 2,
+      name: 'Técnica Dietética',
+      description: 'Preparación de alimentos y planificación de menús.',
+    },
+    {
+      code: 'UBANUT09',
+      year: 3,
+      name: 'Nutrición Normal',
+      description: 'Requerimientos por edad y situación fisiológica.',
+    },
+    {
+      code: 'UBANUT10',
+      year: 3,
+      name: 'Fisiopatología',
+      description: 'Mecanismos de enfermedad y su impacto nutricional.',
+    },
+    {
+      code: 'UBANUT11',
+      year: 3,
+      name: 'Evaluación Nutricional',
+      description: 'Antropometría, bioquímica y dietética.',
+    },
+    {
+      code: 'UBANUT12',
+      year: 3,
+      name: 'Microbiología de los Alimentos',
+      description: 'Contaminación, conservación e inocuidad.',
+    },
+  ]),
+  ...career(UBA, 'Farmacia', [
+    {
+      code: 'UBAFAR01',
+      year: 1,
+      name: 'Química General e Inorgánica',
+      description: 'Estructura atómica y reacciones.',
+    },
+    {
+      code: 'UBAFAR02',
+      year: 1,
+      name: 'Física',
+      description: 'Mecánica, fluidos y electricidad.',
+    },
+    {
+      code: 'UBAFAR03',
+      year: 1,
+      name: 'Matemática',
+      description: 'Cálculo y estadística aplicada.',
+    },
+    {
+      code: 'UBAFAR04',
+      year: 1,
+      name: 'Biología e Introducción a la Biología Celular',
+      description: 'Célula y bases de la vida.',
+    },
+    {
+      code: 'UBAFAR05',
+      year: 2,
+      name: 'Química Orgánica',
+      description: 'Grupos funcionales y mecanismos de reacción.',
+    },
+    {
+      code: 'UBAFAR06',
+      year: 2,
+      name: 'Química Analítica',
+      description: 'Equilibrios y análisis cuantitativo.',
+    },
+    {
+      code: 'UBAFAR07',
+      year: 2,
+      name: 'Fisicoquímica',
+      description: 'Termodinámica, cinética y equilibrio.',
+    },
+    {
+      code: 'UBAFAR08',
+      year: 2,
+      name: 'Anatomía e Histología',
+      description: 'Organización del cuerpo humano.',
+    },
+    {
+      code: 'UBAFAR09',
+      year: 3,
+      name: 'Farmacobotánica',
+      description: 'Drogas vegetales y su identificación.',
+    },
+    {
+      code: 'UBAFAR10',
+      year: 3,
+      name: 'Microbiología',
+      description: 'Bacterias, hongos y control microbiano.',
+    },
+    {
+      code: 'UBAFAR11',
+      year: 3,
+      name: 'Farmacognosia',
+      description: 'Principios activos de origen natural.',
+    },
+    {
+      code: 'UBAFAR12',
+      year: 3,
+      name: 'Fisiología Humana',
+      description: 'Funciones de órganos y sistemas.',
+    },
+  ]),
+
+  // ══════════════════════ UNSAM — carreras nuevas ══════════════════════
+  ...career(UNSAM, 'Ingeniería en Telecomunicaciones', [
+    {
+      code: 'UNSAMTEL01',
+      year: 1,
+      name: 'Análisis Matemático I',
+      description: 'Cálculo de una variable.',
+    },
+    {
+      code: 'UNSAMTEL02',
+      year: 1,
+      name: 'Álgebra y Geometría Analítica',
+      description: 'Vectores, matrices y números complejos.',
+    },
+    {
+      code: 'UNSAMTEL03',
+      year: 1,
+      name: 'Física I',
+      description: 'Mecánica y ondas.',
+    },
+    {
+      code: 'UNSAMTEL04',
+      year: 1,
+      name: 'Introducción a la Programación',
+      description: 'Algoritmos y programación estructurada.',
+    },
+    {
+      code: 'UNSAMTEL05',
+      year: 2,
+      name: 'Análisis Matemático II',
+      description: 'Cálculo vectorial y ecuaciones diferenciales.',
+    },
+    {
+      code: 'UNSAMTEL06',
+      year: 2,
+      name: 'Física II',
+      description: 'Electromagnetismo.',
+    },
+    {
+      code: 'UNSAMTEL07',
+      year: 2,
+      name: 'Probabilidad y Estadística',
+      description: 'Variables aleatorias y procesos.',
+    },
+    {
+      code: 'UNSAMTEL08',
+      year: 2,
+      name: 'Circuitos Eléctricos',
+      description: 'Análisis de circuitos en CC y CA.',
+    },
+    {
+      code: 'UNSAMTEL09',
+      year: 3,
+      name: 'Señales y Sistemas',
+      description: 'Convolución, Fourier y muestreo.',
+    },
+    {
+      code: 'UNSAMTEL10',
+      year: 3,
+      name: 'Electrónica Analógica',
+      description: 'Amplificadores y filtros.',
+    },
+    {
+      code: 'UNSAMTEL11',
+      year: 3,
+      name: 'Campos Electromagnéticos',
+      description: 'Ondas guiadas y radiación.',
+    },
+    {
+      code: 'UNSAMTEL12',
+      year: 3,
+      name: 'Comunicaciones Analógicas',
+      description: 'Modulación AM/FM y ruido.',
+    },
+  ]),
+  ...career(UNSAM, 'Ingeniería Biomédica', [
+    {
+      code: 'UNSAMBME01',
+      year: 1,
+      name: 'Análisis Matemático I',
+      description: 'Cálculo de una variable.',
+    },
+    {
+      code: 'UNSAMBME02',
+      year: 1,
+      name: 'Álgebra y Geometría Analítica',
+      description: 'Matrices, vectores y geometría.',
+    },
+    {
+      code: 'UNSAMBME03',
+      year: 1,
+      name: 'Física I',
+      description: 'Mecánica y termodinámica.',
+    },
+    {
+      code: 'UNSAMBME04',
+      year: 1,
+      name: 'Química General',
+      description: 'Estructura de la materia y reacciones.',
+    },
+    {
+      code: 'UNSAMBME05',
+      year: 2,
+      name: 'Análisis Matemático II',
+      description: 'Cálculo en varias variables.',
+    },
+    {
+      code: 'UNSAMBME06',
+      year: 2,
+      name: 'Física II',
+      description: 'Electricidad y magnetismo.',
+    },
+    {
+      code: 'UNSAMBME07',
+      year: 2,
+      name: 'Anatomía y Fisiología',
+      description: 'Organización y función del cuerpo humano.',
+    },
+    {
+      code: 'UNSAMBME08',
+      year: 2,
+      name: 'Programación',
+      description: 'Estructuras de datos y algoritmos.',
+    },
+    {
+      code: 'UNSAMBME09',
+      year: 3,
+      name: 'Señales y Sistemas Biomédicos',
+      description: 'Procesamiento de señales fisiológicas.',
+    },
+    {
+      code: 'UNSAMBME10',
+      year: 3,
+      name: 'Electrónica',
+      description: 'Circuitos analógicos y digitales.',
+    },
+    {
+      code: 'UNSAMBME11',
+      year: 3,
+      name: 'Biomateriales',
+      description: 'Materiales para dispositivos e implantes.',
+    },
+    {
+      code: 'UNSAMBME12',
+      year: 3,
+      name: 'Instrumentación Biomédica',
+      description: 'Sensores, ECG, EEG y seguridad eléctrica.',
+    },
+  ]),
+  ...career(UNSAM, 'Ingeniería Ambiental', [
+    {
+      code: 'UNSAMAMB01',
+      year: 1,
+      name: 'Análisis Matemático I',
+      description: 'Cálculo de una variable.',
+    },
+    {
+      code: 'UNSAMAMB02',
+      year: 1,
+      name: 'Álgebra y Geometría Analítica',
+      description: 'Sistemas lineales y geometría.',
+    },
+    {
+      code: 'UNSAMAMB03',
+      year: 1,
+      name: 'Química General',
+      description: 'Reacciones y estequiometría.',
+    },
+    {
+      code: 'UNSAMAMB04',
+      year: 1,
+      name: 'Introducción a la Ingeniería Ambiental',
+      description: 'Problemática y gestión ambiental.',
+    },
+    {
+      code: 'UNSAMAMB05',
+      year: 2,
+      name: 'Análisis Matemático II',
+      description: 'Cálculo vectorial y ecuaciones diferenciales.',
+    },
+    {
+      code: 'UNSAMAMB06',
+      year: 2,
+      name: 'Física I',
+      description: 'Mecánica y fluidos.',
+    },
+    {
+      code: 'UNSAMAMB07',
+      year: 2,
+      name: 'Química Orgánica',
+      description: 'Compuestos del carbono y contaminantes.',
+    },
+    {
+      code: 'UNSAMAMB08',
+      year: 2,
+      name: 'Biología General',
+      description: 'Organismos, poblaciones y ecosistemas.',
+    },
+    {
+      code: 'UNSAMAMB09',
+      year: 3,
+      name: 'Fisicoquímica Ambiental',
+      description: 'Equilibrios en aire, agua y suelo.',
+    },
+    {
+      code: 'UNSAMAMB10',
+      year: 3,
+      name: 'Mecánica de los Fluidos',
+      description: 'Flujo en conductos y cuerpos de agua.',
+    },
+    {
+      code: 'UNSAMAMB11',
+      year: 3,
+      name: 'Ecología',
+      description: 'Flujos de energía y ciclos biogeoquímicos.',
+    },
+    {
+      code: 'UNSAMAMB12',
+      year: 3,
+      name: 'Microbiología Ambiental',
+      description: 'Microorganismos en tratamiento de efluentes.',
+    },
+  ]),
+  ...career(UNSAM, 'Ingeniería en Energía', [
+    {
+      code: 'UNSAMENE01',
+      year: 1,
+      name: 'Análisis Matemático I',
+      description: 'Cálculo de una variable.',
+    },
+    {
+      code: 'UNSAMENE02',
+      year: 1,
+      name: 'Álgebra y Geometría Analítica',
+      description: 'Matrices, vectores y geometría.',
+    },
+    {
+      code: 'UNSAMENE03',
+      year: 1,
+      name: 'Física I',
+      description: 'Mecánica y termodinámica básica.',
+    },
+    {
+      code: 'UNSAMENE04',
+      year: 1,
+      name: 'Química General',
+      description: 'Reacciones y energía química.',
+    },
+    {
+      code: 'UNSAMENE05',
+      year: 2,
+      name: 'Análisis Matemático II',
+      description: 'Cálculo en varias variables.',
+    },
+    {
+      code: 'UNSAMENE06',
+      year: 2,
+      name: 'Física II',
+      description: 'Electromagnetismo.',
+    },
+    {
+      code: 'UNSAMENE07',
+      year: 2,
+      name: 'Termodinámica',
+      description: 'Principios, ciclos y rendimiento.',
+    },
+    {
+      code: 'UNSAMENE08',
+      year: 2,
+      name: 'Programación',
+      description: 'Cálculo numérico y simulación.',
+    },
+    {
+      code: 'UNSAMENE09',
+      year: 3,
+      name: 'Mecánica de los Fluidos',
+      description: 'Estática y dinámica de fluidos.',
+    },
+    {
+      code: 'UNSAMENE10',
+      year: 3,
+      name: 'Transferencia de Calor',
+      description: 'Conducción, convección y radiación.',
+    },
+    {
+      code: 'UNSAMENE11',
+      year: 3,
+      name: 'Máquinas Térmicas',
+      description: 'Turbinas, motores y bombas.',
+    },
+    {
+      code: 'UNSAMENE12',
+      year: 3,
+      name: 'Energías Renovables',
+      description: 'Solar, eólica, biomasa e hidráulica.',
+    },
+  ]),
+  ...career(UNSAM, 'Licenciatura en Biotecnología', [
+    {
+      code: 'UNSAMBT01',
+      year: 1,
+      name: 'Introducción a la Biología',
+      description: 'Diversidad y organización de los seres vivos.',
+    },
+    {
+      code: 'UNSAMBT02',
+      year: 1,
+      name: 'Química General',
+      description: 'Estructura de la materia y reacciones.',
+    },
+    {
+      code: 'UNSAMBT03',
+      year: 1,
+      name: 'Matemática I',
+      description: 'Cálculo y álgebra aplicados.',
+    },
+    {
+      code: 'UNSAMBT04',
+      year: 1,
+      name: 'Física I',
+      description: 'Mecánica, fluidos y termodinámica.',
+    },
+    {
+      code: 'UNSAMBT05',
+      year: 2,
+      name: 'Química Orgánica',
+      description: 'Grupos funcionales y biomoléculas.',
+    },
+    {
+      code: 'UNSAMBT06',
+      year: 2,
+      name: 'Biología Celular y Molecular',
+      description: 'Organelas, membranas y expresión génica.',
+    },
+    {
+      code: 'UNSAMBT07',
+      year: 2,
+      name: 'Química Biológica',
+      description: 'Enzimas, metabolismo y bioenergética.',
+    },
+    {
+      code: 'UNSAMBT08',
+      year: 2,
+      name: 'Estadística',
+      description: 'Diseño experimental y análisis de datos.',
+    },
+    {
+      code: 'UNSAMBT09',
+      year: 3,
+      name: 'Microbiología',
+      description: 'Fisiología y cultivo de microorganismos.',
+    },
+    {
+      code: 'UNSAMBT10',
+      year: 3,
+      name: 'Genética',
+      description: 'Herencia, mutación y genética molecular.',
+    },
+    {
+      code: 'UNSAMBT11',
+      year: 3,
+      name: 'Inmunología',
+      description: 'Respuesta inmune innata y adaptativa.',
+    },
+    {
+      code: 'UNSAMBT12',
+      year: 3,
+      name: 'Ingeniería Genética',
+      description: 'Clonado, PCR y organismos recombinantes.',
+    },
+  ]),
+  ...career(UNSAM, 'Licenciatura en Física Médica', [
+    {
+      code: 'UNSAMFM01',
+      year: 1,
+      name: 'Análisis Matemático I',
+      description: 'Cálculo de una variable.',
+    },
+    {
+      code: 'UNSAMFM02',
+      year: 1,
+      name: 'Álgebra',
+      description: 'Vectores, matrices y sistemas lineales.',
+    },
+    {
+      code: 'UNSAMFM03',
+      year: 1,
+      name: 'Física I',
+      description: 'Mecánica y ondas.',
+    },
+    {
+      code: 'UNSAMFM04',
+      year: 1,
+      name: 'Química General',
+      description: 'Estructura atómica y enlaces.',
+    },
+    {
+      code: 'UNSAMFM05',
+      year: 2,
+      name: 'Análisis Matemático II',
+      description: 'Cálculo vectorial y ecuaciones diferenciales.',
+    },
+    {
+      code: 'UNSAMFM06',
+      year: 2,
+      name: 'Física II',
+      description: 'Electromagnetismo.',
+    },
+    {
+      code: 'UNSAMFM07',
+      year: 2,
+      name: 'Anatomía y Fisiología',
+      description: 'Organización y función del cuerpo humano.',
+    },
+    {
+      code: 'UNSAMFM08',
+      year: 2,
+      name: 'Programación',
+      description: 'Procesamiento numérico de datos.',
+    },
+    {
+      code: 'UNSAMFM09',
+      year: 3,
+      name: 'Física Moderna',
+      description: 'Cuántica, átomo y núcleo.',
+    },
+    {
+      code: 'UNSAMFM10',
+      year: 3,
+      name: 'Física de las Radiaciones',
+      description: 'Interacción radiación-materia y dosimetría.',
+    },
+    {
+      code: 'UNSAMFM11',
+      year: 3,
+      name: 'Estadística y Procesamiento de Datos',
+      description: 'Inferencia y análisis de señales médicas.',
+    },
+    {
+      code: 'UNSAMFM12',
+      year: 3,
+      name: 'Radiobiología',
+      description: 'Efectos biológicos de las radiaciones ionizantes.',
+    },
+  ]),
+  ...career(UNSAM, 'Licenciatura en Ciencia de Datos', [
+    {
+      code: 'UNSAMCD01',
+      year: 1,
+      name: 'Análisis Matemático I',
+      description: 'Cálculo de una variable.',
+    },
+    {
+      code: 'UNSAMCD02',
+      year: 1,
+      name: 'Álgebra Lineal',
+      description: 'Vectores, matrices y proyecciones.',
+    },
+    {
+      code: 'UNSAMCD03',
+      year: 1,
+      name: 'Introducción a la Programación',
+      description: 'Python, estructuras de control y funciones.',
+    },
+    {
+      code: 'UNSAMCD04',
+      year: 1,
+      name: 'Introducción a la Ciencia de Datos',
+      description: 'Pipeline de datos y análisis exploratorio.',
+    },
+    {
+      code: 'UNSAMCD05',
+      year: 2,
+      name: 'Análisis Matemático II',
+      description: 'Cálculo en varias variables y optimización.',
+    },
+    {
+      code: 'UNSAMCD06',
+      year: 2,
+      name: 'Algoritmos y Estructuras de Datos',
+      description: 'Complejidad, árboles y grafos.',
+    },
+    {
+      code: 'UNSAMCD07',
+      year: 2,
+      name: 'Probabilidad y Estadística',
+      description: 'Distribuciones e inferencia.',
+    },
+    {
+      code: 'UNSAMCD08',
+      year: 2,
+      name: 'Bases de Datos',
+      description: 'Modelo relacional, SQL y NoSQL.',
+    },
+    {
+      code: 'UNSAMCD09',
+      year: 3,
+      name: 'Aprendizaje Automático',
+      description: 'Modelos supervisados y no supervisados.',
+    },
+    {
+      code: 'UNSAMCD10',
+      year: 3,
+      name: 'Inferencia Estadística',
+      description: 'Estimación, tests y modelos bayesianos.',
+    },
+    {
+      code: 'UNSAMCD11',
+      year: 3,
+      name: 'Optimización',
+      description: 'Descenso por gradiente y programación convexa.',
+    },
+    {
+      code: 'UNSAMCD12',
+      year: 3,
+      name: 'Visualización de Datos',
+      description: 'Gráficos efectivos y comunicación de resultados.',
+    },
+  ]),
+  ...career(UNSAM, 'Licenciatura en Relaciones Internacionales', [
+    {
+      code: 'UNSAMRI01',
+      year: 1,
+      name: 'Introducción a las Relaciones Internacionales',
+      description: 'Actores, sistema internacional y agenda.',
+    },
+    {
+      code: 'UNSAMRI02',
+      year: 1,
+      name: 'Ciencia Política',
+      description: 'Poder, Estado y regímenes.',
+    },
+    {
+      code: 'UNSAMRI03',
+      year: 1,
+      name: 'Historia Contemporánea',
+      description: 'Siglo XX y orden mundial.',
+    },
+    {
+      code: 'UNSAMRI04',
+      year: 1,
+      name: 'Economía Política',
+      description: 'Micro y macroeconomía introductoria.',
+    },
+    {
+      code: 'UNSAMRI05',
+      year: 2,
+      name: 'Teoría de las Relaciones Internacionales',
+      description: 'Realismo, liberalismo y constructivismo.',
+    },
+    {
+      code: 'UNSAMRI06',
+      year: 2,
+      name: 'Derecho Internacional Público',
+      description: 'Tratados, soberanía y organismos.',
+    },
+    {
+      code: 'UNSAMRI07',
+      year: 2,
+      name: 'Historia de las Relaciones Internacionales',
+      description: 'Del Congreso de Viena a la Guerra Fría.',
+    },
+    {
+      code: 'UNSAMRI08',
+      year: 2,
+      name: 'Estadística Social',
+      description: 'Datos e indicadores internacionales.',
+    },
+    {
+      code: 'UNSAMRI09',
+      year: 3,
+      name: 'Política Exterior Argentina',
+      description: 'Tradiciones y ejes de la inserción externa.',
+    },
+    {
+      code: 'UNSAMRI10',
+      year: 3,
+      name: 'Economía Internacional',
+      description: 'Comercio, finanzas y organismos multilaterales.',
+    },
+    {
+      code: 'UNSAMRI11',
+      year: 3,
+      name: 'Organismos Internacionales',
+      description: 'ONU, OMC, FMI y regímenes globales.',
+    },
+    {
+      code: 'UNSAMRI12',
+      year: 3,
+      name: 'Geopolítica',
+      description: 'Territorio, recursos y poder global.',
+    },
+  ]),
+  ...career(UNSAM, 'Licenciatura en Kinesiología y Fisiatría', [
+    {
+      code: 'UNSAMKIN01',
+      year: 1,
+      name: 'Anatomía I',
+      description: 'Sistema osteoartromuscular.',
+    },
+    {
+      code: 'UNSAMKIN02',
+      year: 1,
+      name: 'Biología Celular e Histología',
+      description: 'Célula y tejidos.',
+    },
+    {
+      code: 'UNSAMKIN03',
+      year: 1,
+      name: 'Química Biológica',
+      description: 'Biomoléculas y metabolismo.',
+    },
+    {
+      code: 'UNSAMKIN04',
+      year: 1,
+      name: 'Introducción a la Kinesiología',
+      description: 'Campo profesional y marco de la disciplina.',
+    },
+    {
+      code: 'UNSAMKIN05',
+      year: 2,
+      name: 'Anatomía II',
+      description: 'Sistema nervioso, cardiovascular y respiratorio.',
+    },
+    {
+      code: 'UNSAMKIN06',
+      year: 2,
+      name: 'Fisiología',
+      description: 'Función de órganos y sistemas.',
+    },
+    {
+      code: 'UNSAMKIN07',
+      year: 2,
+      name: 'Biomecánica',
+      description: 'Análisis del movimiento humano.',
+    },
+    {
+      code: 'UNSAMKIN08',
+      year: 2,
+      name: 'Física Aplicada',
+      description: 'Mecánica y agentes físicos terapéuticos.',
+    },
+    {
+      code: 'UNSAMKIN09',
+      year: 3,
+      name: 'Kinefisiatría',
+      description: 'Evaluación y técnicas kinésicas.',
+    },
+    {
+      code: 'UNSAMKIN10',
+      year: 3,
+      name: 'Patología Médica',
+      description: 'Enfermedades prevalentes y su abordaje.',
+    },
+    {
+      code: 'UNSAMKIN11',
+      year: 3,
+      name: 'Kinesiología Neurológica',
+      description: 'Rehabilitación de lesiones del sistema nervioso.',
+    },
+    {
+      code: 'UNSAMKIN12',
+      year: 3,
+      name: 'Kinesiterapia Respiratoria',
+      description: 'Asistencia y rehabilitación respiratoria.',
     },
   ]),
 ];
