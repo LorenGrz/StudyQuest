@@ -25,8 +25,9 @@ export function AuthLayout({ children }: Props) {
 }
 
 export function GameLayout({ children }: Props) {
+  // Same width scale as AppShell so the quiz doesn't look narrower than the app.
   return (
-    <div className="h-full bg-gradient-to-b from-base to-elevated flex flex-col w-full max-w-3xl mx-auto self-center overflow-y-auto">
+    <div className="h-full bg-gradient-to-b from-base to-elevated flex flex-col w-full max-w-[480px] md:max-w-2xl lg:max-w-4xl mx-auto self-center overflow-y-auto">
       {children}
     </div>
   )

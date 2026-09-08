@@ -1,6 +1,7 @@
 import React from 'react'
 import type { ReactNode, ButtonHTMLAttributes } from 'react'
 import { motion } from 'framer-motion'
+import { X } from 'lucide-react'
 
 // ─── Button ──────────────────────────────────────────────────────────────────
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -163,5 +164,91 @@ export function Select({ label, error, options, className = '', id, ...props }: 
       </select>
       {error && <span className="text-[12px] text-danger">{error}</span>}
     </div>
+  )
+}
+
+// ─── Reveal ──────────────────────────────────────────────────────────────────
+// Fade + slide-up on mount. Give siblings an increasing `delay` to stagger a
+// list of sections so the page unfolds instead of snapping in.
+export function Reveal({
+  children,
+  delay = 0,
+  className = '',
+}: {
+  children: ReactNode
+  delay?: number
+  className?: string
+}) {
+  return (
+    <motion.div
+      className={className}
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, delay, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+// ─── Modal ───────────────────────────────────────────────────────────────────
+// Centered dialog. Mount/unmount it from the parent (optionally inside
+// <AnimatePresence> for the exit animation), e.g. {open && <Modal .../>}.
+interface ModalProps {
+  onClose: () => void
+  title?: ReactNode
+  children: ReactNode
+  size?: 'sm' | 'md' | 'lg'
+}
+
+export function Modal({ onClose, title, children, size = 'md' }: ModalProps) {
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prevOverflow
+    }
+  }, [onClose])
+
+  const maxW =
+    size === 'sm' ? 'max-w-sm' : size === 'lg' ? 'max-w-2xl' : 'max-w-lg'
+
+  return (
+    <motion.div
+      className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/60 backdrop-blur-[3px]"
+      onClick={onClose}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.15 }}
+      role="dialog"
+      aria-modal="true"
+    >
+      <motion.div
+        className={`w-full ${maxW} max-h-[85vh] overflow-y-auto bg-surface border border-[var(--overlay-border)] rounded-2xl shadow-xl flex flex-col`}
+        onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0, scale: 0.96, y: 16 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.96, y: 16 }}
+        transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+      >
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 bg-surface px-5 py-4 border-b border-[var(--overlay-border)]">
+          <h2 className="text-[17px] font-bold text-primary">{title}</h2>
+          <button
+            onClick={onClose}
+            aria-label="Cerrar"
+            className="flex items-center justify-center w-8 h-8 -mr-1 rounded-lg text-secondary hover:text-primary hover:bg-elevated transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            <X size={18} aria-hidden="true" />
+          </button>
+        </div>
+        <div className="p-5">{children}</div>
+      </motion.div>
+    </motion.div>
   )
 }

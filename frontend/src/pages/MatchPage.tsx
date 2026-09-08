@@ -83,8 +83,8 @@ export default function MatchPage() {
 
   return (
     <MobileLayout>
-    <div className="w-full max-w-[480px] mx-auto self-center h-full flex flex-col bg-base overflow-hidden">
-      
+    <div className="w-full mx-auto self-center h-full flex flex-col bg-base overflow-hidden">
+
       {/* Header */}
       <header className="flex items-center justify-between px-5 pt-5 pb-2.5 shrink-0">
         <div>
@@ -104,7 +104,7 @@ export default function MatchPage() {
       </header>
 
       {/* Main Deck Container */}
-      <main className="flex-1 min-h-0 flex items-stretch justify-center px-10 py-[18px] overflow-hidden relative">
+      <main className="flex-1 min-h-0 flex items-stretch justify-center px-6 sm:px-10 py-[18px] overflow-hidden relative">
         <AnimatePresence mode="popLayout" custom={exitDir}>
           {(status === 'idle' || status === 'loading') && (
             <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center w-full">
@@ -138,7 +138,7 @@ export default function MatchPage() {
               dragElastic={0.8}
               onDragEnd={handleDragEnd}
               whileTap={{ cursor: 'grabbing', scale: 0.98 }}
-              className="w-full max-w-[440px] h-full flex flex-col justify-center select-none touch-none cursor-grab active:cursor-grabbing"
+              className="w-full max-w-[440px] md:max-w-[520px] h-full flex flex-col justify-center select-none touch-none cursor-grab active:cursor-grabbing"
             >
               <PartyCard party={top} />
             </motion.div>

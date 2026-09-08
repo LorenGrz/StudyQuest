@@ -7,7 +7,7 @@ import {
   LogOut,
 } from "lucide-react"
 import { MobileLayout } from "../components/Layouts"
-import { Button, Spinner } from "../components/UI"
+import { Button, Spinner, Reveal } from "../components/UI"
 import { useAuthStore } from "../store/authStore"
 import { useAuth } from "../hooks/useAuth"
 import { userService, type UserInventory } from "../services/userService"
@@ -114,24 +114,31 @@ export default function ProfilePage() {
         <div className="flex flex-col gap-6">
 
           {/* Stats Grid — 2 cols on md+ */}
-          <ProfileStatsGrid elo={elo} winRate={winRate} stats={stats} leagueColor={league.color} />
+          <Reveal delay={0}>
+            <ProfileStatsGrid elo={elo} winRate={winRate} stats={stats} leagueColor={league.color} />
+          </Reveal>
 
           {/* Medals / Achievements */}
-          <ProfileMedals achievements={achievements} loading={achievementsLoading} />
+          <Reveal delay={0.05}>
+            <ProfileMedals achievements={achievements} loading={achievementsLoading} />
+          </Reveal>
 
           {/* Inventory */}
-          <ProfileInventory
-            user={user}
-            inventory={inventory}
-            loading={inventoryLoading}
-            error={inventoryError}
-            isUpdatingCosmetics={isUpdatingCosmetics}
-            equipTitle={equipTitle}
-            equipBorder={equipBorder}
-          />
+          <Reveal delay={0.1}>
+            <ProfileInventory
+              user={user}
+              inventory={inventory}
+              loading={inventoryLoading}
+              error={inventoryError}
+              isUpdatingCosmetics={isUpdatingCosmetics}
+              equipTitle={equipTitle}
+              equipBorder={equipBorder}
+            />
+          </Reveal>
 
           {/* Academic Info */}
-          <section>
+          <Reveal delay={0.15}>
+           <section>
             <h3 className="text-base font-bold text-secondary uppercase tracking-[1px] pb-2">
               Información Académica
             </h3>
@@ -155,10 +162,12 @@ export default function ProfilePage() {
                 <span className="text-sm font-semibold text-primary text-right">{user.year}</span>
               </div>
             </div>
-          </section>
+           </section>
+          </Reveal>
 
           {/* Enrolled Subjects */}
-          <section>
+          <Reveal delay={0.2}>
+           <section>
             <h3 className="text-base font-bold text-secondary uppercase tracking-[1px] pb-2">
               Materias Inscriptas ({user.enrolledSubjects?.length || 0})
             </h3>
@@ -181,7 +190,8 @@ export default function ProfilePage() {
                 </div>
               )}
             </div>
-          </section>
+           </section>
+          </Reveal>
         </div>
 
         {/* League Ladder */}

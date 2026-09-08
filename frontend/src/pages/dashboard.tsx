@@ -8,7 +8,7 @@ import {
   QuickActions,
   GetStartedNotice,
 } from '../components/dashboard/DashboardComponents'
-import { SectionTitle, Spinner, Button } from '../components/UI'
+import { SectionTitle, Spinner, Button, Reveal } from '../components/UI'
 import { Alert, PageContainer } from '../components/PagePrimitives'
 import { useAuthStore } from '../store/authStore'
 import { usePartyStore } from '../store/partyStore'
@@ -148,16 +148,22 @@ const DashboardPage = () => {
       <PageContainer>
         <div className="flex flex-col gap-3 pb-11">
           {/* Full-width: greeting, quick actions, search, active party */}
-          <GreetingHeader user={user} />
+          <Reveal delay={0}>
+            <GreetingHeader user={user} />
+          </Reveal>
 
           {/* Accesos rápidos arriba de todo */}
           <QuickActions />
 
           {/* Onboarding: si no está inscripto en ninguna materia */}
-          {!isSubjectsLoading && subjects.length === 0 && <GetStartedNotice />}
+          {!isSubjectsLoading && subjects.length === 0 && (
+            <Reveal delay={0.05}>
+              <GetStartedNotice />
+            </Reveal>
+          )}
 
           {/* Search Bar & Inline Results */}
-          <div className="relative mb-2">
+          <Reveal delay={0.1} className="relative mb-2">
             <div className="flex gap-2 items-center">
               <input
                 type="text"
@@ -318,14 +324,18 @@ const DashboardPage = () => {
                 )}
               </div>
             )}
-          </div>
+          </Reveal>
 
-          <ActivePartyBanner party={activeParty} />
+          {activeParty && (
+            <Reveal delay={0.12}>
+              <ActivePartyBanner party={activeParty} />
+            </Reveal>
+          )}
 
-          {/* Responsive two-column grid (desktop) / single-column (mobile) */}
-          <div className="flex flex-col gap-4">
+          {/* Two columns on desktop, single column on mobile */}
+          <Reveal delay={0.15} className="flex flex-col lg:flex-row lg:items-start gap-4 lg:gap-6">
             {/* ── Main column ── */}
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 lg:flex-1 lg:min-w-0">
               {/* Quests para hoy */}
               <SectionTitle>Quests para hoy</SectionTitle>
               {isQuestsTodayLoading ? (
@@ -403,7 +413,7 @@ const DashboardPage = () => {
             </div>
 
             {/* ── Secondary column ── */}
-            <div className="flex flex-col gap-3 mt-3 lg:mt-0">
+            <div className="flex flex-col gap-3 mt-3 lg:mt-0 lg:w-[340px] lg:shrink-0">
               {/* Mis Materias */}
               <SectionTitle>Mis Materias</SectionTitle>
               {isSubjectsLoading ? (
@@ -468,7 +478,7 @@ const DashboardPage = () => {
 
               <HomeLeaderboardPreview subjects={subjects} />
             </div>
-          </div>
+          </Reveal>
         </div>
       </PageContainer>
     </MobileLayout>
