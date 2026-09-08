@@ -55,7 +55,18 @@ import { TournamentsModule } from './modules/tournaments/tournaments.module';
           extra: { max: 5 },
         };
         if (url) {
-          return { ...base, url, ssl: { rejectUnauthorized: false } };
+          // pg >=8.16 (pg-connection-string) trata `sslmode=require` como
+          // `verify-full`, lo que rechaza las cadenas de CA autofirmadas que
+          // presentan Aiven / Neon / Supabase (SELF_SIGNED_CERT_IN_CHAIN).
+          // Quitamos ese parámetro y forzamos TLS sin verificar la CA.
+          const parsed = new URL(url);
+          parsed.searchParams.delete('sslmode');
+          parsed.searchParams.delete('ssl');
+          return {
+            ...base,
+            url: parsed.toString(),
+            ssl: { rejectUnauthorized: false },
+          };
         }
         return {
           ...base,
