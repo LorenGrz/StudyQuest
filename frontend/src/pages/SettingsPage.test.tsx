@@ -30,9 +30,20 @@ vi.mock('../store/authStore', () => {
     avatarUrl: null,
     stats: { level: 1, xp: 0 },
   }
+  const state = {
+    user,
+    setUser: vi.fn(),
+    setTokens: vi.fn(),
+    logout: vi.fn(),
+    accessToken: null,
+    refreshToken: null,
+    isAuthenticated: true,
+  }
   return {
-    useAuthStore: (selector: (s: any) => any) =>
-      selector({ user, setUser: vi.fn() }),
+    // Support both selector calls (useAuthStore(s => s.user)) and bare calls
+    // (const { logout } = useAuthStore()).
+    useAuthStore: (selector?: (s: any) => any) =>
+      selector ? selector(state) : state,
   }
 })
 
