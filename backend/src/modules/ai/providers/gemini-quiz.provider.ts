@@ -56,6 +56,31 @@ export class GeminiQuizProvider implements QuizAiProvider {
     );
   }
 
+  private modelChain(options?: QuizGenerationOptions): string[] {
+    if (options?.model) return [options.model];
+    const primary = this.cfg.get<string>(
+      'GEMINI_MODEL',
+      'gemini-flash-lite-latest',
+    );
+    const fallbacksRaw = this.cfg.get<string>(
+      'GEMINI_FALLBACK_MODELS',
+      'gemini-3.5-flash-lite,gemini-flash-latest',
+    );
+    const fallbacks = fallbacksRaw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    // Dedupe, primary first.
+    return [...new Set([primary, ...fallbacks])];
+  }
+
+  private isTransient(err: unknown): boolean {
+    const msg = err instanceof Error ? err.message : String(err);
+    return /\b(429|500|502|503|504|UNAVAILABLE|overloaded|high demand)\b/i.test(
+      msg,
+    );
+  }
+
   private async callGemini(
     chunk: string,
     options?: QuizGenerationOptions,
@@ -68,38 +93,48 @@ export class GeminiQuizProvider implements QuizAiProvider {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model:
-        options?.model ?? this.cfg.get('GEMINI_MODEL', 'gemini-flash-latest'),
-      // Rules go in systemInstruction; only the (untrusted) study material is
-      // sent as content → the model treats it as data, not instructions.
-      systemInstruction: QUIZ_PROMPT,
-      generationConfig: {
-        temperature: options?.temperature ?? 0.2,
-        maxOutputTokens: Number(this.cfg.get('AI_MAX_OUTPUT_TOKENS', 8192)),
-      },
-    });
-
     const userPrompt = buildQuizUserPrompt(chunk, options);
+    const generationConfig = {
+      temperature: options?.temperature ?? 0.2,
+      maxOutputTokens: Number(this.cfg.get('AI_MAX_OUTPUT_TOKENS', 8192)),
+    };
 
-    const MAX_ATTEMPTS = 4;
+    const models = this.modelChain(options);
+    const ATTEMPTS_PER_MODEL = 3;
     let lastErr: unknown;
-    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-      try {
-        const result = await model.generateContent(userPrompt);
-        return safeParseQuestionsJson(result.response.text());
-      } catch (err: unknown) {
-        lastErr = err;
-        const msg = err instanceof Error ? err.message : String(err);
-        // 429 rate limit / 500 / 503 overload → transitorios, reintentar con backoff.
-        const transient = /\b(429|500|503)\b/.test(msg);
-        if (!transient || attempt === MAX_ATTEMPTS - 1) throw err;
-        this.logger.warn(
-          `Gemini transitorio (${msg.slice(0, 80)}), reintento ${attempt + 1}/${MAX_ATTEMPTS - 1}...`,
-        );
-        await new Promise((r) => setTimeout(r, 3000 * (attempt + 1)));
+
+    // Try each model; within a model, retry transient (overload) errors with
+    // backoff, then fall through to the next model in the chain.
+    for (const modelName of models) {
+      const model = genAI.getGenerativeModel({
+        model: modelName,
+        // Rules go in systemInstruction; only the (untrusted) study material is
+        // sent as content → the model treats it as data, not instructions.
+        systemInstruction: QUIZ_PROMPT,
+        generationConfig,
+      });
+
+      for (let attempt = 0; attempt < ATTEMPTS_PER_MODEL; attempt++) {
+        try {
+          const result = await model.generateContent(userPrompt);
+          return safeParseQuestionsJson(result.response.text());
+        } catch (err: unknown) {
+          lastErr = err;
+          if (!this.isTransient(err)) throw err;
+          const msg = err instanceof Error ? err.message : String(err);
+          this.logger.warn(
+            `Gemini ${modelName} transitorio (${msg.slice(0, 70)}), intento ${attempt + 1}/${ATTEMPTS_PER_MODEL}`,
+          );
+          if (attempt < ATTEMPTS_PER_MODEL - 1) {
+            await new Promise((r) => setTimeout(r, 2500 * (attempt + 1)));
+          }
+        }
       }
+      this.logger.warn(
+        `Gemini ${modelName} agotado, probando el siguiente modelo del fallback`,
+      );
     }
+
     throw lastErr;
   }
 }
