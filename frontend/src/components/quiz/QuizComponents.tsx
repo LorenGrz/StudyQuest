@@ -15,11 +15,18 @@ export function ScoreHeader({ scores, timeLeft, currentIndex, total }: ScoreHead
 
   return (
     <div className="bg-surface px-4 py-3 flex flex-col gap-2 border-b border-[var(--overlay-border)]">
-      <div className="text-xs font-semibold text-muted text-center uppercase tracking-[0.5px]">
+      <div
+        className="text-xs font-semibold text-muted text-center uppercase tracking-[0.5px]"
+        aria-live="polite"
+      >
         Pregunta {currentIndex + 1} / {total}
       </div>
-      <div className="w-[52px] h-[52px] relative mx-auto flex items-center justify-center">
-        <svg viewBox="0 0 36 36" className="absolute inset-0 -rotate-90">
+      <div
+        className="w-[52px] h-[52px] relative mx-auto flex items-center justify-center"
+        role="timer"
+        aria-label={`Quedan ${timeLeft} segundos`}
+      >
+        <svg viewBox="0 0 36 36" className="absolute inset-0 -rotate-90" aria-hidden="true">
           <circle cx="18" cy="18" r="15.9" fill="none" stroke="#1e1e2e" strokeWidth="3" />
           <circle
             cx="18" cy="18" r="15.9" fill="none"
@@ -31,6 +38,11 @@ export function ScoreHeader({ scores, timeLeft, currentIndex, total }: ScoreHead
         </svg>
         <span className="text-base font-extrabold relative z-[1]">{timeLeft}</span>
       </div>
+      {timeLeft <= 5 && (
+        <span className="sr-only" role="status">
+          {timeLeft === 0 ? 'Se acabó el tiempo' : `Quedan ${timeLeft} segundos`}
+        </span>
+      )}
       <div className="flex gap-2 overflow-x-auto">
         {scores.slice(0, 3).map((s, i) => (
           <div key={s.userId} className="flex items-center gap-1.5 bg-elevated rounded-[12px] px-2.5 py-1.5 whitespace-nowrap text-xs">

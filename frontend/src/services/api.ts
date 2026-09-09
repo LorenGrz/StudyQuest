@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const BASE_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:3000') + '/api/v1'
+const BASE_URL =
+  (import.meta.env.VITE_API_URL ?? 'http://localhost:3000') + '/api/v1'
 
 export const api = axios.create({
   baseURL: BASE_URL,
@@ -14,21 +15,41 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-// Si el token expiró (401), intenta refrescar y reintentar
+// Single-flight refresh: concurrent 401s share one /auth/refresh call so a
+// rotating backend doesn't invalidate the refresh token mid-burst.
+let refreshPromise: Promise<string> | null = null
+
+function refreshAccessToken(): Promise<string> {
+  if (!refreshPromise) {
+    refreshPromise = (async () => {
+      const refreshToken = localStorage.getItem('refreshToken')
+      if (!refreshToken) throw new Error('No refresh token')
+      const { data } = await axios.post(`${BASE_URL}/auth/refresh`, {
+        refreshToken,
+      })
+      localStorage.setItem('accessToken', data.accessToken)
+      // The backend rotates refresh tokens — persist the new one.
+      if (data.refreshToken) {
+        localStorage.setItem('refreshToken', data.refreshToken)
+      }
+      return data.accessToken as string
+    })().finally(() => {
+      refreshPromise = null
+    })
+  }
+  return refreshPromise
+}
+
+// Si el token expiró (401), refresca (una sola vez) y reintenta
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
     const original = error.config
-    if (error.response?.status === 401 && !original._retry) {
+    if (error.response?.status === 401 && original && !original._retry) {
       original._retry = true
       try {
-        const refreshToken = localStorage.getItem('refreshToken')
-        if (!refreshToken) throw new Error('No refresh token')
-        const { data } = await axios.post(`${BASE_URL}/auth/refresh`, {
-          refreshToken,
-        })
-        localStorage.setItem('accessToken', data.accessToken)
-        original.headers.Authorization = `Bearer ${data.accessToken}`
+        const accessToken = await refreshAccessToken()
+        original.headers.Authorization = `Bearer ${accessToken}`
         return api(original)
       } catch {
         localStorage.removeItem('accessToken')
