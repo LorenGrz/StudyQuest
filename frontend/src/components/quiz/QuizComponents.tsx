@@ -16,7 +16,7 @@ export function ScoreHeader({ scores, timeLeft, currentIndex, total }: ScoreHead
   return (
     <div className="bg-surface px-4 py-3 flex flex-col gap-2 border-b border-[var(--overlay-border)]">
       <div
-        className="text-xs font-semibold text-muted text-center uppercase tracking-[0.5px]"
+        className="text-xs font-semibold text-secondary text-center uppercase tracking-[0.5px]"
         aria-live="polite"
       >
         Pregunta {currentIndex + 1} / {total}

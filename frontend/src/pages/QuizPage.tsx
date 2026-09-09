@@ -109,7 +109,7 @@ const QuizPage = () => {
             <div className="w-full flex flex-col gap-1.5 mt-1">
               {quest.leaderboard.map((s, i) => (
                 <div key={s.userId} className="flex items-center gap-3 px-3 py-2 bg-elevated rounded-lg">
-                  <span className="text-[11px] font-bold text-muted w-6 shrink-0">#{i + 1}</span>
+                  <span className="text-[11px] font-bold text-secondary w-6 shrink-0">#{i + 1}</span>
                   <span className="flex-1 text-[13px] text-primary truncate text-left">{s.username}</span>
                   <span className="text-[13px] font-bold text-accent-light shrink-0">{s.score} pts</span>
                 </div>
