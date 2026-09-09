@@ -552,6 +552,39 @@ export function QuestCard({ quest, onDelete }: { quest: Quest; onDelete?: (quest
       ? 'Abrila más tarde o generá una nueva quest.'
       : null
 
+  // Per-phase treatment (tone of the status line + the round status chip).
+  const inProgress = quest.myStatus === 'in_progress'
+  const done = quest.myStatus === 'completed' || quest.myBestScore != null
+  const statusTone = isFailed
+    ? 'text-danger'
+    : isGenerating || inProgress
+      ? 'text-accent-light'
+      : done
+        ? 'text-success'
+        : 'text-secondary'
+  const chip = isFailed
+    ? { icon: '⚠', wrap: 'bg-danger/10 text-danger' }
+    : isGenerating
+      ? { icon: '⏳', wrap: 'bg-accent/10 text-accent-light animate-pulse' }
+      : inProgress
+        ? { icon: '▶', wrap: 'bg-accent/10 text-accent-light' }
+        : done
+          ? { icon: '✓', wrap: 'bg-success/10 text-success' }
+          : { icon: '▶', wrap: 'bg-accent/10 text-accent-light' }
+
+  const cardClass = [
+    'flex flex-col gap-2 bg-surface border rounded-[18px] px-4 py-3.5 shadow-sm transition-colors',
+    canPlay
+      ? 'cursor-pointer border-edge hover:border-accent hover:bg-elevated/40'
+      : isFailed
+        ? 'border-danger/25'
+        : 'border-edge',
+  ].join(' ')
+
+  const chipBtn =
+    'inline-flex items-center gap-1.5 min-h-9 px-3 rounded-lg text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2'
+  const hasActions = !!quest.sourcePdfUrl || canPlay || (isFailed && !!onDelete)
+
   const handleOpenQuest = () => {
     if (!canPlay) return
     navigate(`/quiz/${quest.id}`)
@@ -560,70 +593,76 @@ export function QuestCard({ quest, onDelete }: { quest: Quest; onDelete?: (quest
   return (
     <>
       <div
-        className={`flex items-center justify-between gap-3 bg-surface border border-edge rounded-lg px-4 py-3 transition-colors ${canPlay ? 'cursor-pointer hover:border-accent' : 'opacity-80'}`}
+        className={cardClass}
         onClick={handleOpenQuest}
         aria-disabled={!canPlay}
       >
-        <div className="min-w-0 flex-1 flex flex-col gap-1">
-          <p className="font-semibold text-sm text-primary truncate">{quest.title}</p>
-          <p className="text-xs text-secondary">
-            {questionCount} preguntas{` • ${sourceLabel}`}
-          </p>
-          {statusLabel && <p className="text-xs text-accent-light">{statusLabel}</p>}
-          {statusHint && <p className="text-xs text-secondary">{statusHint}</p>}
-          {quest.sourcePdfUrl && (
-            <a
-              className="self-start mt-1 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-secondary/10 text-secondary border border-secondary/30 text-xs font-bold hover:bg-secondary/20 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-              href={resolveAssetUrl(quest.sourcePdfUrl) ?? undefined}
-              target="_blank"
-              rel="noreferrer"
-              onClick={(event) => event.stopPropagation()}
-            >
-              📄 Ver PDF
-            </a>
-          )}
-          {canPlay && (
-            <button
-              className="self-start mt-1 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-accent/15 text-accent-light border border-accent/30 text-xs font-bold hover:bg-accent/25 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-              onClick={(e) => {
-                e.stopPropagation()
-                setShowModal(true)
-              }}
-            >
-              🏆 Iniciar Torneo
-            </button>
-          )}
-          {isFailed && onDelete && (
-            <button
-              className="self-start mt-1 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-danger/10 text-danger border border-danger/30 text-xs font-bold hover:bg-danger/25 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
-              disabled={isDeleting}
-              onClick={async (e) => {
-                e.stopPropagation()
-                if (window.confirm('¿Estás seguro de que querés eliminar esta quest fallida?')) {
-                  setIsDeleting(true)
-                  try {
-                    await onDelete(quest.id)
-                  } catch (err) {
-                    alert('Error al eliminar la quest')
-                  } finally {
-                    setIsDeleting(false)
-                  }
-                }
-              }}
-            >
-              {isDeleting ? 'Eliminando...' : '🗑️ Eliminar'}
-            </button>
-          )}
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold text-[15px] text-primary truncate">{quest.title}</p>
+            <p className="text-xs text-secondary mt-0.5">
+              {questionCount} preguntas{` • ${sourceLabel}`}
+            </p>
+            {statusLabel && (
+              <p className={`text-xs font-semibold mt-1 ${statusTone}`}>{statusLabel}</p>
+            )}
+            {statusHint && <p className="text-xs text-secondary mt-0.5">{statusHint}</p>}
+          </div>
+          <span
+            className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${chip.wrap}`}
+            aria-hidden="true"
+          >
+            {chip.icon}
+          </span>
         </div>
-        <span className={`shrink-0 text-lg ${isGenerating ? 'animate-pulse' : ''}`} aria-hidden="true">
-          {isGenerating
-            ? '⏳'
-            : quest.status === 'active'
-              ? '▶'
-              : quest.status === 'failed'
-                ? '⚠️'
-                : '✅'}
-        </span>
+
+        {hasActions && (
+          <div className="flex flex-wrap gap-2 mt-0.5">
+            {quest.sourcePdfUrl && (
+              <a
+                className={`${chipBtn} bg-[var(--overlay-subtle)] border border-edge text-secondary hover:text-primary hover:border-[var(--border-hover)] focus-visible:ring-accent`}
+                href={resolveAssetUrl(quest.sourcePdfUrl) ?? undefined}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(event) => event.stopPropagation()}
+              >
+                📄 Ver PDF
+              </a>
+            )}
+            {canPlay && (
+              <button
+                className={`${chipBtn} bg-accent/15 border border-accent/30 text-accent-light hover:bg-accent/25 focus-visible:ring-accent`}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setShowModal(true)
+                }}
+              >
+                🏆 Iniciar Torneo
+              </button>
+            )}
+            {isFailed && onDelete && (
+              <button
+                className={`${chipBtn} bg-danger/10 border border-danger/30 text-danger hover:bg-danger/20 focus-visible:ring-danger disabled:opacity-50`}
+                disabled={isDeleting}
+                onClick={async (e) => {
+                  e.stopPropagation()
+                  if (window.confirm('¿Estás seguro de que querés eliminar esta quest fallida?')) {
+                    setIsDeleting(true)
+                    try {
+                      await onDelete(quest.id)
+                    } catch (err) {
+                      alert('Error al eliminar la quest')
+                    } finally {
+                      setIsDeleting(false)
+                    }
+                  }
+                }}
+              >
+                {isDeleting ? 'Eliminando...' : '🗑️ Eliminar'}
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {showModal && (
