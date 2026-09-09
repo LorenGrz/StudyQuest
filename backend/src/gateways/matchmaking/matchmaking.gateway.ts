@@ -17,10 +17,17 @@ import { MatchmakingService, QueueCandidate } from './matchmaking.service';
 import { PartiesService } from '../../modules/parties/parties.service';
 import { UsersService } from '../../modules/users/users.service';
 import { JoinQueueDto, SendChatMessageDto } from '../../common/dto';
+import { corsOrigin } from '../../common/cors';
+
+type Conn = { userId: string; partyId?: string; msgTimes: number[] };
+
+// Per-socket message budget for user-driven events (chat, joins).
+const RATE_WINDOW_MS = 5_000;
+const RATE_MAX = 15;
 
 @WebSocketGateway({
   cors: {
-    origin: true,
+    origin: corsOrigin,
     credentials: true,
   },
 })
@@ -29,7 +36,15 @@ export class MatchmakingGateway
 {
   @WebSocketServer() server: Server;
   private readonly logger = new Logger(MatchmakingGateway.name);
-  private connections = new Map<string, { userId: string; partyId?: string }>();
+  private connections = new Map<string, Conn>();
+
+  private rateOk(conn: Conn): boolean {
+    const now = Date.now();
+    conn.msgTimes = conn.msgTimes.filter((t) => now - t < RATE_WINDOW_MS);
+    if (conn.msgTimes.length >= RATE_MAX) return false;
+    conn.msgTimes.push(now);
+    return true;
+  }
 
   constructor(
     private readonly matchmakingService: MatchmakingService,
@@ -45,7 +60,10 @@ export class MatchmakingGateway
         socket.handshake.headers?.authorization?.replace('Bearer ', '');
       if (!token) throw new Error('Sin token');
       const payload = this.jwtService.verify(token);
-      this.connections.set(socket.id, { userId: payload.sub });
+      if (payload.type && payload.type !== 'access') {
+        throw new Error('No es un access token');
+      }
+      this.connections.set(socket.id, { userId: payload.sub, msgTimes: [] });
       this.logger.log(`[WS] Conectado: ${payload.sub}`);
     } catch {
       socket.emit('error', { code: 'UNAUTHORIZED', message: 'Token inválido' });
@@ -172,7 +190,17 @@ export class MatchmakingGateway
     @MessageBody() { partyId }: { partyId: string },
   ) {
     const conn = this.connections.get(socket.id);
-    if (!conn) return;
+    if (!conn || !this.rateOk(conn)) return;
+    if (
+      !partyId ||
+      !(await this.partiesService.isMember(partyId, conn.userId))
+    ) {
+      socket.emit('error', {
+        code: 'FORBIDDEN',
+        message: 'No sos miembro de esta party',
+      });
+      return;
+    }
     socket.join(partyId);
     conn.partyId = partyId;
     await this.partiesService.setOnlineStatus(partyId, conn.userId, true);
@@ -202,7 +230,17 @@ export class MatchmakingGateway
     @MessageBody() dto: SendChatMessageDto & { partyId: string },
   ) {
     const conn = this.connections.get(socket.id);
-    if (!conn) return;
+    if (!conn || !this.rateOk(conn)) return;
+    if (
+      !dto?.partyId ||
+      !(await this.partiesService.isMember(dto.partyId, conn.userId))
+    ) {
+      socket.emit('error', {
+        code: 'FORBIDDEN',
+        message: 'No sos miembro de esta party',
+      });
+      return;
+    }
     const message = await this.partiesService.addTextChatMessage(
       dto.partyId,
       conn.userId,
@@ -281,7 +319,9 @@ export class MatchmakingGateway
     @MessageBody() { tournamentId }: { tournamentId: string },
   ) {
     socket.join(`tournament:${tournamentId}`);
-    this.logger.log(`[WS] Súper-unión de socket ${socket.id} a torneo:${tournamentId}`);
+    this.logger.log(
+      `[WS] Súper-unión de socket ${socket.id} a torneo:${tournamentId}`,
+    );
   }
 
   @SubscribeMessage('tournament:leave')
@@ -290,26 +330,41 @@ export class MatchmakingGateway
     @MessageBody() { tournamentId }: { tournamentId: string },
   ) {
     socket.leave(`tournament:${tournamentId}`);
-    this.logger.log(`[WS] Salida de socket ${socket.id} de torneo:${tournamentId}`);
+    this.logger.log(
+      `[WS] Salida de socket ${socket.id} de torneo:${tournamentId}`,
+    );
   }
 
   @OnEvent('tournament.started')
-  handleTournamentStarted(payload: { tournamentId: string; title: string; questId: string }) {
+  handleTournamentStarted(payload: {
+    tournamentId: string;
+    title: string;
+    questId: string;
+  }) {
     this.logger.log(`[WS] Torneo iniciado event: ${payload.tournamentId}`);
     this.server.emit('tournament_started', payload);
-    this.server.to(`tournament:${payload.tournamentId}`).emit('tournament_started', payload);
+    this.server
+      .to(`tournament:${payload.tournamentId}`)
+      .emit('tournament_started', payload);
   }
 
   @OnEvent('tournament.score_update')
-  handleTournamentScoreUpdate(payload: { tournamentId: string; scoreboard: any }) {
+  handleTournamentScoreUpdate(payload: {
+    tournamentId: string;
+    scoreboard: any;
+  }) {
     this.logger.log(`[WS] Torneo score update: ${payload.tournamentId}`);
-    this.server.to(`tournament:${payload.tournamentId}`).emit('tournament_score_update', payload);
+    this.server
+      .to(`tournament:${payload.tournamentId}`)
+      .emit('tournament_score_update', payload);
   }
 
   @OnEvent('tournament.ended')
   handleTournamentEnded(payload: { tournamentId: string; ranking: any }) {
     this.logger.log(`[WS] Torneo finalizado event: ${payload.tournamentId}`);
     this.server.emit('tournament_ended', payload);
-    this.server.to(`tournament:${payload.tournamentId}`).emit('tournament_ended', payload);
+    this.server
+      .to(`tournament:${payload.tournamentId}`)
+      .emit('tournament_ended', payload);
   }
 }

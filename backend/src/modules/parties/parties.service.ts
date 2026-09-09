@@ -42,7 +42,10 @@ export class PartiesService {
   // ─── Invite Link (≥PostgreSQL, sin Redis) ────────────────────────────────────
 
   /** Genera token de invitación válido 24hs y lo persiste en la party */
-  async generateInviteToken(partyId: string, requestingUserId: string): Promise<string> {
+  async generateInviteToken(
+    partyId: string,
+    requestingUserId: string,
+  ): Promise<string> {
     const isMember = await this.memberRepo.findOne({
       where: { partyId, userId: requestingUserId },
     });
@@ -50,13 +53,20 @@ export class PartiesService {
 
     // Reusar el token si todavía es válido
     const existing = await this.partyRepo.findOne({ where: { id: partyId } });
-    if (existing?.inviteToken && existing.inviteExpiresAt && existing.inviteExpiresAt > new Date()) {
+    if (
+      existing?.inviteToken &&
+      existing.inviteExpiresAt &&
+      existing.inviteExpiresAt > new Date()
+    ) {
       return existing.inviteToken;
     }
 
     const token = uuid().replace(/-/g, '').slice(0, 16);
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-    await this.partyRepo.update(partyId, { inviteToken: token, inviteExpiresAt: expiresAt });
+    await this.partyRepo.update(partyId, {
+      inviteToken: token,
+      inviteExpiresAt: expiresAt,
+    });
     return token;
   }
 
@@ -68,7 +78,10 @@ export class PartiesService {
         inviteExpiresAt: MoreThan(new Date()),
       },
     });
-    if (!party) throw new NotFoundException('El enlace de invitación es inválido o expiró');
+    if (!party)
+      throw new NotFoundException(
+        'El enlace de invitación es inválido o expiró',
+      );
 
     return this.joinParty(party.id, userId);
   }
@@ -127,7 +140,10 @@ export class PartiesService {
     });
   }
 
-  async acceptPartyInvitation(invitationId: string, userId: string): Promise<Party> {
+  async acceptPartyInvitation(
+    invitationId: string,
+    userId: string,
+  ): Promise<Party> {
     const invitation = await this.invitationRepo.findOne({
       where: { id: invitationId },
       relations: ['party'],
@@ -156,7 +172,10 @@ export class PartiesService {
     return joinedParty;
   }
 
-  async rejectPartyInvitation(invitationId: string, userId: string): Promise<void> {
+  async rejectPartyInvitation(
+    invitationId: string,
+    userId: string,
+  ): Promise<void> {
     const invitation = await this.invitationRepo.findOne({
       where: { id: invitationId },
     });
@@ -252,7 +271,10 @@ export class PartiesService {
       userId,
       'Creó la party (como líder)',
     );
-    this.eventEmitter.emit('party.member_joined', { partyId: result.id, userId });
+    this.eventEmitter.emit('party.member_joined', {
+      partyId: result.id,
+      userId,
+    });
 
     return result;
   }
@@ -282,6 +304,17 @@ export class PartiesService {
   assertMember(party: Party, userId: string): void {
     const isMember = party.members?.some((m) => m.userId === userId);
     if (!isMember) throw new ForbiddenException('No sos miembro de esta party');
+  }
+
+  /** Lightweight membership check (no party load) for guards / gateway. */
+  async isMember(partyId: string, userId: string): Promise<boolean> {
+    return !!(await this.memberRepo.findOne({ where: { partyId, userId } }));
+  }
+
+  async assertMemberById(partyId: string, userId: string): Promise<void> {
+    if (!(await this.isMember(partyId, userId))) {
+      throw new ForbiddenException('No sos miembro de esta party');
+    }
   }
 
   async setOnlineStatus(
@@ -324,7 +357,8 @@ export class PartiesService {
     const leader = await this.memberRepo.findOne({
       where: { partyId, userId: requesterId, role: 'leader' },
     });
-    if (!leader) throw new ForbiddenException('Solo el líder puede cerrar la party');
+    if (!leader)
+      throw new ForbiddenException('Solo el líder puede cerrar la party');
     await this.closeParty(partyId);
   }
 
@@ -351,7 +385,8 @@ export class PartiesService {
     const target = await this.memberRepo.findOne({
       where: { partyId, userId: targetUserId },
     });
-    if (!target) throw new NotFoundException('El miembro no pertenece a esta party');
+    if (!target)
+      throw new NotFoundException('El miembro no pertenece a esta party');
     await this.memberRepo.remove(target);
 
     await this.logActivity(
@@ -382,7 +417,8 @@ export class PartiesService {
       const memberRecord = await em.findOne(PartyMember, {
         where: { partyId, userId },
       });
-      if (!memberRecord) throw new NotFoundException('No sos miembro de esta party');
+      if (!memberRecord)
+        throw new NotFoundException('No sos miembro de esta party');
 
       if (memberRecord.role !== 'leader') {
         await em.remove(memberRecord);
@@ -404,7 +440,10 @@ export class PartiesService {
       if (rest.length === 0) {
         // Estaba solo → cerrar party
         await em.remove(memberRecord);
-        await em.update(Party, partyId, { status: 'closed', closedAt: new Date() });
+        await em.update(Party, partyId, {
+          status: 'closed',
+          closedAt: new Date(),
+        });
         deferredActivities.push({
           type: 'party_status_changed',
           userId,
@@ -442,13 +481,22 @@ export class PartiesService {
     }
   }
 
-  async updateVisibility(partyId: string, userId: string, isPrivate: boolean): Promise<void> {
+  async updateVisibility(
+    partyId: string,
+    userId: string,
+    isPrivate: boolean,
+  ): Promise<void> {
     const leader = await this.memberRepo.findOne({
       where: { partyId, userId, role: 'leader' },
     });
-    if (!leader) throw new ForbiddenException('Solo el líder puede cambiar la visibilidad de la party');
+    if (!leader)
+      throw new ForbiddenException(
+        'Solo el líder puede cambiar la visibilidad de la party',
+      );
 
-    const currentParty = await this.partyRepo.findOne({ where: { id: partyId } });
+    const currentParty = await this.partyRepo.findOne({
+      where: { id: partyId },
+    });
     const oldVisibility = currentParty?.isPrivate ?? false;
 
     await this.partyRepo.update(partyId, { isPrivate });
@@ -464,11 +512,7 @@ export class PartiesService {
     }
   }
 
-  async addTextChatMessage(
-    partyId: string,
-    userId: string,
-    text: string,
-  ) {
+  async addTextChatMessage(partyId: string, userId: string, text: string) {
     const msg = this.chatRepo.create({
       partyId,
       userId,
@@ -510,15 +554,14 @@ export class PartiesService {
       relations: ['user'],
     });
     const response = presentChatMessage(full as ChatMessage);
-    this.eventEmitter.emit('party.chat_message', { partyId, message: response });
+    this.eventEmitter.emit('party.chat_message', {
+      partyId,
+      message: response,
+    });
     return response;
   }
 
-  async addChatMessage(
-    partyId: string,
-    userId: string,
-    text: string,
-  ) {
+  async addChatMessage(partyId: string, userId: string, text: string) {
     return this.addTextChatMessage(partyId, userId, text);
   }
 
@@ -565,7 +608,10 @@ export class PartiesService {
   /**
    * Obtiene el historial de actividades de una party
    */
-  async getActivityHistory(partyId: string, limit = 50): Promise<PartyActivity[]> {
+  async getActivityHistory(
+    partyId: string,
+    limit = 50,
+  ): Promise<PartyActivity[]> {
     return this.activityRepo.find({
       where: { partyId },
       relations: ['user'],
@@ -615,9 +661,7 @@ export class PartiesService {
     const parties = await qb.getMany();
 
     // Filtrar solo las que aun tienen slots libres
-    return parties.filter(
-      (p) => p.members.length < p.maxMembers,
-    );
+    return parties.filter((p) => p.members.length < p.maxMembers);
   }
 
   /**
@@ -667,7 +711,8 @@ export class PartiesService {
         where: { id: partyId },
         relations: ['subject', 'members', 'members.user', 'quests'],
       });
-      if (!updated) throw new NotFoundException('Party no encontrada tras unirse');
+      if (!updated)
+        throw new NotFoundException('Party no encontrada tras unirse');
 
       return updated;
     });

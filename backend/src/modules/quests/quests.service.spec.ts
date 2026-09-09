@@ -41,12 +41,21 @@ describe('QuestsService AI abstraction', () => {
             update: jest.fn(),
             findOne: jest.fn(),
             find: jest.fn(),
+            count: jest.fn().mockResolvedValue(0),
             createQueryBuilder: jest.fn(),
           },
         },
         { provide: getRepositoryToken(QuizQuestion), useValue: {} },
         { provide: getRepositoryToken(QuizOption), useValue: {} },
-        { provide: getRepositoryToken(PlayerResult), useValue: { findOne: jest.fn(), update: jest.fn(), save: jest.fn(), create: jest.fn((value) => value) } },
+        {
+          provide: getRepositoryToken(PlayerResult),
+          useValue: {
+            findOne: jest.fn(),
+            update: jest.fn(),
+            save: jest.fn(),
+            create: jest.fn((value) => value),
+          },
+        },
         {
           provide: DataSource,
           useValue: {
@@ -190,10 +199,12 @@ describe('QuestsService AI abstraction', () => {
   });
 
   it('reads pdf bytes from disk-backed uploads before delegating to AI', async () => {
-    const pdfBuffer = Buffer.from('pdf from disk');
+    const pdfBuffer = Buffer.from('%PDF-1.4 pdf from disk');
     (fs.readFile as jest.Mock).mockResolvedValue(pdfBuffer);
     markitdownService.toMarkdown.mockResolvedValue('# Apunte\n'.repeat(40));
-    partiesService.findById.mockResolvedValue({ subjectId: 'subject-1' } as any);
+    partiesService.findById.mockResolvedValue({
+      subjectId: 'subject-1',
+    } as any);
     questRepo.save.mockResolvedValue({ id: 'quest-3' } as Quest);
     (aiService.generateQuestionsFromText as jest.Mock).mockResolvedValue([
       {

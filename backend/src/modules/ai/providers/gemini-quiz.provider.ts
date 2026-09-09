@@ -71,19 +71,22 @@ export class GeminiQuizProvider implements QuizAiProvider {
     const model = genAI.getGenerativeModel({
       model:
         options?.model ?? this.cfg.get('GEMINI_MODEL', 'gemini-flash-latest'),
+      // Rules go in systemInstruction; only the (untrusted) study material is
+      // sent as content → the model treats it as data, not instructions.
+      systemInstruction: QUIZ_PROMPT,
       generationConfig: {
         temperature: options?.temperature ?? 0.2,
         maxOutputTokens: Number(this.cfg.get('AI_MAX_OUTPUT_TOKENS', 8192)),
       },
     });
 
-    const fullPrompt = `${QUIZ_PROMPT}\n\n${buildQuizUserPrompt(chunk, options)}`;
+    const userPrompt = buildQuizUserPrompt(chunk, options);
 
     const MAX_ATTEMPTS = 4;
     let lastErr: unknown;
     for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
       try {
-        const result = await model.generateContent(fullPrompt);
+        const result = await model.generateContent(userPrompt);
         return safeParseQuestionsJson(result.response.text());
       } catch (err: unknown) {
         lastErr = err;

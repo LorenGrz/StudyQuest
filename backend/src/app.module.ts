@@ -4,17 +4,18 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Module } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname, resolve } from 'path';
-import { v4 as uuid } from 'uuid';
+import { resolve } from 'path';
+import { safeUploadFilename } from './common/upload.util';
 
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -30,7 +31,11 @@ import { TournamentsModule } from './modules/tournaments/tournaments.module';
 
 @Module({
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    // Bind the throttler globally — `ThrottlerModule.forRoot` alone does nothing.
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+  ],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
@@ -79,15 +84,17 @@ import { TournamentsModule } from './modules/tournaments/tournaments.module';
       },
     }),
 
-    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
+    ThrottlerModule.forRoot([
+      { name: 'default', ttl: 60_000, limit: 100 },
+      { name: 'strict', ttl: 60_000, limit: 10 },
+    ]),
     EventEmitterModule.forRoot(),
     ScheduleModule.forRoot(),
 
     MulterModule.register({
       storage: diskStorage({
         destination: './uploads',
-        filename: (_req, file, cb) =>
-          cb(null, `${uuid()}${extname(file.originalname)}`),
+        filename: (_req, file, cb) => cb(null, safeUploadFilename(file)),
       }),
       fileFilter: (_req, file, cb) => {
         const allowed = [

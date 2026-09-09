@@ -2,12 +2,14 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
   Logger,
 } from '@nestjs/common';
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, MoreThan } from 'typeorm';
+import { looksLikePdf } from '../../common/upload.util';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Quest } from './quest.entity';
 import { QuizQuestion } from './quiz-question.entity';
@@ -28,6 +30,8 @@ import {
 const XP_CORRECT_BASE = 100;
 const XP_SPEED_BONUS = 50;
 const XP_SPEED_FAST_MS = 5000;
+
+const QUEST_DAILY_LIMIT = Number(process.env.QUEST_DAILY_LIMIT ?? 20);
 
 // Below this, assume MarkItDown failed to extract anything useful (e.g. a scanned
 // PDF) and fall back to the native multimodal PDF path.
@@ -80,7 +84,20 @@ export class QuestsService {
       throw new BadRequestException('Debés proporcionar texto o un PDF');
     }
 
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const todayCount = await this.questRepo.count({
+      where: { createdBy: userId, createdAt: MoreThan(since) },
+    });
+    if (todayCount >= QUEST_DAILY_LIMIT) {
+      throw new ForbiddenException(
+        `Alcanzaste el límite diario de generación (${QUEST_DAILY_LIMIT}). Probá de nuevo mañana.`,
+      );
+    }
+
     const pdfBuffer = await this.resolvePdfBuffer(file);
+    if (pdfBuffer && !looksLikePdf(pdfBuffer)) {
+      throw new BadRequestException('El archivo no es un PDF válido');
+    }
 
     const quest = await this.questRepo.save(
       this.questRepo.create({
@@ -89,13 +106,19 @@ export class QuestsService {
         subjectId: party.subjectId as string,
         createdBy: userId,
         status: 'generating',
-        sourcePdfUrl: file ? `/uploads/${this.resolveUploadedFilename(file)}` : null,
+        sourcePdfUrl: file
+          ? `/uploads/${this.resolveUploadedFilename(file)}`
+          : null,
       }),
     );
 
-    this.generateInBackground(quest.id, dto.textContent, pdfBuffer, dto.title).catch(
-      (err) =>
-        this.logger.error(`Fallo generación quest ${quest.id}: ${err.message}`),
+    this.generateInBackground(
+      quest.id,
+      dto.textContent,
+      pdfBuffer,
+      dto.title,
+    ).catch((err) =>
+      this.logger.error(`Fallo generación quest ${quest.id}: ${err.message}`),
     );
 
     return quest;
@@ -161,7 +184,10 @@ export class QuestsService {
           : typeof err === 'string'
             ? err
             : JSON.stringify(err);
-      this.logger.error(`Quest ${questId} generation failed: ${msg}`, err instanceof Error ? err.stack : undefined);
+      this.logger.error(
+        `Quest ${questId} generation failed: ${msg}`,
+        err instanceof Error ? err.stack : undefined,
+      );
       await this.questRepo.update(questId, {
         status: 'failed',
         errorMessage: msg,
@@ -183,7 +209,10 @@ export class QuestsService {
     try {
       const markdown = await this.markitdownService.toMarkdown(pdfBuffer);
       if (markdown.trim().length >= MIN_MARKDOWN_CHARS) {
-        return await this.aiService.generateQuestionsFromText(markdown, options);
+        return await this.aiService.generateQuestionsFromText(
+          markdown,
+          options,
+        );
       }
       this.logger.warn(
         `markitdown devolvió muy poco texto (${markdown.trim().length} chars); uso el PDF nativo`,
@@ -297,7 +326,10 @@ export class QuestsService {
     };
   }
 
-  async startQuest(questId: string, userId: string): Promise<QuestAttemptSummary> {
+  async startQuest(
+    questId: string,
+    userId: string,
+  ): Promise<QuestAttemptSummary> {
     const quest = await this.findById(questId);
     this.assertQuestPlayable(quest);
 
@@ -433,8 +465,10 @@ export class QuestsService {
       throw new BadRequestException('No hay un intento activo para completar');
     }
 
-    const answeredQuestionIndices = this.getAnsweredQuestionIndices(activeAttempt);
-    const totalQuestions = activeAttempt.totalQuestions || quest.questions.length;
+    const answeredQuestionIndices =
+      this.getAnsweredQuestionIndices(activeAttempt);
+    const totalQuestions =
+      activeAttempt.totalQuestions || quest.questions.length;
     if (answeredQuestionIndices.length < totalQuestions) {
       throw new BadRequestException(
         'El intento todavía no tiene todas las preguntas respondidas',
@@ -577,7 +611,10 @@ export class QuestsService {
     };
   }
 
-  private buildLeaderboard(results: PlayerResult[], questStatus: Quest['status']) {
+  private buildLeaderboard(
+    results: PlayerResult[],
+    questStatus: Quest['status'],
+  ) {
     const bestByUser = new Map<
       string,
       { userId: string; username: string; score: number }
@@ -592,9 +629,7 @@ export class QuestsService {
       }
       const existing = bestByUser.get(result.userId);
       const username =
-        result.user?.displayName ??
-        result.user?.username ??
-        result.userId;
+        result.user?.displayName ?? result.user?.username ?? result.userId;
 
       if (!existing || result.score > existing.score) {
         bestByUser.set(result.userId, {
@@ -610,8 +645,7 @@ export class QuestsService {
 
   private isStructuredAttempt(result: PlayerResult): boolean {
     return (
-      result.totalQuestions > 0 &&
-      Array.isArray(result.answeredQuestionIndices)
+      result.totalQuestions > 0 && Array.isArray(result.answeredQuestionIndices)
     );
   }
 
@@ -639,4 +673,3 @@ export class QuestsService {
     await this.questRepo.remove(quest);
   }
 }
-

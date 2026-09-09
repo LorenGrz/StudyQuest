@@ -15,12 +15,12 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { QuestsService } from './quests.service';
 import { CreateQuestDto, SubmitAnswerDto } from '../../common/dto';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
-import { v4 as uuid } from 'uuid';
+import { safeUploadFilename } from '../../common/upload.util';
 
 @ApiTags('quests')
 @ApiBearerAuth()
@@ -29,22 +29,24 @@ import { v4 as uuid } from 'uuid';
 export class QuestsController {
   private static questUploadStorage = diskStorage({
     destination: './uploads',
-    filename: (_req, file, cb) => cb(null, `${uuid()}${extname(file.originalname)}`),
+    filename: (_req, file, cb) => cb(null, safeUploadFilename(file)),
   });
 
   constructor(private readonly questsService: QuestsService) {}
 
+  // AI generation is the expensive path: cap it hard per client.
+  @Throttle({ strict: { limit: 15, ttl: 3_600_000 } })
   @Post()
   @ApiConsumes('multipart/form-data', 'application/json')
-  @UseInterceptors(FileInterceptor('file', { storage: QuestsController.questUploadStorage }))
+  @UseInterceptors(
+    FileInterceptor('file', { storage: QuestsController.questUploadStorage }),
+  )
   create(
     @Request() req: any,
     @Body() dto: CreateQuestDto,
     @UploadedFile(
       new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }),
-        ],
+        validators: [new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 })],
         fileIsRequired: false,
       }),
     )
@@ -86,4 +88,3 @@ export class QuestsController {
     return this.questsService.deleteQuest(id, req.user.userId);
   }
 }
-

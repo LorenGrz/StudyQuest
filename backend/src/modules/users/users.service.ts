@@ -147,7 +147,9 @@ export class UsersService {
       date.setHours(0, 0, 0, 0);
       date.setDate(date.getDate() - (6 - index));
       const iso = date.toISOString().slice(0, 10);
-      const row = weeklyRows.find((r: any) => String(r.day).slice(0, 10) === iso);
+      const row = weeklyRows.find(
+        (r: any) => String(r.day).slice(0, 10) === iso,
+      );
       const minutes = row ? Math.round(row.total_time_ms / 60000) : 0;
       return { day: iso, minutes, totalTimeMs: row?.total_time_ms ?? 0 };
     });
@@ -170,12 +172,19 @@ export class UsersService {
     };
   }
 
-  async createFriendRequest(requesterId: string, requesteeUsername: string): Promise<FriendRequest> {
+  async createFriendRequest(
+    requesterId: string,
+    requesteeUsername: string,
+  ): Promise<FriendRequest> {
     if (requesterId === requesteeUsername) {
-      throw new BadRequestException('No podés enviarte una solicitud a vos mismo');
+      throw new BadRequestException(
+        'No podés enviarte una solicitud a vos mismo',
+      );
     }
 
-    const targetUser = await this.userRepo.findOneBy({ username: requesteeUsername });
+    const targetUser = await this.userRepo.findOneBy({
+      username: requesteeUsername,
+    });
     if (!targetUser) {
       throw new NotFoundException('Usuario destino no encontrado');
     }
@@ -185,7 +194,11 @@ export class UsersService {
     const existingAccepted = await this.friendRequestRepo.findOne({
       where: [
         { requesterId: requesterId, requesteeId, status: 'accepted' },
-        { requesterId: requesteeId, requesteeId: requesterId, status: 'accepted' },
+        {
+          requesterId: requesteeId,
+          requesteeId: requesterId,
+          status: 'accepted',
+        },
       ],
     });
     if (existingAccepted) {
@@ -237,7 +250,11 @@ export class UsersService {
     });
   }
 
-  async respondFriendRequest(requestId: string, userId: string, accept: boolean): Promise<FriendRequest> {
+  async respondFriendRequest(
+    requestId: string,
+    userId: string,
+    accept: boolean,
+  ): Promise<FriendRequest> {
     const request = await this.friendRequestRepo.findOne({
       where: { id: requestId },
       relations: ['requestee', 'requester'],
@@ -266,7 +283,9 @@ export class UsersService {
     });
 
     const friendIds = acceptedRequests.map((request) =>
-      request.requesterId === userId ? request.requesteeId : request.requesterId,
+      request.requesterId === userId
+        ? request.requesteeId
+        : request.requesterId,
     );
     if (!friendIds.length) return [];
 
@@ -375,7 +394,10 @@ export class UsersService {
     return { titles: titleItems, borders: borderItems };
   }
 
-  async setActiveCosmetics(userId: string, dto: SetActiveCosmeticsDto): Promise<User> {
+  async setActiveCosmetics(
+    userId: string,
+    dto: SetActiveCosmeticsDto,
+  ): Promise<User> {
     const user = await this.userRepo.findOneBy({ id: userId });
     if (!user) throw new NotFoundException('Usuario no encontrado');
 
@@ -386,8 +408,12 @@ export class UsersService {
       borderImageUrl: null,
     };
 
-    const requestedTitleCode = dto.titleCode === undefined ? current.titleCode : (dto.titleCode || null);
-    const requestedBorderCode = dto.borderCode === undefined ? current.borderCode : (dto.borderCode || null);
+    const requestedTitleCode =
+      dto.titleCode === undefined ? current.titleCode : dto.titleCode || null;
+    const requestedBorderCode =
+      dto.borderCode === undefined
+        ? current.borderCode
+        : dto.borderCode || null;
 
     let titleText = current.titleText;
     let borderImageUrl = current.borderImageUrl;
@@ -551,7 +577,11 @@ export class UsersService {
     // 3. Emit event so achievements service can process league promotions
     if (delta > 0) {
       const after = await this.getElo(userId);
-      this.eventEmitter.emit('user.elo_updated', { userId, eloBefore: before, eloAfter: after });
+      this.eventEmitter.emit('user.elo_updated', {
+        userId,
+        eloBefore: before,
+        eloAfter: after,
+      });
     }
   }
 
@@ -564,9 +594,7 @@ export class UsersService {
     return user?.elo ?? DEFAULT_ELO;
   }
 
-  async getGlobalLeaderboard(
-    limit = 20,
-  ): Promise<
+  async getGlobalLeaderboard(limit = 20): Promise<
     {
       rank: number;
       userId: string;
@@ -653,18 +681,23 @@ export class UsersService {
       .execute();
   }
 
-  async removeRefreshToken(userId: string, hashedToken: string): Promise<void> {
-    await this.userRepo
-      .createQueryBuilder()
-      .update()
-      .set({
-        refreshTokens: () =>
-          `(SELECT COALESCE(jsonb_agg(t), '[]'::jsonb)
-            FROM jsonb_array_elements_text(COALESCE(refresh_tokens, '[]'::jsonb)) AS t
-            WHERE t <> '${hashedToken}')`,
-      })
-      .where('id = :id', { id: userId })
-      .execute();
+  // `token` is the PLAINTEXT refresh token. Stored entries are salted bcrypt
+  // hashes, so we must bcrypt.compare each one rather than string-match.
+  async removeRefreshToken(userId: string, token: string): Promise<void> {
+    const user = await this.userRepo
+      .createQueryBuilder('u')
+      .addSelect('u.refreshTokens')
+      .where('u.id = :id', { id: userId })
+      .getOne();
+    if (!user?.refreshTokens?.length) return;
+
+    const kept: string[] = [];
+    for (const stored of user.refreshTokens) {
+      if (!(await bcrypt.compare(token, stored))) kept.push(stored);
+    }
+    if (kept.length !== user.refreshTokens.length) {
+      await this.userRepo.update(userId, { refreshTokens: kept });
+    }
   }
 
   async validateRefreshToken(userId: string, token: string): Promise<boolean> {

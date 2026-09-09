@@ -1,12 +1,9 @@
 import { PartiesController } from './parties.controller';
 
-jest.mock('uuid', () => ({
-  v4: () => 'mock-uuid',
-}));
-
 describe('PartiesController uploads', () => {
   const partiesService = {
     addBinaryChatMessage: jest.fn(),
+    assertMemberById: jest.fn().mockResolvedValue(undefined),
   } as any;
 
   let controller: PartiesController;

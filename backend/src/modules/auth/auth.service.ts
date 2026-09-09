@@ -25,28 +25,44 @@ export class AuthService {
   }
 
   async refresh(token: string) {
+    let payload: { sub: string; type?: string };
     try {
-      const payload = await this.jwtService.verifyAsync(token);
-      const userId = payload.sub;
-      const valid = await this.usersService.validateRefreshToken(userId, token);
-      if (!valid) throw new UnauthorizedException('Refresh token inválido');
-      const user = await this.usersService.findById(userId);
-      return this.buildTokens(user.id, user.email, user.username, user.role);
+      payload = await this.jwtService.verifyAsync(token);
     } catch {
       throw new UnauthorizedException('Refresh token inválido');
     }
+    if (payload.type !== 'refresh') {
+      throw new UnauthorizedException('Refresh token inválido');
+    }
+    const userId = payload.sub;
+    const valid = await this.usersService.validateRefreshToken(userId, token);
+    if (!valid) throw new UnauthorizedException('Refresh token inválido');
+    // Rotate: revoke the token just presented so it can't be replayed.
+    await this.usersService.removeRefreshToken(userId, token);
+    const user = await this.usersService.findById(userId);
+    return this.buildTokens(user.id, user.email, user.username, user.role);
   }
 
   async logout(userId: string, refreshToken: string) {
-    const hashed = await bcrypt.hash(refreshToken, 10);
-    await this.usersService.removeRefreshToken(userId, hashed);
+    await this.usersService.removeRefreshToken(userId, refreshToken);
   }
 
-  private async buildTokens(userId: string, email: string, username: string, role = 'USER') {
-    const payload = { sub: userId, email, username, role };
+  private async buildTokens(
+    userId: string,
+    email: string,
+    username: string,
+    role = 'USER',
+  ) {
+    const base = { sub: userId, email, username, role };
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(payload, { expiresIn: '15m' }),
-      this.jwtService.signAsync(payload, { expiresIn: '30d' }),
+      this.jwtService.signAsync(
+        { ...base, type: 'access' },
+        { expiresIn: '15m' },
+      ),
+      this.jwtService.signAsync(
+        { ...base, type: 'refresh' },
+        { expiresIn: '30d' },
+      ),
     ]);
     const hashedRefresh = await bcrypt.hash(refreshToken, 10);
     await this.usersService.saveRefreshToken(userId, hashedRefresh);

@@ -10,6 +10,7 @@ import {
   IsOptional,
   IsBoolean,
   IsUUID,
+  Matches,
   Min,
   Max,
   ValidateNested,
@@ -82,7 +83,12 @@ export class UpdateProfileDto {
   @IsOptional() @IsString() @MinLength(3) @MaxLength(30) username?: string;
   @IsOptional() @IsString() @MaxLength(500) bio?: string;
   @IsOptional() @IsString() @MaxLength(60) displayName?: string;
-  @IsOptional() @IsString() avatarUrl?: string;
+  // Only a server-produced avatar path is accepted here; real uploads go
+  // through POST /users/me/avatar.
+  @IsOptional()
+  @IsString()
+  @Matches(/^\/uploads\/avatars\/[\w.-]+$/)
+  avatarUrl?: string;
   @IsOptional() @IsString() university?: string;
   @IsOptional() @IsIn(CAREERS) career?: string;
   @IsOptional() @IsInt() @Min(1) @Max(7) year?: number;

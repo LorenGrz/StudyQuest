@@ -35,14 +35,16 @@ services:
         value: "true"
       - key: TYPEORM_LOGGING
         value: "false"
-      - key: JWT_EXPIRES_IN
-        value: 7d
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://lorengrz.github.io
       - key: GEMINI_MODEL
         value: gemini-flash-latest
       - key: MARKITDOWN_URL
         value: https://studyquest-markitdown.onrender.com
       - key: QUEST_RETENTION_DAYS
         value: "7"
+      - key: QUEST_DAILY_LIMIT
+        value: "20"
       - key: DATABASE_URL
         sync: false
       - key: JWT_SECRET

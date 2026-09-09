@@ -8,6 +8,7 @@ import helmet from 'helmet';
 import express from 'express';
 import { join } from 'path';
 import { AppModule } from './app.module';
+import { corsOrigin } from './common/cors';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,7 +16,7 @@ async function bootstrap() {
   const port = cfg.get<number>('PORT', 3000);
 
   app.enableCors({
-    origin: true,
+    origin: corsOrigin,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -23,7 +24,17 @@ async function bootstrap() {
   });
 
   app.use(helmet({ crossOriginResourcePolicy: false }));
-  app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
+  // Serve uploads as untrusted downloads: never render an uploaded .html/.svg
+  // inline, and don't let the browser sniff a different content type.
+  app.use(
+    '/uploads',
+    express.static(join(process.cwd(), 'uploads'), {
+      setHeaders: (res) => {
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('Content-Disposition', 'attachment');
+      },
+    }),
+  );
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
