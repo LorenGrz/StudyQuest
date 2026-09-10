@@ -12,6 +12,7 @@ import { MarkitdownService } from '../ai/markitdown.service';
 import { PartiesService } from '../parties/parties.service';
 import { UsersService } from '../users/users.service';
 import { SkillTreeService } from '../skill-tree/skill-tree.service';
+import { BillingService } from '../billing/billing.service';
 
 jest.mock('uuid', () => ({
   v4: () => 'mock-uuid',
@@ -87,6 +88,18 @@ describe('QuestsService attempts and progress', () => {
           provide: SkillTreeService,
           useValue: {
             awardTopicXp: jest.fn().mockResolvedValue([]),
+          },
+        },
+        {
+          provide: BillingService,
+          useValue: {
+            getLimits: jest.fn().mockReturnValue({
+              questsPerDay: 20,
+              maxUploadMb: 10,
+              maxInstructionsChars: 500,
+              aiModelTier: 'lite',
+              partySizeMax: 6,
+            }),
           },
         },
         { provide: EventEmitter2, useValue: { emit: jest.fn() } },

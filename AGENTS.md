@@ -182,7 +182,8 @@ In Docker Compose those are already provided for the `web` service.
 
 ### Quests
 
-- Users can create quests from pasted text or uploaded PDF
+- Users create quests by uploading a source document (PDF, DOCX/DOC, MD, TXT, RTF, PPTX, CSV, HTML, EPUB, XLSX — anything MarkItDown parses). The optional "instrucciones / temas" text field is question guidance (topics/focus/difficulty), not the study source.
+- Subscription plans are manual tiers (`free` / `pro`) — no payment processor. `src/common/plans.ts` is the single source of truth for per-plan limits (quests/day, upload MB, instructions length, AI model tier, party size). `BillingModule` exposes `GET/POST /billing/*`; `pro` is granted by a promo code or an admin and lapses at `planExpiresAt`.
 - Party chat also supports file and audio uploads
 - Backend stores uploaded quest source files under `/uploads/<filename>`
 

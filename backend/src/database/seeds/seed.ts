@@ -46,6 +46,8 @@ import { UserInventory } from '../../modules/cosmetics/user-inventory.entity';
 import { ProfileBorder } from '../../modules/cosmetics/profile-border.entity';
 import { Tournament } from '../../modules/tournaments/tournament.entity';
 import { TournamentParticipant } from '../../modules/tournaments/tournament-participant.entity';
+import { PromoCode } from '../../modules/billing/promo-code.entity';
+import { PromoRedemption } from '../../modules/billing/promo-redemption.entity';
 import { DEFAULT_ELO } from '../../common/leagues';
 import { CAREER_CATALOG } from './data/subjects-catalog';
 
@@ -93,6 +95,8 @@ const AppDataSource = new DataSource({
     ProfileBorder,
     Tournament,
     TournamentParticipant,
+    PromoCode,
+    PromoRedemption,
   ],
   synchronize: false,
   logging: false,
@@ -108,6 +112,19 @@ async function ensureBootstrapSchema(): Promise<void> {
     ALTER TABLE IF EXISTS users
     ADD COLUMN IF NOT EXISTS active_cosmetics jsonb
     DEFAULT '{"titleCode":null,"titleText":null}'::jsonb;
+  `);
+
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS users
+    ADD COLUMN IF NOT EXISTS plan varchar(16) DEFAULT 'free';
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS users
+    ADD COLUMN IF NOT EXISTS plan_expires_at timestamptz;
+  `);
+  await AppDataSource.query(`
+    ALTER TABLE IF EXISTS users
+    ADD COLUMN IF NOT EXISTS plan_source varchar(16);
   `);
 
   await AppDataSource.query(`
@@ -1584,6 +1601,33 @@ async function seed() {
     const highestTier = earnedTiers[earnedTiers.length - 1];
     console.log(
       `   ✔  ${u.displayName} (ELO ${elo}) → hasta ${highestTier?.borderCode ?? 'ninguno'}`,
+    );
+  }
+
+  // ── Códigos promocionales de demo ───────────────────────────────────────────
+  console.log('\n🎟️   Creando códigos promocionales de demo...');
+  const promoRepo = AppDataSource.getRepository(PromoCode);
+  const demoPromos = [
+    { code: 'STUDYQUEST-PRO-30', durationDays: 30, maxRedemptions: 100 },
+    { code: 'STUDYQUEST-PRO-7', durationDays: 7, maxRedemptions: 500 },
+  ];
+  for (const p of demoPromos) {
+    const exists = await promoRepo.findOneBy({ code: p.code });
+    if (exists) {
+      console.log(`   ⚠️  ${p.code} ya existe — omitido`);
+      continue;
+    }
+    await promoRepo.save(
+      promoRepo.create({
+        code: p.code,
+        plan: 'pro',
+        durationDays: p.durationDays,
+        maxRedemptions: p.maxRedemptions,
+        isActive: true,
+      }),
+    );
+    console.log(
+      `   ✔  ${p.code} (${p.durationDays} días, ${p.maxRedemptions} usos)`,
     );
   }
 

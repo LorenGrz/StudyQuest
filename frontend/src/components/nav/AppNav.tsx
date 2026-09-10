@@ -7,6 +7,7 @@ import {
   BookOpen,
   Users,
   Trophy,
+  Sparkles,
   Settings,
   LogOut,
 } from 'lucide-react'
@@ -86,6 +87,7 @@ export function DesktopSidebar() {
       </nav>
 
       <div className="mt-auto px-3 pb-4 pt-2 border-t border-edge flex flex-col gap-1">
+        <SidebarLink path="/plan" label="Plan" Icon={Sparkles} />
         <SidebarLink path="/settings" label="Ajustes" Icon={Settings} />
         <button
           onClick={() => void logout()}

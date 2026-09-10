@@ -18,6 +18,7 @@ import {
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CAREERS } from '../careers';
+import { PLANS } from '../plans';
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -410,4 +411,28 @@ export interface SkillNodeWithProgress {
   unlocked: boolean;
   progressPercent: number;
   prerequisitesMet: boolean;
+}
+
+// ─── Billing / plans ─────────────────────────────────────────────────────────
+
+export class RedeemPromoDto {
+  @IsString()
+  @MinLength(3)
+  @MaxLength(40)
+  code: string;
+}
+
+export class GrantPlanDto {
+  @IsUUID() userId: string;
+  @IsIn(PLANS) plan: string;
+  /** 0 (or omitted for a paid plan) → no expiry. */
+  @IsOptional() @IsInt() @Min(0) @Max(3650) days?: number;
+}
+
+export class CreatePromoCodeDto {
+  @IsString() @MinLength(3) @MaxLength(40) code: string;
+  @IsIn(PLANS) @IsOptional() plan?: string;
+  @IsInt() @Min(1) @Max(3650) durationDays: number;
+  @IsOptional() @IsInt() @Min(1) @Max(100_000) maxRedemptions?: number;
+  @IsOptional() @IsInt() @Min(1) @Max(3650) expiresInDays?: number;
 }

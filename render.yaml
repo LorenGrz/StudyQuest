@@ -43,6 +43,9 @@ services:
         value: gemini-flash-lite-latest
       - key: GEMINI_FALLBACK_MODELS
         value: gemini-3.5-flash-lite,gemini-flash-latest
+      # Modelo del plan Pro (tier "full").
+      - key: GEMINI_MODEL_PRO
+        value: gemini-flash-latest
       - key: MARKITDOWN_URL
         value: https://studyquest-markitdown.onrender.com
       - key: QUEST_RETENTION_DAYS

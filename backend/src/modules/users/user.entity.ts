@@ -80,6 +80,27 @@ export class User {
   @Column({ type: 'varchar', length: 10, default: Role.USER })
   role: Role;
 
+  // ─── Subscription plan (manual tiers, no payment processor) ───────────────
+  @Column({ name: 'plan', type: 'varchar', length: 16, default: 'free' })
+  plan: string;
+
+  @Column({
+    name: 'plan_expires_at',
+    type: 'timestamptz',
+    nullable: true,
+    default: null,
+  })
+  planExpiresAt: Date | null;
+
+  @Column({
+    name: 'plan_source',
+    type: 'varchar',
+    length: 16,
+    nullable: true,
+    default: null,
+  })
+  planSource: string | null;
+
   @ManyToMany(() => Subject, (s) => s.enrolledUsers, { eager: false })
   @JoinTable({
     name: 'user_subjects',

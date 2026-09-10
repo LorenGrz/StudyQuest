@@ -21,6 +21,7 @@ import { QuizGenerationOptions, RawQuestion } from '../ai/ai.types';
 import { PartiesService } from '../parties/parties.service';
 import { UsersService } from '../users/users.service';
 import { SkillTreeService } from '../skill-tree/skill-tree.service';
+import { BillingService } from '../billing/billing.service';
 import { CreateQuestDto, SubmitAnswerDto } from '../../common/dto';
 import {
   calculateSoloEloDelta,
@@ -30,8 +31,6 @@ import {
 const XP_CORRECT_BASE = 100;
 const XP_SPEED_BONUS = 50;
 const XP_SPEED_FAST_MS = 5000;
-
-const QUEST_DAILY_LIMIT = Number(process.env.QUEST_DAILY_LIMIT ?? 20);
 
 // Below this, assume MarkItDown failed to extract anything useful (e.g. a scanned
 // PDF) and fall back to the native multimodal PDF path.
@@ -69,6 +68,7 @@ export class QuestsService {
     private readonly partiesService: PartiesService,
     private readonly usersService: UsersService,
     private readonly skillTreeService: SkillTreeService,
+    private readonly billingService: BillingService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -90,18 +90,37 @@ export class QuestsService {
       );
     }
 
-    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    const todayCount = await this.questRepo.count({
-      where: { createdBy: userId, createdAt: MoreThan(since) },
-    });
-    if (todayCount >= QUEST_DAILY_LIMIT) {
+    const user = await this.usersService.findById(userId);
+    const limits = this.billingService.getLimits(user);
+
+    if (file.size && file.size > limits.maxUploadMb * 1024 * 1024) {
       throw new ForbiddenException(
-        `Alcanzaste el límite diario de generación (${QUEST_DAILY_LIMIT}). Probá de nuevo mañana.`,
+        `El archivo supera el límite de tu plan (${limits.maxUploadMb} MB). Pasá a Pro para subir archivos más grandes.`,
       );
     }
 
     const instructions = dto.instructions?.trim() || null;
+    if (instructions && instructions.length > limits.maxInstructionsChars) {
+      throw new ForbiddenException(
+        `Las instrucciones superan el límite de tu plan (${limits.maxInstructionsChars} caracteres). Pasá a Pro para instrucciones más largas.`,
+      );
+    }
+
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const todayCount = await this.questRepo.count({
+      where: { createdBy: userId, createdAt: MoreThan(since) },
+    });
+    if (todayCount >= limits.questsPerDay) {
+      throw new ForbiddenException(
+        `Alcanzaste el límite diario de generación de tu plan (${limits.questsPerDay}). Probá de nuevo mañana o pasá a Pro.`,
+      );
+    }
+
     const uploadedFilename = this.resolveUploadedFilename(file);
+    const proModel =
+      limits.aiModelTier === 'full'
+        ? (process.env.GEMINI_MODEL_PRO ?? 'gemini-flash-latest')
+        : undefined;
 
     const quest = await this.questRepo.save(
       this.questRepo.create({
@@ -122,6 +141,7 @@ export class QuestsService {
       filename: file.originalname ?? uploadedFilename,
       instructions,
       questTitle: dto.title,
+      model: proModel,
     }).catch((err) =>
       this.logger.error(`Fallo generación quest ${quest.id}: ${err.message}`),
     );
@@ -136,12 +156,14 @@ export class QuestsService {
       filename: string;
       instructions: string | null;
       questTitle?: string;
+      model?: string;
     },
   ): Promise<void> {
     try {
       const isPdf = looksLikePdf(input.sourceBuffer);
       const generationOptions: QuizGenerationOptions = {
         instructions: input.instructions ?? undefined,
+        model: input.model,
         metadata: {
           questTitle: input.questTitle,
           sourceType: isPdf ? ('pdf' as const) : ('text' as const),

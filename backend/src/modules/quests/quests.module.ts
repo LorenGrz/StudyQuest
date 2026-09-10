@@ -11,6 +11,7 @@ import { AiModule } from '../ai/ai.module';
 import { PartiesModule } from '../parties/parties.module';
 import { UsersModule } from '../users/users.module';
 import { SkillTreeModule } from '../skill-tree/skill-tree.module';
+import { BillingModule } from '../billing/billing.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { SkillTreeModule } from '../skill-tree/skill-tree.module';
     PartiesModule,
     UsersModule,
     SkillTreeModule,
+    BillingModule,
   ],
   controllers: [QuestsController],
   providers: [QuestsService, QuestRetentionService],

@@ -28,6 +28,7 @@ import { AchievementsModule } from './modules/achievements/achievements.module';
 import { MatchmakingModule } from './gateways/matchmaking/matchmaking.module';
 import { SearchModule } from './modules/search/search.module';
 import { TournamentsModule } from './modules/tournaments/tournaments.module';
+import { BillingModule } from './modules/billing/billing.module';
 
 @Module({
   controllers: [AppController],
@@ -123,6 +124,7 @@ import { TournamentsModule } from './modules/tournaments/tournaments.module';
     MatchmakingModule,
     SearchModule,
     TournamentsModule,
+    BillingModule,
   ],
 })
 export class AppModule {}

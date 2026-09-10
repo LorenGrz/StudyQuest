@@ -12,7 +12,16 @@ import { MarkitdownService } from '../ai/markitdown.service';
 import { PartiesService } from '../parties/parties.service';
 import { UsersService } from '../users/users.service';
 import { SkillTreeService } from '../skill-tree/skill-tree.service';
+import { BillingService } from '../billing/billing.service';
 import * as fs from 'node:fs/promises';
+
+const FREE_LIMITS = {
+  questsPerDay: 20,
+  maxUploadMb: 10,
+  maxInstructionsChars: 500,
+  aiModelTier: 'lite' as const,
+  partySizeMax: 6,
+};
 
 jest.mock('node:fs/promises', () => ({
   readFile: jest.fn(),
@@ -26,6 +35,7 @@ describe('QuestsService AI abstraction', () => {
   let markitdownService: jest.Mocked<MarkitdownService>;
   let questRepo: jest.Mocked<Repository<Quest>>;
   let partiesService: jest.Mocked<PartiesService>;
+  let billingService: jest.Mocked<BillingService>;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -86,7 +96,18 @@ describe('QuestsService AI abstraction', () => {
             assertMember: jest.fn(),
           },
         },
-        { provide: UsersService, useValue: {} },
+        {
+          provide: UsersService,
+          useValue: {
+            findById: jest
+              .fn()
+              .mockResolvedValue({ plan: 'free', planExpiresAt: null }),
+          },
+        },
+        {
+          provide: BillingService,
+          useValue: { getLimits: jest.fn().mockReturnValue(FREE_LIMITS) },
+        },
         { provide: SkillTreeService, useValue: { awardTopicXp: jest.fn() } },
         { provide: EventEmitter2, useValue: { emit: jest.fn() } },
       ],
@@ -97,6 +118,7 @@ describe('QuestsService AI abstraction', () => {
     markitdownService = moduleRef.get(MarkitdownService);
     questRepo = moduleRef.get(getRepositoryToken(Quest));
     partiesService = moduleRef.get(PartiesService);
+    billingService = moduleRef.get(BillingService);
   });
 
   const rawQuestion = {
@@ -287,5 +309,54 @@ describe('QuestsService AI abstraction', () => {
         } as Express.Multer.File,
       ),
     ).rejects.toThrow(/no coincide con su extensión|documento válido/);
+  });
+
+  it('enforces the daily quest cap from the user plan limits', async () => {
+    partiesService.findById.mockResolvedValue({
+      subjectId: 'subject-1',
+    } as any);
+    billingService.getLimits.mockReturnValue({
+      ...FREE_LIMITS,
+      questsPerDay: 3,
+    });
+    (questRepo.count as jest.Mock).mockResolvedValue(3);
+
+    await expect(
+      service.createQuest(
+        { partyId: 'party-1', title: 'Quest de más' },
+        'user-1',
+        {
+          originalname: 'quest.pdf',
+          buffer: PDF_BYTES,
+        } as Express.Multer.File,
+      ),
+    ).rejects.toThrow(/límite diario/i);
+  });
+
+  it('uses the stronger model for a pro plan', async () => {
+    partiesService.findById.mockResolvedValue({
+      subjectId: 'subject-1',
+    } as any);
+    billingService.getLimits.mockReturnValue({
+      ...FREE_LIMITS,
+      aiModelTier: 'full',
+    });
+    questRepo.save.mockResolvedValue({ id: 'quest-pro' } as Quest);
+    markitdownService.toMarkdown.mockResolvedValue('# Apunte\n'.repeat(40));
+    (aiService.generateQuestionsFromText as jest.Mock).mockResolvedValue([
+      rawQuestion,
+    ]);
+
+    await service.createQuest(
+      { partyId: 'party-1', title: 'Quest Pro' },
+      'user-1',
+      { originalname: 'quest.pdf', buffer: PDF_BYTES } as Express.Multer.File,
+    );
+    await new Promise(process.nextTick);
+
+    expect(aiService.generateQuestionsFromText).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ model: expect.stringContaining('gemini') }),
+    );
   });
 });

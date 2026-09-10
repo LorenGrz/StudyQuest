@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
+import { Link } from 'react-router-dom'
+import { Sparkles, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { MobileLayout } from '../components/Layouts'
@@ -32,6 +34,17 @@ export default function SettingsPage() {
         className="flex flex-col flex-1 px-4 pb-10"
       >
         <h1 className="text-xl font-bold text-primary mt-4 mb-3">Configuración</h1>
+
+        <Link
+          to="/plan"
+          className="flex items-center justify-between gap-2 rounded-xl border border-edge bg-surface px-4 py-3 mb-2 hover:border-accent transition-colors"
+        >
+          <span className="flex items-center gap-2 text-sm font-medium text-primary">
+            <Sparkles size={16} className="text-accent-light" aria-hidden="true" />
+            Plan y límites
+          </span>
+          <ChevronRight size={16} className="text-muted" aria-hidden="true" />
+        </Link>
 
       {/*
         Single tab list — rendered once.
