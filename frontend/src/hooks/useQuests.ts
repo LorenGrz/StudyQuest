@@ -36,19 +36,19 @@ export function useQuests(partyId: string) {
 
   const uploadNote = useCallback(async (
     title: string,
-    file?: File,
-    textContent?: string,
+    file: File,
+    instructions?: string,
   ) => {
     setIsGenerating(true)
     try {
       const quest = await questService.create(
-        { partyId, title, textContent },
+        { partyId, title, instructions },
         file,
       )
       setQuests((prev) => [
         {
           ...quest,
-          sourceType: file ? 'pdf' : 'text',
+          sourceType: file.name.toLowerCase().endsWith('.pdf') ? 'pdf' : 'text',
           questionCount: 0,
           myBestScore: null,
           myLastScore: null,

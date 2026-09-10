@@ -3,17 +3,36 @@ import { Sparkles, FileText, X, Paperclip } from 'lucide-react'
 import { Button } from '../../components/UI'
 import { useFileDrop } from '../../hooks/useFileDrop'
 
-const isPdf = (file: File) =>
-  file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
+const ACCEPTED_EXTS = [
+  '.pdf', '.doc', '.docx', '.odt', '.md', '.markdown', '.txt', '.rtf',
+  '.ppt', '.pptx', '.csv', '.html', '.epub',
+]
+
+const ACCEPT_ATTR = [
+  ...ACCEPTED_EXTS,
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  'text/plain',
+  'text/markdown',
+].join(',')
+
+const MAX_INSTRUCTIONS = 1500
+
+const isSupportedDoc = (file: File) => {
+  const name = file.name.toLowerCase()
+  return ACCEPTED_EXTS.some((ext) => name.endsWith(ext))
+}
 
 interface UploadNoteCardProps {
-  onUpload: (title: string, file?: File, textContent?: string) => Promise<unknown>
+  onUpload: (title: string, file: File, instructions?: string) => Promise<unknown>
   isLoading: boolean
 }
 
 export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
   const [title, setTitle] = useState('')
-  const [noteText, setNoteText] = useState('')
+  const [instructions, setInstructions] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [expanded, setExpanded] = useState(false)
   const [fileName, setFileName] = useState<string | null>(null)
@@ -26,41 +45,43 @@ export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
     if (fileRef.current) fileRef.current.value = ''
   }
 
+  const rejectUnsupported = () =>
+    setError('Formato no soportado. Usá PDF, Word, Markdown, TXT…')
+
+  // Single entry point for the file input, drag-drop and paste — all validate.
   const pickFile = (file: File) => {
+    if (!isSupportedDoc(file)) {
+      rejectUnsupported()
+      return
+    }
     setSelectedFile(file)
     setFileName(file.name)
     if (error) setError(null)
   }
 
-  // Drag-and-drop + paste of a PDF anywhere on the card.
+  // Drag-and-drop + paste of a document anywhere on the card.
   const { isDragging, dropZoneProps, onPaste } = useFileDrop({
     onFile: pickFile,
-    accept: isPdf,
-    onReject: () => setError('Solo se aceptan archivos PDF.'),
+    accept: isSupportedDoc,
+    onReject: rejectUnsupported,
     disabled: isLoading,
   })
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     const file = selectedFile
-    const trimmedText = noteText.trim()
 
-    if (!file && !trimmedText) {
-      setError('Pegá al menos 100 caracteres o subí un PDF.')
-      return
-    }
-
-    if (!file && trimmedText.length < 100) {
-      setError(`El texto es muy corto. Faltan ${100 - trimmedText.length} caracteres para generar la quest.`)
+    if (!file) {
+      setError('Subí un archivo (PDF, Word, Markdown, TXT…). Es la fuente del quiz.')
       return
     }
 
     setError(null)
 
     try {
-      await onUpload(title, file ?? undefined, trimmedText || undefined)
+      await onUpload(title, file, instructions.trim() || undefined)
       setTitle('')
-      setNoteText('')
+      setInstructions('')
       setExpanded(false)
       clearFile()
     } catch (err) {
@@ -103,25 +124,7 @@ export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="text-[13px] font-medium text-secondary" htmlFor="quest-note">Texto del apunte</label>
-        <textarea
-          id="quest-note"
-          className={`w-full min-h-24 px-3.5 py-2.5 bg-[var(--bg-input)] border rounded-lg text-primary text-sm placeholder:text-muted resize-y transition-[border-color,box-shadow] duration-200 outline-none focus-visible:ring-2 focus-visible:ring-accent/30 ${error ? 'border-danger focus-visible:border-danger' : 'border-[var(--border)] focus-visible:border-accent'}`}
-          value={noteText}
-          onChange={(e) => {
-            setNoteText(e.target.value)
-            if (error) setError(null)
-          }}
-          placeholder="Pegá acá el texto del apunte… (o subí un PDF abajo)"
-          rows={4}
-        />
-        <p className="text-xs text-secondary">
-          Si pegás texto, necesitás al menos 100 caracteres. Si subís PDF, el texto es opcional.
-        </p>
-      </div>
-
-      <div className="flex flex-col gap-1.5">
-        <label className="text-[13px] font-medium text-secondary">Archivo PDF (opcional)</label>
+        <label className="text-[13px] font-medium text-secondary">Archivo del apunte</label>
         {fileName ? (
           <div className="flex items-center justify-between gap-2 rounded-lg border border-accent/40 bg-accent-bg px-3 py-2.5">
             <span className="flex min-w-0 items-center gap-2 text-sm text-primary">
@@ -142,7 +145,7 @@ export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
             <input
               ref={fileRef}
               type="file"
-              accept="application/pdf"
+              accept={ACCEPT_ATTR}
               className="sr-only"
               onChange={(e) => {
                 const file = e.target.files?.[0]
@@ -150,9 +153,34 @@ export function UploadNoteCard({ onUpload, isLoading }: UploadNoteCardProps) {
               }}
             />
             <Paperclip size={16} aria-hidden="true" />
-            Elegí un PDF, arrastralo o pegalo (Ctrl+V)
+            Elegí un archivo, arrastralo o pegalo (Ctrl+V)
           </label>
         )}
+        <p className="text-xs text-secondary">
+          PDF, Word, Markdown, TXT, PPTX, CSV… El quiz se genera a partir de este archivo.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label className="text-[13px] font-medium text-secondary" htmlFor="quest-instructions">
+          Instrucciones / temas <span className="text-muted">(opcional)</span>
+        </label>
+        <textarea
+          id="quest-instructions"
+          className={`w-full min-h-20 px-3.5 py-2.5 bg-[var(--bg-input)] border rounded-lg text-primary text-sm placeholder:text-muted resize-y transition-[border-color,box-shadow] duration-200 outline-none focus-visible:ring-2 focus-visible:ring-accent/30 ${error ? 'border-danger focus-visible:border-danger' : 'border-[var(--border)] focus-visible:border-accent'}`}
+          value={instructions}
+          maxLength={MAX_INSTRUCTIONS}
+          onChange={(e) => {
+            setInstructions(e.target.value)
+            if (error) setError(null)
+          }}
+          placeholder="Ej: enfocate en el capítulo 3; preguntas de aplicación, no de definiciones; nivel parcial."
+          rows={3}
+        />
+        <p className="text-xs text-secondary">
+          Reglas para orientar las preguntas (qué temas, enfoque, dificultad). No es el texto del apunte.
+          <span className="ml-1 text-muted">{instructions.length}/{MAX_INSTRUCTIONS}</span>
+        </p>
       </div>
 
       {error && <p className="text-xs text-danger">{error}</p>}

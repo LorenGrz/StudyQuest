@@ -20,7 +20,15 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { QuestsService } from './quests.service';
 import { CreateQuestDto, SubmitAnswerDto } from '../../common/dto';
 import { diskStorage } from 'multer';
-import { safeUploadFilename } from '../../common/upload.util';
+import {
+  safeUploadFilename,
+  isQuestDocumentExt,
+  QUEST_DOC_EXTS,
+} from '../../common/upload.util';
+
+// Hard ceiling; the per-plan limit (10 MB free / 25 MB pro) is enforced in the
+// service once the user's plan is known.
+const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 
 @ApiTags('quests')
 @ApiBearerAuth()
@@ -46,14 +54,16 @@ export class QuestsController {
     @Body() dto: CreateQuestDto,
     @UploadedFile(
       new ParseFilePipe({
-        validators: [new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 })],
-        fileIsRequired: false,
+        validators: [new MaxFileSizeValidator({ maxSize: MAX_UPLOAD_BYTES })],
+        fileIsRequired: true,
       }),
     )
-    file?: Express.Multer.File,
+    file: Express.Multer.File,
   ) {
-    if (file && file.mimetype !== 'application/pdf') {
-      throw new BadRequestException('Solo se permiten archivos PDF');
+    if (!isQuestDocumentExt(file.originalname)) {
+      throw new BadRequestException(
+        `Formato no soportado. Aceptados: ${QUEST_DOC_EXTS.join(', ')}`,
+      );
     }
     return this.questsService.createQuest(dto, req.user.userId, file);
   }

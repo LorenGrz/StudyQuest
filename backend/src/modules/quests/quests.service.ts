@@ -9,7 +9,7 @@ import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, MoreThan } from 'typeorm';
-import { looksLikePdf } from '../../common/upload.util';
+import { looksLikePdf, looksLikeQuestDocument } from '../../common/upload.util';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Quest } from './quest.entity';
 import { QuizQuestion } from './quiz-question.entity';
@@ -75,13 +75,19 @@ export class QuestsService {
   async createQuest(
     dto: CreateQuestDto,
     userId: string,
-    file?: Express.Multer.File,
+    file: Express.Multer.File,
   ): Promise<Quest> {
     const party = await this.partiesService.findById(dto.partyId);
     this.partiesService.assertMember(party, userId);
 
-    if (!dto.textContent && !file) {
-      throw new BadRequestException('Debés proporcionar texto o un PDF');
+    const sourceBuffer = await this.resolveSourceBuffer(file);
+    if (!sourceBuffer) {
+      throw new BadRequestException('No se pudo leer el archivo subido');
+    }
+    if (!looksLikeQuestDocument(sourceBuffer, file.originalname)) {
+      throw new BadRequestException(
+        'El archivo no coincide con su extensión o no es un documento válido',
+      );
     }
 
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -94,10 +100,8 @@ export class QuestsService {
       );
     }
 
-    const pdfBuffer = await this.resolvePdfBuffer(file);
-    if (pdfBuffer && !looksLikePdf(pdfBuffer)) {
-      throw new BadRequestException('El archivo no es un PDF válido');
-    }
+    const instructions = dto.instructions?.trim() || null;
+    const uploadedFilename = this.resolveUploadedFilename(file);
 
     const quest = await this.questRepo.save(
       this.questRepo.create({
@@ -106,18 +110,19 @@ export class QuestsService {
         subjectId: party.subjectId as string,
         createdBy: userId,
         status: 'generating',
-        sourcePdfUrl: file
-          ? `/uploads/${this.resolveUploadedFilename(file)}`
-          : null,
+        // `sourceText` now holds the user's topic/focus instructions, not the
+        // study material (that is the uploaded document).
+        sourceText: instructions,
+        sourcePdfUrl: `/uploads/${uploadedFilename}`,
       }),
     );
 
-    this.generateInBackground(
-      quest.id,
-      dto.textContent,
-      pdfBuffer,
-      dto.title,
-    ).catch((err) =>
+    this.generateInBackground(quest.id, {
+      sourceBuffer,
+      filename: file.originalname ?? uploadedFilename,
+      instructions,
+      questTitle: dto.title,
+    }).catch((err) =>
       this.logger.error(`Fallo generación quest ${quest.id}: ${err.message}`),
     );
 
@@ -126,23 +131,27 @@ export class QuestsService {
 
   private async generateInBackground(
     questId: string,
-    textContent?: string,
-    pdfBuffer?: Buffer,
-    questTitle?: string,
+    input: {
+      sourceBuffer: Buffer;
+      filename: string;
+      instructions: string | null;
+      questTitle?: string;
+    },
   ): Promise<void> {
     try {
-      const generationOptions = {
+      const isPdf = looksLikePdf(input.sourceBuffer);
+      const generationOptions: QuizGenerationOptions = {
+        instructions: input.instructions ?? undefined,
         metadata: {
-          questTitle,
-          sourceType: pdfBuffer ? ('pdf' as const) : ('text' as const),
+          questTitle: input.questTitle,
+          sourceType: isPdf ? ('pdf' as const) : ('text' as const),
         },
       };
-      const rawQuestions = pdfBuffer
-        ? await this.generateFromPdf(pdfBuffer, generationOptions)
-        : await this.aiService.generateQuestionsFromText(
-            textContent!,
-            generationOptions,
-          );
+      const rawQuestions = await this.generateFromDocument(
+        input.sourceBuffer,
+        input.filename,
+        generationOptions,
+      );
 
       await this.dataSource.transaction(async (em) => {
         for (let i = 0; i < rawQuestions.length; i++) {
@@ -197,17 +206,22 @@ export class QuestsService {
   }
 
   /**
-   * Convert the PDF to Markdown with the MarkItDown sidecar and generate from
-   * that clean text. Falls back to the native multimodal PDF path if the sidecar
-   * is unreachable or returns too little text, so a misbehaving sidecar never
-   * blocks quest generation.
+   * Convert the uploaded document to Markdown with the MarkItDown sidecar and
+   * generate from that clean text. If the sidecar is unreachable or returns too
+   * little text, fall back to the native multimodal path — but only for real
+   * PDFs, since that path can't parse DOCX/PPTX/etc.
    */
-  private async generateFromPdf(
-    pdfBuffer: Buffer,
+  private async generateFromDocument(
+    buffer: Buffer,
+    filename: string,
     options: QuizGenerationOptions,
   ): Promise<RawQuestion[]> {
+    const isPdf = looksLikePdf(buffer);
     try {
-      const markdown = await this.markitdownService.toMarkdown(pdfBuffer);
+      const markdown = await this.markitdownService.toMarkdown(
+        buffer,
+        filename,
+      );
       if (markdown.trim().length >= MIN_MARKDOWN_CHARS) {
         return await this.aiService.generateQuestionsFromText(
           markdown,
@@ -215,20 +229,25 @@ export class QuestsService {
         );
       }
       this.logger.warn(
-        `markitdown devolvió muy poco texto (${markdown.trim().length} chars); uso el PDF nativo`,
+        `markitdown devolvió muy poco texto (${markdown.trim().length} chars) para ${filename}`,
       );
     } catch (err) {
       this.logger.warn(
-        `markitdown falló (${err.message}); uso el PDF nativo como fallback`,
+        `markitdown falló para ${filename} (${(err as Error).message})`,
       );
     }
-    return this.aiService.generateQuestionsFromPdf(pdfBuffer, options);
+
+    if (isPdf) {
+      return this.aiService.generateQuestionsFromPdf(buffer, options);
+    }
+    throw new Error(
+      'No se pudo extraer texto del documento. Probá exportándolo a PDF o TXT.',
+    );
   }
 
-  private async resolvePdfBuffer(
-    file?: Express.Multer.File,
+  private async resolveSourceBuffer(
+    file: Express.Multer.File,
   ): Promise<Buffer | undefined> {
-    if (!file) return undefined;
     if (file.buffer) return file.buffer;
     if (file.path) return readFile(file.path);
     return undefined;

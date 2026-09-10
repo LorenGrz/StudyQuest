@@ -177,11 +177,14 @@ export class UpdatePartyVisibilityDto {
 export class CreateQuestDto {
   @IsUUID() partyId: string;
   @IsString() @MinLength(3) @MaxLength(100) title: string;
+  // Optional focus/topic guidance for the questions ("only chapter 3", "harder,
+  // exam-level", "skip definitions"). NOT the study source — that is the uploaded
+  // file. No minimum length; 1500 is a hard ceiling, the per-plan limit is
+  // enforced in QuestsService.
   @IsOptional()
   @IsString()
-  @MinLength(100)
-  @MaxLength(50_000)
-  textContent?: string;
+  @MaxLength(1500)
+  instructions?: string;
 }
 
 export class SubmitAnswerDto {

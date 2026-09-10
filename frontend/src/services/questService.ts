@@ -57,16 +57,17 @@ export interface AnswerResult {
 export interface CreateQuestPayload {
   partyId: string
   title: string
-  textContent?: string
+  /** Optional topic/focus guidance for the questions — not the study source. */
+  instructions?: string
 }
 
 export const questService = {
-  async create(payload: CreateQuestPayload, file?: File): Promise<Quest> {
+  async create(payload: CreateQuestPayload, file: File): Promise<Quest> {
     const form = new FormData()
     form.append('partyId', payload.partyId)
     form.append('title', payload.title)
-    if (payload.textContent) form.append('textContent', payload.textContent)
-    if (file) form.append('file', file)
+    if (payload.instructions) form.append('instructions', payload.instructions)
+    form.append('file', file)
 
     const { data } = await api.post<Quest>('/quests', form, {
       headers: { 'Content-Type': 'multipart/form-data' },

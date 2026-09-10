@@ -1,40 +1,39 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { UploadNoteCard } from './UploadNoteCard'
 
+const openForm = () =>
+  fireEvent.click(screen.getByRole('button', { name: /crear quest con ia/i }))
+
+const selectFile = (file: File) => {
+  const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+  fireEvent.change(fileInput, { target: { files: [file] } })
+}
+
 describe('UploadNoteCard', () => {
-  it('shows a validation error for short text without a PDF', async () => {
+  it('requires a file (it is the quiz source)', async () => {
     const onUpload = vi.fn()
 
     render(<UploadNoteCard onUpload={onUpload} isLoading={false} />)
-
-    fireEvent.click(screen.getByRole('button', { name: /crear quest con ia/i }))
+    openForm()
     fireEvent.change(screen.getByLabelText(/título del quiz/i), {
       target: { value: 'Bases de datos' },
-    })
-    fireEvent.change(screen.getByLabelText(/texto del apunte/i), {
-      target: { value: 'bases de datos' },
     })
     fireEvent.click(screen.getByRole('button', { name: /generar quest/i }))
 
-    expect(
-      await screen.findByText(/el texto es muy corto/i),
-    ).toBeInTheDocument()
+    expect(await screen.findByText(/subí un archivo/i)).toBeInTheDocument()
     expect(onUpload).not.toHaveBeenCalled()
   })
 
-  it('submits successfully when a PDF is selected and the note text is empty', async () => {
+  it('submits with just a file when no instructions are given', async () => {
     const onUpload = vi.fn().mockResolvedValue(undefined)
-    const file = new File(['pdf-content'], 'apunte.pdf', { type: 'application/pdf' })
+    const file = new File(['pdf'], 'apunte.pdf', { type: 'application/pdf' })
 
     render(<UploadNoteCard onUpload={onUpload} isLoading={false} />)
-
-    fireEvent.click(screen.getByRole('button', { name: /crear quest con ia/i }))
+    openForm()
     fireEvent.change(screen.getByLabelText(/título del quiz/i), {
       target: { value: 'Bases de datos' },
     })
-
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
-    fireEvent.change(fileInput, { target: { files: [file] } })
+    selectFile(file)
     fireEvent.click(screen.getByRole('button', { name: /generar quest/i }))
 
     await waitFor(() => {
@@ -42,21 +41,47 @@ describe('UploadNoteCard', () => {
     })
   })
 
-  it('shows backend error messages returned by onUpload', async () => {
-    const onUpload = vi.fn().mockRejectedValue(new Error('No se pudo generar'))
+  it('passes the instructions text through without any minimum length', async () => {
+    const onUpload = vi.fn().mockResolvedValue(undefined)
+    const file = new File(['docx'], 'apunte.docx')
 
     render(<UploadNoteCard onUpload={onUpload} isLoading={false} />)
+    openForm()
+    fireEvent.change(screen.getByLabelText(/título del quiz/i), {
+      target: { value: 'SO' },
+    })
+    selectFile(file)
+    fireEvent.change(screen.getByLabelText(/instrucciones \/ temas/i), {
+      target: { value: 'solo cap 3' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: /generar quest/i }))
 
-    fireEvent.click(screen.getByRole('button', { name: /crear quest con ia/i }))
+    await waitFor(() => {
+      expect(onUpload).toHaveBeenCalledWith('SO', file, 'solo cap 3')
+    })
+  })
+
+  it('rejects an unsupported file type', async () => {
+    const onUpload = vi.fn()
+    const file = new File(['x'], 'virus.exe')
+
+    render(<UploadNoteCard onUpload={onUpload} isLoading={false} />)
+    openForm()
+    selectFile(file)
+
+    expect(await screen.findByText(/formato no soportado/i)).toBeInTheDocument()
+  })
+
+  it('shows backend error messages returned by onUpload', async () => {
+    const onUpload = vi.fn().mockRejectedValue(new Error('No se pudo generar'))
+    const file = new File(['pdf'], 'apunte.pdf', { type: 'application/pdf' })
+
+    render(<UploadNoteCard onUpload={onUpload} isLoading={false} />)
+    openForm()
     fireEvent.change(screen.getByLabelText(/título del quiz/i), {
       target: { value: 'Bases de datos' },
     })
-    fireEvent.change(screen.getByLabelText(/texto del apunte/i), {
-      target: {
-        value:
-          'Bases de datos relacionales con SQL, joins, indices, claves primarias, claves foraneas y normalizacion.',
-      },
-    })
+    selectFile(file)
     fireEvent.click(screen.getByRole('button', { name: /generar quest/i }))
 
     await waitFor(() => {

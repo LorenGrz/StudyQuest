@@ -14,13 +14,11 @@ import { UsersService } from '../users/users.service';
 import { SkillTreeService } from '../skill-tree/skill-tree.service';
 import * as fs from 'node:fs/promises';
 
-jest.mock('uuid', () => ({
-  v4: () => 'mock-uuid',
-}));
-
 jest.mock('node:fs/promises', () => ({
   readFile: jest.fn(),
 }));
+
+const PDF_BYTES = Buffer.from('%PDF-1.4 contenido de prueba');
 
 describe('QuestsService AI abstraction', () => {
   let service: QuestsService;
@@ -101,27 +99,36 @@ describe('QuestsService AI abstraction', () => {
     partiesService = moduleRef.get(PartiesService);
   });
 
-  it('delegates text generation to the AI facade', async () => {
+  const rawQuestion = {
+    text: 'Pregunta mock?',
+    options: ['A', 'B', 'C', 'D'],
+    correctIndex: 0,
+    explanation: 'Explicacion',
+    topic: 'Tema',
+    difficulty: 'easy',
+  };
+
+  it('converts a non-pdf document to markdown via markitdown then delegates to text generation', async () => {
+    const docBuffer = Buffer.from('texto plano del apunte');
+    const markdown = '# Apunte\n'.repeat(40);
+    markitdownService.toMarkdown.mockResolvedValue(markdown);
     (aiService.generateQuestionsFromText as jest.Mock).mockResolvedValue([
-      {
-        text: 'Pregunta mock?',
-        options: ['A', 'B', 'C', 'D'],
-        correctIndex: 0,
-        explanation: 'Explicacion',
-        topic: 'Tema',
-        difficulty: 'easy',
-      },
+      rawQuestion,
     ]);
 
-    await (service as any).generateInBackground(
-      'quest-1',
-      'texto base',
-      undefined,
-      'Quest de prueba',
-    );
+    await (service as any).generateInBackground('quest-1', {
+      sourceBuffer: docBuffer,
+      filename: 'apunte.txt',
+      instructions: null,
+      questTitle: 'Quest de prueba',
+    });
 
+    expect(markitdownService.toMarkdown).toHaveBeenCalledWith(
+      docBuffer,
+      'apunte.txt',
+    );
     expect(aiService.generateQuestionsFromText).toHaveBeenCalledWith(
-      'texto base',
+      markdown,
       expect.objectContaining({
         metadata: expect.objectContaining({
           questTitle: 'Quest de prueba',
@@ -132,29 +139,45 @@ describe('QuestsService AI abstraction', () => {
     expect(aiService.generateQuestionsFromPdf).not.toHaveBeenCalled();
   });
 
+  it('passes the user instructions through to the AI options', async () => {
+    markitdownService.toMarkdown.mockResolvedValue('# Apunte\n'.repeat(40));
+    (aiService.generateQuestionsFromText as jest.Mock).mockResolvedValue([
+      rawQuestion,
+    ]);
+
+    await (service as any).generateInBackground('quest-1b', {
+      sourceBuffer: PDF_BYTES,
+      filename: 'apunte.pdf',
+      instructions: 'solo el capítulo 1, nivel difícil',
+      questTitle: 'Quest',
+    });
+
+    expect(aiService.generateQuestionsFromText).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        instructions: 'solo el capítulo 1, nivel difícil',
+      }),
+    );
+  });
+
   it('converts pdf to markdown via markitdown then delegates to text generation', async () => {
-    const pdfBuffer = Buffer.from('fake pdf');
     const markdown = '# Apunte\n'.repeat(40);
     markitdownService.toMarkdown.mockResolvedValue(markdown);
     (aiService.generateQuestionsFromText as jest.Mock).mockResolvedValue([
-      {
-        text: 'Pregunta pdf?',
-        options: ['A', 'B', 'C', 'D'],
-        correctIndex: 0,
-        explanation: 'Explicacion',
-        topic: 'PDF',
-        difficulty: 'medium',
-      },
+      rawQuestion,
     ]);
 
-    await (service as any).generateInBackground(
-      'quest-2',
-      undefined,
-      pdfBuffer,
-      'Quest PDF',
-    );
+    await (service as any).generateInBackground('quest-2', {
+      sourceBuffer: PDF_BYTES,
+      filename: 'apunte.pdf',
+      instructions: null,
+      questTitle: 'Quest PDF',
+    });
 
-    expect(markitdownService.toMarkdown).toHaveBeenCalledWith(pdfBuffer);
+    expect(markitdownService.toMarkdown).toHaveBeenCalledWith(
+      PDF_BYTES,
+      'apunte.pdf',
+    );
     expect(aiService.generateQuestionsFromText).toHaveBeenCalledWith(
       markdown,
       expect.objectContaining({
@@ -167,30 +190,21 @@ describe('QuestsService AI abstraction', () => {
     expect(aiService.generateQuestionsFromPdf).not.toHaveBeenCalled();
   });
 
-  it('falls back to native pdf generation when markitdown fails', async () => {
-    const pdfBuffer = Buffer.from('fake pdf');
+  it('falls back to native pdf generation when markitdown fails for a pdf', async () => {
     markitdownService.toMarkdown.mockRejectedValue(new Error('sidecar caído'));
     (aiService.generateQuestionsFromPdf as jest.Mock).mockResolvedValue([
-      {
-        text: 'Pregunta pdf?',
-        options: ['A', 'B', 'C', 'D'],
-        correctIndex: 0,
-        explanation: 'Explicacion',
-        topic: 'PDF',
-        difficulty: 'medium',
-      },
+      rawQuestion,
     ]);
 
-    await (service as any).generateInBackground(
-      'quest-2b',
-      undefined,
-      pdfBuffer,
-      'Quest PDF',
-    );
+    await (service as any).generateInBackground('quest-2b', {
+      sourceBuffer: PDF_BYTES,
+      filename: 'apunte.pdf',
+      instructions: null,
+      questTitle: 'Quest PDF',
+    });
 
-    expect(markitdownService.toMarkdown).toHaveBeenCalledWith(pdfBuffer);
     expect(aiService.generateQuestionsFromPdf).toHaveBeenCalledWith(
-      pdfBuffer,
+      PDF_BYTES,
       expect.objectContaining({
         metadata: expect.objectContaining({ sourceType: 'pdf' }),
       }),
@@ -198,34 +212,43 @@ describe('QuestsService AI abstraction', () => {
     expect(aiService.generateQuestionsFromText).not.toHaveBeenCalled();
   });
 
-  it('reads pdf bytes from disk-backed uploads before delegating to AI', async () => {
-    const pdfBuffer = Buffer.from('%PDF-1.4 pdf from disk');
-    (fs.readFile as jest.Mock).mockResolvedValue(pdfBuffer);
+  it('fails the quest when markitdown fails for a non-pdf document (no native fallback)', async () => {
+    markitdownService.toMarkdown.mockRejectedValue(new Error('sidecar caído'));
+
+    await (service as any).generateInBackground('quest-2c', {
+      sourceBuffer: Buffer.from('un docx que markitdown no pudo leer'),
+      filename: 'apunte.docx',
+      instructions: null,
+      questTitle: 'Quest DOCX',
+    });
+
+    expect(aiService.generateQuestionsFromPdf).not.toHaveBeenCalled();
+    expect(questRepo.update).toHaveBeenCalledWith(
+      'quest-2c',
+      expect.objectContaining({ status: 'failed' }),
+    );
+  });
+
+  it('reads the source bytes from disk-backed uploads and stores instructions', async () => {
+    (fs.readFile as jest.Mock).mockResolvedValue(PDF_BYTES);
     markitdownService.toMarkdown.mockResolvedValue('# Apunte\n'.repeat(40));
     partiesService.findById.mockResolvedValue({
       subjectId: 'subject-1',
     } as any);
     questRepo.save.mockResolvedValue({ id: 'quest-3' } as Quest);
     (aiService.generateQuestionsFromText as jest.Mock).mockResolvedValue([
-      {
-        text: 'Pregunta disco?',
-        options: ['A', 'B', 'C', 'D'],
-        correctIndex: 0,
-        explanation: 'Explicacion',
-        topic: 'PDF',
-        difficulty: 'medium',
-      },
+      rawQuestion,
     ]);
 
     await service.createQuest(
       {
         partyId: 'party-1',
         title: 'Quest PDF',
-        textContent: undefined,
+        instructions: 'foco en teoría',
       },
       'user-1',
       {
-        filename: 'quest.pdf',
+        originalname: 'quest.pdf',
         path: '/tmp/quest.pdf',
       } as Express.Multer.File,
     );
@@ -236,17 +259,33 @@ describe('QuestsService AI abstraction', () => {
     expect(questRepo.create).toHaveBeenCalledWith(
       expect.objectContaining({
         sourcePdfUrl: '/uploads/quest.pdf',
+        sourceText: 'foco en teoría',
       }),
     );
-    expect(markitdownService.toMarkdown).toHaveBeenCalledWith(pdfBuffer);
+    expect(markitdownService.toMarkdown).toHaveBeenCalledWith(
+      PDF_BYTES,
+      'quest.pdf',
+    );
     expect(aiService.generateQuestionsFromText).toHaveBeenCalledWith(
       expect.any(String),
-      expect.objectContaining({
-        metadata: expect.objectContaining({
-          questTitle: 'Quest PDF',
-          sourceType: 'pdf',
-        }),
-      }),
+      expect.objectContaining({ instructions: 'foco en teoría' }),
     );
+  });
+
+  it('rejects a file whose bytes do not match its extension', async () => {
+    partiesService.findById.mockResolvedValue({
+      subjectId: 'subject-1',
+    } as any);
+
+    await expect(
+      service.createQuest(
+        { partyId: 'party-1', title: 'Quest falso' },
+        'user-1',
+        {
+          originalname: 'quest.pdf',
+          buffer: Buffer.from('<html>no soy un pdf</html>'),
+        } as Express.Multer.File,
+      ),
+    ).rejects.toThrow(/no coincide con su extensión|documento válido/);
   });
 });

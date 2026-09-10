@@ -22,6 +22,12 @@ export interface QuizGenerationOptions {
   provider?: AiProviderName;
   model?: string;
   temperature?: number;
+  /**
+   * User-supplied topic/focus preferences for the questions. Treated as a
+   * lower-priority hint than the system rules — it can steer *what* content to
+   * prioritise, never the output format, question count, or language.
+   */
+  instructions?: string;
   metadata?: {
     useCase?: string;
     costTier?: 'low' | 'balanced' | 'high-quality';

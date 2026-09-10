@@ -8,21 +8,37 @@ vi.mock('./api', () => ({
 }))
 
 describe('questService.create', () => {
-  it('sends textContent and omits subjectId in multipart payload', async () => {
-    vi.mocked(api.post).mockResolvedValue({ data: { id: 'q1' } })
+  beforeEach(() => vi.mocked(api.post).mockClear())
 
-    await questService.create({
-      partyId: 'party-1',
-      title: 'Quest prueba',
-      textContent: 'Texto largo de prueba',
-    })
+  it('sends the file plus optional instructions in the multipart payload', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: { id: 'q1' } })
+    const file = new File(['pdf'], 'apunte.pdf', { type: 'application/pdf' })
+
+    await questService.create(
+      {
+        partyId: 'party-1',
+        title: 'Quest prueba',
+        instructions: 'foco en el capítulo 2',
+      },
+      file,
+    )
 
     const [, form] = vi.mocked(api.post).mock.calls[0]
     expect(form).toBeInstanceOf(FormData)
     expect((form as FormData).get('partyId')).toBe('party-1')
     expect((form as FormData).get('title')).toBe('Quest prueba')
-    expect((form as FormData).get('textContent')).toBe('Texto largo de prueba')
-    expect((form as FormData).get('subjectId')).toBeNull()
-    expect((form as FormData).get('noteText')).toBeNull()
+    expect((form as FormData).get('instructions')).toBe('foco en el capítulo 2')
+    expect((form as FormData).get('file')).toBeInstanceOf(File)
+    expect((form as FormData).get('textContent')).toBeNull()
+  })
+
+  it('omits the instructions field when none is given', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: { id: 'q1' } })
+    const file = new File(['pdf'], 'apunte.pdf', { type: 'application/pdf' })
+
+    await questService.create({ partyId: 'p1', title: 'Q' }, file)
+
+    const [, form] = vi.mocked(api.post).mock.calls[0]
+    expect((form as FormData).get('instructions')).toBeNull()
   })
 })
