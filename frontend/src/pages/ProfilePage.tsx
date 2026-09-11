@@ -109,7 +109,7 @@ export default function ProfilePage() {
           </div>
 
           {/* ─── Main two-column area: progression + league ─────────────── */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start lg:gap-6">
         {/* Left column: stats, medals, inventory, academic info, subjects */}
         <div className="flex flex-col gap-6">
 
@@ -194,6 +194,8 @@ export default function ProfilePage() {
           </Reveal>
         </div>
 
+        {/* Right rail on desktop: league ladder + account actions */}
+        <div className="flex flex-col gap-4 lg:gap-6">
         {/* League Ladder */}
         <aside>
           <h3 className="text-base font-bold text-secondary uppercase tracking-[1px] pb-2 mt-6 lg:mt-0">
@@ -267,6 +269,7 @@ export default function ProfilePage() {
             </div>
           </div>
         </section>
+        </div>
       </div>
 
       <AnimatePresence>

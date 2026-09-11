@@ -9,7 +9,7 @@ export function PageContainer({
   children: ReactNode
   width?: 'narrow' | 'wide'
 }) {
-  const maxWidth = width === 'narrow' ? 'max-w-2xl' : 'max-w-5xl'
+  const maxWidth = width === 'narrow' ? 'max-w-2xl' : 'max-w-[1600px]'
   return (
     <div className={`w-full mx-auto px-4 sm:px-5 lg:px-6 py-4 sm:py-6 ${maxWidth}`}>
       {children}
