@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { DesktopSidebar, BottomNav } from './nav/AppNav'
+import { StudyBotWidget } from './study-bot/StudyBotWidget'
 
 interface Props {
   children: ReactNode
@@ -22,6 +23,7 @@ export function AppShell({ children }: Props) {
         </main>
         <BottomNav />
       </div>
+      <StudyBotWidget />
     </div>
   )
 }

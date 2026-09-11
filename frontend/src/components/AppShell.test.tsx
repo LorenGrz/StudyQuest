@@ -1,7 +1,17 @@
 import { render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { AppShell } from './AppShell'
+import { billingService } from '../services/billingService'
+
+// AppShell mounts the study-bot widget, which checks the plan on mount —
+// stub it so these layout tests don't fire a real network request.
+vi.mock('../services/billingService', () => ({
+  billingService: { getState: vi.fn() },
+}))
+vi.mocked(billingService.getState).mockResolvedValue({
+  limits: { studyBotEnabled: false },
+} as never)
 
 const renderAt = (path: string) =>
   render(

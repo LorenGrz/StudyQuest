@@ -6,6 +6,12 @@ import { useAuthStore } from '../store/authStore'
 
 // ─── Service mocks ────────────────────────────────────────────────────────────
 
+// DashboardPage renders inside AppShell, which mounts the study-bot widget —
+// stub its plan check so this test doesn't fire a real network request.
+vi.mock('../services/billingService', () => ({
+  billingService: { getState: vi.fn().mockResolvedValue({ limits: { studyBotEnabled: false } }) },
+}))
+
 vi.mock('../services/userService', () => ({
   userService: {
     getQuestsToday: vi.fn().mockResolvedValue([]),

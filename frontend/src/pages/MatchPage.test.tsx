@@ -4,6 +4,12 @@ import MatchPage from './MatchPage'
 import { useAuthStore } from '../store/authStore'
 import { useMatch } from '../hooks/useMatch'
 
+// MatchPage renders inside AppShell, which mounts the study-bot widget —
+// stub its plan check so this test doesn't fire a real network request.
+vi.mock('../services/billingService', () => ({
+  billingService: { getState: vi.fn().mockResolvedValue({ limits: { studyBotEnabled: false } }) },
+}))
+
 const navigate = vi.fn()
 const joinSpy = vi.fn()
 const loadSpy = vi.fn()

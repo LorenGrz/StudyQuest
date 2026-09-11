@@ -26,6 +26,7 @@ const freeState = {
     maxInstructionsChars: 500,
     aiModelTier: 'lite',
     partySizeMax: 6,
+    studyBotEnabled: false,
   },
   usage: { questsToday: 4, questsPerDay: 20 },
 }

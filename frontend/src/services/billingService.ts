@@ -9,6 +9,7 @@ export interface PlanLimits {
   maxInstructionsChars: number
   aiModelTier: 'lite' | 'full'
   partySizeMax: number
+  studyBotEnabled: boolean
 }
 
 export interface PlanDescriptor {
