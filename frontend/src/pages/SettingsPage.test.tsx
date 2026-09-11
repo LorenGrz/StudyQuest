@@ -4,6 +4,12 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import SettingsPage from './SettingsPage'
 
+// SettingsPage renders inside AppShell, which mounts the study-bot widget —
+// stub its plan check so this test doesn't fire a real network request.
+vi.mock('../services/billingService', () => ({
+  billingService: { getState: vi.fn().mockResolvedValue({ limits: { studyBotEnabled: false } }) },
+}))
+
 vi.mock('../services/userService', () => ({
   userService: {
     getMe: vi.fn().mockResolvedValue({
