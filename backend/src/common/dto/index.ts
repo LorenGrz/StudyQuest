@@ -165,7 +165,7 @@ export class UploadAudioMessageDto {
 
 export class CreatePartyDto {
   @IsOptional() @IsUUID() subjectId?: string;
-  @IsOptional() @IsNumber() @Min(2) @Max(8) maxMembers?: number;
+  @IsOptional() @IsNumber() @Min(2) @Max(10) maxMembers?: number;
   @IsOptional() @IsBoolean() isPrivate?: boolean;
 }
 
@@ -435,4 +435,10 @@ export class CreatePromoCodeDto {
   @IsInt() @Min(1) @Max(3650) durationDays: number;
   @IsOptional() @IsInt() @Min(1) @Max(100_000) maxRedemptions?: number;
   @IsOptional() @IsInt() @Min(1) @Max(3650) expiresInDays?: number;
+}
+
+// ─── Study bot (Pro) ────────────────────────────────────────────────────────
+
+export class AskStudyBotDto {
+  @IsString() @MinLength(3) @MaxLength(500) question: string;
 }

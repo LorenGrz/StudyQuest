@@ -21,6 +21,8 @@ export interface PlanLimits {
   aiModelTier: 'lite' | 'full';
   /** Max members in a party the user creates. */
   partySizeMax: number;
+  /** Access to the study-bot chat (AI tutor grounded in the user's own quests). */
+  studyBotEnabled: boolean;
 }
 
 const envInt = (key: string, fallback: number): number => {
@@ -35,7 +37,8 @@ export function planLimits(plan: Plan): PlanLimits {
       maxUploadMb: envInt('PLAN_PRO_UPLOAD_MB', 25),
       maxInstructionsChars: 1500,
       aiModelTier: 'full',
-      partySizeMax: 8,
+      partySizeMax: envInt('PLAN_PRO_PARTY_SIZE_MAX', 10),
+      studyBotEnabled: true,
     };
   }
   return {
@@ -47,7 +50,8 @@ export function planLimits(plan: Plan): PlanLimits {
     maxUploadMb: envInt('PLAN_FREE_UPLOAD_MB', 10),
     maxInstructionsChars: 500,
     aiModelTier: 'lite',
-    partySizeMax: 6,
+    partySizeMax: envInt('PLAN_FREE_PARTY_SIZE_MAX', 6),
+    studyBotEnabled: false,
   };
 }
 
@@ -70,7 +74,7 @@ export function planCatalog(): PlanDescriptor[] {
         `Archivos de hasta ${planLimits('free').maxUploadMb} MB`,
         'Instrucciones de hasta 500 caracteres',
         'Modelo de IA estándar',
-        'Parties de hasta 6 integrantes',
+        `Parties de hasta ${planLimits('free').partySizeMax} integrantes`,
       ],
       limits: planLimits('free'),
     },
@@ -83,7 +87,8 @@ export function planCatalog(): PlanDescriptor[] {
         `Archivos de hasta ${planLimits('pro').maxUploadMb} MB`,
         'Instrucciones de hasta 1500 caracteres',
         'Modelo de IA avanzado (respuestas más precisas)',
-        'Parties de hasta 8 integrantes',
+        `Parties de hasta ${planLimits('pro').partySizeMax} integrantes`,
+        'Bot de estudio con IA (usa tus últimos quests como contexto)',
       ],
       limits: planLimits('pro'),
     },
