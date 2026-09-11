@@ -44,8 +44,10 @@ function SidebarLink({ path, label, Icon }: NavItem) {
     <Link
       to={path}
       aria-current={active ? 'page' : undefined}
+      aria-label={label}
+      title={label}
       className={[
-        'flex items-center gap-3 px-3 h-11 rounded-lg text-[14px] font-semibold',
+        'flex items-center justify-center lg:justify-start gap-3 px-0 lg:px-3 h-11 rounded-lg text-[14px] font-semibold',
         'transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent',
         active
           ? 'text-accent-light bg-[var(--accent-bg)]'
@@ -53,7 +55,7 @@ function SidebarLink({ path, label, Icon }: NavItem) {
       ].join(' ')}
     >
       <Icon size={20} aria-hidden="true" />
-      <span>{label}</span>
+      <span className="hidden lg:inline">{label}</span>
     </Link>
   )
 }
@@ -62,19 +64,20 @@ export function DesktopSidebar() {
   const { logout } = useAuth()
 
   return (
-    <aside className="hidden lg:flex lg:flex-col lg:w-60 shrink-0 border-r border-edge bg-surface">
+    <aside className="hidden md:flex md:flex-col md:w-16 lg:w-60 shrink-0 border-r border-edge bg-surface">
       <Link
         to="/dashboard"
-        className="flex items-center gap-2 px-5 py-5 text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+        aria-label="StudyQuest — Inicio"
+        className="flex items-center justify-center lg:justify-start gap-2 px-0 lg:px-5 py-5 text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
       >
         <span className="text-xl">⚡</span>
-        <span className="text-[17px] font-extrabold tracking-tight">
+        <span className="hidden lg:inline text-[17px] font-extrabold tracking-tight">
           StudyQuest
         </span>
       </Link>
 
       <nav
-        className="flex-1 px-3 flex flex-col gap-1 overflow-y-auto"
+        className="flex-1 px-2 lg:px-3 flex flex-col gap-1 overflow-y-auto"
         aria-label="Navegación principal"
       >
         {PRIMARY_NAV.map((item) => (
@@ -86,15 +89,17 @@ export function DesktopSidebar() {
         ))}
       </nav>
 
-      <div className="mt-auto px-3 pb-4 pt-2 border-t border-edge flex flex-col gap-1">
+      <div className="mt-auto px-2 lg:px-3 pb-4 pt-2 border-t border-edge flex flex-col gap-1">
         <SidebarLink path="/plan" label="Plan" Icon={Sparkles} />
         <SidebarLink path="/settings" label="Ajustes" Icon={Settings} />
         <button
           onClick={() => void logout()}
-          className="flex items-center gap-3 px-3 h-11 rounded-lg text-[14px] font-semibold text-muted hover:text-danger hover:bg-danger/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
+          aria-label="Cerrar sesión"
+          title="Cerrar sesión"
+          className="flex items-center justify-center lg:justify-start gap-3 px-0 lg:px-3 h-11 rounded-lg text-[14px] font-semibold text-muted hover:text-danger hover:bg-danger/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger"
         >
           <LogOut size={20} aria-hidden="true" />
-          <span>Cerrar sesión</span>
+          <span className="hidden lg:inline">Cerrar sesión</span>
         </button>
       </div>
     </aside>
@@ -125,7 +130,7 @@ function BottomNavLink({ path, label, Icon }: NavItem) {
 export function BottomNav() {
   return (
     <nav
-      className="lg:hidden shrink-0 border-t border-edge bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
+      className="md:hidden shrink-0 border-t border-edge bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
       aria-label="Navegación principal"
     >
       <div className="flex justify-around mx-auto w-full max-w-[480px]">
