@@ -51,6 +51,8 @@ Primary backend areas:
 - `backend/src/modules/parties`
 - `backend/src/modules/quests`
 - `backend/src/modules/skill-tree`
+- `backend/src/modules/billing`
+- `backend/src/modules/study-bot`
 - `backend/src/gateways/matchmaking`
 
 ### Frontend
@@ -186,6 +188,12 @@ In Docker Compose those are already provided for the `web` service.
 - Subscription plans are manual tiers (`free` / `pro`) — no payment processor. `src/common/plans.ts` is the single source of truth for per-plan limits (quests/day, upload MB, instructions length, AI model tier, party size). `BillingModule` exposes `GET/POST /billing/*`; `pro` is granted by a promo code or an admin and lapses at `planExpiresAt`.
 - Party chat also supports file and audio uploads
 - Backend stores uploaded quest source files under `/uploads/<filename>`
+
+### Study bot (Pro)
+
+- `POST /study-bot/ask` — a free-text chat grounded in the caller's own recent quest history. Gated by `ProPlanGuard` (`backend/src/common/pro-plan.guard.ts`), which checks `BillingService.getState().effectivePlan === 'pro'`.
+- No vector store: `StudyBotService` fetches the last 5 completed `PlayerResult`s (+ quest/subject/questions) scoped to `userId` and formats them as context (`study-history.utils.ts`) — that SQL query, already scoped to the account, *is* the retrieval step. Gemini answers using that context (`study-bot-prompt.ts`).
+- Known limit: `PlayerResult` only stores an aggregate correct-answer count, not which specific questions were right or wrong, so the bot can report a quest's score but not name the exact question that was missed.
 
 ### Matchmaking
 
