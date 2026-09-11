@@ -132,7 +132,7 @@ export default function BillingPage() {
                   <Input
                     id="promo-code"
                     aria-label="Código promocional"
-                    placeholder="STUDYQUEST-PRO-30"
+                    placeholder="Ingresá tu código"
                     value={code}
                     onChange={(e) => setCode(e.target.value.toUpperCase())}
                     className="flex-1"
