@@ -16,6 +16,7 @@ import { PartyInvitation } from './party-invitation.entity';
 import { PartyActivity, ActivityType } from './party-activity.entity';
 import { User } from '../users/user.entity';
 import { UsersService } from '../users/users.service';
+import { BillingService } from '../billing/billing.service';
 import { ChatAttachmentPayload } from './chat-message.types';
 import { presentChatMessage } from './chat-message.presenter';
 
@@ -37,6 +38,7 @@ export class PartiesService {
     private readonly dataSource: DataSource,
     private readonly eventEmitter: EventEmitter2,
     private readonly usersService: UsersService,
+    private readonly billingService: BillingService,
   ) {}
 
   // ─── Invite Link (≥PostgreSQL, sin Redis) ────────────────────────────────────
@@ -224,6 +226,21 @@ export class PartiesService {
     maxMembers = 4,
     isPrivate = false,
   ): Promise<Party> {
+    // El DTO ya limita a [2, 10] (el techo de Pro); acá lo bajamos al límite
+    // real del plan del que llama para que free no pueda pedir el cupo de Pro.
+    const billingUser = await this.userRepo.findOne({
+      where: { id: userId },
+      select: ['id', 'plan', 'planExpiresAt'],
+    });
+    const { partySizeMax } = this.billingService.getLimits(
+      billingUser ?? { plan: 'free', planExpiresAt: null },
+    );
+    if (maxMembers > partySizeMax) {
+      throw new ForbiddenException(
+        `Tu plan permite parties de hasta ${partySizeMax} integrantes. Pasá a Pro para más lugar.`,
+      );
+    }
+
     // Si no se pasa subjectId, usamos la primera materia inscripta del usuario
     let resolvedSubjectId = subjectId;
     if (!resolvedSubjectId) {

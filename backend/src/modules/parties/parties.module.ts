@@ -9,11 +9,20 @@ import { PartiesService } from './parties.service';
 import { PartiesController } from './parties.controller';
 import { User } from '../users/user.entity';
 import { UsersModule } from '../users/users.module';
+import { BillingModule } from '../billing/billing.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Party, PartyMember, ChatMessage, PartyActivity, PartyInvitation, User]),
+    TypeOrmModule.forFeature([
+      Party,
+      PartyMember,
+      ChatMessage,
+      PartyActivity,
+      PartyInvitation,
+      User,
+    ]),
     UsersModule,
+    BillingModule,
   ],
   controllers: [PartiesController],
   providers: [PartiesService],

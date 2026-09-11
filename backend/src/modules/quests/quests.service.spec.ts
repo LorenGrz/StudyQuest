@@ -21,6 +21,7 @@ const FREE_LIMITS = {
   maxInstructionsChars: 500,
   aiModelTier: 'lite' as const,
   partySizeMax: 6,
+  studyBotEnabled: false,
 };
 
 jest.mock('node:fs/promises', () => ({

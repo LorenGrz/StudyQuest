@@ -10,6 +10,8 @@ import { PartyActivity } from './party-activity.entity';
 import { PartyInvitation } from './party-invitation.entity';
 import { User } from '../users/user.entity';
 import { UsersService } from '../users/users.service';
+import { BillingService } from '../billing/billing.service';
+import { planLimits } from '../../common/plans';
 
 jest.mock('uuid', () => ({
   v4: () => 'mock-uuid',
@@ -18,13 +20,24 @@ jest.mock('uuid', () => ({
 describe('PartiesService rich chat messages', () => {
   let service: PartiesService;
   let chatRepo: jest.Mocked<Repository<ChatMessage>>;
+  let userRepo: jest.Mocked<Repository<User>>;
+  let dataSource: { transaction: jest.Mock };
+  let billingService: { getLimits: jest.Mock };
 
   beforeEach(async () => {
+    billingService = {
+      getLimits: jest.fn().mockReturnValue(planLimits('free')),
+    };
+    dataSource = { transaction: jest.fn() };
+
     const moduleRef = await Test.createTestingModule({
       providers: [
         PartiesService,
         { provide: getRepositoryToken(Party), useValue: {} },
-        { provide: getRepositoryToken(PartyMember), useValue: { findOne: jest.fn() } },
+        {
+          provide: getRepositoryToken(PartyMember),
+          useValue: { findOne: jest.fn() },
+        },
         {
           provide: getRepositoryToken(ChatMessage),
           useValue: {
@@ -34,21 +47,29 @@ describe('PartiesService rich chat messages', () => {
             find: jest.fn(),
           },
         },
-        { provide: getRepositoryToken(PartyActivity), useValue: {} },
+        {
+          provide: getRepositoryToken(PartyActivity),
+          useValue: { create: jest.fn((v) => v), save: jest.fn((v) => v) },
+        },
         { provide: getRepositoryToken(PartyInvitation), useValue: {} },
-        { provide: getRepositoryToken(User), useValue: {} },
-        { provide: DataSource, useValue: {} },
+        { provide: getRepositoryToken(User), useValue: { findOne: jest.fn() } },
+        { provide: DataSource, useValue: dataSource },
         { provide: EventEmitter2, useValue: { emit: jest.fn() } },
         { provide: UsersService, useValue: { areFriends: jest.fn() } },
+        { provide: BillingService, useValue: billingService },
       ],
     }).compile();
 
     service = moduleRef.get(PartiesService);
     chatRepo = moduleRef.get(getRepositoryToken(ChatMessage));
+    userRepo = moduleRef.get(getRepositoryToken(User));
   });
 
   it('creates a text message with null attachment metadata', async () => {
-    chatRepo.create.mockReturnValue({ type: 'text', text: 'hola' } as ChatMessage);
+    chatRepo.create.mockReturnValue({
+      type: 'text',
+      text: 'hola',
+    } as ChatMessage);
     chatRepo.save.mockResolvedValue({ id: 'm1' } as ChatMessage);
     chatRepo.findOne.mockResolvedValue({
       id: 'm1',
@@ -110,5 +131,35 @@ describe('PartiesService rich chat messages', () => {
     expect(result.type).toBe('audio');
     expect(result.attachment?.durationMs).toBe(9000);
     expect(result.attachment?.mimeType).toBe('audio/webm');
+  });
+
+  describe('createForUser party size limit', () => {
+    it('rejects a maxMembers over the caller plan limit', async () => {
+      userRepo.findOne.mockResolvedValue({
+        id: 'u1',
+        plan: 'free',
+        planExpiresAt: null,
+      } as User);
+      billingService.getLimits.mockReturnValue(planLimits('free'));
+
+      await expect(
+        service.createForUser('u1', 'subject-1', 8, false),
+      ).rejects.toThrow(/hasta 6 integrantes/);
+    });
+
+    it('allows a pro user to request up to their plan limit', async () => {
+      userRepo.findOne.mockResolvedValue({
+        id: 'u1',
+        plan: 'pro',
+        planExpiresAt: new Date(Date.now() + 86_400_000),
+      } as User);
+      billingService.getLimits.mockReturnValue(planLimits('pro'));
+      dataSource.transaction.mockResolvedValue({ id: 'party-1' } as Party);
+
+      const result = await service.createForUser('u1', 'subject-1', 10, false);
+
+      expect(result).toEqual({ id: 'party-1' });
+      expect(dataSource.transaction).toHaveBeenCalled();
+    });
   });
 });
