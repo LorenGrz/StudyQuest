@@ -1,0 +1,81 @@
+[
+  {
+    "topic": "Modelo Relacional",
+    "name": "Modelo Relacional",
+    "description": "Relaciones, tuplas, claves y restricciones de integridad.",
+    "iconKey": "target",
+    "xpThreshold": 80,
+    "col": 2,
+    "row": 0
+  },
+  {
+    "topic": "Modelo Entidad-Relación",
+    "name": "Modelo Entidad-Relación",
+    "description": "Entidades, atributos, relaciones y diagramas E-R.",
+    "iconKey": "link",
+    "xpThreshold": 100,
+    "col": 1,
+    "row": 1,
+    "dependsOn": ["Modelo Relacional"]
+  },
+  {
+    "topic": "Álgebra Relacional",
+    "name": "Álgebra Relacional",
+    "description": "Selección, proyección, joins y operaciones de conjuntos.",
+    "iconKey": "sigma",
+    "xpThreshold": 110,
+    "col": 3,
+    "row": 1,
+    "dependsOn": ["Modelo Relacional"]
+  },
+  {
+    "topic": "SQL",
+    "name": "SQL",
+    "description": "DDL, DML, consultas, agrupamientos y subconsultas.",
+    "iconKey": "trending-up",
+    "xpThreshold": 140,
+    "col": 2,
+    "row": 2,
+    "dependsOn": ["Modelo Entidad-Relación", "Álgebra Relacional"]
+  },
+  {
+    "topic": "Normalización",
+    "name": "Normalización",
+    "description": "Dependencias funcionales y formas normales (1FN a FNBC).",
+    "iconKey": "link",
+    "xpThreshold": 130,
+    "col": 0,
+    "row": 2,
+    "dependsOn": ["Modelo Entidad-Relación"]
+  },
+  {
+    "topic": "Índices y Optimización",
+    "name": "Índices y Optimización",
+    "description": "Índices B-tree/hash y planes de ejecución de consultas.",
+    "iconKey": "trending-up",
+    "xpThreshold": 150,
+    "col": 4,
+    "row": 2,
+    "dependsOn": ["SQL"]
+  },
+  {
+    "topic": "Transacciones y Concurrencia",
+    "name": "Transacciones y Concurrencia",
+    "description": "ACID, niveles de aislamiento y control de concurrencia.",
+    "iconKey": "star",
+    "xpThreshold": 170,
+    "col": 2,
+    "row": 3,
+    "dependsOn": ["SQL"]
+  },
+  {
+    "topic": "Diseño Físico y Tuning",
+    "name": "Diseño Físico y Tuning",
+    "description": "Almacenamiento, particionamiento y ajuste de rendimiento.",
+    "iconKey": "rocket",
+    "xpThreshold": 210,
+    "col": 2,
+    "row": 4,
+    "dependsOn": ["Normalización", "Índices y Optimización", "Transacciones y Concurrencia"]
+  }
+]

@@ -1,0 +1,9 @@
+packages:
+  - 'backend'
+  - 'frontend'
+allowBuilds:
+  '@nestjs/core': false
+  '@scarf/scarf': false
+  bcrypt: false
+  esbuild: false
+  unrs-resolver: false

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#78716c"/>
+      <stop offset="100%" stop-color="#a8a29e"/>
+    </linearGradient>
+    <filter id="blur">
+      <feGaussianBlur stdDeviation="1.5"/>
+    </filter>
+  </defs>
+  <!-- outer glow -->
+  <circle cx="50" cy="50" r="46" stroke="#a8a29e" stroke-width="3" stroke-opacity="0.25" filter="url(#blur)"/>
+  <!-- main ring -->
+  <circle cx="50" cy="50" r="46" stroke="url(#g)" stroke-width="3.5" stroke-dasharray="6 4" stroke-linecap="round"/>
+  <!-- inner accent -->
+  <circle cx="50" cy="50" r="40" stroke="#a8a29e" stroke-width="1" stroke-opacity="0.4"/>
+  <!-- corner gems -->
+  <polygon points="50,4 53,11 50,8 47,11" fill="#a8a29e" opacity="0.9"/>
+  <polygon points="50,96 53,89 50,92 47,89" fill="#a8a29e" opacity="0.9"/>
+  <polygon points="4,50 11,47 8,50 11,53" fill="#a8a29e" opacity="0.9"/>
+  <polygon points="96,50 89,47 92,50 89,53" fill="#a8a29e" opacity="0.9"/>
+</svg>

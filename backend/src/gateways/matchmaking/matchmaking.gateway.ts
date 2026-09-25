@@ -1,0 +1,370 @@
+import {
+  WebSocketGateway,
+  WebSocketServer,
+  SubscribeMessage,
+  ConnectedSocket,
+  MessageBody,
+  OnGatewayConnection,
+  OnGatewayDisconnect,
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+import { Logger } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import { JwtService } from '@nestjs/jwt';
+import { OnEvent } from '@nestjs/event-emitter';
+import { v4 as uuid } from 'uuid';
+import { MatchmakingService, QueueCandidate } from './matchmaking.service';
+import { PartiesService } from '../../modules/parties/parties.service';
+import { UsersService } from '../../modules/users/users.service';
+import { JoinQueueDto, SendChatMessageDto } from '../../common/dto';
+import { corsOrigin } from '../../common/cors';
+
+type Conn = { userId: string; partyId?: string; msgTimes: number[] };
+
+// Per-socket message budget for user-driven events (chat, joins).
+const RATE_WINDOW_MS = 5_000;
+const RATE_MAX = 15;
+
+@WebSocketGateway({
+  cors: {
+    origin: corsOrigin,
+    credentials: true,
+  },
+})
+export class MatchmakingGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
+  @WebSocketServer() server: Server;
+  private readonly logger = new Logger(MatchmakingGateway.name);
+  private connections = new Map<string, Conn>();
+
+  private rateOk(conn: Conn): boolean {
+    const now = Date.now();
+    conn.msgTimes = conn.msgTimes.filter((t) => now - t < RATE_WINDOW_MS);
+    if (conn.msgTimes.length >= RATE_MAX) return false;
+    conn.msgTimes.push(now);
+    return true;
+  }
+
+  constructor(
+    private readonly matchmakingService: MatchmakingService,
+    private readonly partiesService: PartiesService,
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+  ) {}
+
+  async handleConnection(socket: Socket) {
+    try {
+      const token =
+        socket.handshake.auth?.token ??
+        socket.handshake.headers?.authorization?.replace('Bearer ', '');
+      if (!token) throw new Error('Sin token');
+      const payload = this.jwtService.verify(token);
+      if (payload.type && payload.type !== 'access') {
+        throw new Error('No es un access token');
+      }
+      this.connections.set(socket.id, { userId: payload.sub, msgTimes: [] });
+      this.logger.log(`[WS] Conectado: ${payload.sub}`);
+    } catch {
+      socket.emit('error', { code: 'UNAUTHORIZED', message: 'Token inválido' });
+      socket.disconnect();
+    }
+  }
+
+  async handleDisconnect(socket: Socket) {
+    const conn = this.connections.get(socket.id);
+    if (!conn) return;
+    this.matchmakingService.removeFromQueue(conn.userId);
+    if (conn.partyId) {
+      await this.partiesService.setOnlineStatus(
+        conn.partyId,
+        conn.userId,
+        false,
+      );
+      this.server.to(conn.partyId).emit('party:member-online', {
+        userId: conn.userId,
+        isOnline: false,
+      });
+    }
+    this.connections.delete(socket.id);
+  }
+
+  @SubscribeMessage('match:join-queue')
+  async handleJoinQueue(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() dto: JoinQueueDto,
+  ) {
+    const conn = this.connections.get(socket.id);
+    if (!conn) return;
+
+    if (this.matchmakingService.isInQueue(conn.userId)) {
+      socket.emit('error', { code: 'ALREADY_IN_QUEUE' });
+      return;
+    }
+
+    const elo = await this.usersService.getElo(conn.userId);
+
+    const candidate: QueueCandidate = {
+      userId: conn.userId,
+      socketId: socket.id,
+      subjectIds: dto.subjectIds ?? [],
+      availability: dto.availability ?? [],
+      career: '',
+      elo,
+      preferredPartySize: dto.preferredPartySize ?? 4,
+      joinedAt: new Date(),
+      threshold: 0.5,
+      eloRange: 300,
+    };
+
+    this.matchmakingService.addToQueue(candidate);
+    socket.emit('match:queued', {
+      queueSize: this.matchmakingService.getQueueSize(),
+      elo,
+    });
+  }
+
+  @SubscribeMessage('match:leave-queue')
+  handleLeaveQueue(@ConnectedSocket() socket: Socket) {
+    const conn = this.connections.get(socket.id);
+    if (!conn) return;
+    this.matchmakingService.removeFromQueue(conn.userId);
+    socket.emit('match:left-queue');
+  }
+
+  @SubscribeMessage('match:accept')
+  async handleAccept(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() body?: { matchId?: string },
+  ) {
+    const conn = this.connections.get(socket.id);
+    if (!conn) return;
+    const matchId = body?.matchId;
+    if (!matchId) return;
+
+    const { allAccepted, subjectId, acceptedCount } =
+      this.matchmakingService.acceptConfirmation(matchId, conn.userId);
+
+    this.server.to(matchId).emit('match:confirmed', { count: acceptedCount });
+
+    if (allAccepted) {
+      const sockets = await this.server.in(matchId).fetchSockets();
+      const memberIds = sockets
+        .map((s) => this.connections.get(s.id)?.userId)
+        .filter(Boolean) as string[];
+
+      const party = await this.partiesService.createParty(subjectId, memberIds);
+
+      if (!party) return; // ← esta línea es el fix
+
+      for (const s of sockets) {
+        s.leave(matchId);
+        s.join(party.id);
+        const c = this.connections.get(s.id);
+        if (c) c.partyId = party.id;
+      }
+
+      this.server.to(party.id).emit('match:ready', {
+        partyId: party.id,
+        party: { id: party.id, subjectId, memberCount: memberIds.length },
+      });
+    }
+  }
+
+  @SubscribeMessage('match:reject')
+  handleReject(
+    @ConnectedSocket() _socket: Socket,
+    @MessageBody() body?: { matchId?: string },
+  ) {
+    const matchId = body?.matchId;
+    if (!matchId) return;
+    this.matchmakingService.rejectConfirmation(matchId);
+    this.server.to(matchId).emit('match:timeout', {
+      message: 'El match fue rechazado.',
+    });
+  }
+
+  @SubscribeMessage('party:join')
+  async handlePartyJoin(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() { partyId }: { partyId: string },
+  ) {
+    const conn = this.connections.get(socket.id);
+    if (!conn || !this.rateOk(conn)) return;
+    if (
+      !partyId ||
+      !(await this.partiesService.isMember(partyId, conn.userId))
+    ) {
+      socket.emit('error', {
+        code: 'FORBIDDEN',
+        message: 'No sos miembro de esta party',
+      });
+      return;
+    }
+    socket.join(partyId);
+    conn.partyId = partyId;
+    await this.partiesService.setOnlineStatus(partyId, conn.userId, true);
+    this.server.to(partyId).emit('party:member-online', {
+      userId: conn.userId,
+      isOnline: true,
+    });
+  }
+
+  @SubscribeMessage('party:leave')
+  async handlePartyLeave(@ConnectedSocket() socket: Socket) {
+    const conn = this.connections.get(socket.id);
+    if (!conn?.partyId) return;
+    const { partyId } = conn;
+    socket.leave(partyId);
+    conn.partyId = undefined;
+    await this.partiesService.setOnlineStatus(partyId, conn.userId, false);
+    this.server.to(partyId).emit('party:member-online', {
+      userId: conn.userId,
+      isOnline: false,
+    });
+  }
+
+  @SubscribeMessage('party:chat')
+  async handleChat(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() dto: SendChatMessageDto & { partyId: string },
+  ) {
+    const conn = this.connections.get(socket.id);
+    if (!conn || !this.rateOk(conn)) return;
+    if (
+      !dto?.partyId ||
+      !(await this.partiesService.isMember(dto.partyId, conn.userId))
+    ) {
+      socket.emit('error', {
+        code: 'FORBIDDEN',
+        message: 'No sos miembro de esta party',
+      });
+      return;
+    }
+    const message = await this.partiesService.addTextChatMessage(
+      dto.partyId,
+      conn.userId,
+      dto.text,
+    );
+    this.server.to(dto.partyId).emit('chat:message', message);
+  }
+
+  @Cron(CronExpression.EVERY_5_SECONDS)
+  runMatchmaking() {
+    if (this.matchmakingService.getQueueSize() < 2) return;
+    const groups = this.matchmakingService.findMatches();
+
+    for (const group of groups) {
+      const matchId = uuid();
+
+      for (const candidate of group.members) {
+        const s = this.server.sockets.sockets.get(candidate.socketId);
+        if (s) s.join(matchId);
+        this.matchmakingService.removeFromQueue(candidate.userId);
+      }
+
+      this.server.to(matchId).emit('match:found', {
+        matchId,
+        memberCount: group.members.length,
+        subjectId: group.subjectId,
+        members: group.members.map((m) => ({ userId: m.userId })),
+      });
+
+      this.matchmakingService.initConfirmation(
+        matchId,
+        group.members.map((m) => m.userId),
+        group.subjectId,
+        () => {
+          this.server.to(matchId).emit('match:timeout', {
+            message: 'Tiempo agotado.',
+          });
+        },
+      );
+    }
+  }
+
+  // ─── Activity Events ──────────────────────────────────────────────────────────
+
+  @OnEvent('party.activity')
+  handlePartyActivity(payload: { partyId: string; activity: any }) {
+    this.logger.debug(
+      `Activity en party ${payload.partyId}: ${payload.activity.type}`,
+    );
+    this.server.to(payload.partyId).emit('party:activity', {
+      activity: payload.activity,
+    });
+  }
+
+  @OnEvent('party.chat_message')
+  handleChatMessageCreated(payload: { partyId: string; message: any }) {
+    this.server.to(payload.partyId).emit('chat:message', payload.message);
+  }
+
+  @OnEvent('achievement.unlocked')
+  handleAchievementUnlocked(payload: { userId: string; achievement: any }) {
+    for (const [socketId, conn] of this.connections) {
+      if (conn.userId === payload.userId) {
+        this.server
+          .to(socketId)
+          .emit('achievement:unlocked', payload.achievement);
+      }
+    }
+  }
+
+  // ─── Tournament Events ────────────────────────────────────────────────────────
+
+  @SubscribeMessage('tournament:join')
+  handleTournamentJoin(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() { tournamentId }: { tournamentId: string },
+  ) {
+    socket.join(`tournament:${tournamentId}`);
+    this.logger.log(
+      `[WS] Súper-unión de socket ${socket.id} a torneo:${tournamentId}`,
+    );
+  }
+
+  @SubscribeMessage('tournament:leave')
+  handleTournamentLeave(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() { tournamentId }: { tournamentId: string },
+  ) {
+    socket.leave(`tournament:${tournamentId}`);
+    this.logger.log(
+      `[WS] Salida de socket ${socket.id} de torneo:${tournamentId}`,
+    );
+  }
+
+  @OnEvent('tournament.started')
+  handleTournamentStarted(payload: {
+    tournamentId: string;
+    title: string;
+    questId: string;
+  }) {
+    this.logger.log(`[WS] Torneo iniciado event: ${payload.tournamentId}`);
+    this.server.emit('tournament_started', payload);
+    this.server
+      .to(`tournament:${payload.tournamentId}`)
+      .emit('tournament_started', payload);
+  }
+
+  @OnEvent('tournament.score_update')
+  handleTournamentScoreUpdate(payload: {
+    tournamentId: string;
+    scoreboard: any;
+  }) {
+    this.logger.log(`[WS] Torneo score update: ${payload.tournamentId}`);
+    this.server
+      .to(`tournament:${payload.tournamentId}`)
+      .emit('tournament_score_update', payload);
+  }
+
+  @OnEvent('tournament.ended')
+  handleTournamentEnded(payload: { tournamentId: string; ranking: any }) {
+    this.logger.log(`[WS] Torneo finalizado event: ${payload.tournamentId}`);
+    this.server.emit('tournament_ended', payload);
+    this.server
+      .to(`tournament:${payload.tournamentId}`)
+      .emit('tournament_ended', payload);
+  }
+}

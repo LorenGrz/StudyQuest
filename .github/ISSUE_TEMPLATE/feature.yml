@@ -1,0 +1,68 @@
+name: Feature
+description: Create a feature request for product or engineering work.
+title: "[Feature]: "
+labels:
+  - feature
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or need
+      description: Explain what user or business need this feature addresses.
+      placeholder: Users need...
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Add supporting details, constraints, references, or related issues.
+      placeholder: Background...
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+      description: Define the expected behavior or outcomes.
+      placeholder: |
+        - [ ] Scenario 1
+        - [ ] Scenario 2
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Select the main area affected by this work.
+      options:
+        - frontend
+        - backend
+        - mobile
+        - infra
+        - design
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Select the delivery priority.
+      options:
+        - P0
+        - P1
+        - P2
+    validations:
+      required: true
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size
+      description: Estimate the implementation effort.
+      options:
+        - XS
+        - S
+        - M
+        - L
+    validations:
+      required: true

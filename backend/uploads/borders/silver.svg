@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <circle cx="50" cy="50" r="46" stroke="#cbd5e1" stroke-width="4" stroke-opacity="0.2" filter="url(#glow)"/>
+  <circle cx="50" cy="50" r="46" stroke="url(#g)" stroke-width="3.5"/>
+  <circle cx="50" cy="50" r="42" stroke="#e2e8f0" stroke-width="0.8" stroke-opacity="0.6" stroke-dasharray="3 5"/>
+  <!-- stars at cardinal points -->
+  <path d="M50 2 L51.5 6.5 L56 5 L52.5 8.5 L54 13 L50 10.5 L46 13 L47.5 8.5 L44 5 L48.5 6.5 Z" fill="#cbd5e1"/>
+  <path d="M50 98 L51.5 93.5 L56 95 L52.5 91.5 L54 87 L50 89.5 L46 87 L47.5 91.5 L44 95 L48.5 93.5 Z" fill="#cbd5e1"/>
+  <path d="M2 50 L6.5 51.5 L5 56 L8.5 52.5 L13 54 L10.5 50 L13 46 L8.5 47.5 L5 44 L6.5 48.5 Z" fill="#cbd5e1"/>
+  <path d="M98 50 L93.5 51.5 L95 56 L91.5 52.5 L87 54 L89.5 50 L87 46 L91.5 47.5 L95 44 L93.5 48.5 Z" fill="#cbd5e1"/>
+</svg>

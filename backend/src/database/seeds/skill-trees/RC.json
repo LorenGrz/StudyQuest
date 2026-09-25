@@ -1,0 +1,81 @@
+[
+  {
+    "topic": "Modelo OSI y TCP/IP",
+    "name": "Modelo OSI y TCP/IP",
+    "description": "Capas, encapsulamiento y comparación de ambos modelos.",
+    "iconKey": "target",
+    "xpThreshold": 80,
+    "col": 2,
+    "row": 0
+  },
+  {
+    "topic": "Capa Física y Enlace",
+    "name": "Capa Física y de Enlace",
+    "description": "Medios, codificación, tramas, MAC y detección de errores.",
+    "iconKey": "link",
+    "xpThreshold": 100,
+    "col": 1,
+    "row": 1,
+    "dependsOn": ["Modelo OSI y TCP/IP"]
+  },
+  {
+    "topic": "Capa de Red e IP",
+    "name": "Capa de Red e IP",
+    "description": "Direccionamiento IPv4/IPv6, datagramas y fragmentación.",
+    "iconKey": "trending-up",
+    "xpThreshold": 120,
+    "col": 3,
+    "row": 1,
+    "dependsOn": ["Modelo OSI y TCP/IP"]
+  },
+  {
+    "topic": "Subnetting",
+    "name": "Subnetting y Direccionamiento",
+    "description": "Máscaras, VLSM y diseño de subredes.",
+    "iconKey": "sigma",
+    "xpThreshold": 140,
+    "col": 1,
+    "row": 2,
+    "dependsOn": ["Capa de Red e IP"]
+  },
+  {
+    "topic": "Capa de Transporte",
+    "name": "Capa de Transporte (TCP/UDP)",
+    "description": "Control de flujo, congestión y multiplexación por puertos.",
+    "iconKey": "link",
+    "xpThreshold": 140,
+    "col": 2,
+    "row": 2,
+    "dependsOn": ["Capa de Red e IP"]
+  },
+  {
+    "topic": "Ruteo",
+    "name": "Ruteo",
+    "description": "Algoritmos de enrutamiento: vector distancia y estado de enlace.",
+    "iconKey": "trending-up",
+    "xpThreshold": 150,
+    "col": 3,
+    "row": 2,
+    "dependsOn": ["Capa de Red e IP"]
+  },
+  {
+    "topic": "Capa de Aplicación",
+    "name": "Capa de Aplicación (HTTP/DNS)",
+    "description": "Protocolos de aplicación: HTTP, DNS, SMTP y modelo cliente-servidor.",
+    "iconKey": "star",
+    "xpThreshold": 160,
+    "col": 2,
+    "row": 3,
+    "dependsOn": ["Capa de Transporte"]
+  },
+  {
+    "topic": "Seguridad en Redes",
+    "name": "Seguridad en Redes",
+    "description": "Cifrado, firewalls, VPN y vectores de ataque comunes.",
+    "iconKey": "rocket",
+    "xpThreshold": 210,
+    "col": 2,
+    "row": 4,
+    "dependsOn": ["Ruteo", "Capa de Aplicación"]
+  }
+]

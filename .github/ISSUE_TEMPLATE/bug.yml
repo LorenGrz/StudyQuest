@@ -1,0 +1,68 @@
+name: Bug
+description: Report a defect or regression that needs investigation.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Describe the bug and its impact.
+      placeholder: When I do X, Y happens...
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Include reproduction details, environment, logs, screenshots, or related links.
+      placeholder: Steps to reproduce...
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+      description: Define the expected fix or verification points.
+      placeholder: |
+        - [ ] Bug no longer occurs
+        - [ ] Regression coverage added if needed
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Select the main area affected by this bug.
+      options:
+        - frontend
+        - backend
+        - mobile
+        - infra
+        - design
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Select the urgency of the fix.
+      options:
+        - P0
+        - P1
+        - P2
+    validations:
+      required: true
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size
+      description: Estimate the implementation effort.
+      options:
+        - XS
+        - S
+        - M
+        - L
+    validations:
+      required: true

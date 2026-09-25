@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d97706"/>
+      <stop offset="50%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#fde68a"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- glow ring -->
+  <circle cx="50" cy="50" r="46" stroke="#fbbf24" stroke-width="5" stroke-opacity="0.3" filter="url(#glow)"/>
+  <!-- main ring -->
+  <circle cx="50" cy="50" r="46" stroke="url(#g)" stroke-width="4"/>
+  <!-- ornamental inner ring -->
+  <circle cx="50" cy="50" r="41" stroke="#fde68a" stroke-width="1" stroke-opacity="0.5" stroke-dasharray="2 4"/>
+  <!-- laurel-style marks at 45° intervals -->
+  <path d="M50 3 L52 9 L50 7 L48 9 Z" fill="#fbbf24"/>
+  <path d="M79.6 11.7 L79.6 18 L77.3 15.4 L74.7 17.7 Z" fill="#fbbf24" transform="rotate(45 50 50)"/>
+  <path d="M50 97 L52 91 L50 93 L48 91 Z" fill="#fbbf24"/>
+  <path d="M3 50 L9 52 L7 50 L9 48 Z" fill="#fbbf24"/>
+  <path d="M97 50 L91 52 L93 50 L91 48 Z" fill="#fbbf24"/>
+  <!-- corner diamonds -->
+  <polygon points="50,4 52,8 50,12 48,8" fill="#fde68a" opacity="0.85"/>
+  <polygon points="50,96 52,92 50,88 48,92" fill="#fde68a" opacity="0.85"/>
+  <polygon points="4,50 8,52 12,50 8,48" fill="#fde68a" opacity="0.85"/>
+  <polygon points="96,50 92,52 88,50 92,48" fill="#fde68a" opacity="0.85"/>
+</svg>

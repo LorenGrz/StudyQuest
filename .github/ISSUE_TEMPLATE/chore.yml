@@ -1,0 +1,68 @@
+name: Chore
+description: Track maintenance, cleanup, tooling, or operational work.
+title: "[Chore]: "
+labels:
+  - chore
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Need
+      description: Describe the maintenance need, cleanup task, or operational goal.
+      placeholder: We need to...
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Add background, risks, dependencies, or related work.
+      placeholder: Relevant details...
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+      description: Define what completion looks like.
+      placeholder: |
+        - [ ] Task completed
+        - [ ] No regressions introduced
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Select the main area affected by this work.
+      options:
+        - frontend
+        - backend
+        - mobile
+        - infra
+        - design
+    validations:
+      required: true
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      description: Select the delivery priority.
+      options:
+        - P0
+        - P1
+        - P2
+    validations:
+      required: true
+  - type: dropdown
+    id: size
+    attributes:
+      label: Size
+      description: Estimate the implementation effort.
+      options:
+        - XS
+        - S
+        - M
+        - L
+    validations:
+      required: true

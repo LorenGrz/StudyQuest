@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b45309"/>
+      <stop offset="40%" stop-color="#f59e0b"/>
+      <stop offset="70%" stop-color="#fde68a"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fde68a"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <!-- outer glow halo -->
+  <circle cx="50" cy="50" r="47" stroke="#f59e0b" stroke-width="10" stroke-opacity="0.35" filter="url(#glow)"/>
+  <!-- outer ring -->
+  <circle cx="50" cy="50" r="46" stroke="url(#g)" stroke-width="5"/>
+  <!-- secondary ring -->
+  <circle cx="50" cy="50" r="40" stroke="url(#g2)" stroke-width="2" stroke-dasharray="3 5"/>
+  <!-- inner subtle -->
+  <circle cx="50" cy="50" r="35" stroke="#fde68a" stroke-width="0.6" stroke-opacity="0.3"/>
+  <!-- Crown-top point -->
+  <path d="M50 0 L53 7 L57 3 L55 10 L60 7 L56 14 L50 11 L44 14 L40 7 L45 10 L43 3 L47 7 Z" fill="#f59e0b"/>
+  <!-- bottom fleur -->
+  <path d="M50 100 L53 93 L50 96 L47 93 Z" fill="#f59e0b"/>
+  <!-- side fleur -->
+  <path d="M0 50 L7 47 L4 50 L7 53 Z" fill="#f59e0b"/>
+  <path d="M100 50 L93 47 L96 50 L93 53 Z" fill="#f59e0b"/>
+  <!-- 8 star ornaments -->
+  <path d="M79.6 20.4 L81.5 24 L79.6 22 L77.7 24 L79.6 20.4Z" fill="#fde68a"/>
+  <path d="M20.4 79.6 L22.3 83.2 L20.4 81.2 L18.5 83.2 L20.4 79.6Z" fill="#fde68a"/>
+  <path d="M79.6 79.6 L81.5 83.2 L79.6 81.2 L77.7 83.2 L79.6 79.6Z" fill="#fde68a"/>
+  <path d="M20.4 20.4 L22.3 24 L20.4 22 L18.5 24 L20.4 20.4Z" fill="#fde68a"/>
+  <!-- extra glow dots -->
+  <circle cx="50" cy="5" r="2" fill="#fde68a" opacity="0.8"/>
+  <circle cx="95" cy="50" r="2" fill="#fde68a" opacity="0.8"/>
+  <circle cx="50" cy="95" r="2" fill="#fde68a" opacity="0.8"/>
+  <circle cx="5" cy="50" r="2" fill="#fde68a" opacity="0.8"/>
+</svg>

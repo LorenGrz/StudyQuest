@@ -1,0 +1,81 @@
+[
+  {
+    "topic": "Procesos e Hilos",
+    "name": "Procesos e Hilos",
+    "description": "Concepto de proceso, hilos y cambio de contexto.",
+    "iconKey": "target",
+    "xpThreshold": 80,
+    "col": 2,
+    "row": 0
+  },
+  {
+    "topic": "Planificación de CPU",
+    "name": "Planificación de CPU",
+    "description": "Algoritmos de scheduling: FCFS, SJF, Round Robin y prioridades.",
+    "iconKey": "trending-up",
+    "xpThreshold": 110,
+    "col": 1,
+    "row": 1,
+    "dependsOn": ["Procesos e Hilos"]
+  },
+  {
+    "topic": "Concurrencia y Sincronización",
+    "name": "Concurrencia y Sincronización",
+    "description": "Secciones críticas, semáforos y monitores.",
+    "iconKey": "link",
+    "xpThreshold": 130,
+    "col": 3,
+    "row": 1,
+    "dependsOn": ["Procesos e Hilos"]
+  },
+  {
+    "topic": "Interbloqueos",
+    "name": "Interbloqueos (Deadlocks)",
+    "description": "Condiciones de Coffman, prevención, evitación y detección.",
+    "iconKey": "star",
+    "xpThreshold": 150,
+    "col": 3,
+    "row": 2,
+    "dependsOn": ["Concurrencia y Sincronización"]
+  },
+  {
+    "topic": "Gestión de Memoria",
+    "name": "Gestión de Memoria",
+    "description": "Particiones, paginación y segmentación.",
+    "iconKey": "sigma",
+    "xpThreshold": 140,
+    "col": 1,
+    "row": 2,
+    "dependsOn": ["Planificación de CPU"]
+  },
+  {
+    "topic": "Memoria Virtual",
+    "name": "Memoria Virtual",
+    "description": "Paginación por demanda y algoritmos de reemplazo.",
+    "iconKey": "trending-up",
+    "xpThreshold": 160,
+    "col": 1,
+    "row": 3,
+    "dependsOn": ["Gestión de Memoria"]
+  },
+  {
+    "topic": "Sistemas de Archivos",
+    "name": "Sistemas de Archivos",
+    "description": "Organización, asignación de bloques y journaling.",
+    "iconKey": "link",
+    "xpThreshold": 150,
+    "col": 3,
+    "row": 3,
+    "dependsOn": ["Gestión de Memoria"]
+  },
+  {
+    "topic": "Entrada/Salida",
+    "name": "Entrada/Salida y Drivers",
+    "description": "Gestión de dispositivos, planificación de disco y buffering.",
+    "iconKey": "rocket",
+    "xpThreshold": 200,
+    "col": 2,
+    "row": 4,
+    "dependsOn": ["Memoria Virtual", "Sistemas de Archivos"]
+  }
+]

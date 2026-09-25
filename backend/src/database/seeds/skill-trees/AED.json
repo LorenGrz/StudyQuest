@@ -1,0 +1,81 @@
+[
+  {
+    "topic": "Complejidad Algorítmica",
+    "name": "Complejidad Algorítmica",
+    "description": "Notación asintótica (O, Ω, Θ) y análisis de costo temporal y espacial.",
+    "iconKey": "target",
+    "xpThreshold": 80,
+    "col": 2,
+    "row": 0
+  },
+  {
+    "topic": "Arreglos y Listas",
+    "name": "Arreglos y Listas",
+    "description": "Estructuras lineales, listas enlazadas y operaciones básicas.",
+    "iconKey": "link",
+    "xpThreshold": 100,
+    "col": 1,
+    "row": 1,
+    "dependsOn": ["Complejidad Algorítmica"]
+  },
+  {
+    "topic": "Recursión",
+    "name": "Recursión",
+    "description": "Casos base, recursión y técnica de dividir y conquistar.",
+    "iconKey": "trending-up",
+    "xpThreshold": 110,
+    "col": 3,
+    "row": 1,
+    "dependsOn": ["Complejidad Algorítmica"]
+  },
+  {
+    "topic": "Pilas y Colas",
+    "name": "Pilas y Colas",
+    "description": "Estructuras LIFO/FIFO y sus aplicaciones.",
+    "iconKey": "link",
+    "xpThreshold": 120,
+    "col": 0,
+    "row": 2,
+    "dependsOn": ["Arreglos y Listas"]
+  },
+  {
+    "topic": "Árboles",
+    "name": "Árboles",
+    "description": "Árboles binarios, de búsqueda y balanceados (AVL).",
+    "iconKey": "trending-up",
+    "xpThreshold": 150,
+    "col": 2,
+    "row": 2,
+    "dependsOn": ["Arreglos y Listas", "Recursión"]
+  },
+  {
+    "topic": "Ordenamiento",
+    "name": "Algoritmos de Ordenamiento",
+    "description": "Quicksort, mergesort, heapsort y sus complejidades.",
+    "iconKey": "sigma",
+    "xpThreshold": 150,
+    "col": 4,
+    "row": 2,
+    "dependsOn": ["Recursión"]
+  },
+  {
+    "topic": "Grafos",
+    "name": "Grafos",
+    "description": "Representaciones y recorridos (BFS, DFS).",
+    "iconKey": "star",
+    "xpThreshold": 180,
+    "col": 2,
+    "row": 3,
+    "dependsOn": ["Árboles"]
+  },
+  {
+    "topic": "Algoritmos sobre Grafos",
+    "name": "Algoritmos sobre Grafos",
+    "description": "Caminos mínimos (Dijkstra) y árboles de expansión mínima.",
+    "iconKey": "rocket",
+    "xpThreshold": 220,
+    "col": 2,
+    "row": 4,
+    "dependsOn": ["Grafos", "Ordenamiento"]
+  }
+]

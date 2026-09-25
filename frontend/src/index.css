@@ -1,0 +1,393 @@
+/* ============================================================
+   StudyQuest – Design System
+   Dark gaming aesthetic · Mobile-first
+   ============================================================ */
+
+/* Inter is loaded via <link> in index.html (with preconnect) — no @import here. */
+@import "tailwindcss";
+
+/* Tailwind tokens mapped to the app's CSS variables so utilities follow the active theme */
+@theme {
+  --color-base: var(--bg-base);
+  --color-surface: var(--bg-surface);
+  --color-elevated: var(--bg-elevated);
+  --color-input: var(--bg-input);
+  --color-panel: var(--bg-input);
+  --color-primary: var(--text-primary);
+  --color-secondary: var(--text-secondary);
+  --color-muted: var(--text-muted);
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+  --color-on-accent: var(--text-on-accent);
+  --color-success: var(--green);
+  --color-warning: var(--yellow);
+  --color-danger: var(--red);
+  --color-info: var(--blue);
+  --color-edge: var(--border);
+  --color-content: var(--text-primary);
+  --color-faint: var(--text-muted);
+  --shadow-card: var(--shadow-card);
+}
+
+/* ─── Custom Utilities (sin equivalente nativo en Tailwind) ──────────────── */
+@utility animate-wave {
+  animation: wave 1.5s ease-in-out infinite;
+  display: inline-block;
+}
+@utility animate-pulse-dot {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@utility animate-radar {
+  animation: radar-expand 2s ease-out infinite;
+}
+@utility animate-skill-pulse {
+  animation: skill-node-pulse 2.8s ease-in-out infinite;
+}
+@utility animate-lb-in {
+  animation: lb-slide-in 0.35s ease both;
+}
+@utility animate-pulse-border {
+  animation: pulse-border 2s ease-in-out infinite;
+}
+@utility animate-fade-in {
+  animation: fadeIn 0.2s ease;
+}
+@utility animate-slide-up {
+  animation: slideUp 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+/* Entrance for page sections (see <Reveal> in UI.tsx). `backwards` holds the
+   hidden state during animation-delay, then plays; with prefers-reduced-motion
+   it snaps to visible. Pure CSS so it never gets stuck at opacity 0. */
+@utility reveal {
+  animation: reveal 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+@utility animate-recording-pulse {
+  animation: chat-recording-pulse 1.2s ease-out infinite;
+}
+@utility field-sizing-content {
+  field-sizing: content;
+}
+@utility text-gradient-accent {
+  background: linear-gradient(135deg, #a855f7, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ─── CSS Variables ──────────────────────────────────────────────────────── */
+:root {
+  --bg-base:        #0d0d18;
+  --bg-surface:     #13131f;
+  --bg-elevated:    #1a1a2e;
+  --bg-input:       #1e1e30;
+  --border:         rgba(255, 255, 255, 0.08);
+  --border-hover:   rgba(255, 255, 255, 0.15);
+  
+  --overlay-subtle: rgba(255, 255, 255, 0.05);
+  --overlay-soft: rgba(255, 255, 255, 0.08);
+  --overlay-border: rgba(255, 255, 255, 0.12);
+  
+  --page-gradient: linear-gradient(180deg, #0d0d18 0%, #1a0a2e 100%);
+
+  --text-primary:   #f0f0ff;
+  --text-secondary: #8888aa;
+  --text-muted:     #555577;
+  
+  --accent:         #7c3aed;
+  --accent-light:   #9d5df7;
+  --accent-glow:    rgba(124, 58, 237, 0.3);
+  --accent-bg:      rgba(124, 58, 237, 0.1);
+  --text-on-accent: #ffffff;
+  
+  --green:          #10b981;
+  --green-bg:       rgba(16, 185, 129, 0.1);
+  --yellow:         #f59e0b;
+  --yellow-bg:      rgba(245, 158, 11, 0.1);
+  --red:            #ef4444;
+  --red-bg:         rgba(239, 68, 68, 0.1);
+  --blue:           #3b82f6;
+  --blue-bg:        rgba(59, 130, 246, 0.1);
+  
+  --radius-sm:      8px;
+  --radius-md:      12px;
+  --radius-lg:      18px;
+  --radius-xl:      24px;
+  --radius-full:    9999px;
+  
+  --shadow-sm:      0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md:      0 4px 16px rgba(0, 0, 0, 0.5);
+  --shadow-card:    0 8px 32px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-accent:  0 0 24px var(--accent-glow);
+  
+  --navbar-height:  70px;
+
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background: var(--bg-base);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Light theme (toggled via data-theme on <html>) ────────────── */
+:root[data-theme="light"] {
+  --bg-base: #f4f4f8;
+  --bg-surface: #ffffff;
+  --bg-elevated: #ffffff;
+  --bg-input: #eeeef4;
+  --border: rgba(20, 20, 40, 0.1);
+  --border-hover: rgba(20, 20, 40, 0.2);
+
+  --overlay-subtle: rgba(20, 20, 40, 0.04);
+  --overlay-soft: rgba(20, 20, 40, 0.07);
+  --overlay-border: rgba(20, 20, 40, 0.12);
+
+  --page-gradient: linear-gradient(180deg, #f4f4f8 0%, #ece9f5 100%);
+
+  --text-primary: #1a1a2e;
+  --text-secondary: #555570;
+  --text-muted: #8888a0;
+
+  --accent: #7c3aed;
+  --accent-light: #6d28d9;
+  --accent-glow: rgba(124, 58, 237, 0.2);
+  --accent-bg: rgba(124, 58, 237, 0.08);
+  --text-on-accent: #ffffff;
+
+  /* Darker green than the dark-theme #10b981 so success text/icons stay legible
+     on light backgrounds. */
+  --green: #059669;
+  --green-bg: rgba(16, 185, 129, 0.12);
+  --yellow-bg: rgba(245, 158, 11, 0.12);
+  --red-bg: rgba(239, 68, 68, 0.12);
+  --blue-bg: rgba(59, 130, 246, 0.12);
+
+  --shadow-sm: 0 1px 3px rgba(20, 20, 40, 0.1);
+  --shadow-md: 0 4px 16px rgba(20, 20, 40, 0.12);
+  --shadow-card: 0 8px 24px rgba(20, 20, 40, 0.08), inset 0 0 0 1px rgba(20, 20, 40, 0.02);
+  --shadow-accent: 0 0 24px var(--accent-glow);
+}
+
+/* Element defaults & reset live in @layer base so Tailwind's utilities (a later
+   layer) always win. Unlayered, these beat every utility regardless of
+   specificity — e.g. `* { padding:0 }` killed all spacing utilities, and
+   `button { background:none }` killed bg-colors on every button. */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    min-width: 320px;
+    background: var(--bg-base);
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  body {
+    min-width: 320px;
+    height: 100dvh;
+    overflow: hidden;
+    background: var(--bg-base);
+    color: var(--text-primary);
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  #root {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: var(--text-primary);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  p {
+    color: var(--text-secondary);
+  }
+  a {
+    color: var(--accent-light);
+    text-decoration: none;
+  }
+  button {
+    cursor: pointer;
+    border: none;
+    background: none;
+  }
+}
+
+/* ─── Scrollbar hiding ───────────────────────────────────────────────────────
+   Kept outside @layer base so it doesn't compete with scrollbar utilities */
+*,
+*::before,
+*::after {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ─── Keyframes ──────────────────────────────────────────────────────────── */
+@keyframes wave {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(20deg); }
+  75% { transform: rotate(-10deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes radar-expand {
+  0% { opacity: 1; transform: scale(0.8); }
+  100% { opacity: 0; transform: scale(1.1); }
+}
+
+@keyframes skill-node-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.18); }
+  50% { box-shadow: 0 0 0 6px rgba(124, 58, 237, 0.06); }
+}
+
+@keyframes lb-slide-in {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes pulse-border {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0); }
+  50% { box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.3); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes chat-recording-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(251, 113, 133, 0.55); }
+  70% { box-shadow: 0 0 0 10px rgba(251, 113, 133, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(251, 113, 133, 0); }
+}
+
+/* Skill-tree dependency edges. These <line> elements in SkillTreePage rely on
+   these class names for their stroke; the Tailwind migration dropped the rules,
+   leaving the dependency paths invisible. */
+@layer components {
+  .skill-tree-edge {
+    stroke: rgba(124, 58, 237, 0.35);
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-dasharray: 6 6;
+    transition: opacity 0.18s ease, stroke 0.18s ease, stroke-width 0.18s ease;
+  }
+  .skill-tree-edge--active {
+    stroke: rgba(245, 197, 24, 0.8);
+    stroke-dasharray: none;
+  }
+  .skill-tree-edge--dimmed {
+    opacity: 0.22;
+  }
+  .skill-tree-edge--focused {
+    opacity: 1;
+    stroke: rgba(245, 197, 24, 0.95);
+    stroke-width: 3;
+    stroke-dasharray: none;
+  }
+}
+
+/* Form field primitives. Most forms use Tailwind utilities directly, but
+   PartyComponents.tsx (tournament/quest creation, invites) still consumes these
+   class names — keep them defined so those fields stay styled. */
+@layer components {
+  .input {
+    width: 100%;
+    min-height: 2.75rem;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 0.625rem 0.875rem;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    line-height: 1.4;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .input:focus-visible,
+  .input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .input-textarea {
+    min-height: 6rem;
+    resize: vertical;
+    line-height: 1.5;
+  }
+
+  .input-select {
+    cursor: pointer;
+  }
+
+  .input-error {
+    border-color: var(--red);
+  }
+
+  .input-error:focus-visible,
+  .input-error:focus {
+    box-shadow: 0 0 0 3px var(--red-bg);
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .input-label {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+}
