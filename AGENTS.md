@@ -1,6 +1,6 @@
 # StudyQuest Agent Context
 
-Last validated against the codebase on 2026-05-16.
+Last validated against the codebase on 2026-05-16 (branch/worktree section updated 2026-09-25). See `CLAUDE.md` for the current deploy/infra state.
 
 ## Purpose
 
@@ -275,23 +275,12 @@ docker compose up --build
 
 ## Git And Worktree Convention
 
-To avoid accidental changes on `dev`, use this workflow for every new task:
-
-1. Keep `/Users/dantestefanotripodi/Documents/Projects/StudyQuest` on `dev` as the stable base workspace.
-2. Create a separate branch for each task using the `Feat/` prefix.
-3. Open that branch in its own git worktree instead of reusing the main folder.
-4. Never work in `detached HEAD` if the task is going to produce files or commits.
-5. If a detached worktree already exists and is clean, attach it to a named branch immediately.
-
-Suggested naming:
-
-- feature work: `Feat/<short-feature-name>`
-- docs or planning work: `Feat/<topic>-plan`
-- quick preservation branch for detached worktrees: `Feat/<topic>-snapshot`
-
-Recommended commands:
+- `dev` is the default branch and every push to it deploys; `master` is the stable mirror (merge `dev` → `master` with `--no-ff`).
+- Work on a named branch per task (`feature/<slug>`, `fix/<slug>`, `docs/<slug>`), merged back into `dev` with `--no-ff`.
+- Prefer a separate git worktree per parallel task; never commit from a detached HEAD.
+- After merging into `master`, update `CLAUDE.md` / this file if stack, env, deploy, commands or known issues changed.
 
 ```bash
-git worktree add ~/.codex/worktrees/<id>/StudyQuest -b Feat/<short-feature-name>
-git -C ~/.codex/worktrees/<id>/StudyQuest status --short --branch
+git worktree add ../studyquest-<slug> -b feature/<slug> dev
+git -C ../studyquest-<slug> status --short --branch
 ```
