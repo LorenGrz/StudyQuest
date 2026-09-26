@@ -115,9 +115,19 @@ export function SectionTitle({ children }: { children: ReactNode }) {
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string
   error?: string
+  /** Fixed, non-editable text shown inside the field before the value (e.g. "@"). */
+  prefix?: string
 }
 
-export function Input({ label, error, className = '', id, ...props }: InputProps) {
+export function Input({ label, error, prefix, className = '', id, ...props }: InputProps) {
+  const input = (
+    <input
+      id={id}
+      className={`w-full min-h-11 ${prefix ? 'pl-8 pr-3.5' : 'px-3.5'} py-3 bg-panel border border-[var(--overlay-border)] rounded-lg text-primary text-[15px] transition-[border-color,box-shadow] duration-200 outline-none placeholder:text-muted focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 ${error ? 'border-danger' : ''} ${className}`}
+      {...props}
+    />
+  )
+
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
@@ -125,11 +135,19 @@ export function Input({ label, error, className = '', id, ...props }: InputProps
           {label}
         </label>
       )}
-      <input
-        id={id}
-        className={`w-full min-h-11 px-3.5 py-3 bg-panel border border-[var(--overlay-border)] rounded-lg text-primary text-[15px] transition-[border-color,box-shadow] duration-200 outline-none placeholder:text-muted focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30 ${error ? 'border-danger' : ''} ${className}`}
-        {...props}
-      />
+      {prefix ? (
+        <div className="relative">
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[15px] text-muted select-none"
+          >
+            {prefix}
+          </span>
+          {input}
+        </div>
+      ) : (
+        input
+      )}
       {error && <span className="text-[12px] text-danger">{error}</span>}
     </div>
   )

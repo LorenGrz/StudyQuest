@@ -9,6 +9,7 @@ import { Button, Badge, Input } from '../components/UI'
 import { AvatarWithBorder } from '../components/AvatarWithBorder'
 import { useAuthStore } from '../store/authStore'
 import { useTheme } from '../hooks/useTheme'
+import { normalizeUsernameInput } from '../utils/username'
 import { userService } from '../services/userService'
 
 const TABS = [
@@ -225,11 +226,15 @@ function ProfileTab() {
         <Input
           id="settings-username"
           label="Nombre de usuario"
+          prefix="@"
           value={username}
           maxLength={30}
           minLength={3}
           required
-          onChange={(e) => setUsername(e.target.value)}
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          onChange={(e) => setUsername(normalizeUsernameInput(e.target.value))}
         />
         <div className="flex flex-col gap-1">
           <label htmlFor="settings-bio" className="text-sm text-muted">

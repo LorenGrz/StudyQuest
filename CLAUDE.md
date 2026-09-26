@@ -1,6 +1,6 @@
 # StudyQuest — Claude context
 
-Last validated against the code: 2026-09-26 (after the AWS migration). When this file and the code disagree, the code wins — then fix this file.
+Last validated against the code: 2026-09-26 (AWS migration, throttling + username fixes). When this file and the code disagree, the code wins — then fix this file.
 `AGENTS.md` holds the longer operational notes for other agents; keep both in sync.
 
 ## What it is
@@ -42,6 +42,9 @@ Realtime: one gateway `src/gateways/matchmaking/matchmaking.gateway.ts` (matchma
 - Prod runs `TYPEORM_SYNC=false`; schema changes need a migration in `src/database/migrations` (`pnpm migration:run` locally, `deploy.sh` runs them in prod). There is no initial-schema migration: a brand-new DB needs one boot with `TYPEORM_SYNC=true`. `deploy.sh` baselines the `migrations` table so `ResetUsersEloToZero` never re-runs on a synced DB.
 - Seeds (`seed.js`) create demo accounts with passwords from the repo — rotate them in any public environment (done in prod 2026-09-26).
 - Global prefix `/api/v1` except `/health` and the socket.
+- **Rate limiting:** `default` throttler (100/min) runs everywhere; `strict` is opt-in per route via `@Throttle({ strict: … })` (`common/throttle.ts` `onlyWhereDeclared`). `trust proxy` is 1 (Caddy) so limits are per client. Never register a named throttler without a `skipIf`, or it applies to every route.
+- **Usernames** are stored lowercase without `@` (`common/username.ts` normalizes register/profile/friend lookup; migration `LowercaseUsernames`). The UI shows a fixed `@` prefix (`Input prefix`) and lowercases as you type (`frontend/src/utils/username.ts`).
+- **API errors in the UI:** `services/api.ts` rewrites 429/5xx/network errors into Spanish user-facing text (`utils/apiErrors.ts`); other statuses keep the backend `message`. University fields are selects fed by `GET /subjects/universities`.
 
 ## Branches & deploy
 
