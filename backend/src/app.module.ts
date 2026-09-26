@@ -29,6 +29,7 @@ import { SearchModule } from './modules/search/search.module';
 import { TournamentsModule } from './modules/tournaments/tournaments.module';
 import { BillingModule } from './modules/billing/billing.module';
 import { StudyBotModule } from './modules/study-bot/study-bot.module';
+import { onlyWhereDeclared, THROTTLE_ERROR_MESSAGE } from './common/throttle';
 import { StorageModule } from './modules/storage/storage.module';
 
 @Module({
@@ -86,10 +87,19 @@ import { StorageModule } from './modules/storage/storage.module';
       },
     }),
 
-    ThrottlerModule.forRoot([
-      { name: 'default', ttl: 60_000, limit: 100 },
-      { name: 'strict', ttl: 60_000, limit: 10 },
-    ]),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        { name: 'default', ttl: 60_000, limit: 100 },
+        // Opt-in only: routes enable it with @Throttle({ strict: … }).
+        {
+          name: 'strict',
+          ttl: 60_000,
+          limit: 10,
+          skipIf: onlyWhereDeclared('strict'),
+        },
+      ],
+      errorMessage: THROTTLE_ERROR_MESSAGE,
+    }),
     EventEmitterModule.forRoot(),
     ScheduleModule.forRoot(),
 

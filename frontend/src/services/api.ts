@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { friendlyApiErrorMessage } from '../utils/apiErrors'
 
 const BASE_URL =
   (import.meta.env.VITE_API_URL ?? 'http://localhost:3000') + '/api/v1'
@@ -57,6 +58,22 @@ api.interceptors.response.use(
         window.location.href = `${import.meta.env.BASE_URL}auth`
       }
     }
-    return Promise.reject(error)
+    return Promise.reject(withFriendlyMessage(error))
   },
 )
+
+// Screens show `response.data.message` (or `error.message`) directly, so
+// rewrite both for failures whose raw text means nothing to a user
+// (e.g. "ThrottlerException: Too Many Requests", "Network Error").
+function withFriendlyMessage(error: unknown): unknown {
+  if (!axios.isAxiosError?.(error)) return error
+  const friendly = friendlyApiErrorMessage(error.response?.status)
+  if (!friendly) return error
+  error.message = friendly
+  if (error.response) {
+    const data: unknown = error.response.data
+    error.response.data =
+      data && typeof data === 'object' ? { ...data, message: friendly } : { message: friendly }
+  }
+  return error
+}

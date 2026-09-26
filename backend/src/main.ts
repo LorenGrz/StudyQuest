@@ -1,5 +1,6 @@
 import './polyfill';
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { RequestMethod, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { IoAdapter } from '@nestjs/platform-socket.io';
@@ -11,7 +12,10 @@ import { AppModule } from './app.module';
 import { corsOrigin } from './common/cors';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  // One reverse proxy (Caddy) sits in front: trust its X-Forwarded-For so
+  // req.ip — and therefore rate limiting — is per client, not per proxy.
+  app.set('trust proxy', 1);
   const cfg = app.get(ConfigService);
   const port = cfg.get<number>('PORT', 3000);
 
