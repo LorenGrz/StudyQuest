@@ -33,7 +33,8 @@ jobs:
       - name: Build
         working-directory: frontend
         env:
-          VITE_API_URL: https://studyquest-api-sjc1.onrender.com
+          # Backend on AWS Lightsail (Caddy + Let's Encrypt via sslip.io)
+          VITE_API_URL: https://api-54-156-9-166.sslip.io
         run: pnpm build
 
       - name: SPA routing

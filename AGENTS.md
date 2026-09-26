@@ -1,6 +1,6 @@
 # StudyQuest Agent Context
 
-Last validated against the codebase on 2026-05-16.
+Last validated against the codebase on 2026-05-16 (branch/worktree section updated 2026-09-25). See `CLAUDE.md` for the current deploy/infra state.
 
 ## Purpose
 
@@ -38,7 +38,9 @@ There is no monorepo workspace manager configured. `backend/` and `frontend/` ar
 - JWT auth
 - Multer for file uploads
 - AI provider abstraction for quiz generation
-- Gemini provider via `@google/generative-ai`
+- AWS Bedrock provider (default: Nova 2 Lite free tier, Claude Haiku 4.5 Pro + study bot) via `@aws-sdk/client-bedrock-runtime`
+- Gemini provider via `@google/generative-ai` (optional/legacy)
+- AWS S3 for uploads, DynamoDB for quiz content
 - OpenAI-compatible providers via configurable backend adapter
 - Anthropic provider via direct Messages API integration
 - Jest for tests
@@ -91,7 +93,7 @@ cp .env.example .env
 2. Start infra only:
 
 ```bash
-docker compose up -d postgres redis
+docker compose up -d postgres dynamodb-local
 ```
 
 3. Start backend:
@@ -137,7 +139,7 @@ Services exposed by default:
 - backend API: `http://localhost:3000/api/v1`
 - swagger: `http://localhost:3000/docs`
 - postgres: `localhost:5432`
-- redis: `localhost:6379`
+- dynamodb-local: `localhost:8000`
 
 ## Environment Notes
 
@@ -147,13 +149,13 @@ Root `.env.example` currently defines:
 - Redis password
 - JWT secret
 - AI provider selection
-- Gemini API key and model
+- AWS region/keys, Bedrock models, S3 bucket, DynamoDB table (Gemini/OpenAI keys optional)
 - OpenAI API key and model
 
 AI provider notes:
 
 - `AI_PROVIDER` controls the default quiz provider globally
-- supported values: `gemini`, `openai`, `anthropic`, `groq`, `mock`
+- supported values: `bedrock` (default), `gemini`, `openai`, `anthropic`, `groq`, `mock`
 - `QuestsService` talks to the AI facade, not to a provider SDK directly
 - provider override is internal to backend code for now; there is no public API switch yet
 
@@ -187,12 +189,14 @@ In Docker Compose those are already provided for the `web` service.
 - Users create quests by uploading a source document (PDF, DOCX/DOC, MD, TXT, RTF, PPTX, CSV, HTML, EPUB, XLSX — anything MarkItDown parses). The optional "instrucciones / temas" text field is question guidance (topics/focus/difficulty), not the study source.
 - Subscription plans are manual tiers (`free` / `pro`) — no payment processor. `src/common/plans.ts` is the single source of truth for per-plan limits (quests/day, upload MB, instructions length, AI model tier, party size). `BillingModule` exposes `GET/POST /billing/*`; `pro` is granted by a promo code or an admin and lapses at `planExpiresAt`.
 - Party chat also supports file and audio uploads
-- Backend stores uploaded quest source files under `/uploads/<filename>`
+- Backend stores uploaded quest source files in S3 (`quests/<uuid>.<ext>`), exposed as `/api/v1/files/<key>` (302 to a presigned URL)
+- Quiz content (questions + options) lives in DynamoDB, one document per quest (table `DYNAMO_QUIZZES_TABLE`, PK `questId`, TTL `expiresAt`). Postgres keeps `Quest` metadata (incl. `question_count`) and `PlayerResult`. Access goes through `QuizContentRepository` (`backend/src/modules/quests/quiz-content/`); unit tests use `InMemoryQuizContentRepository`. Write order on generation: Dynamo put → quest `ready`. Deletes (user + retention) remove the Postgres row first, then the Dynamo item.
+- Local: `docker compose up -d dynamodb-local`, set `DYNAMO_ENDPOINT=http://localhost:8000`, then `pnpm run dynamo:create-table`. One-off backfill from the legacy `quiz_questions`/`quiz_options` tables: `pnpm run migrate:quizzes-dynamo -- --dry-run`, then without the flag.
 
 ### Study bot (Pro)
 
 - `POST /study-bot/ask` — a free-text chat grounded in the caller's own recent quest history. Gated by `ProPlanGuard` (`backend/src/common/pro-plan.guard.ts`), which checks `BillingService.getState().effectivePlan === 'pro'`.
-- No vector store: `StudyBotService` fetches the last 5 completed `PlayerResult`s (+ quest/subject/questions) scoped to `userId` and formats them as context (`study-history.utils.ts`) — that SQL query, already scoped to the account, *is* the retrieval step. Gemini answers using that context (`study-bot-prompt.ts`).
+- No vector store: `StudyBotService` fetches the last 5 completed `PlayerResult`s (+ quest/subject) scoped to `userId`, batch-reads their questions from DynamoDB, and formats them as context (`study-history.utils.ts`) — that SQL query, already scoped to the account, *is* the retrieval step. Bedrock (`AiService.chat`, `STUDY_BOT_MODEL`) answers using that context (`study-bot-prompt.ts`).
 - Known limit: `PlayerResult` only stores an aggregate correct-answer count, not which specific questions were right or wrong, so the bot can report a quest's score but not name the exact question that was missed.
 
 ### Matchmaking
@@ -214,7 +218,7 @@ Implementation notes:
 - `ChatMessage` now has `type`, `text`, and `attachment` metadata
 - file uploads are exposed at `POST /api/v1/parties/:id/chat/file`
 - audio uploads are exposed at `POST /api/v1/parties/:id/chat/audio`
-- uploaded assets are served from `/uploads/*`
+- uploaded assets live in S3 under `chat/<partyId>/` and are served via `/api/v1/files/*`
 - the chat UI renders file links and inline audio players
 
 Useful verification files:
@@ -261,7 +265,7 @@ pnpm run lint
 Infra:
 
 ```bash
-docker compose up -d postgres redis
+docker compose up -d postgres dynamodb-local
 docker compose up --build
 ```
 
@@ -275,23 +279,12 @@ docker compose up --build
 
 ## Git And Worktree Convention
 
-To avoid accidental changes on `dev`, use this workflow for every new task:
-
-1. Keep `/Users/dantestefanotripodi/Documents/Projects/StudyQuest` on `dev` as the stable base workspace.
-2. Create a separate branch for each task using the `Feat/` prefix.
-3. Open that branch in its own git worktree instead of reusing the main folder.
-4. Never work in `detached HEAD` if the task is going to produce files or commits.
-5. If a detached worktree already exists and is clean, attach it to a named branch immediately.
-
-Suggested naming:
-
-- feature work: `Feat/<short-feature-name>`
-- docs or planning work: `Feat/<topic>-plan`
-- quick preservation branch for detached worktrees: `Feat/<topic>-snapshot`
-
-Recommended commands:
+- `dev` is the default branch and every push to it deploys; `master` is the stable mirror (merge `dev` → `master` with `--no-ff`).
+- Work on a named branch per task (`feature/<slug>`, `fix/<slug>`, `docs/<slug>`), merged back into `dev` with `--no-ff`.
+- Prefer a separate git worktree per parallel task; never commit from a detached HEAD.
+- After merging into `master`, update `CLAUDE.md` / this file if stack, env, deploy, commands or known issues changed.
 
 ```bash
-git worktree add ~/.codex/worktrees/<id>/StudyQuest -b Feat/<short-feature-name>
-git -C ~/.codex/worktrees/<id>/StudyQuest status --short --branch
+git worktree add ../studyquest-<slug> -b feature/<slug> dev
+git -C ../studyquest-<slug> status --short --branch
 ```

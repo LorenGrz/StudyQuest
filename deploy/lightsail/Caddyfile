@@ -1,0 +1,17 @@
+{$API_DOMAIN} {
+	encode gzip
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		# No preload: keep the option to move off HTTPS-only without waiting
+		# for the browser preload list to expire.
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+
+	# Caddy proxies WebSocket upgrade requests through automatically, so this
+	# also covers the Socket.IO gateway (matchmaking, party chat presence).
+	reverse_proxy api:3000
+}

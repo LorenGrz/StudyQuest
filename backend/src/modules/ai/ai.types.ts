@@ -10,6 +10,7 @@ export interface RawQuestion {
 }
 
 export type AiProviderName =
+  | 'bedrock'
   | 'gemini'
   | 'openai'
   | 'anthropic'

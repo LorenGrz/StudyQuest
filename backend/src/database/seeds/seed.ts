@@ -35,8 +35,6 @@ import { PartyMember } from '../../modules/parties/party-member.entity';
 import { ChatMessage } from '../../modules/parties/chat-message.entity';
 import { PartyActivity } from '../../modules/parties/party-activity.entity';
 import { Quest } from '../../modules/quests/quest.entity';
-import { QuizQuestion } from '../../modules/quests/quiz-question.entity';
-import { QuizOption } from '../../modules/quests/quiz-option.entity';
 import { PlayerResult } from '../../modules/quests/player-result.entity';
 import { PartyInvitation } from '../../modules/parties/party-invitation.entity';
 import { Achievement } from '../../modules/achievements/achievement.entity';
@@ -84,8 +82,6 @@ const AppDataSource = new DataSource({
     ChatMessage,
     PartyActivity,
     Quest,
-    QuizQuestion,
-    QuizOption,
     PlayerResult,
     PartyInvitation,
     Achievement,
