@@ -24,9 +24,14 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "seed": "ts-node -P tsconfig.seed.json src/database/seeds/seed.ts",
-    "seed:skill-tree": "ts-node -P tsconfig.seed.json src/database/seeds/skill-tree.seed.ts"
+    "seed:skill-tree": "ts-node -P tsconfig.seed.json src/database/seeds/skill-tree.seed.ts",
+    "migration:run": "TS_NODE_PROJECT=tsconfig.seed.json typeorm-ts-node-commonjs migration:run -d src/config/typeorm.config.ts",
+    "migrate:quizzes-dynamo": "ts-node -P tsconfig.seed.json src/database/scripts/migrate-quizzes-to-dynamo.ts",
+    "dynamo:create-table": "ts-node -P tsconfig.seed.json src/database/scripts/create-dynamo-table.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1140.0",
+    "@aws-sdk/lib-dynamodb": "^3.1140.0",
     "@google/generative-ai": "^0.24.1",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.3",
@@ -106,6 +111,8 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
-    "setupFiles": ["<rootDir>/polyfill.ts"]
+    "setupFiles": [
+      "<rootDir>/polyfill.ts"
+    ]
   }
 }

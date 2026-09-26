@@ -6,15 +6,16 @@ import type { Dirent } from 'node:fs';
 import { readdir, stat, unlink } from 'node:fs/promises';
 import { basename, join } from 'node:path';
 import { Quest } from './quest.entity';
+import { QuizContentRepository } from './quiz-content/quiz-content.repository';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_RETENTION_DAYS = 7;
 const UPLOADS_DIR = join(process.cwd(), 'uploads');
 
 /**
- * Borra quests (y en cascada sus quiz_questions / quiz_options / player_results
- * vía FK ON DELETE CASCADE) y los PDFs subidos una vez superada la ventana de
- * retención. Mantiene acotado el uso de disco de Postgres y de ./uploads.
+ * Borra quests (y en cascada sus player_results vía FK ON DELETE CASCADE), su
+ * contenido de quiz en DynamoDB y los PDFs subidos una vez superada la ventana
+ * de retención. Mantiene acotado el uso de disco de Postgres y de ./uploads.
  */
 @Injectable()
 export class QuestRetentionService implements OnModuleInit {
@@ -24,6 +25,7 @@ export class QuestRetentionService implements OnModuleInit {
   constructor(
     @InjectRepository(Quest)
     private readonly questRepo: Repository<Quest>,
+    private readonly quizContent: QuizContentRepository,
   ) {}
 
   private get retentionDays(): number {
@@ -55,9 +57,11 @@ export class QuestRetentionService implements OnModuleInit {
         return;
       }
 
-      // El FK ON DELETE CASCADE se encarga de quiz_questions, quiz_options y
-      // player_results.
+      // El FK ON DELETE CASCADE se encarga de player_results. El contenido
+      // del quiz vive en DynamoDB: se borra después de Postgres (el TTL del
+      // ítem es sólo la red de seguridad si este paso falla).
       await this.questRepo.delete({ createdAt: LessThan(cutoff) });
+      await this.purgeQuizContent(expired.map((quest) => quest.id));
 
       let files = 0;
       for (const quest of expired) {
@@ -73,6 +77,16 @@ export class QuestRetentionService implements OnModuleInit {
       this.logger.error(`fallo la purga de retención: ${message}`);
     } finally {
       this.running = false;
+    }
+  }
+
+  private async purgeQuizContent(questIds: string[]): Promise<void> {
+    try {
+      await this.quizContent.deleteMany(questIds);
+    } catch (err) {
+      this.logger.warn(
+        `no se pudo borrar el contenido de ${questIds.length} quests en DynamoDB: ${(err as Error).message}`,
+      );
     }
   }
 

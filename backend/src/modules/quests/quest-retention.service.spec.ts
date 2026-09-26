@@ -4,6 +4,7 @@ import { FindOperator, Repository } from 'typeorm';
 import * as fs from 'node:fs/promises';
 import { QuestRetentionService } from './quest-retention.service';
 import { Quest } from './quest.entity';
+import { QuizContentRepository } from './quiz-content/quiz-content.repository';
 
 jest.mock('node:fs/promises', () => ({
   readdir: jest.fn(),
@@ -25,6 +26,7 @@ const cutoffOf = (call: unknown): Date => {
 describe('QuestRetentionService', () => {
   let service: QuestRetentionService;
   let questRepo: jest.Mocked<Pick<Repository<Quest>, 'find' | 'delete'>>;
+  let quizContent: { deleteMany: jest.Mock };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -35,9 +37,12 @@ describe('QuestRetentionService', () => {
     statMock.mockResolvedValue({ mtime: NOW });
     unlinkMock.mockResolvedValue(undefined);
 
+    quizContent = { deleteMany: jest.fn().mockResolvedValue(undefined) };
+
     const moduleRef = await Test.createTestingModule({
       providers: [
         QuestRetentionService,
+        { provide: QuizContentRepository, useValue: quizContent },
         {
           provide: getRepositoryToken(Quest),
           useValue: {
@@ -60,6 +65,7 @@ describe('QuestRetentionService', () => {
       '2026-01-25T00:00:00.000Z',
     );
     expect(questRepo.delete).not.toHaveBeenCalled();
+    expect(quizContent.deleteMany).not.toHaveBeenCalled();
   });
 
   it('honours the QUEST_RETENTION_DAYS override', async () => {
@@ -82,6 +88,10 @@ describe('QuestRetentionService', () => {
     await service.purgeExpired();
 
     expect(questRepo.delete).toHaveBeenCalledTimes(1);
+    expect(quizContent.deleteMany).toHaveBeenCalledWith(['q1', 'q2', 'q3']);
+    expect(questRepo.delete.mock.invocationCallOrder[0]).toBeLessThan(
+      quizContent.deleteMany.mock.invocationCallOrder[0],
+    );
     expect(unlinkMock).toHaveBeenCalledWith(
       expect.stringMatching(/uploads[/\\]a\.pdf$/),
     );
@@ -123,6 +133,19 @@ describe('QuestRetentionService', () => {
     expect(unlinkMock).toHaveBeenCalledTimes(1);
     expect(unlinkMock).toHaveBeenCalledWith(
       expect.stringMatching(/uploads[/\\]old\.pdf$/),
+    );
+  });
+
+  it('still unlinks PDFs when the DynamoDB purge fails (TTL is the backstop)', async () => {
+    questRepo.find.mockResolvedValue([
+      { id: 'q1', sourcePdfUrl: '/uploads/a.pdf' },
+    ] as Quest[]);
+    quizContent.deleteMany.mockRejectedValue(new Error('throttled'));
+
+    await expect(service.purgeExpired()).resolves.toBeUndefined();
+
+    expect(unlinkMock).toHaveBeenCalledWith(
+      expect.stringMatching(/uploads[/\\]a\.pdf$/),
     );
   });
 

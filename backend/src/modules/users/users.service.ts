@@ -113,18 +113,14 @@ export class UsersService {
          q.subject_id,
          s.name AS subject_name,
          SUM(pr.correct_answers)::int AS correct_answers,
-         SUM(qc.question_count)::int AS total_questions,
+         SUM(pr.total_questions)::int AS total_questions,
          SUM(pr.total_time_ms)::int AS total_time_ms,
          COUNT(pr.id)::int AS quizzes_played
        FROM player_results pr
        JOIN quests q ON q.id = pr.quest_id
        JOIN subjects s ON s.id = q.subject_id
-       JOIN (
-         SELECT quest_id, COUNT(*) AS question_count
-         FROM quiz_questions
-         GROUP BY quest_id
-       ) qc ON qc.quest_id = q.id
        WHERE pr.user_id = $1
+         AND pr.total_questions > 0
        GROUP BY q.subject_id, s.name
        ORDER BY quizzes_played DESC`,
       [userId],

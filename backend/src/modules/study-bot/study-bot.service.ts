@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { PlayerResult } from '../quests/player-result.entity';
+import { QuizContentRepository } from '../quests/quiz-content/quiz-content.repository';
 import { formatQuestHistory } from './study-history.utils';
 import {
   STUDY_BOT_SYSTEM_PROMPT,
@@ -26,6 +27,7 @@ export class StudyBotService {
   constructor(
     @InjectRepository(PlayerResult)
     private readonly resultRepo: Repository<PlayerResult>,
+    private readonly quizContent: QuizContentRepository,
     private readonly cfg: ConfigService,
   ) {}
 
@@ -40,9 +42,20 @@ export class StudyBotService {
       where: { userId, status: 'completed' },
       order: { completedAt: 'DESC' },
       take: RECENT_QUESTS_LIMIT,
-      relations: { quest: { subject: true, questions: true } },
+      relations: { quest: { subject: true } },
     });
-    return formatQuestHistory(results);
+    // Question text lives in DynamoDB: one batch read for all recent quests.
+    const content = await this.quizContent.batchGet(
+      results.map((r) => r.questId),
+    );
+    return formatQuestHistory(
+      results.map((r) => ({
+        ...r,
+        quest: r.quest
+          ? { ...r.quest, questions: content.get(r.questId)?.questions ?? null }
+          : null,
+      })),
+    );
   }
 
   private async callModel(question: string, context: string): Promise<string> {

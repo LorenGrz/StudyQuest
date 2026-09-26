@@ -1,11 +1,11 @@
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { DataSource, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { QuestsService } from './quests.service';
 import { Quest } from './quest.entity';
-import { QuizQuestion } from './quiz-question.entity';
-import { QuizOption } from './quiz-option.entity';
+import { QuizContentRepository } from './quiz-content/quiz-content.repository';
+import { InMemoryQuizContentRepository } from './quiz-content/in-memory-quiz-content.repository';
 import { PlayerResult } from './player-result.entity';
 import { AiService } from '../ai/ai.service';
 import { MarkitdownService } from '../ai/markitdown.service';
@@ -37,8 +37,10 @@ describe('QuestsService AI abstraction', () => {
   let questRepo: jest.Mocked<Repository<Quest>>;
   let partiesService: jest.Mocked<PartiesService>;
   let billingService: jest.Mocked<BillingService>;
+  let quizContent: InMemoryQuizContentRepository;
 
   beforeEach(async () => {
+    quizContent = new InMemoryQuizContentRepository();
     const moduleRef = await Test.createTestingModule({
       providers: [
         QuestsService,
@@ -54,8 +56,6 @@ describe('QuestsService AI abstraction', () => {
             createQueryBuilder: jest.fn(),
           },
         },
-        { provide: getRepositoryToken(QuizQuestion), useValue: {} },
-        { provide: getRepositoryToken(QuizOption), useValue: {} },
         {
           provide: getRepositoryToken(PlayerResult),
           useValue: {
@@ -65,18 +65,7 @@ describe('QuestsService AI abstraction', () => {
             create: jest.fn((value) => value),
           },
         },
-        {
-          provide: DataSource,
-          useValue: {
-            transaction: jest.fn(async (cb: any) =>
-              cb({
-                create: jest.fn((_entity: unknown, value: unknown) => value),
-                save: jest.fn(),
-                update: jest.fn(),
-              }),
-            ),
-          },
-        },
+        { provide: QuizContentRepository, useValue: quizContent },
         {
           provide: AiService,
           useValue: {
@@ -359,5 +348,128 @@ describe('QuestsService AI abstraction', () => {
       expect.any(String),
       expect.objectContaining({ model: expect.stringContaining('gemini') }),
     );
+  });
+
+  describe('quiz content storage (DynamoDB document)', () => {
+    const generate = (questId: string) =>
+      (service as any).generateInBackground(questId, {
+        sourceBuffer: Buffer.from('texto plano'),
+        filename: 'apunte.txt',
+        instructions: null,
+      });
+
+    beforeEach(() => {
+      markitdownService.toMarkdown.mockResolvedValue('# Apunte\n'.repeat(40));
+      (aiService.generateQuestionsFromText as jest.Mock).mockResolvedValue([
+        rawQuestion,
+        { ...rawQuestion, text: 'Otra?', correctIndex: 2 },
+      ]);
+    });
+
+    it('writes the document before marking the quest ready with its questionCount', async () => {
+      const order: string[] = [];
+      jest.spyOn(quizContent, 'save').mockImplementation(async (doc) => {
+        order.push('dynamo.put');
+        await InMemoryQuizContentRepository.prototype.save.call(
+          quizContent,
+          doc,
+        );
+      });
+      questRepo.update.mockImplementation(async () => {
+        order.push('pg.update');
+        return {} as any;
+      });
+
+      await generate('quest-doc');
+
+      expect(order).toEqual(['dynamo.put', 'pg.update']);
+      expect(questRepo.update).toHaveBeenCalledWith('quest-doc', {
+        questionCount: 2,
+        status: 'ready',
+      });
+      const doc = await quizContent.get('quest-doc');
+      expect(doc).toEqual(
+        expect.objectContaining({ questId: 'quest-doc', questionCount: 2 }),
+      );
+      expect(doc!.questions[1]).toEqual(
+        expect.objectContaining({
+          position: 1,
+          text: 'Otra?',
+          correctIndex: 2,
+          id: expect.any(String),
+        }),
+      );
+      expect(doc!.questions[1].options.map((o) => o.isCorrect)).toEqual([
+        false,
+        false,
+        true,
+        false,
+      ]);
+    });
+
+    it('marks the quest failed (and never ready) when the DynamoDB put fails', async () => {
+      jest
+        .spyOn(quizContent, 'save')
+        .mockRejectedValue(new Error('ProvisionedThroughputExceeded'));
+
+      await generate('quest-put-fail');
+
+      expect(questRepo.update).toHaveBeenCalledTimes(1);
+      expect(questRepo.update).toHaveBeenCalledWith('quest-put-fail', {
+        status: 'failed',
+        errorMessage: 'ProvisionedThroughputExceeded',
+      });
+    });
+
+    it('drops the orphan document when the Postgres update fails after the put', async () => {
+      questRepo.update
+        .mockRejectedValueOnce(new Error('pg down'))
+        .mockResolvedValueOnce({} as any);
+
+      await generate('quest-pg-fail');
+
+      expect(await quizContent.get('quest-pg-fail')).toBeNull();
+      expect(questRepo.update).toHaveBeenLastCalledWith('quest-pg-fail', {
+        status: 'failed',
+        errorMessage: 'pg down',
+      });
+    });
+
+    it('deletes the DynamoDB document when a quest is deleted', async () => {
+      await generate('quest-del');
+      expect(await quizContent.get('quest-del')).not.toBeNull();
+      const remove = jest.fn();
+      (questRepo as any).remove = remove;
+      questRepo.findOne.mockResolvedValue({
+        id: 'quest-del',
+        partyId: 'party-1',
+      } as Quest);
+      partiesService.findById.mockResolvedValue({ id: 'party-1' } as any);
+
+      await service.deleteQuest('quest-del', 'user-1');
+
+      expect(remove).toHaveBeenCalled();
+      expect(await quizContent.get('quest-del')).toBeNull();
+    });
+
+    it('reports questionCount from the Postgres column in the party list', async () => {
+      questRepo.find.mockResolvedValue([
+        {
+          id: 'quest-1',
+          title: 'Q',
+          status: 'ready',
+          questionCount: 7,
+          results: [],
+          createdAt: new Date(),
+        } as unknown as Quest,
+      ]);
+
+      const [quest] = await service.findByParty('party-1', 'user-1');
+
+      expect(quest.questionCount).toBe(7);
+      expect(questRepo.find).toHaveBeenCalledWith(
+        expect.objectContaining({ relations: ['results'] }),
+      );
+    });
   });
 });
