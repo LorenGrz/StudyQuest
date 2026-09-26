@@ -1,5 +1,6 @@
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DataSource, Repository } from 'typeorm';
 import { QuestsService } from './quests.service';
@@ -111,6 +112,12 @@ describe('QuestsService AI abstraction', () => {
         },
         { provide: SkillTreeService, useValue: { awardTopicXp: jest.fn() } },
         { provide: EventEmitter2, useValue: { emit: jest.fn() } },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((_key: string, defaultValue?: string) => defaultValue),
+          },
+        },
       ],
     }).compile();
 
@@ -357,7 +364,7 @@ describe('QuestsService AI abstraction', () => {
 
     expect(aiService.generateQuestionsFromText).toHaveBeenCalledWith(
       expect.any(String),
-      expect.objectContaining({ model: expect.stringContaining('gemini') }),
+      expect.objectContaining({ model: expect.stringContaining('claude') }),
     );
   });
 });

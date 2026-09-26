@@ -7,6 +7,8 @@ import type {
   QuizGenerationOptions,
   RawQuestion,
 } from './ai.types';
+import { BedrockClientService } from './bedrock-client.service';
+import { BedrockQuizProvider } from './providers/bedrock-quiz.provider';
 import { GeminiQuizProvider } from './providers/gemini-quiz.provider';
 import { OpenAiQuizProvider } from './providers/openai-quiz.provider';
 import { MockQuizProvider } from './providers/mock-quiz.provider';
@@ -28,6 +30,7 @@ function createProvider(
 
 describe('AiService provider routing', () => {
   let service: AiService;
+  let bedrockProvider: QuizAiProvider;
   let geminiProvider: QuizAiProvider;
   let openAiProvider: QuizAiProvider;
   let mockProvider: QuizAiProvider;
@@ -35,6 +38,7 @@ describe('AiService provider routing', () => {
   let groqProvider: QuizAiProvider;
 
   beforeEach(async () => {
+    bedrockProvider = createProvider('bedrock');
     geminiProvider = createProvider('gemini');
     openAiProvider = createProvider('openai');
     mockProvider = createProvider('mock');
@@ -52,6 +56,11 @@ describe('AiService provider routing', () => {
             ),
           },
         },
+        {
+          provide: BedrockClientService,
+          useValue: { converse: jest.fn() },
+        },
+        { provide: BedrockQuizProvider, useValue: bedrockProvider },
         { provide: GeminiQuizProvider, useValue: geminiProvider },
         { provide: OpenAiQuizProvider, useValue: openAiProvider },
         { provide: MockQuizProvider, useValue: mockProvider },
@@ -109,13 +118,80 @@ describe('AiService provider routing', () => {
       provider: 'groq',
     });
 
-    expect(anthropicProvider.generateQuizQuestionsFromText).toHaveBeenCalledWith(
-      'texto anthropic',
-      { provider: 'anthropic' },
-    );
+    expect(
+      anthropicProvider.generateQuizQuestionsFromText,
+    ).toHaveBeenCalledWith('texto anthropic', { provider: 'anthropic' });
     expect(groqProvider.generateQuizQuestionsFromText).toHaveBeenCalledWith(
       'texto groq',
       { provider: 'groq' },
+    );
+  });
+
+  it('routes overrides to bedrock too', async () => {
+    await service.generateQuestionsFromText('texto bedrock', {
+      provider: 'bedrock',
+    });
+
+    expect(bedrockProvider.generateQuizQuestionsFromText).toHaveBeenCalledWith(
+      'texto bedrock',
+      { provider: 'bedrock' },
+    );
+  });
+});
+
+describe('AiService.chat', () => {
+  let service: AiService;
+  let bedrockClient: { converse: jest.Mock };
+  let cfg: { get: jest.Mock };
+
+  beforeEach(async () => {
+    bedrockClient = { converse: jest.fn().mockResolvedValue('respuesta') };
+    cfg = {
+      get: jest.fn((_key: string, defaultValue?: string) => defaultValue),
+    };
+
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        AiService,
+        { provide: ConfigService, useValue: cfg },
+        { provide: BedrockClientService, useValue: bedrockClient },
+        { provide: BedrockQuizProvider, useValue: createProvider('bedrock') },
+        { provide: GeminiQuizProvider, useValue: createProvider('gemini') },
+        { provide: OpenAiQuizProvider, useValue: createProvider('openai') },
+        { provide: MockQuizProvider, useValue: createProvider('mock') },
+        {
+          provide: AnthropicQuizProvider,
+          useValue: createProvider('anthropic'),
+        },
+        { provide: GroqQuizProvider, useValue: createProvider('groq') },
+      ],
+    }).compile();
+
+    service = moduleRef.get(AiService);
+  });
+
+  it('calls Bedrock Converse with the given system/user prompts and an explicit model', async () => {
+    const result = await service.chat('system prompt', 'user prompt', {
+      model: 'us.anthropic.claude-haiku-4-5-20251001-v1:0',
+      maxTokens: 512,
+    });
+
+    expect(bedrockClient.converse).toHaveBeenCalledWith({
+      modelId: 'us.anthropic.claude-haiku-4-5-20251001-v1:0',
+      system: 'system prompt',
+      userMessage: 'user prompt',
+      maxTokens: 512,
+    });
+    expect(result).toBe('respuesta');
+  });
+
+  it('falls back to BEDROCK_MODEL_PRO when no model is given', async () => {
+    await service.chat('system prompt', 'user prompt');
+
+    expect(bedrockClient.converse).toHaveBeenCalledWith(
+      expect.objectContaining({
+        modelId: 'us.anthropic.claude-haiku-4-5-20251001-v1:0',
+      }),
     );
   });
 });
