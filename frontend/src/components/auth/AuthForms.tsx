@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
-import { useCareers } from '../../hooks/useUniversities'
+import { useCareers, useUniversities } from '../../hooks/useUniversities'
+import { normalizeUsernameInput } from '../../utils/username'
 import { Button, Input, Select } from '../UI'
 
 export function LoginForm() {
@@ -57,6 +58,7 @@ interface RegisterFormProps {
 export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   const { register, isLoading, error } = useAuth()
   const { careers } = useCareers()
+  const { universities } = useUniversities()
   const [step, setStep] = useState(1)
   const [form, setForm] = useState({
     email: '',
@@ -142,8 +144,9 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
 
       {step === 2 && (
         <>
-          <Input id="reg-uni" label="Universidad" value={form.university}
-            onChange={(e) => set('university', e.target.value)} placeholder="UBA, UTN, UNC..." required />
+          <Select id="reg-uni" label="Universidad" value={form.university}
+            onChange={(e) => set('university', e.target.value)}
+            options={universities.map((u) => ({ value: u, label: u }))} required />
           <Select id="reg-career" label="Carrera" value={form.career}
             onChange={(e) => set('career', e.target.value)}
             options={careers.map((c) => ({ value: c, label: c }))} required />
@@ -154,8 +157,9 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
 
       {step === 3 && (
         <>
-          <Input id="reg-username" label="Username" value={form.username}
-            onChange={(e) => set('username', e.target.value)} placeholder="@tualias" required />
+          <Input id="reg-username" label="Username" prefix="@" value={form.username}
+            onChange={(e) => set('username', normalizeUsernameInput(e.target.value))}
+            placeholder="tualias" autoCapitalize="none" autoCorrect="off" spellCheck={false} required />
           <Input id="reg-displayname" label="Nombre para mostrar" value={form.displayName}
             onChange={(e) => set('displayName', e.target.value)} placeholder="Tu nombre" required />
         </>

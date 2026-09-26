@@ -15,10 +15,11 @@ import {
   Max,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { CAREERS } from '../careers';
 import { PLANS } from '../plans';
+import { toNormalizedUsername } from '../username';
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -32,7 +33,8 @@ export class RegisterDto {
   @MaxLength(64)
   password: string;
 
-  @ApiProperty({ example: 'juandev' })
+  @ApiProperty({ example: 'juandev', description: 'Stored lowercase, without @' })
+  @Transform(toNormalizedUsername)
   @IsString()
   @MinLength(3)
   @MaxLength(30)
@@ -81,7 +83,12 @@ export class AvailabilitySlotDto {
 }
 
 export class UpdateProfileDto {
-  @IsOptional() @IsString() @MinLength(3) @MaxLength(30) username?: string;
+  @IsOptional()
+  @Transform(toNormalizedUsername)
+  @IsString()
+  @MinLength(3)
+  @MaxLength(30)
+  username?: string;
   @IsOptional() @IsString() @MaxLength(500) bio?: string;
   @IsOptional() @IsString() @MaxLength(60) displayName?: string;
   // Only a server-produced avatar path is accepted here; real uploads go
