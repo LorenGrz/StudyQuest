@@ -6,6 +6,7 @@ import { Button, Input, Spinner } from '../components/UI'
 import { PageHeader, PageContainer, Surface, EmptyState } from '../components/PagePrimitives'
 import { friendService, type FriendRequest } from '../services/friendService'
 import { partyService, type PartyInvitation } from '../services/partyService'
+import { normalizeUsernameInput } from '../utils/username'
 import type { User } from '../services/userService'
 
 const FriendsPage = () => {
@@ -110,14 +111,18 @@ const FriendsPage = () => {
           <p className="text-[13px] font-medium text-secondary mb-3">Enviar solicitud de amistad</p>
           <div className="flex gap-2">
             <Input
+              prefix="@"
               value={newFriendUsername}
-              onChange={(event) => setNewFriendUsername(event.target.value)}
-              placeholder="@username"
+              onChange={(event) => setNewFriendUsername(normalizeUsernameInput(event.target.value))}
+              placeholder="username"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
               className="flex-1"
             />
             <Button onClick={handleSendRequest} disabled={isLoading}>Enviar</Button>
           </div>
-          <p className="text-[12px] text-muted mt-2">Ingresá el @username para invitar a un amigo.</p>
+          <p className="text-[12px] text-muted mt-2">Ingresá el username de tu amigo para invitarlo.</p>
         </Surface>
 
         {error && (

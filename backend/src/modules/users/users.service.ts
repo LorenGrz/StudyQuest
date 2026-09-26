@@ -44,6 +44,7 @@ interface InventoryPayload {
   borders: InventoryBorderItem[];
 }
 
+import { normalizeUsername } from '../../common/username';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
@@ -179,7 +180,7 @@ export class UsersService {
     }
 
     const targetUser = await this.userRepo.findOneBy({
-      username: requesteeUsername,
+      username: normalizeUsername(requesteeUsername),
     });
     if (!targetUser) {
       throw new NotFoundException('Usuario destino no encontrado');

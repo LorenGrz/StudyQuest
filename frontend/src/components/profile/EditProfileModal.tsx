@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '../../components/UI'
-import { useCareers } from '../../hooks/useUniversities'
+import { useCareers, useUniversities } from '../../hooks/useUniversities'
 import { userService } from '../../services/userService'
 
 interface EditProfileModalProps {
@@ -12,6 +12,7 @@ interface EditProfileModalProps {
 
 export function EditProfileModal({ user, onClose, onUpdate }: EditProfileModalProps) {
   const { careers } = useCareers()
+  const { universities } = useUniversities()
   const [formData, setFormData] = useState({
     displayName: user.displayName,
     university: user.university,
@@ -19,6 +20,11 @@ export function EditProfileModal({ user, onClose, onUpdate }: EditProfileModalPr
     year: user.year,
   })
   const [isLoading, setIsLoading] = useState(false)
+  // Keep a legacy free-text university selectable so saving the profile doesn't blank it.
+  const universityOptions =
+    formData.university && !universities.includes(formData.university)
+      ? [formData.university, ...universities]
+      : universities
   const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -78,14 +84,21 @@ export function EditProfileModal({ user, onClose, onUpdate }: EditProfileModalPr
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-[13px] font-medium text-secondary">Universidad</label>
-            <input
+            <select
               className="w-full px-3.5 py-3 bg-panel border border-[var(--overlay-border)] rounded-lg text-primary text-[15px] transition-[border-color,box-shadow] duration-200 outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(124,58,237,0.3)] min-h-[44px]"
               value={formData.university}
               onChange={(e) =>
                 setFormData({ ...formData, university: e.target.value })
               }
               required
-            />
+            >
+              <option value="">Seleccionar...</option>
+              {universityOptions.map((u) => (
+                <option key={u} value={u}>
+                  {u}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="flex flex-col gap-1.5">
             <label className="text-[13px] font-medium text-secondary">Carrera</label>
