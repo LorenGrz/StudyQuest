@@ -27,7 +27,8 @@
     "seed:skill-tree": "ts-node -P tsconfig.seed.json src/database/seeds/skill-tree.seed.ts",
     "migration:run": "TS_NODE_PROJECT=tsconfig.seed.json typeorm-ts-node-commonjs migration:run -d src/config/typeorm.config.ts",
     "migrate:quizzes-dynamo": "ts-node -P tsconfig.seed.json src/database/scripts/migrate-quizzes-to-dynamo.ts",
-    "dynamo:create-table": "ts-node -P tsconfig.seed.json src/database/scripts/create-dynamo-table.ts"
+    "dynamo:create-table": "ts-node -P tsconfig.seed.json src/database/scripts/create-dynamo-table.ts",
+    "migration:run:prod": "typeorm migration:run -d dist/config/typeorm.config.js"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.1140.0",

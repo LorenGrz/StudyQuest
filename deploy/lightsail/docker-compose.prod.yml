@@ -1,0 +1,114 @@
+# Production compose for a single AWS Lightsail Ubuntu 24.04 instance (2 GB RAM).
+# Usage: docker compose -f deploy/lightsail/docker-compose.prod.yml --env-file deploy/lightsail/.env up -d --build
+#
+# Build contexts are relative to this file's directory (deploy/lightsail/), so
+# they point back at the repo's existing backend/ and markitdown-service/ Dockerfiles.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    mem_limit: 512m
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - studyquest-net
+    # Not published to the host: only reachable from other containers on
+    # studyquest-net.
+
+  markitdown:
+    build:
+      context: ../../markitdown-service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request,sys; sys.exit(0) if urllib.request.urlopen('http://localhost:8000/health').status==200 else sys.exit(1)",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - studyquest-net
+    # Internal only: no ports published, reached by `api` as http://markitdown:8000.
+
+  api:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+      target: production
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NODE_ENV: production
+      POSTGRES_HOST: postgres
+      MARKITDOWN_URL: http://markitdown:8000
+      TYPEORM_SYNC: "false"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      markitdown:
+        condition: service_started
+    volumes:
+      - uploads_data:/app/uploads
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:3000/health',res=>process.exit(res.statusCode===200?0:1)).on('error',()=>process.exit(1))",
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - studyquest-net
+    # Not published to the host: reached only through the `caddy` reverse proxy.
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+    networks:
+      - studyquest-net
+
+volumes:
+  postgres_data:
+  uploads_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  studyquest-net:
+    driver: bridge
