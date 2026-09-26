@@ -68,8 +68,6 @@ services:
         condition: service_healthy
       markitdown:
         condition: service_started
-    volumes:
-      - uploads_data:/app/uploads
     healthcheck:
       test:
         [
@@ -105,7 +103,6 @@ services:
 
 volumes:
   postgres_data:
-  uploads_data:
   caddy_data:
   caddy_config:
 
