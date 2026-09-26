@@ -385,7 +385,7 @@ export class UsersService {
         borderItems.push({
           code: border.code,
           name: border.name,
-          imageUrl: `/uploads/borders/${border.imageFile}`,
+          imageUrl: `/static/borders/${border.imageFile}`,
           unlockedAt: item.unlockedAt,
         });
       }
@@ -447,7 +447,7 @@ export class UsersService {
       if (!ownsBorder || !border) {
         throw new ForbiddenException('No tenés ese borde desbloqueado');
       }
-      borderImageUrl = `/uploads/borders/${border.imageFile}`;
+      borderImageUrl = `/static/borders/${border.imageFile}`;
     } else {
       borderImageUrl = null;
     }

@@ -6,10 +6,14 @@ import {
   Logger,
 } from '@nestjs/common';
 import { readFile } from 'node:fs/promises';
-import { basename } from 'node:path';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource, MoreThan } from 'typeorm';
-import { looksLikePdf, looksLikeQuestDocument } from '../../common/upload.util';
+import {
+  looksLikePdf,
+  looksLikeQuestDocument,
+  safeUploadFilename,
+} from '../../common/upload.util';
+import { StorageService } from '../storage/storage.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Quest } from './quest.entity';
 import { QuizQuestion } from './quiz-question.entity';
@@ -70,6 +74,7 @@ export class QuestsService {
     private readonly skillTreeService: SkillTreeService,
     private readonly billingService: BillingService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly storageService: StorageService,
   ) {}
 
   async createQuest(
@@ -116,7 +121,9 @@ export class QuestsService {
       );
     }
 
-    const uploadedFilename = this.resolveUploadedFilename(file);
+    const storageKey = `quests/${safeUploadFilename(file)}`;
+    await this.storageService.put(storageKey, sourceBuffer, file.mimetype);
+
     const proModel =
       limits.aiModelTier === 'full'
         ? (process.env.GEMINI_MODEL_PRO ?? 'gemini-flash-latest')
@@ -132,13 +139,13 @@ export class QuestsService {
         // `sourceText` now holds the user's topic/focus instructions, not the
         // study material (that is the uploaded document).
         sourceText: instructions,
-        sourcePdfUrl: `/uploads/${uploadedFilename}`,
+        sourcePdfUrl: this.storageService.urlForKey(storageKey),
       }),
     );
 
     this.generateInBackground(quest.id, {
       sourceBuffer,
-      filename: file.originalname ?? uploadedFilename,
+      filename: file.originalname ?? storageKey,
       instructions,
       questTitle: dto.title,
       model: proModel,
@@ -273,13 +280,6 @@ export class QuestsService {
     if (file.buffer) return file.buffer;
     if (file.path) return readFile(file.path);
     return undefined;
-  }
-
-  private resolveUploadedFilename(file: Express.Multer.File): string {
-    if (file.filename) return file.filename;
-    if (file.path) return basename(file.path);
-    if (file.originalname) return file.originalname;
-    return 'upload.bin';
   }
 
   async findById(id: string): Promise<Quest> {

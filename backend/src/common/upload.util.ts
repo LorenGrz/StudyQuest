@@ -116,7 +116,7 @@ export function looksLikePdf(buf: Buffer): boolean {
  * `true` when `originalname`'s extension is an accepted quest document AND the
  * buffer's leading bytes match that extension's format family — so a `.docx`
  * that is really an HTML page, or a renamed executable, is rejected before it
- * reaches MarkItDown or the `/uploads` static mount.
+ * reaches MarkItDown or gets uploaded to S3.
  */
 export function looksLikeQuestDocument(
   buf: Buffer,

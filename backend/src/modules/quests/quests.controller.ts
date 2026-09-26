@@ -19,12 +19,8 @@ import { Throttle } from '@nestjs/throttler';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { QuestsService } from './quests.service';
 import { CreateQuestDto, SubmitAnswerDto } from '../../common/dto';
-import { diskStorage } from 'multer';
-import {
-  safeUploadFilename,
-  isQuestDocumentExt,
-  QUEST_DOC_EXTS,
-} from '../../common/upload.util';
+import { memoryStorage } from 'multer';
+import { isQuestDocumentExt, QUEST_DOC_EXTS } from '../../common/upload.util';
 
 // Hard ceiling; the per-plan limit (10 MB free / 25 MB pro) is enforced in the
 // service once the user's plan is known.
@@ -35,10 +31,7 @@ const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
 @UseGuards(JwtAuthGuard)
 @Controller('quests')
 export class QuestsController {
-  private static questUploadStorage = diskStorage({
-    destination: './uploads',
-    filename: (_req, file, cb) => cb(null, safeUploadFilename(file)),
-  });
+  private static questUploadStorage = memoryStorage();
 
   constructor(private readonly questsService: QuestsService) {}
 
