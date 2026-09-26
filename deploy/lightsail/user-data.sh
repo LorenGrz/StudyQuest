@@ -5,6 +5,10 @@
 #
 # Safe to re-run (e.g. if cloud-init re-executes it): every step checks for an
 # existing result before acting.
+#
+# Lightsail prepends its own init lines and runs the combined script with
+# /bin/sh (dash), so the shebang is ignored: re-exec under bash first.
+if [ -z "${BASH_VERSION:-}" ]; then exec /bin/bash "$0" "$@"; fi
 set -euo pipefail
 
 REPO_URL="https://github.com/LorenGrz/StudyQuest.git"
