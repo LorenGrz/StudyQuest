@@ -24,16 +24,12 @@ async function bootstrap() {
   });
 
   app.use(helmet({ crossOriginResourcePolicy: false }));
-  // Serve uploads as untrusted downloads: never render an uploaded .html/.svg
-  // inline, and don't let the browser sniff a different content type.
+  // Cosmetic border SVGs are static app assets (not user uploads), served
+  // as-is. User uploads (quest docs, chat attachments, avatars) live in S3
+  // and go through GET /api/v1/files/<key> (see FilesController) instead.
   app.use(
-    '/uploads',
-    express.static(join(process.cwd(), 'uploads'), {
-      setHeaders: (res) => {
-        res.setHeader('X-Content-Type-Options', 'nosniff');
-        res.setHeader('Content-Disposition', 'attachment');
-      },
-    }),
+    '/static/borders',
+    express.static(join(process.cwd(), 'static', 'borders')),
   );
   app.useGlobalPipes(
     new ValidationPipe({

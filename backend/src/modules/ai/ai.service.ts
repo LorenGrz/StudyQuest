@@ -10,6 +10,8 @@ import {
   QuizGenerationOptions,
   RawQuestion,
 } from './ai.types';
+import { BedrockClientService } from './bedrock-client.service';
+import { BedrockQuizProvider } from './providers/bedrock-quiz.provider';
 import { GeminiQuizProvider } from './providers/gemini-quiz.provider';
 import { OpenAiQuizProvider } from './providers/openai-quiz.provider';
 import { MockQuizProvider } from './providers/mock-quiz.provider';
@@ -23,6 +25,8 @@ export class AiService {
 
   constructor(
     private readonly cfg: ConfigService,
+    private readonly bedrockClient: BedrockClientService,
+    bedrockProvider: BedrockQuizProvider,
     geminiProvider: GeminiQuizProvider,
     openAiProvider: OpenAiQuizProvider,
     anthropicProvider: AnthropicQuizProvider,
@@ -30,12 +34,36 @@ export class AiService {
     mockProvider: MockQuizProvider,
   ) {
     this.providers = new Map<AiProviderName, QuizAiProvider>([
+      [bedrockProvider.name, bedrockProvider],
       [geminiProvider.name, geminiProvider],
       [openAiProvider.name, openAiProvider],
       [anthropicProvider.name, anthropicProvider],
       [groqProvider.name, groqProvider],
       [mockProvider.name, mockProvider],
     ]);
+  }
+
+  /**
+   * Generic single-shot chat backed by Bedrock Converse, independent of the
+   * AI_PROVIDER used for quiz generation. Used by the study bot.
+   */
+  async chat(
+    system: string,
+    user: string,
+    opts?: { model?: string; maxTokens?: number },
+  ): Promise<string> {
+    const model =
+      opts?.model ??
+      this.cfg.get<string>(
+        'BEDROCK_MODEL_PRO',
+        'us.anthropic.claude-haiku-4-5-20251001-v1:0',
+      );
+    return this.bedrockClient.converse({
+      modelId: model,
+      system,
+      userMessage: user,
+      maxTokens: opts?.maxTokens,
+    });
   }
 
   async generateQuestionsFromPdf(
@@ -54,12 +82,10 @@ export class AiService {
     return provider.generateQuizQuestionsFromText(rawText, options);
   }
 
-  private resolveProvider(
-    options?: QuizGenerationOptions,
-  ): QuizAiProvider {
+  private resolveProvider(options?: QuizGenerationOptions): QuizAiProvider {
     const providerName =
       options?.provider ??
-      (this.cfg.get<string>('AI_PROVIDER', 'gemini') as AiProviderName);
+      (this.cfg.get<string>('AI_PROVIDER', 'bedrock') as AiProviderName);
 
     const provider = this.providers.get(providerName);
     if (!provider) {

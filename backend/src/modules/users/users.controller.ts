@@ -16,13 +16,18 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname, join } from 'path';
-import { randomUUID } from 'crypto';
-import { mkdirSync } from 'fs';
-import { ApiBearerAuth, ApiTags, ApiQuery, ApiOkResponse } from '@nestjs/swagger';
+import { memoryStorage } from 'multer';
+import { extname } from 'path';
+import {
+  ApiBearerAuth,
+  ApiTags,
+  ApiQuery,
+  ApiOkResponse,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UsersService } from './users.service';
+import { StorageService } from '../storage/storage.service';
+import { safeUploadFilename } from '../../common/upload.util';
 import {
   UpdateProfileDto,
   ChangePasswordDto,
@@ -32,8 +37,6 @@ import {
   RecommendedQuestsResponseDto,
   RecommendedQuestDto,
 } from '../../common/dto';
-
-const AVATAR_DIR = join(process.cwd(), 'uploads', 'avatars');
 
 const ALLOWED_AVATAR_EXTS = ['.jpg', '.jpeg', '.png', '.webp'];
 // Browsers/OSes report inconsistent mimetypes for the same file (e.g. `image/jpg`
@@ -53,7 +56,10 @@ function isAllowedAvatar(file: {
 @UseGuards(JwtAuthGuard)
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly storageService: StorageService,
+  ) {}
 
   @Get('me')
   getMe(@Request() req: any) {
@@ -73,27 +79,22 @@ export class UsersController {
   @Post('me/avatar')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: diskStorage({
-        destination: (_req, _file, cb) => {
-          mkdirSync(AVATAR_DIR, { recursive: true });
-          cb(null, AVATAR_DIR);
-        },
-        filename: (_req, file, cb) =>
-          cb(null, `${randomUUID()}${extname(file.originalname).toLowerCase()}`),
-      }),
+      storage: memoryStorage(),
       fileFilter: (_req, file, cb) => {
         if (isAllowedAvatar(file)) {
           cb(null, true);
         } else {
           cb(
-            new BadRequestException('Solo se permiten imágenes jpeg, png o webp'),
+            new BadRequestException(
+              'Solo se permiten imágenes jpeg, png o webp',
+            ),
             false,
           );
         }
       },
     }),
   )
-  uploadAvatar(
+  async uploadAvatar(
     @Request() req: any,
     @UploadedFile(
       new ParseFilePipe({
@@ -102,10 +103,22 @@ export class UsersController {
     )
     file: Express.Multer.File,
   ) {
-    return this.usersService.setAvatar(
-      req.user.userId,
-      `/uploads/avatars/${file.filename}`,
+    const userId = req.user.userId;
+    const previous = await this.usersService.findById(userId);
+
+    const key = `avatars/${userId}/${safeUploadFilename(file)}`;
+    await this.storageService.put(key, file.buffer, file.mimetype);
+
+    const updated = await this.usersService.setAvatar(
+      userId,
+      this.storageService.urlForKey(key),
     );
+
+    await this.storageService.delete(
+      this.storageService.keyFromUrl(previous.avatarUrl),
+    );
+
+    return updated;
   }
 
   @Get('me/inventory')
@@ -146,7 +159,9 @@ export class UsersController {
 
   @Get('leaderboard/global')
   getGlobalLeaderboard(@Query('limit') limit?: string) {
-    return this.usersService.getGlobalLeaderboard(limit ? parseInt(limit, 10) : 20);
+    return this.usersService.getGlobalLeaderboard(
+      limit ? parseInt(limit, 10) : 20,
+    );
   }
 
   @Get('leaderboard/:subjectId')
@@ -154,7 +169,10 @@ export class UsersController {
     @Param('subjectId') subjectId: string,
     @Query('limit') limit?: string,
   ) {
-    return this.usersService.getLeaderboard(subjectId, limit ? parseInt(limit, 10) : 20);
+    return this.usersService.getLeaderboard(
+      subjectId,
+      limit ? parseInt(limit, 10) : 20,
+    );
   }
 
   @Get(':id')

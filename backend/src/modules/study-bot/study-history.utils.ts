@@ -1,7 +1,8 @@
 import { PlayerResult } from '../quests/player-result.entity';
 
 /** Minimal shape this module needs from a completed `PlayerResult`, with its
- * `quest` (and `quest.subject` / `quest.questions`) relations loaded. Kept
+ * `quest` (and `quest.subject`) relations loaded plus `quest.questions`
+ * taken from the quest's DynamoDB quiz-content document. Kept
  * narrow so the formatter is easy to unit test with plain fixtures. */
 export type CompletedResultWithQuest = Pick<
   PlayerResult,

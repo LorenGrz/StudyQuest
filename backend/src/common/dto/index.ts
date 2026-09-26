@@ -85,10 +85,10 @@ export class UpdateProfileDto {
   @IsOptional() @IsString() @MaxLength(500) bio?: string;
   @IsOptional() @IsString() @MaxLength(60) displayName?: string;
   // Only a server-produced avatar path is accepted here; real uploads go
-  // through POST /users/me/avatar.
+  // through POST /users/me/avatar. Keys are `avatars/<userId>/<uuid>.<ext>`.
   @IsOptional()
   @IsString()
-  @Matches(/^\/uploads\/avatars\/[\w.-]+$/)
+  @Matches(/^\/api\/v1\/files\/avatars\/[\w-]+\/[\w.-]+$/)
   avatarUrl?: string;
   @IsOptional() @IsString() university?: string;
   @IsOptional() @IsIn(CAREERS) career?: string;

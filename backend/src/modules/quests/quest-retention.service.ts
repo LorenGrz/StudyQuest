@@ -2,19 +2,18 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { LessThan, Repository } from 'typeorm';
-import type { Dirent } from 'node:fs';
-import { readdir, stat, unlink } from 'node:fs/promises';
-import { basename, join } from 'node:path';
 import { Quest } from './quest.entity';
+import { StorageService } from '../storage/storage.service';
+import { QuizContentRepository } from './quiz-content/quiz-content.repository';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const DEFAULT_RETENTION_DAYS = 7;
-const UPLOADS_DIR = join(process.cwd(), 'uploads');
+const DEFAULT_RETENTION_DAYS = 30;
 
 /**
- * Borra quests (y en cascada sus quiz_questions / quiz_options / player_results
- * vía FK ON DELETE CASCADE) y los PDFs subidos una vez superada la ventana de
- * retención. Mantiene acotado el uso de disco de Postgres y de ./uploads.
+ * Borra quests (y en cascada sus player_results vía FK ON DELETE CASCADE), su
+ * contenido de quiz en DynamoDB y sus documentos fuente en S3 una vez superada
+ * la ventana de retención. Los objetos S3 huérfanos quedan a cargo de la
+ * lifecycle policy del bucket y los items de Dynamo tienen TTL como red.
  */
 @Injectable()
 export class QuestRetentionService implements OnModuleInit {
@@ -24,6 +23,8 @@ export class QuestRetentionService implements OnModuleInit {
   constructor(
     @InjectRepository(Quest)
     private readonly questRepo: Repository<Quest>,
+    private readonly storageService: StorageService,
+    private readonly quizContent: QuizContentRepository,
   ) {}
 
   private get retentionDays(): number {
@@ -50,23 +51,21 @@ export class QuestRetentionService implements OnModuleInit {
         select: { id: true, sourcePdfUrl: true },
       });
 
-      if (expired.length === 0) {
-        await this.sweepOrphanUploads(cutoff);
-        return;
-      }
+      if (expired.length === 0) return;
 
-      // El FK ON DELETE CASCADE se encarga de quiz_questions, quiz_options y
-      // player_results.
+      // El FK ON DELETE CASCADE se encarga de player_results. El contenido
+      // del quiz vive en DynamoDB: se borra después de Postgres (el TTL del
+      // ítem es sólo la red de seguridad si este paso falla).
       await this.questRepo.delete({ createdAt: LessThan(cutoff) });
+      await this.purgeQuizContent(expired.map((quest) => quest.id));
 
-      let files = 0;
-      for (const quest of expired) {
-        if (await this.removeUpload(quest.sourcePdfUrl)) files += 1;
-      }
-      files += await this.sweepOrphanUploads(cutoff);
+      const keys = expired.map((quest) =>
+        this.storageService.keyFromUrl(quest.sourcePdfUrl),
+      );
+      await this.storageService.deleteMany(keys);
 
       this.logger.log(
-        `retención: ${expired.length} quests y ${files} archivos borrados (corte ${cutoff.toISOString()})`,
+        `retención: ${expired.length} quests y ${keys.filter(Boolean).length} archivos borrados (corte ${cutoff.toISOString()})`,
       );
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -76,62 +75,13 @@ export class QuestRetentionService implements OnModuleInit {
     }
   }
 
-  private async removeUpload(sourcePdfUrl: string | null): Promise<boolean> {
-    if (!sourcePdfUrl) return false;
-
-    const file = join(UPLOADS_DIR, basename(sourcePdfUrl));
+  private async purgeQuizContent(questIds: string[]): Promise<void> {
     try {
-      await unlink(file);
-      return true;
+      await this.quizContent.deleteMany(questIds);
     } catch (err) {
-      if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
-        this.logger.warn(
-          `no se pudo borrar ${file}: ${(err as Error).message}`,
-        );
-      }
-      return false;
-    }
-  }
-
-  /**
-   * Borra archivos sueltos directamente bajo uploads/ (PDFs de quests, adjuntos
-   * de chat viejos) anteriores al corte. Ignora los subdirectorios borders/ y
-   * avatars/, que guardan cosméticos y no subidas de usuario.
-   */
-  private async sweepOrphanUploads(cutoff: Date): Promise<number> {
-    const entries = await this.readUploads();
-    let removed = 0;
-
-    for (const entry of entries) {
-      if (!entry.isFile()) continue;
-
-      const file = join(UPLOADS_DIR, entry.name);
-      try {
-        const info = await stat(file);
-        if (info.mtime < cutoff) {
-          await unlink(file);
-          removed += 1;
-        }
-      } catch (err) {
-        if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
-          this.logger.warn(
-            `no se pudo revisar ${file}: ${(err as Error).message}`,
-          );
-        }
-      }
-    }
-
-    return removed;
-  }
-
-  private async readUploads(): Promise<Dirent[]> {
-    try {
-      return await readdir(UPLOADS_DIR, { withFileTypes: true });
-    } catch (err) {
-      if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
-        this.logger.warn(`no se pudo leer uploads/: ${(err as Error).message}`);
-      }
-      return [];
+      this.logger.warn(
+        `no se pudo borrar el contenido de ${questIds.length} quests en DynamoDB: ${(err as Error).message}`,
+      );
     }
   }
 }
