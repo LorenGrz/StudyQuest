@@ -20,10 +20,11 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import { diskStorage } from 'multer';
+import { memoryStorage } from 'multer';
 import { safeUploadFilename } from '../../common/upload.util';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PartiesService } from './parties.service';
+import { StorageService } from '../storage/storage.service';
 import {
   SendChatMessageDto,
   CreatePartyDto,
@@ -36,8 +37,6 @@ import {
 @UseGuards(JwtAuthGuard)
 @Controller('parties')
 export class PartiesController {
-  constructor(private readonly partiesService: PartiesService) {}
-
   private static readonly allowedChatFileMimeTypes = [
     'application/pdf',
     'text/plain',
@@ -59,10 +58,12 @@ export class PartiesController {
     'application/octet-stream',
   ];
 
-  private static chatUploadStorage = diskStorage({
-    destination: './uploads',
-    filename: (_req, file, cb) => cb(null, safeUploadFilename(file)),
-  });
+  private static chatUploadStorage = memoryStorage();
+
+  constructor(
+    private readonly partiesService: PartiesService,
+    private readonly storageService: StorageService,
+  ) {}
 
   // ─── Rutas sin parámetro :id primero (evitar conflictos de orden) ────────────
 
@@ -215,9 +216,11 @@ export class PartiesController {
         'Solo se permiten PDF, TXT, DOC o DOCX en el chat',
       );
     }
+    const key = `chat/${id}/${safeUploadFilename(file)}`;
+    await this.storageService.put(key, file.buffer, file.mimetype);
     return this.partiesService.addBinaryChatMessage(id, req.user.userId, {
       type: 'file',
-      url: `/uploads/${file.filename}`,
+      url: this.storageService.urlForKey(key),
       name: file.originalname,
       mimeType: file.mimetype,
       sizeBytes: file.size,
@@ -246,9 +249,11 @@ export class PartiesController {
         'Solo se permiten audios WEBM, OGG, MP4 o MP3',
       );
     }
+    const key = `chat/${id}/${safeUploadFilename(file)}`;
+    await this.storageService.put(key, file.buffer, file.mimetype);
     return this.partiesService.addBinaryChatMessage(id, req.user.userId, {
       type: 'audio',
-      url: `/uploads/${file.filename}`,
+      url: this.storageService.urlForKey(key),
       name: file.originalname,
       mimeType: file.mimetype,
       sizeBytes: file.size,

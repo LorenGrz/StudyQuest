@@ -14,6 +14,7 @@ import { PartiesService } from '../parties/parties.service';
 import { UsersService } from '../users/users.service';
 import { SkillTreeService } from '../skill-tree/skill-tree.service';
 import { BillingService } from '../billing/billing.service';
+import { StorageService } from '../storage/storage.service';
 import * as fs from 'node:fs/promises';
 
 const FREE_LIMITS = {
@@ -116,6 +117,13 @@ describe('QuestsService AI abstraction', () => {
           provide: ConfigService,
           useValue: {
             get: jest.fn((_key: string, defaultValue?: string) => defaultValue),
+          },
+        },
+        {
+          provide: StorageService,
+          useValue: {
+            put: jest.fn(),
+            urlForKey: jest.fn((key: string) => `/api/v1/files/${key}`),
           },
         },
       ],
@@ -288,7 +296,9 @@ describe('QuestsService AI abstraction', () => {
     expect(fs.readFile).toHaveBeenCalledWith('/tmp/quest.pdf');
     expect(questRepo.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        sourcePdfUrl: '/uploads/quest.pdf',
+        sourcePdfUrl: expect.stringMatching(
+          /^\/api\/v1\/files\/quests\/[0-9a-f-]{36}\.pdf$/,
+        ),
         sourceText: 'foco en teoría',
       }),
     );

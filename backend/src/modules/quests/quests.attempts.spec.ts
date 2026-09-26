@@ -14,6 +14,7 @@ import { PartiesService } from '../parties/parties.service';
 import { UsersService } from '../users/users.service';
 import { SkillTreeService } from '../skill-tree/skill-tree.service';
 import { BillingService } from '../billing/billing.service';
+import { StorageService } from '../storage/storage.service';
 
 jest.mock('uuid', () => ({
   v4: () => 'mock-uuid',
@@ -108,6 +109,13 @@ describe('QuestsService attempts and progress', () => {
           provide: ConfigService,
           useValue: {
             get: jest.fn((_key: string, defaultValue?: string) => defaultValue),
+          },
+        },
+        {
+          provide: StorageService,
+          useValue: {
+            put: jest.fn(),
+            urlForKey: jest.fn((key: string) => `/api/v1/files/${key}`),
           },
         },
       ],

@@ -13,9 +13,8 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MulterModule } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+import { memoryStorage } from 'multer';
 import { resolve } from 'path';
-import { safeUploadFilename } from './common/upload.util';
 
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -30,6 +29,7 @@ import { SearchModule } from './modules/search/search.module';
 import { TournamentsModule } from './modules/tournaments/tournaments.module';
 import { BillingModule } from './modules/billing/billing.module';
 import { StudyBotModule } from './modules/study-bot/study-bot.module';
+import { StorageModule } from './modules/storage/storage.module';
 
 @Module({
   controllers: [AppController],
@@ -94,10 +94,7 @@ import { StudyBotModule } from './modules/study-bot/study-bot.module';
     ScheduleModule.forRoot(),
 
     MulterModule.register({
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (_req, file, cb) => cb(null, safeUploadFilename(file)),
-      }),
+      storage: memoryStorage(),
       fileFilter: (_req, file, cb) => {
         const allowed = [
           'application/pdf',
@@ -127,6 +124,7 @@ import { StudyBotModule } from './modules/study-bot/study-bot.module';
     TournamentsModule,
     BillingModule,
     StudyBotModule,
+    StorageModule,
   ],
 })
 export class AppModule {}
