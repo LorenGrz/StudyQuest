@@ -33,6 +33,7 @@ jobs:
       - name: Build
         working-directory: frontend
         env:
+          # AWS cutover: set to https://api-<ip-dashes>.sslip.io
           VITE_API_URL: https://studyquest-api-sjc1.onrender.com
         run: pnpm build
 

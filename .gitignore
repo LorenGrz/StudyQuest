@@ -13,6 +13,7 @@ pnpm-debug.log*
 .env
 .env.*
 !.env.example
+!deploy/lightsail/.env.production.example
 
 # =========================
 # Logs
