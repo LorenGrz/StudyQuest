@@ -188,11 +188,13 @@ In Docker Compose those are already provided for the `web` service.
 - Subscription plans are manual tiers (`free` / `pro`) — no payment processor. `src/common/plans.ts` is the single source of truth for per-plan limits (quests/day, upload MB, instructions length, AI model tier, party size). `BillingModule` exposes `GET/POST /billing/*`; `pro` is granted by a promo code or an admin and lapses at `planExpiresAt`.
 - Party chat also supports file and audio uploads
 - Backend stores uploaded quest source files under `/uploads/<filename>`
+- Quiz content (questions + options) lives in DynamoDB, one document per quest (table `DYNAMO_QUIZZES_TABLE`, PK `questId`, TTL `expiresAt`). Postgres keeps `Quest` metadata (incl. `question_count`) and `PlayerResult`. Access goes through `QuizContentRepository` (`backend/src/modules/quests/quiz-content/`); unit tests use `InMemoryQuizContentRepository`. Write order on generation: Dynamo put → quest `ready`. Deletes (user + retention) remove the Postgres row first, then the Dynamo item.
+- Local: `docker compose up -d dynamodb-local`, set `DYNAMO_ENDPOINT=http://localhost:8000`, then `pnpm run dynamo:create-table`. One-off backfill from the legacy `quiz_questions`/`quiz_options` tables: `pnpm run migrate:quizzes-dynamo -- --dry-run`, then without the flag.
 
 ### Study bot (Pro)
 
 - `POST /study-bot/ask` — a free-text chat grounded in the caller's own recent quest history. Gated by `ProPlanGuard` (`backend/src/common/pro-plan.guard.ts`), which checks `BillingService.getState().effectivePlan === 'pro'`.
-- No vector store: `StudyBotService` fetches the last 5 completed `PlayerResult`s (+ quest/subject/questions) scoped to `userId` and formats them as context (`study-history.utils.ts`) — that SQL query, already scoped to the account, *is* the retrieval step. Gemini answers using that context (`study-bot-prompt.ts`).
+- No vector store: `StudyBotService` fetches the last 5 completed `PlayerResult`s (+ quest/subject) scoped to `userId`, batch-reads their questions from DynamoDB, and formats them as context (`study-history.utils.ts`) — that SQL query, already scoped to the account, *is* the retrieval step. Gemini answers using that context (`study-bot-prompt.ts`).
 - Known limit: `PlayerResult` only stores an aggregate correct-answer count, not which specific questions were right or wrong, so the bot can report a quest's score but not name the exact question that was missed.
 
 ### Matchmaking

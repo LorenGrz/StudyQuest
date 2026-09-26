@@ -13,7 +13,6 @@ import {
 import { Party } from '../parties/party.entity';
 import { Subject } from '../subjects/subject.entity';
 import { User } from '../users/user.entity';
-import { QuizQuestion } from './quiz-question.entity';
 import { PlayerResult } from './player-result.entity';
 
 export type QuestStatus =
@@ -97,8 +96,10 @@ export class Quest {
   })
   completedAt: Date | null;
 
-  @OneToMany(() => QuizQuestion, (q) => q.quest, { cascade: true })
-  questions: QuizQuestion[];
+  /** Denormalised count of the questions stored in the quest's DynamoDB
+   * quiz-content document (see quiz-content/). */
+  @Column({ name: 'question_count', type: 'int', default: 0 })
+  questionCount: number;
 
   @OneToMany(() => PlayerResult, (r) => r.quest, { cascade: true })
   results: PlayerResult[];

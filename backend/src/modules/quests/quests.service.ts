@@ -8,7 +8,7 @@ import {
 import { readFile } from 'node:fs/promises';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
-import { Repository, DataSource, MoreThan } from 'typeorm';
+import { Repository, MoreThan } from 'typeorm';
 import {
   looksLikePdf,
   looksLikeQuestDocument,
@@ -17,9 +17,13 @@ import {
 import { StorageService } from '../storage/storage.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Quest } from './quest.entity';
-import { QuizQuestion } from './quiz-question.entity';
-import { QuizOption } from './quiz-option.entity';
 import { PlayerResult } from './player-result.entity';
+import { QuizContentRepository } from './quiz-content/quiz-content.repository';
+import { QuizQuestionDoc } from './quiz-content/quiz-content.types';
+import {
+  buildQuizContentDoc,
+  sortedQuestions,
+} from './quiz-content/quiz-content.utils';
 import { AiService } from '../ai/ai.service';
 import { MarkitdownService } from '../ai/markitdown.service';
 import { QuizGenerationOptions, RawQuestion } from '../ai/ai.types';
@@ -61,13 +65,9 @@ export class QuestsService {
   constructor(
     @InjectRepository(Quest)
     private readonly questRepo: Repository<Quest>,
-    @InjectRepository(QuizQuestion)
-    private readonly questionRepo: Repository<QuizQuestion>,
-    @InjectRepository(QuizOption)
-    private readonly optionRepo: Repository<QuizOption>,
     @InjectRepository(PlayerResult)
     private readonly resultRepo: Repository<PlayerResult>,
-    private readonly dataSource: DataSource,
+    private readonly quizContent: QuizContentRepository,
     private readonly aiService: AiService,
     private readonly markitdownService: MarkitdownService,
     private readonly partiesService: PartiesService,
@@ -166,6 +166,7 @@ export class QuestsService {
       model?: string;
     },
   ): Promise<void> {
+    let contentWritten = false;
     try {
       const isPdf = looksLikePdf(input.sourceBuffer);
       const generationOptions: QuizGenerationOptions = {
@@ -182,33 +183,15 @@ export class QuestsService {
         generationOptions,
       );
 
-      await this.dataSource.transaction(async (em) => {
-        for (let i = 0; i < rawQuestions.length; i++) {
-          const raw = rawQuestions[i];
+      // Write order: content first (DynamoDB), then flip the quest to ready
+      // in Postgres. A quest is never `ready` without its content.
+      const content = buildQuizContentDoc(questId, rawQuestions);
+      await this.quizContent.save(content);
+      contentWritten = true;
 
-          const question = em.create(QuizQuestion, {
-            questId,
-            position: i,
-            text: raw.text,
-            correctIndex: raw.correctIndex,
-            explanation: raw.explanation,
-            topic: raw.topic,
-            difficulty: raw.difficulty,
-          });
-          await em.save(question);
-
-          const options = raw.options.map((optText: string, j: number) =>
-            em.create(QuizOption, {
-              questionId: question.id,
-              position: j,
-              text: optText,
-              isCorrect: j === raw.correctIndex,
-            }),
-          );
-          await em.save(options);
-        }
-
-        await em.update(Quest, questId, { status: 'ready' });
+      await this.questRepo.update(questId, {
+        questionCount: content.questionCount,
+        status: 'ready',
       });
 
       this.eventEmitter.emit('quest.ready', { questId });
@@ -226,6 +209,11 @@ export class QuestsService {
         `Quest ${questId} generation failed: ${msg}`,
         err instanceof Error ? err.stack : undefined,
       );
+      if (contentWritten) {
+        // Postgres update failed after the put: drop the orphan document
+        // (best effort — the TTL is the backstop).
+        await this.quizContent.delete(questId).catch(() => undefined);
+      }
       await this.questRepo.update(questId, {
         status: 'failed',
         errorMessage: msg,
@@ -304,16 +292,27 @@ export class QuestsService {
   async findById(id: string): Promise<Quest> {
     const quest = await this.questRepo.findOne({
       where: { id },
-      relations: ['questions', 'questions.options', 'results', 'results.user'],
+      relations: ['results', 'results.user'],
     });
     if (!quest) throw new NotFoundException('Quest no encontrado');
     return quest;
   }
 
+  /** Quiz content for a quest, sorted by position. A missing document (not
+   * yet migrated, or already expired) behaves like a quest with no questions,
+   * which is what the old relational read returned in that case. */
+  private async loadQuestions(questId: string): Promise<QuizQuestionDoc[]> {
+    const doc = await this.quizContent.get(questId);
+    if (!doc) {
+      this.logger.warn(`Quest ${questId}: no quiz content in DynamoDB`);
+    }
+    return sortedQuestions(doc);
+  }
+
   async findByParty(partyId: string, userId: string): Promise<any[]> {
     const quests = await this.questRepo.find({
       where: { partyId },
-      relations: ['questions', 'results'],
+      relations: ['results'],
       order: { createdAt: 'DESC' },
     });
 
@@ -331,7 +330,7 @@ export class QuestsService {
         errorMessage: quest.errorMessage,
         sourcePdfUrl: quest.sourcePdfUrl,
         sourceType: quest.sourcePdfUrl ? 'pdf' : 'text',
-        questionCount: quest.questions?.length ?? 0,
+        questionCount: quest.questionCount ?? 0,
         myBestScore: summary.myBestScore,
         myLastScore: summary.myLastScore,
         myStatus: summary.myStatus,
@@ -345,6 +344,7 @@ export class QuestsService {
   async getQuestForPlay(questId: string, userId: string): Promise<any> {
     const quest = await this.findById(questId);
     this.assertQuestPlayable(quest);
+    const questions = await this.loadQuestions(questId);
 
     const summary = this.buildUserQuestSummary(
       quest.results ?? [],
@@ -359,29 +359,27 @@ export class QuestsService {
       title: quest.title,
       status: quest.status,
       sourcePdfUrl: quest.sourcePdfUrl,
-      questionCount: quest.questions.length,
+      questionCount: questions.length,
       myBestScore: summary.myBestScore,
       myLastScore: summary.myLastScore,
       myStatus: summary.myStatus,
       activeAttempt: summary.activeAttempt,
       latestAttempt: summary.latestAttempt,
       leaderboard: this.buildLeaderboard(quest.results ?? [], quest.status),
-      questions: quest.questions
-        .sort((a, b) => a.position - b.position)
-        .map((question) => ({
-          id: question.id,
-          text: question.text,
-          topic: question.topic,
-          difficulty: question.difficulty,
-          position: question.position,
-          options: [...(question.options ?? [])]
-            .sort((a, b) => a.position - b.position)
-            .map((option) => ({
-              id: option.id,
-              text: option.text,
-              position: option.position,
-            })),
-        })),
+      questions: questions.map((question) => ({
+        id: question.id,
+        text: question.text,
+        topic: question.topic,
+        difficulty: question.difficulty,
+        position: question.position,
+        options: [...(question.options ?? [])]
+          .sort((a, b) => a.position - b.position)
+          .map((option) => ({
+            id: option.id,
+            text: option.text,
+            position: option.position,
+          })),
+      })),
       createdAt: quest.createdAt,
     };
   }
@@ -411,6 +409,7 @@ export class QuestsService {
       order: { attemptNumber: 'DESC' },
     });
     const attemptNumber = (attempts[0]?.attemptNumber ?? 0) + 1;
+    const questions = await this.loadQuestions(questId);
     const created = await this.resultRepo.save(
       this.resultRepo.create({
         questId,
@@ -418,7 +417,7 @@ export class QuestsService {
         attemptNumber,
         status: 'in_progress',
         answeredQuestionIndices: [],
-        totalQuestions: quest.questions.length,
+        totalQuestions: questions.length,
         score: 0,
         correctAnswers: 0,
         xpEarned: 0,
@@ -437,10 +436,10 @@ export class QuestsService {
   }
 
   async submitAnswer(dto: SubmitAnswerDto, userId: string) {
-    const question = await this.questionRepo.findOne({
-      where: { questId: dto.questId, position: dto.questionIndex },
-      select: ['id', 'correctIndex', 'explanation', 'topic'],
-    });
+    const content = await this.quizContent.get(dto.questId);
+    const question = content?.questions.find(
+      (q) => q.position === dto.questionIndex,
+    );
     if (!question) throw new BadRequestException('Pregunta inválida');
 
     const isCorrect = question.correctIndex === dto.selectedOption;
@@ -527,8 +526,8 @@ export class QuestsService {
 
     const answeredQuestionIndices =
       this.getAnsweredQuestionIndices(activeAttempt);
-    const totalQuestions =
-      activeAttempt.totalQuestions || quest.questions.length;
+    const questions = await this.loadQuestions(questId);
+    const totalQuestions = activeAttempt.totalQuestions || questions.length;
     if (answeredQuestionIndices.length < totalQuestions) {
       throw new BadRequestException(
         'El intento todavía no tiene todas las preguntas respondidas',
@@ -561,7 +560,7 @@ export class QuestsService {
 
       const currentElo = await this.usersService.getElo(userId);
       const questRating = questRatingFromDifficulties(
-        quest.questions.map((q) => q.difficulty),
+        questions.map((q) => q.difficulty),
       );
       eloDelta = calculateSoloEloDelta(currentElo, accuracy, questRating);
       await this.usersService.updateElo(userId, eloDelta);
@@ -731,5 +730,14 @@ export class QuestsService {
     this.partiesService.assertMember(party, userId);
 
     await this.questRepo.remove(quest);
+    // Postgres first, so a Dynamo failure can only leave an orphan document
+    // (cleaned up by TTL), never a quest without its content.
+    await this.quizContent
+      .delete(id)
+      .catch((err: Error) =>
+        this.logger.warn(
+          `Quest ${id}: no se pudo borrar el contenido en DynamoDB (${err.message})`,
+        ),
+      );
   }
 }

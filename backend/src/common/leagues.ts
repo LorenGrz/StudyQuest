@@ -1,4 +1,4 @@
-import { Difficulty } from '../modules/quests/quiz-question.entity';
+import { Difficulty } from '../modules/quests/quiz-content/quiz-content.types';
 
 export interface League {
   tier: number;

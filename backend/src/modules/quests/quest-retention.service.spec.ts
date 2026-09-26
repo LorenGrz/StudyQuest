@@ -4,6 +4,7 @@ import { FindOperator, Repository } from 'typeorm';
 import { QuestRetentionService } from './quest-retention.service';
 import { Quest } from './quest.entity';
 import { StorageService } from '../storage/storage.service';
+import { QuizContentRepository } from './quiz-content/quiz-content.repository';
 
 const NOW = new Date('2026-02-01T00:00:00.000Z');
 
@@ -18,15 +19,19 @@ describe('QuestRetentionService', () => {
   let storageService: jest.Mocked<
     Pick<StorageService, 'keyFromUrl' | 'deleteMany'>
   >;
+  let quizContent: { deleteMany: jest.Mock };
 
   beforeEach(async () => {
     jest.clearAllMocks();
     delete process.env.QUEST_RETENTION_DAYS;
     jest.spyOn(Date, 'now').mockReturnValue(NOW.getTime());
 
+    quizContent = { deleteMany: jest.fn().mockResolvedValue(undefined) };
+
     const moduleRef = await Test.createTestingModule({
       providers: [
         QuestRetentionService,
+        { provide: QuizContentRepository, useValue: quizContent },
         {
           provide: getRepositoryToken(Quest),
           useValue: {
@@ -60,6 +65,7 @@ describe('QuestRetentionService', () => {
     );
     expect(questRepo.delete).not.toHaveBeenCalled();
     expect(storageService.deleteMany).not.toHaveBeenCalled();
+    expect(quizContent.deleteMany).not.toHaveBeenCalled();
   });
 
   it('honours the QUEST_RETENTION_DAYS override', async () => {
@@ -87,6 +93,10 @@ describe('QuestRetentionService', () => {
       null,
       'quests/b.pdf',
     ]);
+    expect(quizContent.deleteMany).toHaveBeenCalledWith(['q1', 'q2', 'q3']);
+    expect(questRepo.delete.mock.invocationCallOrder[0]).toBeLessThan(
+      quizContent.deleteMany.mock.invocationCallOrder[0],
+    );
   });
 
   it('does not throw when storage cleanup rejects', async () => {
@@ -96,6 +106,17 @@ describe('QuestRetentionService', () => {
     storageService.deleteMany.mockRejectedValueOnce(new Error('boom'));
 
     await expect(service.purgeExpired()).resolves.toBeUndefined();
+  });
+
+  it('still deletes S3 objects when the DynamoDB purge fails (TTL is the backstop)', async () => {
+    questRepo.find.mockResolvedValue([
+      { id: 'q1', sourcePdfUrl: '/api/v1/files/quests/a.pdf' },
+    ] as Quest[]);
+    quizContent.deleteMany.mockRejectedValue(new Error('throttled'));
+
+    await expect(service.purgeExpired()).resolves.toBeUndefined();
+
+    expect(storageService.deleteMany).toHaveBeenCalled();
   });
 
   it('does not run concurrently with itself', async () => {

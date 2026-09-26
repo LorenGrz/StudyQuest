@@ -2,10 +2,7 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DataSource } from 'typeorm';
-import {
-  ConflictException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ConflictException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from './users.service';
 import { User } from './user.entity';
@@ -59,9 +56,7 @@ describe('UsersService (settings)', () => {
     }).compile();
 
     service = moduleRef.get(UsersService);
-    jest
-      .spyOn(service, 'findById')
-      .mockResolvedValue({ id: 'u1' } as User);
+    jest.spyOn(service, 'findById').mockResolvedValue({ id: 'u1' } as User);
   });
 
   describe('updateProfile', () => {
@@ -121,5 +116,67 @@ describe('UsersService (settings)', () => {
         avatarUrl: '/uploads/avatars/x.png',
       });
     });
+  });
+});
+
+describe('UsersService (dashboard stats)', () => {
+  let service: UsersService;
+  let query: jest.Mock;
+
+  beforeEach(async () => {
+    query = jest.fn();
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        UsersService,
+        { provide: getRepositoryToken(User), useValue: {} },
+        { provide: getRepositoryToken(Subject), useValue: {} },
+        { provide: getRepositoryToken(FriendRequest), useValue: {} },
+        { provide: getRepositoryToken(UserTitle), useValue: {} },
+        { provide: getRepositoryToken(UserInventory), useValue: {} },
+        { provide: getRepositoryToken(ProfileBorder), useValue: {} },
+        { provide: getRepositoryToken(Quest), useValue: {} },
+        { provide: getRepositoryToken(PlayerResult), useValue: {} },
+        { provide: DataSource, useValue: { query } },
+        { provide: EventEmitter2, useValue: { emit: jest.fn() } },
+      ],
+    }).compile();
+
+    service = moduleRef.get(UsersService);
+  });
+
+  it('should compute subject accuracy from player_results.total_questions without the quiz_questions table', async () => {
+    query
+      .mockResolvedValueOnce([{ total_time_ms: 600000 }])
+      .mockResolvedValueOnce([
+        {
+          subject_id: 's1',
+          subject_name: 'Física',
+          correct_answers: 6,
+          total_questions: 8,
+          total_time_ms: 120000,
+          quizzes_played: 2,
+        },
+      ])
+      .mockResolvedValueOnce([]);
+
+    const stats = await service.getDashboardStats('u1');
+
+    const subjectSql = query.mock.calls[1][0] as string;
+    expect(subjectSql).not.toMatch(/quiz_questions/);
+    expect(subjectSql).toMatch(/SUM\(pr\.total_questions\)/);
+    expect(query.mock.calls[1][1]).toEqual(['u1']);
+    expect(stats.totalStudyMinutes).toBe(10);
+    expect(stats.subjectPerformance).toEqual([
+      {
+        subjectId: 's1',
+        subjectName: 'Física',
+        accuracy: 0.75,
+        totalQuestions: 8,
+        correctAnswers: 6,
+        totalStudyMinutes: 2,
+        quizzesPlayed: 2,
+      },
+    ]);
+    expect(stats.weeklyStudy).toHaveLength(7);
   });
 });

@@ -3,11 +3,17 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { PlayerResult } from '../quests/player-result.entity';
 import { BillingModule } from '../billing/billing.module';
 import { AiModule } from '../ai/ai.module';
+import { QuizContentModule } from '../quests/quiz-content/quiz-content.module';
 import { StudyBotService } from './study-bot.service';
 import { StudyBotController } from './study-bot.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([PlayerResult]), BillingModule, AiModule],
+  imports: [
+    TypeOrmModule.forFeature([PlayerResult]),
+    BillingModule,
+    AiModule,
+    QuizContentModule,
+  ],
   controllers: [StudyBotController],
   providers: [StudyBotService],
 })
