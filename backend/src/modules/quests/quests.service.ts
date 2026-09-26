@@ -8,6 +8,7 @@ import {
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 import { Repository, DataSource, MoreThan } from 'typeorm';
 import { looksLikePdf, looksLikeQuestDocument } from '../../common/upload.util';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -70,6 +71,7 @@ export class QuestsService {
     private readonly skillTreeService: SkillTreeService,
     private readonly billingService: BillingService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly cfg: ConfigService,
   ) {}
 
   async createQuest(
@@ -118,9 +120,7 @@ export class QuestsService {
 
     const uploadedFilename = this.resolveUploadedFilename(file);
     const proModel =
-      limits.aiModelTier === 'full'
-        ? (process.env.GEMINI_MODEL_PRO ?? 'gemini-flash-latest')
-        : undefined;
+      limits.aiModelTier === 'full' ? this.resolveProModel() : undefined;
 
     const quest = await this.questRepo.save(
       this.questRepo.create({
@@ -280,6 +280,25 @@ export class QuestsService {
     if (file.path) return basename(file.path);
     if (file.originalname) return file.originalname;
     return 'upload.bin';
+  }
+
+  /** Model used for the Pro tier (aiModelTier = 'full'). An explicit
+   * AI_MODEL_PRO always wins; otherwise it depends on the active provider. */
+  private resolveProModel(): string | undefined {
+    const override = this.cfg.get<string>('AI_MODEL_PRO');
+    if (override) return override;
+
+    const provider = this.cfg.get<string>('AI_PROVIDER', 'bedrock');
+    if (provider === 'bedrock') {
+      return this.cfg.get<string>(
+        'BEDROCK_MODEL_PRO',
+        'us.anthropic.claude-haiku-4-5-20251001-v1:0',
+      );
+    }
+    if (provider === 'gemini') {
+      return this.cfg.get<string>('GEMINI_MODEL_PRO', 'gemini-flash-latest');
+    }
+    return undefined;
   }
 
   async findById(id: string): Promise<Quest> {

@@ -6,7 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { AiService } from '../ai/ai.service';
 import { PlayerResult } from '../quests/player-result.entity';
 import { formatQuestHistory } from './study-history.utils';
 import {
@@ -27,6 +27,7 @@ export class StudyBotService {
     @InjectRepository(PlayerResult)
     private readonly resultRepo: Repository<PlayerResult>,
     private readonly cfg: ConfigService,
+    private readonly aiService: AiService,
   ) {}
 
   async ask(userId: string, question: string): Promise<{ answer: string }> {
@@ -46,40 +47,33 @@ export class StudyBotService {
   }
 
   private async callModel(question: string, context: string): Promise<string> {
-    const apiKey = this.cfg.get<string>('GEMINI_API_KEY');
-    if (!apiKey) {
-      throw new InternalServerErrorException(
-        'Falta GEMINI_API_KEY para usar el bot de estudio',
-      );
-    }
-
-    const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: this.cfg.get(
-        'STUDY_BOT_MODEL',
-        this.cfg.get('GEMINI_MODEL', 'gemini-flash-lite-latest'),
+    const model = this.cfg.get<string>(
+      'STUDY_BOT_MODEL',
+      this.cfg.get<string>(
+        'BEDROCK_MODEL_PRO',
+        'us.anthropic.claude-haiku-4-5-20251001-v1:0',
       ),
-      // Rules go in systemInstruction; the (indirectly user-influenced) quest
-      // history is sent as content between delimiter tags so the model can
-      // tell it apart from instructions — same pattern as quiz-prompt.ts.
-      systemInstruction: STUDY_BOT_SYSTEM_PROMPT,
-      generationConfig: {
-        temperature: 0.4,
-        maxOutputTokens: Number(this.cfg.get('AI_MAX_OUTPUT_TOKENS', 1024)),
-      },
-    });
+    );
 
     try {
-      const result = await model.generateContent(
+      // Rules go in the system prompt; the (indirectly user-influenced) quest
+      // history is sent as content between delimiter tags so the model can
+      // tell it apart from instructions — same pattern as quiz-prompt.ts.
+      const text = await this.aiService.chat(
+        STUDY_BOT_SYSTEM_PROMPT,
         buildStudyBotUserPrompt(question, context),
+        {
+          model,
+          maxTokens: Number(this.cfg.get('AI_MAX_OUTPUT_TOKENS', 1024)),
+        },
       );
-      const text = result.response.text()?.trim();
-      if (!text) {
+      const trimmed = text?.trim();
+      if (!trimmed) {
         throw new InternalServerErrorException(
           'El bot de estudio no generó respuesta',
         );
       }
-      return text;
+      return trimmed;
     } catch (err) {
       this.logger.error(
         `Error consultando al bot de estudio: ${(err as Error)?.message}`,
