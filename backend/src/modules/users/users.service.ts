@@ -7,7 +7,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, In } from 'typeorm';
+import { Repository, DataSource, In, SelectQueryBuilder } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from './user.entity';
 import { Subject } from '../subjects/subject.entity';
@@ -591,7 +591,10 @@ export class UsersService {
     return user?.elo ?? DEFAULT_ELO;
   }
 
-  async getGlobalLeaderboard(limit = 20): Promise<
+  async getGlobalLeaderboard(
+    limit = 20,
+    university?: string,
+  ): Promise<
     {
       rank: number;
       userId: string;
@@ -602,15 +605,22 @@ export class UsersService {
       elo: number;
     }[]
   > {
-    const rows = await this.userRepo
+    let qb = this.userRepo
       .createQueryBuilder('u')
       .select('u.id', 'userId')
       .addSelect('u.username', 'username')
       .addSelect('u.display_name', 'displayName')
       .addSelect('u.avatar_url', 'avatarUrl')
       .addSelect('u.active_cosmetics', 'activeCosmetics')
-      .addSelect(`COALESCE((u.stats->>'elo')::int, ${DEFAULT_ELO})`, 'elo')
+      .addSelect(`COALESCE((u.stats->>'elo')::int, ${DEFAULT_ELO})`, 'elo');
+
+    if (university) {
+      qb = qb.where('u.university = :university', { university });
+    }
+
+    const rows = await qb
       .orderBy('elo', 'DESC')
+      .addOrderBy('u.username', 'ASC')
       .limit(limit)
       .getRawMany<{
         userId: string;
@@ -622,6 +632,54 @@ export class UsersService {
       }>();
 
     return rows.map((row, index) => ({ rank: index + 1, ...row }));
+  }
+
+  async getLeaderboardUniversities(): Promise<string[]> {
+    const rows = await this.userRepo
+      .createQueryBuilder('u')
+      .select('u.university', 'university')
+      .distinct(true)
+      .where("u.university <> ''")
+      .orderBy('u.university', 'ASC')
+      .getRawMany<{ university: string }>();
+
+    return rows.map((row) => row.university);
+  }
+
+  async getMyLeaderboardPosition(
+    userId: string,
+    university?: string,
+    subjectId?: string,
+  ): Promise<{ rank: number; elo: number; total: number }> {
+    const elo = await this.getElo(userId);
+
+    const scopedQuery = (): SelectQueryBuilder<User> => {
+      let qb = this.userRepo.createQueryBuilder('u');
+      if (subjectId) {
+        qb = qb.innerJoin('u.enrolledSubjects', 's', 's.id = :subjectId', {
+          subjectId,
+        });
+      } else if (university) {
+        qb = qb.where('u.university = :university', { university });
+      }
+      return qb;
+    };
+
+    const [totalRow, higherRow] = await Promise.all([
+      scopedQuery().select('COUNT(*)', 'count').getRawOne<{ count: string }>(),
+      scopedQuery()
+        .andWhere(`COALESCE((u.stats->>'elo')::int, ${DEFAULT_ELO}) > :elo`, {
+          elo,
+        })
+        .select('COUNT(*)', 'count')
+        .getRawOne<{ count: string }>(),
+    ]);
+
+    return {
+      rank: parseInt(higherRow?.count ?? '0', 10) + 1,
+      elo,
+      total: parseInt(totalRow?.count ?? '0', 10),
+    };
   }
 
   async getLeaderboard(

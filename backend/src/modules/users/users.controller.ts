@@ -36,6 +36,9 @@ import {
   RecommendedQuestsQueryDto,
   RecommendedQuestsResponseDto,
   RecommendedQuestDto,
+  GlobalLeaderboardQueryDto,
+  SubjectLeaderboardQueryDto,
+  LeaderboardMeQueryDto,
 } from '../../common/dto';
 
 const ALLOWED_AVATAR_EXTS = ['.jpg', '.jpeg', '.png', '.webp'];
@@ -157,22 +160,40 @@ export class UsersController {
     return this.usersService.setActiveCosmetics(req.user.userId, dto);
   }
 
+  // Static leaderboard routes must be declared before the `:subjectId`
+  // wildcard below, or Nest would try to match "global"/"me"/"universities"
+  // as a subject id.
   @Get('leaderboard/global')
-  getGlobalLeaderboard(@Query('limit') limit?: string) {
+  getGlobalLeaderboard(@Query() query: GlobalLeaderboardQueryDto) {
     return this.usersService.getGlobalLeaderboard(
-      limit ? parseInt(limit, 10) : 20,
+      query.limit ?? 20,
+      query.university,
     );
+  }
+
+  @Get('leaderboard/me')
+  getMyLeaderboardPosition(
+    @Request() req: any,
+    @Query() query: LeaderboardMeQueryDto,
+  ) {
+    return this.usersService.getMyLeaderboardPosition(
+      req.user.userId,
+      query.university,
+      query.subjectId,
+    );
+  }
+
+  @Get('leaderboard/universities')
+  getLeaderboardUniversities() {
+    return this.usersService.getLeaderboardUniversities();
   }
 
   @Get('leaderboard/:subjectId')
   getLeaderboard(
     @Param('subjectId') subjectId: string,
-    @Query('limit') limit?: string,
+    @Query() query: SubjectLeaderboardQueryDto,
   ) {
-    return this.usersService.getLeaderboard(
-      subjectId,
-      limit ? parseInt(limit, 10) : 20,
-    );
+    return this.usersService.getLeaderboard(subjectId, query.limit ?? 20);
   }
 
   @Get(':id')

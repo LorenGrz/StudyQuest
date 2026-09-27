@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import { userService, type LeaderboardEntry, type Subject } from '../../services/userService';
 import { getLeague, DEFAULT_ELO } from '../../utils/leagues';
+import { useAuthStore } from '../../store/authStore';
+import { AvatarWithBorder } from '../AvatarWithBorder';
 
 // Animaciones para la lista
 const containerVariants = {
@@ -17,8 +19,11 @@ const itemVariants: Variants = {
   show: { opacity: 1, x: 0, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } }
 };
 
+type TabValue = 'global' | 'university' | string;
+
 export const HomeLeaderboardPreview = ({ subjects }: { subjects: Subject[] }) => {
-  const [selectedTab, setSelectedTab] = useState<'global' | string>('global');
+  const { user } = useAuthStore();
+  const [selectedTab, setSelectedTab] = useState<TabValue>('global');
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +36,9 @@ export const HomeLeaderboardPreview = ({ subjects }: { subjects: Subject[] }) =>
         if (selectedTab === 'global') {
           const data = await userService.getGlobalLeaderboard(5);
           setEntries(data);
+        } else if (selectedTab === 'university') {
+          const data = await userService.getGlobalLeaderboard(5, user?.university);
+          setEntries(data);
         } else {
           const data = await userService.getLeaderboard(selectedTab, 5);
           setEntries(data);
@@ -42,7 +50,7 @@ export const HomeLeaderboardPreview = ({ subjects }: { subjects: Subject[] }) =>
       }
     };
     fetchLeaderboard();
-  }, [selectedTab]);
+  }, [selectedTab, user?.university]);
 
   return (
     <div className="bg-surface border border-[var(--overlay-border)] rounded-2xl p-4 flex flex-col gap-4 mt-2 shadow-sm">
@@ -66,6 +74,20 @@ export const HomeLeaderboardPreview = ({ subjects }: { subjects: Subject[] }) =>
         >
           🌎 Global
         </motion.button>
+        {user?.university && (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setSelectedTab('university')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
+              selectedTab === 'university'
+                ? 'bg-accent text-on-accent shadow-accent/20 shadow-lg'
+                : 'bg-elevated text-muted border border-[var(--overlay-border)] hover:border-[var(--overlay-border)]'
+            }`}
+          >
+            🎓 Mi universidad
+          </motion.button>
+        )}
         {subjects.map((sub) => (
           <motion.button
             key={sub.id}
@@ -117,13 +139,12 @@ export const HomeLeaderboardPreview = ({ subjects }: { subjects: Subject[] }) =>
                   <div className="w-6 text-center font-bold text-sm text-muted">
                     {medal ? <span className="text-base filter drop-shadow-md">{medal}</span> : <span>#{idx + 1}</span>}
                   </div>
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-accent to-blue-600 flex items-center justify-center text-primary font-bold text-xs overflow-hidden shrink-0 shadow-sm">
-                    {entry.avatarUrl ? (
-                      <img src={entry.avatarUrl} alt={entry.displayName} className="w-full h-full object-cover" />
-                    ) : (
-                      entry.displayName?.charAt(0).toUpperCase() ?? '?'
-                    )}
-                  </div>
+                  <AvatarWithBorder
+                    displayName={entry.displayName ?? '?'}
+                    avatarUrl={entry.avatarUrl}
+                    borderImageUrl={entry.activeCosmetics?.borderImageUrl}
+                    size="sm"
+                  />
                   <div className="flex-1 min-w-0">
                     <p className="text-primary text-[13px] font-semibold truncate group-hover:text-accent-light transition-colors">{entry.displayName}</p>
                     <p className="text-muted text-[10px] truncate">@{entry.username}</p>
