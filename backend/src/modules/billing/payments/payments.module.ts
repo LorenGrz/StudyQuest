@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../../users/user.entity';
 import { Payment } from './payment.entity';
+import { PaymentGrant } from './payment-grant.entity';
 import { FxService } from './fx.service';
 import { MercadoPagoClient } from './mercadopago.client';
 import { PaymentsService } from './payments.service';
@@ -10,7 +11,7 @@ import { PaymentsWebhookController } from './payments-webhook.controller';
 
 /** Mercado Pago Checkout Pro: pay ARS for 30 days of Pro. */
 @Module({
-  imports: [TypeOrmModule.forFeature([Payment, User])],
+  imports: [TypeOrmModule.forFeature([Payment, PaymentGrant, User])],
   providers: [FxService, MercadoPagoClient, PaymentsService],
   controllers: [PaymentsController, PaymentsWebhookController],
 })

@@ -11,10 +11,8 @@ import {
 import { ApiExcludeController } from '@nestjs/swagger';
 import { SkipThrottle } from '@nestjs/throttler';
 import { ConfigService } from '@nestjs/config';
-import { PaymentsService } from './payments.service';
+import { MP_PAYMENT_ID_RE, PaymentsService } from './payments.service';
 import { verifyMercadoPagoSignature } from './webhook-signature';
-
-const MP_PAYMENT_ID_RE = /^\d{1,24}$/;
 
 const str = (v: unknown): string | undefined =>
   typeof v === 'string' ? v : typeof v === 'number' ? String(v) : undefined;

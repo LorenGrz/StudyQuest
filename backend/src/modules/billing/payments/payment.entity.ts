@@ -26,6 +26,12 @@ export const PAYMENT_STATUSES = [
 ] as const;
 export type PaymentStatus = (typeof PAYMENT_STATUSES)[number];
 
+/** Final for an MP payment: never moved back to approved/in_process. */
+export const TERMINAL_STATUSES: readonly PaymentStatus[] = [
+  'refunded',
+  'charged_back',
+];
+
 /** pg returns `numeric` as a string; amounts here are small, so a JS number is exact enough. */
 const numeric: ValueTransformer = {
   to: (v: number | null | undefined) => v,
@@ -34,8 +40,9 @@ const numeric: ValueTransformer = {
 
 /**
  * One Checkout Pro attempt: created `pending` when the user starts a checkout,
- * updated from the Mercado Pago API when a webhook arrives. `appliedAt` is set
- * exactly once, when the Pro days are granted — it is the idempotency guard.
+ * updated from the Mercado Pago API (webhook or reconciliation). `appliedAt`
+ * is when Pro was first granted for it; the per-MP-payment ledger that makes
+ * grants idempotent is PaymentGrant.
  *
  * Constraint/index names are explicit so the migration (AddPayments) and
  * `synchronize` agree on the schema.
@@ -125,6 +132,32 @@ export class Payment {
     default: null,
   })
   rawStatusDetail: string | null;
+
+  /** Checkout URL of the preference, reused while it is still fresh (see createCheckout). */
+  @Column({ name: 'init_point', type: 'varchar', nullable: true, default: null })
+  initPoint: string | null;
+
+  /**
+   * Set when an approved MP payment could not be granted automatically
+   * (amount/currency mismatch, test payment in live mode, missing user) and
+   * needs a human. Stops reconciliation and tells the UI to show support.
+   */
+  @Column({
+    name: 'needs_review_reason',
+    type: 'varchar',
+    nullable: true,
+    default: null,
+  })
+  needsReviewReason: string | null;
+
+  /** Last time we asked the MP API about this payment (reconciliation throttle). */
+  @Column({
+    name: 'last_synced_at',
+    type: 'timestamptz',
+    nullable: true,
+    default: null,
+  })
+  lastSyncedAt: Date | null;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;

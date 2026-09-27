@@ -4,6 +4,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -31,11 +32,20 @@ export class PaymentsController {
     return this.payments.createCheckout(req.user.userId);
   }
 
+  /**
+   * Status of one of the caller's payments. `hint` = the `payment_id` MP
+   * appends to the back URL; the service verifies it against MP before use.
+   */
   @Get(':id')
   get(
     @Req() req: { user: { userId: string } },
     @Param('id', new ParseUUIDPipe()) id: string,
+    @Query('hint') hint?: string,
   ) {
-    return this.payments.getForUser(req.user.userId, id);
+    return this.payments.getForUser(
+      req.user.userId,
+      id,
+      typeof hint === 'string' ? hint : undefined,
+    );
   }
 }

@@ -4,6 +4,10 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  * Mercado Pago Checkout Pro payments (modules/billing/payments/payment.entity.ts).
  * IF NOT EXISTS so a dev DB that already got the table from synchronize is
  * left alone; names match the entity's explicit constraint names.
+ *
+ * down: intentional no-op — `payments` holds financial records (what was
+ * charged, to whom, and whether Pro was granted). A code rollback leaves the
+ * table unused, which is harmless; never drop it without exporting it first.
  */
 export class AddPayments1790300000000 implements MigrationInterface {
   name = 'AddPayments1790300000000';
@@ -36,7 +40,7 @@ export class AddPayments1790300000000 implements MigrationInterface {
     );
   }
 
-  async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP TABLE IF EXISTS payments`);
+  async down(): Promise<void> {
+    // Intentional no-op (see class comment).
   }
 }

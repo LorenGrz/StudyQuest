@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import MercadoPagoConfig, {
   MercadoPagoError,
@@ -40,6 +40,31 @@ export interface MpPaymentInfo {
   currencyId: string | null;
   transactionAmount: number | null;
   externalReference: string | null;
+  /** false for sandbox/test payments. */
+  liveMode: boolean | null;
+}
+
+interface RawMpPayment {
+  id?: string | number;
+  status?: string;
+  status_detail?: string;
+  currency_id?: string;
+  transaction_amount?: number;
+  external_reference?: string;
+  live_mode?: boolean;
+}
+
+function toInfo(p: RawMpPayment): MpPaymentInfo {
+  return {
+    id: String(p.id),
+    status: p.status ?? 'unknown',
+    statusDetail: p.status_detail ?? null,
+    currencyId: p.currency_id ?? null,
+    transactionAmount:
+      typeof p.transaction_amount === 'number' ? p.transaction_amount : null,
+    externalReference: p.external_reference ?? null,
+    liveMode: typeof p.live_mode === 'boolean' ? p.live_mode : null,
+  };
 }
 
 const REQUEST_TIMEOUT_MS = 10_000;
@@ -51,10 +76,22 @@ const REQUEST_TIMEOUT_MS = 10_000;
  */
 @Injectable()
 export class MercadoPagoClient {
+  private readonly logger = new Logger(MercadoPagoClient.name);
   private readonly sdk: MercadoPagoConfig | null;
 
   constructor(config: ConfigService) {
     const token = config.get<string>('MP_ACCESS_TOKEN')?.trim();
+    const sandbox =
+      config.get<string>('MP_SANDBOX')?.trim().toLowerCase() === 'true';
+    if (token?.startsWith('TEST-') && !sandbox) {
+      this.logger.warn(
+        'MP_ACCESS_TOKEN es de prueba (TEST-) pero MP_SANDBOX no es true: los pagos no se acreditarán (live_mode=false)',
+      );
+    } else if (token?.startsWith('APP_USR-') && sandbox) {
+      this.logger.warn(
+        'MP_SANDBOX=true con un token APP_USR-: correcto solo si es el token de un usuario de prueba',
+      );
+    }
     this.sdk = token
       ? new MercadoPagoConfig({
           accessToken: token,
@@ -89,21 +126,26 @@ export class MercadoPagoClient {
   async getPayment(id: string): Promise<MpPaymentInfo | null> {
     try {
       const p = await new MpPayment(this.requireSdk()).get({ id });
-      return {
-        id: String(p.id),
-        status: p.status ?? 'unknown',
-        statusDetail: p.status_detail ?? null,
-        currencyId: p.currency_id ?? null,
-        transactionAmount:
-          typeof p.transaction_amount === 'number'
-            ? p.transaction_amount
-            : null,
-        externalReference: p.external_reference ?? null,
-      };
+      return toInfo(p);
     } catch (err) {
       if (err instanceof MercadoPagoError && err.status === 404) return null;
       throw err;
     }
+  }
+
+  /** Every MP payment made against one of our preferences (by external_reference). */
+  async searchByExternalReference(ref: string): Promise<MpPaymentInfo[]> {
+    const res = await new MpPayment(this.requireSdk()).search({
+      options: {
+        external_reference: ref,
+        sort: 'date_created',
+        criteria: 'desc',
+        limit: 20,
+      },
+    });
+    return (res.results ?? [])
+      .filter((p) => p.id !== undefined && p.id !== null)
+      .map((p) => toInfo(p));
   }
 
   private requireSdk(): MercadoPagoConfig {

@@ -1,7 +1,12 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 
-/** Notifications signed longer ago than this (or this far in the future) are rejected. */
-export const SIGNATURE_MAX_AGE_MS = 10 * 60 * 1000;
+/**
+ * Notifications signed longer ago than this (or this far in the future) are
+ * rejected. Generous on purpose: MP retries for hours and may resend an old
+ * `ts`, and replays are harmless anyway — the payment is re-read from the MP
+ * API and grants are idempotent per MP payment id.
+ */
+export const SIGNATURE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 export type SignatureCheck =
   | { ok: true }

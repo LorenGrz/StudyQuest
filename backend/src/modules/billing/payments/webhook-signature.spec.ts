@@ -72,8 +72,18 @@ describe('verifyMercadoPagoSignature', () => {
     ).toEqual({ ok: false, reason: 'mismatch' });
   });
 
-  it('rejects a correctly signed but old notification (replay)', () => {
-    const old = String(NOW / 1000 - 11 * 60);
+  it('accepts an MP retry signed hours ago (within 24 h)', () => {
+    const ts = String(NOW / 1000 - 6 * 60 * 60);
+    expect(
+      verifyMercadoPagoSignature({
+        ...base(),
+        xSignature: `ts=${ts},v1=${sign('123456', 'req-1', ts)}`,
+      }),
+    ).toEqual({ ok: true });
+  });
+
+  it('rejects a correctly signed but old notification (replay > 24 h)', () => {
+    const old = String(NOW / 1000 - 25 * 60 * 60);
     expect(
       verifyMercadoPagoSignature({
         ...base(),
