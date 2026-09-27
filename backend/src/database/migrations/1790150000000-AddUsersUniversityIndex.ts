@@ -7,10 +7,10 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  * decorator on `User.university` so a synced dev DB doesn't create a second,
  * differently-named index for the same column.
  */
-export class AddUsersUniversityIndex1790200000000
+export class AddUsersUniversityIndex1790150000000
   implements MigrationInterface
 {
-  name = 'AddUsersUniversityIndex1790200000000';
+  name = 'AddUsersUniversityIndex1790150000000';
 
   async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
