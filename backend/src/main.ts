@@ -1,7 +1,7 @@
 import './polyfill';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import { RequestMethod, ValidationPipe } from '@nestjs/common';
+import { RequestMethod } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { IoAdapter } from '@nestjs/platform-socket.io';
 import { ConfigService } from '@nestjs/config';
@@ -10,6 +10,7 @@ import express from 'express';
 import { join } from 'path';
 import { AppModule } from './app.module';
 import { corsOrigin } from './common/cors';
+import { globalValidationPipe } from './common/validation';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -35,14 +36,7 @@ async function bootstrap() {
     '/static/borders',
     express.static(join(process.cwd(), 'static', 'borders')),
   );
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-      transformOptions: { enableImplicitConversion: true },
-    }),
-  );
+  app.useGlobalPipes(globalValidationPipe());
   app.useWebSocketAdapter(new IoAdapter(app));
   app.setGlobalPrefix('api/v1', {
     exclude: [{ path: 'health', method: RequestMethod.GET }],

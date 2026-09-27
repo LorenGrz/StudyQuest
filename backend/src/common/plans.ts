@@ -1,14 +1,38 @@
 /**
- * Subscription plans. Manual tiers for now — no payment processor. A user's plan
- * is granted by a promo code or by an admin; it lapses back to `free` once
- * `planExpiresAt` passes. This file is the single source of truth for the
+ * Subscription plans. A user's plan is granted by a promo code, an admin or a
+ * Mercado Pago payment (modules/billing/payments); it lapses back to `free`
+ * once `planExpiresAt` passes. This file is the single source of truth for the
  * per-plan limits; the numbers can be overridden per environment.
  */
 
 export const PLANS = ['free', 'pro'] as const;
 export type Plan = (typeof PLANS)[number];
 
-export type PlanSource = 'default' | 'promo' | 'admin';
+export type PlanSource = 'default' | 'promo' | 'admin' | 'mercadopago';
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Pro with no expiry (admin grant with 0 days). Paid/promo days must not shorten it. */
+export function isPermanentPro(user: {
+  plan?: string | null;
+  planExpiresAt?: Date | string | null;
+}): boolean {
+  return user.plan === 'pro' && !user.planExpiresAt;
+}
+
+/**
+ * New expiry after granting `days` more: stacks on top of an expiry that is
+ * still in the future, otherwise counts from `now`. Shared by promo codes and
+ * payments so both extend a plan the same way.
+ */
+export function extendExpiry(
+  current: Date | null | undefined,
+  days: number,
+  now: Date = new Date(),
+): Date {
+  const base = current && current > now ? current : now;
+  return new Date(base.getTime() + days * DAY_MS);
+}
 
 export interface PlanLimits {
   /** AI quests a user can generate per rolling 24 h. */
