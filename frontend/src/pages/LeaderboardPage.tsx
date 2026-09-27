@@ -1,20 +1,30 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { MobileLayout } from '../components/Layouts'
-import { Spinner } from '../components/UI'
+import { Spinner, Select } from '../components/UI'
 import { useAuthStore } from '../store/authStore'
 import { userService } from '../services/userService'
-import type { LeaderboardEntry } from '../services/userService'
+import type { LeaderboardEntry, MyLeaderboardPosition } from '../services/userService'
+import { useLeaderboard, type LeaderboardScope } from '../hooks/useLeaderboard'
 
 import { getLeague, DEFAULT_ELO } from '../utils/leagues'
 import { AvatarWithBorder } from '../components/AvatarWithBorder'
 
+type TabType = 'global' | 'university' | 'subject'
+
+const TAB_LABELS: Record<TabType, string> = {
+  global: 'Global',
+  university: 'Por universidad',
+  subject: 'Por materia',
+}
+
 export default function LeaderboardPage() {
   const { user } = useAuthStore()
+  const [activeTab, setActiveTab] = useState<TabType>('global')
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>('')
-  const [entries, setEntries] = useState<LeaderboardEntry[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [selectedUniversity, setSelectedUniversity] = useState<string>(user?.university ?? '')
+  const [universities, setUniversities] = useState<string[]>([])
+  const [myPosition, setMyPosition] = useState<MyLeaderboardPosition | null>(null)
 
   const subjects = user?.enrolledSubjects ?? []
 
@@ -25,16 +35,65 @@ export default function LeaderboardPage() {
     }
   }, [subjects, selectedSubjectId])
 
+  // Default the university selector to the user's own university once it's known.
   useEffect(() => {
-    if (!selectedSubjectId) return
-    setIsLoading(true)
-    setError(null)
+    if (!selectedUniversity && user?.university) {
+      setSelectedUniversity(user.university)
+    }
+  }, [user, selectedUniversity])
+
+  useEffect(() => {
+    let cancelled = false
     userService
-      .getLeaderboard(selectedSubjectId)
-      .then(setEntries)
-      .catch(() => setError('No se pudo cargar el leaderboard'))
-      .finally(() => setIsLoading(false))
-  }, [selectedSubjectId])
+      .getLeaderboardUniversities()
+      .then((data) => { if (!cancelled) setUniversities(data) })
+      .catch(() => { /* the selector still works with just the user's own university */ })
+    return () => { cancelled = true }
+  }, [])
+
+  // The user's own university may not yet appear in the aggregate list (e.g.
+  // nobody else from it has played yet) — keep it selectable regardless.
+  const universityOptions = useMemo(
+    () =>
+      selectedUniversity && !universities.includes(selectedUniversity)
+        ? [selectedUniversity, ...universities]
+        : universities,
+    [selectedUniversity, universities],
+  )
+
+  const scope: LeaderboardScope | null = useMemo(() => {
+    if (activeTab === 'global') return { type: 'global' }
+    if (activeTab === 'university') {
+      return selectedUniversity ? { type: 'university', university: selectedUniversity } : null
+    }
+    return selectedSubjectId ? { type: 'subject', subjectId: selectedSubjectId } : null
+  }, [activeTab, selectedUniversity, selectedSubjectId])
+
+  const { data: entries, loading: isLoading, error } = useLeaderboard(scope)
+
+  // Fetch the caller's own rank only when they're not already in the visible top.
+  useEffect(() => {
+    if (!scope || isLoading) return
+    if (entries.some((e) => e.userId === user?.id)) {
+      setMyPosition(null)
+      return
+    }
+    let cancelled = false
+    const params =
+      scope.type === 'university'
+        ? { university: scope.university }
+        : scope.type === 'subject'
+          ? { subjectId: scope.subjectId }
+          : {}
+    userService
+      .getMyLeaderboardPosition(params)
+      .then((pos) => { if (!cancelled) setMyPosition(pos) })
+      .catch(() => { if (!cancelled) setMyPosition(null) })
+    return () => { cancelled = true }
+  }, [scope, entries, isLoading, user?.id])
+
+  const showSubjectEmptyState = activeTab === 'subject' && subjects.length === 0
+  const showContent = !showSubjectEmptyState
 
   return (
     <MobileLayout>
@@ -45,17 +104,43 @@ export default function LeaderboardPage() {
       >
         <div className="px-4 pt-5 pb-2">
           <h1 className="text-2xl font-extrabold pt-5 pb-2">🏆 Leaderboard</h1>
-          <p className="text-[13px] text-muted mt-0.5">Ranking global por materia</p>
+          <p className="text-[13px] text-muted mt-0.5">Ranking global, por universidad y por materia</p>
         </div>
 
-      {/* Subject Selector */}
-      {subjects.length === 0 ? (
-        <div className="text-center py-10 px-5">
-          <p className="text-sm font-semibold text-primary">Inscribite a materias para ver el leaderboard.</p>
+        {/* Main tabs */}
+        <div className="flex flex-wrap gap-2 px-4 pb-3">
+          {(Object.keys(TAB_LABELS) as TabType[]).map((tab) => (
+            <button
+              key={tab}
+              role="tab"
+              aria-selected={activeTab === tab}
+              className={`py-[7px] px-4 rounded-full border border-[var(--overlay-border)] bg-surface text-secondary text-[13px] font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer hover:border-accent hover:text-accent-light min-h-[44px] ${activeTab === tab ? 'bg-accent border-accent text-on-accent shadow-[0_0_12px_rgba(124,58,237,0.4)]' : ''}`}
+              onClick={() => setActiveTab(tab)}
+            >
+              {TAB_LABELS[tab]}
+            </button>
+          ))}
         </div>
-      ) : (
-        <>
-          {/* Subject tabs: scroll on mobile, wrap on desktop */}
+
+        {activeTab === 'university' && (
+          <div className="px-4 pb-3 max-w-xs">
+            <Select
+              id="leaderboard-university"
+              label="Universidad"
+              value={selectedUniversity}
+              onChange={(e) => setSelectedUniversity(e.target.value)}
+              options={universityOptions.map((u) => ({ value: u, label: u }))}
+            />
+          </div>
+        )}
+
+        {showSubjectEmptyState && (
+          <div className="text-center py-10 px-5">
+            <p className="text-sm font-semibold text-primary">Inscribite a materias para ver el leaderboard.</p>
+          </div>
+        )}
+
+        {activeTab === 'subject' && subjects.length > 0 && (
           <div className="flex flex-wrap gap-2 px-4 pb-3">
             {subjects.map(s => (
               <button
@@ -68,63 +153,74 @@ export default function LeaderboardPage() {
               </button>
             ))}
           </div>
+        )}
 
-          {/* Content */}
-          {isLoading && (
-            <div className="flex justify-center items-center min-h-[200px] mt-10">
-              <Spinner size="lg" />
-            </div>
-          )}
-
-          {error && !isLoading && (
-            <div className="mx-4 mt-4 px-4 py-3 rounded-lg text-sm bg-[rgba(239,68,68,0.1)] text-danger border border-[rgba(239,68,68,0.2)]">{error}</div>
-          )}
-
-          {!isLoading && !error && entries.length === 0 && (
-            <div className="text-center py-10 px-5">
-              <p className="text-sm font-semibold text-primary">Nadie en el ranking todavía. ¡Sé el primero!</p>
-            </div>
-          )}
-
-          {!isLoading && !error && entries.length > 0 && (
-            /*
-              Desktop: podium + ranked list side by side (2-col)
-              Mobile: podium stacked above ranked list
-            */
-            <div className="px-4 pb-8">
-              {/* Podium */}
-              {entries.length >= 3 && (
-                <div className="flex justify-center items-end gap-2 py-5 pb-6">
-                  {/* Mobile/tablet: classic 2nd-1st-3rd arc */}
-                  <div className="flex justify-center items-end gap-2 w-full">
-                    <PodiumCard entry={entries[1]} currentUserId={user?.id} position={2} />
-                    <PodiumCard entry={entries[0]} currentUserId={user?.id} position={1} />
-                    <PodiumCard entry={entries[2]} currentUserId={user?.id} position={3} />
-                  </div>
-                  {/* Desktop: stacked 1st-2nd-3rd */}
-                  <div className="hidden">
-                    <PodiumCard entry={entries[0]} currentUserId={user?.id} position={1} />
-                    <PodiumCard entry={entries[1]} currentUserId={user?.id} position={2} />
-                    <PodiumCard entry={entries[2]} currentUserId={user?.id} position={3} />
-                  </div>
-                </div>
-              )}
-
-              {/* Ranked list */}
-              <div className="flex flex-col gap-2 mt-2">
-                {entries.slice(entries.length >= 3 ? 3 : 0).map((entry, idx) => (
-                  <LeaderboardRow
-                    key={entry.userId}
-                    entry={entry}
-                    isMe={entry.userId === user?.id}
-                    animDelay={idx * 40}
-                  />
-                ))}
+        {/* Content */}
+        {showContent && (
+          <>
+            {isLoading && (
+              <div className="flex justify-center items-center min-h-[200px] mt-10">
+                <Spinner size="lg" />
               </div>
-            </div>
-          )}
-        </>
-      )}
+            )}
+
+            {error && !isLoading && (
+              <div className="mx-4 mt-4 px-4 py-3 rounded-lg text-sm bg-[rgba(239,68,68,0.1)] text-danger border border-[rgba(239,68,68,0.2)]">{error}</div>
+            )}
+
+            {!isLoading && !error && entries.length === 0 && (
+              <div className="text-center py-10 px-5">
+                <p className="text-sm font-semibold text-primary">Nadie en el ranking todavía. ¡Sé el primero!</p>
+              </div>
+            )}
+
+            {!isLoading && !error && entries.length > 0 && (
+              /*
+                Desktop: podium + ranked list side by side (2-col)
+                Mobile: podium stacked above ranked list
+              */
+              <div className="px-4 pb-8">
+                {/* Podium */}
+                {entries.length >= 3 && (
+                  <div className="flex justify-center items-end gap-2 py-5 pb-6">
+                    {/* Mobile/tablet: classic 2nd-1st-3rd arc */}
+                    <div className="flex justify-center items-end gap-2 w-full">
+                      <PodiumCard entry={entries[1]} currentUserId={user?.id} position={2} />
+                      <PodiumCard entry={entries[0]} currentUserId={user?.id} position={1} />
+                      <PodiumCard entry={entries[2]} currentUserId={user?.id} position={3} />
+                    </div>
+                    {/* Desktop: stacked 1st-2nd-3rd */}
+                    <div className="hidden">
+                      <PodiumCard entry={entries[0]} currentUserId={user?.id} position={1} />
+                      <PodiumCard entry={entries[1]} currentUserId={user?.id} position={2} />
+                      <PodiumCard entry={entries[2]} currentUserId={user?.id} position={3} />
+                    </div>
+                  </div>
+                )}
+
+                {/* Ranked list */}
+                <div className="flex flex-col gap-2 mt-2">
+                  {entries.slice(entries.length >= 3 ? 3 : 0).map((entry, idx) => (
+                    <LeaderboardRow
+                      key={entry.userId}
+                      entry={entry}
+                      isMe={entry.userId === user?.id}
+                      animDelay={idx * 40}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!isLoading && !error && myPosition && (
+              <div className="px-4 pb-8 text-center">
+                <p className="text-sm font-semibold text-secondary">
+                  Tu posición: #{myPosition.rank}
+                </p>
+              </div>
+            )}
+          </>
+        )}
       </motion.div>
     </MobileLayout>
   )

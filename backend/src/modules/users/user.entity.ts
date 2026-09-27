@@ -69,6 +69,7 @@ export class User {
   bio: string | null;
 
   @Column({ length: 200 })
+  @Index('IDX_users_university')
   university: string;
 
   @Column({ length: 200 })
