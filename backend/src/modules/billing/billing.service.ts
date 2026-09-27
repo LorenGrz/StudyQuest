@@ -18,6 +18,7 @@ import {
   PlanLimits,
   PlanSource,
   effectivePlan,
+  extendExpiry,
   planCatalog,
   planLimits,
 } from '../../common/plans';
@@ -117,13 +118,16 @@ export class BillingService implements OnModuleInit {
         throw new ConflictException('Ya canjeaste este código');
       }
 
-      const u = await em.findOne(User, { where: { id: userId } });
+      // Row lock: payments (PaymentsService) also extend planExpiresAt; without
+      // it two concurrent grants could both read the old expiry.
+      const u = await em.findOne(User, {
+        where: { id: userId },
+        lock: { mode: 'pessimistic_write' },
+      });
       if (!u) throw new NotFoundException('Usuario no encontrado');
 
-      const base =
-        u.planExpiresAt && u.planExpiresAt > now ? u.planExpiresAt : now;
       u.plan = promo.plan;
-      u.planExpiresAt = new Date(base.getTime() + promo.durationDays * DAY_MS);
+      u.planExpiresAt = extendExpiry(u.planExpiresAt, promo.durationDays, now);
       u.planSource = 'promo';
       await em.save(u);
 
