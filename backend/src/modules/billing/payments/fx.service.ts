@@ -12,6 +12,11 @@ const RATE_TTL_MS = 60 * 60 * 1000;
 /** After a failed fetch the fallback is reused briefly so every request doesn't wait 5 s. */
 const FALLBACK_TTL_MS = 5 * 60 * 1000;
 const DEFAULT_USD_PRICE = 5;
+/** A fetched quote outside [0.5×, 5×] PRO_PRICE_ARS_FALLBACK is treated as bogus. */
+const BAND_MIN = 0.5;
+const BAND_MAX = 5;
+/** Default hard floor (PRO_PRICE_ARS_FLOOR) = half the fallback price. */
+const FLOOR_OF_FALLBACK = 0.5;
 
 export interface ProQuote {
   /** Rounded up to the next 100 ARS. */
@@ -24,7 +29,8 @@ export interface ProQuote {
 /**
  * Prices Pro in ARS from its USD price, using the official "venta" rate from
  * dolarapi.com. Falls back to a fixed ARS price (PRO_PRICE_ARS_FALLBACK) when
- * the rate can't be fetched, so checkout keeps working if dolarapi is down.
+ * the rate can't be fetched or looks wrong (outside a band around the
+ * fallback), and never charges less than PRO_PRICE_ARS_FLOOR.
  */
 @Injectable()
 export class FxService {
@@ -43,30 +49,56 @@ export class FxService {
     if (this.cache && this.cache.expiresAt > now) return this.cache.quote;
 
     const usd = this.usdPrice();
+    const fallback = this.positiveEnv('PRO_PRICE_ARS_FALLBACK');
+    const floor =
+      this.positiveEnv('PRO_PRICE_ARS_FLOOR') ??
+      (fallback !== null ? fallback * FLOOR_OF_FALLBACK : null);
+
+    let quote: ProQuote | null = null;
+    let ttl = RATE_TTL_MS;
     const venta = await this.fetchVenta();
     if (venta !== null) {
-      const quote = {
-        amountArs: Math.ceil((usd * venta) / 100) * 100,
-        fxRate: venta,
-        usd,
-      };
-      this.cache = { quote, expiresAt: now + RATE_TTL_MS };
-      return quote;
+      const raw = usd * venta;
+      // Sanity band around the configured fallback: a broken/hijacked rate
+      // must not make Pro cost 1 peso (or a fortune).
+      if (
+        fallback !== null &&
+        (raw < fallback * BAND_MIN || raw > fallback * BAND_MAX)
+      ) {
+        this.logger.error(
+          `Cotización fuera de rango (venta=${venta}, USD ${usd} = ${raw} ARS; fallback ${fallback}). Uso el fallback.`,
+        );
+      } else {
+        quote = { amountArs: Math.ceil(raw / 100) * 100, fxRate: venta, usd };
+      }
     }
 
-    const fallback = Number(this.config.get<string>('PRO_PRICE_ARS_FALLBACK'));
-    if (!Number.isFinite(fallback) || fallback <= 0) {
-      this.logger.error(
-        'Sin cotización del dólar y PRO_PRICE_ARS_FALLBACK no está configurado',
-      );
-      throw new ServiceUnavailableException('Pagos no disponibles');
+    if (!quote) {
+      if (fallback === null) {
+        this.logger.error(
+          'Sin cotización válida y PRO_PRICE_ARS_FALLBACK no está configurado',
+        );
+        throw new ServiceUnavailableException('Pagos no disponibles');
+      }
+      this.logger.warn(`Usando PRO_PRICE_ARS_FALLBACK=${fallback}`);
+      quote = { amountArs: Math.ceil(fallback), fxRate: 0, usd };
+      ttl = FALLBACK_TTL_MS;
     }
-    this.logger.warn(
-      `Usando PRO_PRICE_ARS_FALLBACK=${fallback} (no se pudo obtener la cotización)`,
-    );
-    const quote = { amountArs: Math.ceil(fallback), fxRate: 0, usd };
-    this.cache = { quote, expiresAt: now + FALLBACK_TTL_MS };
+
+    if (floor !== null && quote.amountArs < floor) {
+      this.logger.warn(
+        `Precio ${quote.amountArs} ARS bajo el piso ${floor}; se cobra el piso`,
+      );
+      quote = { ...quote, amountArs: Math.ceil(floor) };
+    }
+
+    this.cache = { quote, expiresAt: now + ttl };
     return quote;
+  }
+
+  private positiveEnv(key: string): number | null {
+    const n = Number(this.config.get<string>(key));
+    return Number.isFinite(n) && n > 0 ? n : null;
   }
 
   /** The "venta" rate, or null on any network/HTTP/payload problem. */

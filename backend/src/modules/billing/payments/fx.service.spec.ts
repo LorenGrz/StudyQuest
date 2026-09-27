@@ -89,4 +89,43 @@ describe('FxService', () => {
       ServiceUnavailableException,
     );
   });
+
+  describe('sanity band and floor', () => {
+    it.each([
+      ['absurdly low', 1],
+      ['absurdly high', 100_000],
+    ])('uses the fallback when the rate is %s', async (_n, venta) => {
+      fetchMock.mockResolvedValue(okResponse({ venta }));
+      const fx = new FxService(makeConfig({ PRO_PRICE_ARS_FALLBACK: '7000' }));
+      await expect(fx.quoteProArs()).resolves.toEqual({
+        amountArs: 7000,
+        fxRate: 0,
+        usd: 5,
+      });
+    });
+
+    it('keeps a rate inside [0.5x, 5x] of the fallback', async () => {
+      // 5 * 800 = 4000 ≥ 3500 (half of 7000)
+      fetchMock.mockResolvedValue(okResponse({ venta: 800 }));
+      const fx = new FxService(makeConfig({ PRO_PRICE_ARS_FALLBACK: '7000' }));
+      await expect(fx.quoteProArs()).resolves.toMatchObject({
+        amountArs: 4000,
+        fxRate: 800,
+      });
+    });
+
+    it('never goes below PRO_PRICE_ARS_FLOOR', async () => {
+      fetchMock.mockResolvedValue(okResponse({ venta: 800 }));
+      const fx = new FxService(
+        makeConfig({
+          PRO_PRICE_ARS_FALLBACK: '7000',
+          PRO_PRICE_ARS_FLOOR: '5000',
+        }),
+      );
+      await expect(fx.quoteProArs()).resolves.toMatchObject({
+        amountArs: 5000,
+        fxRate: 800,
+      });
+    });
+  });
 });
