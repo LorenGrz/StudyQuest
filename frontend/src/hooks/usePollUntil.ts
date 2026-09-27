@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
 
-export type PollStatus = 'idle' | 'polling' | 'done' | 'timeout'
+export type PollStatus = 'idle' | 'polling' | 'done' | 'stopped' | 'timeout'
+
+/** What one check found: finished, keep waiting, or give up (don't retry). */
+export type PollCheck = 'done' | 'wait' | 'stop'
 
 interface PollOptions {
   /** Polling runs only while this is true. */
@@ -10,35 +13,37 @@ interface PollOptions {
   intervalMs?: number
   timeoutMs?: number
   onDone?: () => void
+  onStop?: () => void
   onTimeout?: () => void
 }
 
 /**
  * Calls `check` right away and then every `intervalMs` until it resolves
- * `true` (→ 'done') or `timeoutMs` elapses (→ 'timeout'). A rejected check
- * counts as "not yet". The pending timer is cleared on unmount, when
+ * 'done' or 'stop', or `timeoutMs` elapses (→ 'timeout'). A rejected check
+ * counts as 'wait'. The pending timer is cleared on unmount, when
  * `enabled` turns false, or when `runKey` changes — nothing leaks.
  */
 export function usePollUntil(
-  check: () => Promise<boolean>,
+  check: () => Promise<PollCheck>,
   {
     enabled,
     runKey,
     intervalMs = 3000,
     timeoutMs = 60_000,
     onDone,
+    onStop,
     onTimeout,
   }: PollOptions,
 ): PollStatus {
   const [result, setResult] = useState<{
     key: string
-    status: 'done' | 'timeout'
+    status: 'done' | 'stopped' | 'timeout'
   } | null>(null)
 
   // Latest callbacks without restarting the polling loop when they change.
-  const latest = useRef({ check, onDone, onTimeout })
+  const latest = useRef({ check, onDone, onStop, onTimeout })
   useEffect(() => {
-    latest.current = { check, onDone, onTimeout }
+    latest.current = { check, onDone, onStop, onTimeout }
   })
 
   useEffect(() => {
@@ -50,16 +55,19 @@ export function usePollUntil(
 
     const tick = async () => {
       checks += 1
-      let ok = false
+      let found: PollCheck = 'wait'
       try {
-        ok = await latest.current.check()
+        found = await latest.current.check()
       } catch {
-        ok = false
+        found = 'wait'
       }
       if (cancelled) return
-      if (ok) {
+      if (found === 'done') {
         setResult({ key: runKey, status: 'done' })
         latest.current.onDone?.()
+      } else if (found === 'stop') {
+        setResult({ key: runKey, status: 'stopped' })
+        latest.current.onStop?.()
       } else if (checks >= maxChecks) {
         setResult({ key: runKey, status: 'timeout' })
         latest.current.onTimeout?.()

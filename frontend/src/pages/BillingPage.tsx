@@ -1,23 +1,24 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Check, Sparkles, ArrowLeft, CreditCard } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { MobileLayout } from '../components/Layouts'
 import { Button, Badge, Input, Spinner, Reveal } from '../components/UI'
 import { useBilling } from '../hooks/useBilling'
-import { usePollUntil } from '../hooks/usePollUntil'
+import { usePollUntil, type PollCheck } from '../hooks/usePollUntil'
 import { billingService, type PlanSource } from '../services/billingService'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const MP_PAYMENT_ID_RE = /^\d{1,24}$/
+
+/** Checkout Pro hosts for Argentina (production and sandbox). Nothing else. */
+const MP_CHECKOUT_HOSTS = new Set(['www.mercadopago.com.ar', 'sandbox.mercadopago.com.ar'])
 
 /** Only ever redirect to Mercado Pago's own checkout over https. */
 function isMercadoPagoUrl(raw: string): boolean {
   try {
     const u = new URL(raw)
-    return (
-      u.protocol === 'https:' &&
-      /(^|\.)mercadopago\.com(\.[a-z]{2})?$/.test(u.hostname)
-    )
+    return u.protocol === 'https:' && MP_CHECKOUT_HOSTS.has(u.hostname)
   } catch {
     return false
   }
@@ -62,6 +63,9 @@ export default function BillingPage() {
   const pago = searchParams.get('pago')
   const rawRef = searchParams.get('external_reference')
   const paymentRef = rawRef && UUID_RE.test(rawRef) ? rawRef : null
+  // MP also appends its own payment id; the backend verifies it before use.
+  const rawHint = searchParams.get('payment_id') ?? searchParams.get('collection_id')
+  const paymentHint = rawHint && MP_PAYMENT_ID_RE.test(rawHint) ? rawHint : undefined
   const returning = pago === 'ok' || pago === 'pendiente'
 
   const clearReturnParams = useCallback(
@@ -69,16 +73,27 @@ export default function BillingPage() {
     [setSearchParams],
   )
 
-  // Wait for the webhook to grant Pro. With our payment id we watch that exact
-  // payment (also works when extending an active Pro); otherwise the plan.
-  const paymentApplied = useCallback(async () => {
+  // Plan snapshot taken on the first check when there's no payment id.
+  const planBaseline = useRef<string | null>(null)
+
+  // Wait for Pro to be granted. With our payment id we watch that exact
+  // payment (the backend also reconciles with MP on each read); a payment held
+  // for review stops the wait. Without it, only a *change* of plan counts —
+  // already being Pro proves nothing about this payment.
+  const paymentApplied = useCallback(async (): Promise<PollCheck> => {
     if (paymentRef) {
-      const p = await billingService.getPayment(paymentRef)
-      return p.appliedAt !== null
+      const p = await billingService.getPayment(paymentRef, paymentHint)
+      if (p.appliedAt !== null) return 'done'
+      return p.needsSupport ? 'stop' : 'wait'
     }
     const s = await billingService.getState()
-    return s.effectivePlan === 'pro'
-  }, [paymentRef])
+    const snapshot = `${s.effectivePlan}|${s.planExpiresAt ?? ''}`
+    if (planBaseline.current === null) {
+      planBaseline.current = snapshot
+      return 'wait'
+    }
+    return s.effectivePlan === 'pro' && snapshot !== planBaseline.current ? 'done' : 'wait'
+  }, [paymentRef, paymentHint])
 
   const pollStatus = usePollUntil(paymentApplied, {
     enabled: returning,
@@ -95,6 +110,9 @@ export default function BillingPage() {
     toast.error('El pago no se completó. No se te cobró nada.', { id: 'mp-return' })
     clearReturnParams()
   }, [pago, clearReturnParams])
+
+  // Admin-granted Pro without expiry: paying would add nothing (backend 409s).
+  const permanentPro = state?.effectivePlan === 'pro' && !state.planExpiresAt
 
   const onCheckout = async () => {
     setPaying(true)
@@ -165,7 +183,9 @@ export default function BillingPage() {
                 className="bg-surface border border-accent/40 rounded-2xl p-4 text-sm text-secondary flex items-center gap-2"
               >
                 {pollStatus === 'polling' && <Spinner size="sm" />}
-                {pollStatus === 'timeout'
+                {pollStatus === 'stopped'
+                  ? `Recibimos tu pago pero necesita una revisión manual. Escribinos indicando el código ${paymentRef ?? ''} y lo resolvemos.`
+                  : pollStatus === 'timeout'
                   ? 'Tu pago se está acreditando, puede tardar unos minutos.'
                   : pago === 'pendiente'
                     ? 'Tu pago quedó pendiente. Te activamos Pro apenas se acredite.'
@@ -280,7 +300,7 @@ export default function BillingPage() {
                           </li>
                         ))}
                       </ul>
-                      {p.id === 'pro' && quote?.available && (
+                      {p.id === 'pro' && quote?.available && !permanentPro && (
                         <Button
                           type="button"
                           className="mt-4 w-full"

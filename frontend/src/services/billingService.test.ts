@@ -48,6 +48,12 @@ describe('billingService', () => {
   it('getPayment reads GET /payments/:id (encoded)', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { id: 'a/b' } })
     await billingService.getPayment('a/b')
-    expect(api.get).toHaveBeenCalledWith('/payments/a%2Fb')
+    expect(api.get).toHaveBeenCalledWith('/payments/a%2Fb', undefined)
+  })
+
+  it('getPayment forwards the MP payment_id as a hint', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { id: 'p1' } })
+    await billingService.getPayment('p1', '123456')
+    expect(api.get).toHaveBeenCalledWith('/payments/p1', { params: { hint: '123456' } })
   })
 })

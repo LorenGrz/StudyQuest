@@ -161,12 +161,18 @@ describe('BillingPage', () => {
       vi.unstubAllGlobals()
     })
 
-    it('refuses to redirect anywhere but Mercado Pago', async () => {
+    it.each([
+      'https://evil.example.com/mercadopago.com',
+      'https://evil.mercadopago.com.ar/checkout',
+      'https://mercadopago.com.ar.evil.com/checkout',
+      'https://www.mercadopago.com/checkout',
+      'http://www.mercadopago.com.ar/checkout',
+    ])('refuses to redirect to %s', async (initPoint) => {
       const assign = vi.fn()
       vi.stubGlobal('location', { ...window.location, assign })
       vi.mocked(billingService.createCheckout).mockResolvedValue({
         paymentId: PAY_ID,
-        initPoint: 'https://evil.example.com/mercadopago.com',
+        initPoint,
         amountArs: 6200,
         fxRate: 1234.5,
         usd: 5,
@@ -183,18 +189,22 @@ describe('BillingPage', () => {
     it('on ?pago=ok polls the payment every 3s until it is applied', async () => {
       vi.useFakeTimers({ shouldAdvanceTime: true })
       vi.mocked(billingService.getPayment)
-        .mockResolvedValueOnce({ id: PAY_ID, status: 'pending', amountArs: 6200, appliedAt: null })
-        .mockResolvedValueOnce({ id: PAY_ID, status: 'pending', amountArs: 6200, appliedAt: null })
+        .mockResolvedValueOnce({ id: PAY_ID, status: 'pending', amountArs: 6200, appliedAt: null, needsSupport: false })
+        .mockResolvedValueOnce({ id: PAY_ID, status: 'pending', amountArs: 6200, appliedAt: null, needsSupport: false })
         .mockResolvedValue({
           id: PAY_ID,
           status: 'approved',
           amountArs: 6200,
           appliedAt: new Date().toISOString(),
+          needsSupport: false,
         })
 
-      renderPage(`/plan?pago=ok&external_reference=${PAY_ID}&collection_status=approved`)
+      renderPage(
+        `/plan?pago=ok&external_reference=${PAY_ID}&payment_id=123456&collection_status=approved`,
+      )
       expect(await screen.findByText(/confirmando tu pago/i)).toBeInTheDocument()
-      expect(billingService.getPayment).toHaveBeenCalledWith(PAY_ID)
+      // MP's payment_id is forwarded as a hint (the backend verifies it).
+      expect(billingService.getPayment).toHaveBeenCalledWith(PAY_ID, '123456')
 
       await act(async () => {
         await vi.advanceTimersByTimeAsync(3000)
@@ -226,6 +236,7 @@ describe('BillingPage', () => {
         status: 'pending',
         amountArs: 6200,
         appliedAt: null,
+        needsSupport: false,
       })
 
       renderPage(`/plan?pago=pendiente&external_reference=${PAY_ID}`)
@@ -241,13 +252,78 @@ describe('BillingPage', () => {
       expect(billingService.getPayment).toHaveBeenCalledTimes(21)
     })
 
-    it('falls back to polling the plan when there is no payment id', async () => {
-      vi.mocked(billingService.getState)
-        .mockResolvedValueOnce(freeState as never) // page load
-        .mockResolvedValue({ ...freeState, plan: 'pro', effectivePlan: 'pro' } as never)
+    const proState = (expires: string) =>
+      ({ ...freeState, plan: 'pro', effectivePlan: 'pro', planExpiresAt: expires }) as never
+
+    it('without a payment id, succeeds only when the plan changes while polling', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+      // getState has several callers (page load, study-bot widget, polling):
+      // drive it by "has the payment landed yet" rather than by call order.
+      let paid = false
+      vi.mocked(billingService.getState).mockImplementation(async () =>
+        paid ? proState('2026-12-01T00:00:00.000Z') : (freeState as never),
+      )
       renderPage('/plan?pago=ok')
+      await screen.findByText(/confirmando tu pago/i)
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0)
+      })
+      expect(toast.success).not.toHaveBeenCalled()
+      paid = true
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(3000)
+      })
       await waitFor(() => expect(toast.success).toHaveBeenCalled())
       expect(billingService.getPayment).not.toHaveBeenCalled()
+    })
+
+    it('without a payment id, being Pro already is not reported as a new payment', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+      vi.mocked(billingService.getState).mockResolvedValue(proState('2026-12-01T00:00:00.000Z'))
+      renderPage('/plan?pago=ok')
+      await screen.findByText(/confirmando tu pago/i)
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(61_000)
+      })
+      expect(
+        await screen.findByText('Tu pago se está acreditando, puede tardar unos minutos.'),
+      ).toBeInTheDocument()
+      expect(toast.success).not.toHaveBeenCalled()
+    })
+
+    it('stops polling and shows support when the payment needs review', async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true })
+      vi.mocked(billingService.getPayment).mockResolvedValue({
+        id: PAY_ID,
+        status: 'approved',
+        amountArs: 6200,
+        appliedAt: null,
+        needsSupport: true,
+      })
+      renderPage(`/plan?pago=ok&external_reference=${PAY_ID}`)
+
+      expect(await screen.findByText(/revisión manual/i)).toBeInTheDocument()
+      expect(screen.getByRole('status')).toHaveTextContent(PAY_ID)
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(9000)
+      })
+      expect(billingService.getPayment).toHaveBeenCalledTimes(1)
+      expect(toast.success).not.toHaveBeenCalled()
+    })
+
+    it('hides the pay button for a permanent (no expiry) Pro', async () => {
+      vi.mocked(billingService.getState).mockResolvedValue({
+        ...freeState,
+        plan: 'pro',
+        effectivePlan: 'pro',
+        planSource: 'admin',
+        planExpiresAt: null,
+      } as never)
+      renderPage()
+      await screen.findByText('4 / 20')
+      expect(screen.queryByRole('button', { name: /mercado pago|extender/i })).not.toBeInTheDocument()
     })
 
     it('on ?pago=error shows an error toast and clears the params', async () => {

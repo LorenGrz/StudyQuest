@@ -60,6 +60,8 @@ export interface PaymentView {
   amountArs: number
   /** Set once the Pro days were granted. */
   appliedAt: string | null
+  /** Paid but held for manual review (e.g. amount mismatch): show support, stop waiting. */
+  needsSupport: boolean
 }
 
 export const billingService = {
@@ -88,8 +90,15 @@ export const billingService = {
     return data
   },
 
-  async getPayment(id: string): Promise<PaymentView> {
-    const { data } = await api.get<PaymentView>(`/payments/${encodeURIComponent(id)}`)
+  /**
+   * `hint` = the `payment_id` Mercado Pago appends to the return URL; the
+   * backend verifies it with MP before using it.
+   */
+  async getPayment(id: string, hint?: string): Promise<PaymentView> {
+    const { data } = await api.get<PaymentView>(
+      `/payments/${encodeURIComponent(id)}`,
+      hint ? { params: { hint } } : undefined,
+    )
     return data
   },
 }
