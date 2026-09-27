@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useState } from 'react'
 import type { ReactNode, ButtonHTMLAttributes } from 'react'
-import { motion } from 'framer-motion'
-import { X } from 'lucide-react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { ChevronDown, X } from 'lucide-react'
 
 // ─── Button ──────────────────────────────────────────────────────────────────
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -202,6 +202,107 @@ export function Reveal({
   return (
     <div className={`reveal ${className}`} style={{ animationDelay: `${delay}s` }}>
       {children}
+    </div>
+  )
+}
+
+// ─── Collapsible ─────────────────────────────────────────────────────────────
+// Collapsible section with a full-width header button (title + optional
+// summary badge + rotating chevron). Open state persists per `id` in
+// localStorage so a user's choice survives navigation; `forceOpen` overrides
+// it while true (e.g. to keep an error visible) without losing the stored
+// preference underneath.
+const COLLAPSIBLE_STORAGE_PREFIX = 'sq:collapsible:'
+
+function readStoredOpen(id: string): boolean | null {
+  try {
+    const raw = localStorage.getItem(`${COLLAPSIBLE_STORAGE_PREFIX}${id}`)
+    if (raw === 'true') return true
+    if (raw === 'false') return false
+    return null
+  } catch {
+    return null
+  }
+}
+
+function writeStoredOpen(id: string, open: boolean) {
+  try {
+    localStorage.setItem(`${COLLAPSIBLE_STORAGE_PREFIX}${id}`, String(open))
+  } catch {
+    // Storage unavailable (private mode, quota, disabled) — keep the in-memory state only.
+  }
+}
+
+interface CollapsibleProps {
+  id: string
+  title: ReactNode
+  summary?: ReactNode
+  defaultOpen?: boolean
+  forceOpen?: boolean
+  children: ReactNode
+}
+
+export function Collapsible({
+  id,
+  title,
+  summary,
+  defaultOpen = false,
+  forceOpen = false,
+  children,
+}: CollapsibleProps) {
+  const [open, setOpen] = useState(() => readStoredOpen(id) ?? defaultOpen)
+  const shouldReduceMotion = useReducedMotion()
+  const contentId = `${id}-collapsible-content`
+  const isOpen = forceOpen || open
+
+  const toggle = () => {
+    if (forceOpen) return
+    setOpen((prev) => {
+      const next = !prev
+      writeStoredOpen(id, next)
+      return next
+    })
+  }
+
+  return (
+    <div className="flex flex-col">
+      <button
+        type="button"
+        aria-expanded={isOpen}
+        aria-controls={contentId}
+        onClick={toggle}
+        className="flex w-full items-center justify-between gap-2 pt-4 pb-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-lg"
+      >
+        <span className="flex items-center gap-2 min-w-0">
+          <span className="text-base font-bold text-secondary uppercase tracking-[1px] truncate">
+            {title}
+          </span>
+          {summary != null && <Badge variant="neutral">{summary}</Badge>}
+        </span>
+        <motion.span
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
+          className="text-secondary shrink-0"
+          aria-hidden="true"
+        >
+          <ChevronDown size={18} />
+        </motion.span>
+      </button>
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            id={contentId}
+            key="content"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.2 }}
+            style={{ overflow: 'hidden' }}
+          >
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
