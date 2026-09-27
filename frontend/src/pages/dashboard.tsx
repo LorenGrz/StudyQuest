@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MobileLayout } from '../components/Layouts'
 import {
@@ -8,19 +8,21 @@ import {
   QuickActions,
   GetStartedNotice,
 } from '../components/dashboard/DashboardComponents'
-import { SectionTitle, Spinner, Button, Reveal } from '../components/UI'
+import { SectionTitle, Spinner, Button, Reveal, Collapsible } from '../components/UI'
 import { Alert, PageContainer } from '../components/PagePrimitives'
 import { useAuthStore } from '../store/authStore'
 import { usePartyStore } from '../store/partyStore'
 import { useUserSubjects } from '../hooks/useUserSubjects'
+import { useQuestsToday } from '../hooks/useQuestsToday'
+import { useRecommendedQuests } from '../hooks/useRecommendedQuests'
 import { partyService } from '../services/partyService'
-import { userService, type RecommendedQuestDto } from '../services/userService'
 import { tournamentService } from '../services/tournamentService'
 import { searchService, type GlobalSearchResponseDto } from '../services/searchService'
 
 import { RecommendedQuestCard } from '../components/dashboard/RecommendedQuestCard'
 import { HomeLeaderboardPreview } from '../components/dashboard/HomeLeaderboardPreview'
 
+const SEARCH_LISTBOX_ID = 'dashboard-search-results'
 
 const DashboardPage = () => {
   const navigate = useNavigate()
@@ -32,23 +34,36 @@ const DashboardPage = () => {
   const [tournaments, setTournaments] = useState<any[]>([])
   const [isTournamentsLoading, setIsTournamentsLoading] = useState(false)
 
-  // 1. Quests para hoy state
-  const [questsToday, setQuestsToday] = useState<RecommendedQuestDto[]>([])
-  const [isQuestsTodayLoading, setIsQuestsTodayLoading] = useState(false)
-  const [questsTodayError, setQuestsTodayError] = useState<string | null>(null)
+  // 1. Quests para hoy
+  const {
+    data: questsToday,
+    loading: isQuestsTodayLoading,
+    error: questsTodayError,
+    recargar: loadQuestsToday,
+  } = useQuestsToday()
 
-  // 2. Recommended quests state
-  const [recommendedQuests, setRecommendedQuests] = useState<RecommendedQuestDto[]>([])
-  const [recommendedPage, setRecommendedPage] = useState(1)
-  const [recommendedTotalPages, setRecommendedTotalPages] = useState(1)
-  const [isRecommendedLoading, setIsRecommendedLoading] = useState(false)
-  const [recommendedError, setRecommendedError] = useState<string | null>(null)
+  // 2. Recommended quests (paginado)
+  const {
+    items: recommendedQuests,
+    page: recommendedPage,
+    setPage: setRecommendedPage,
+    totalPages: recommendedTotalPages,
+    total: recommendedTotal,
+    loading: isRecommendedLoading,
+    error: recommendedError,
+    recargar: reloadRecommended,
+  } = useRecommendedQuests()
 
   // 3. Search state
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<GlobalSearchResponseDto | null>(null)
   const [isSearching, setIsSearching] = useState(false)
   const [searchError, setSearchError] = useState<string | null>(null)
+  const [isSearchDismissed, setIsSearchDismissed] = useState(false)
+  const searchWrapperRef = useRef<HTMLDivElement>(null)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+
+  const isSearchOpen = !isSearchDismissed && (isSearching || !!searchResults || !!searchError)
 
   // Cargar la party activa del usuario
   useEffect(() => {
@@ -73,58 +88,24 @@ const DashboardPage = () => {
       })
   }, [])
 
-  // Cargar Quests para hoy
-  const loadQuestsToday = useCallback(() => {
-    setIsQuestsTodayLoading(true)
-    userService
-      .getQuestsToday()
-      .then((data) => {
-        setQuestsToday(data)
-        setQuestsTodayError(null)
-      })
-      .catch(() => {
-        setQuestsTodayError('error')
-      })
-      .finally(() => {
-        setIsQuestsTodayLoading(false)
-      })
-  }, [])
-
+  // Search Debounce (300ms). Every setState call lives inside this timeout's
+  // callback (an async boundary), never as a direct synchronous statement in
+  // the effect body, so clearing the query below doesn't fire on every commit.
   useEffect(() => {
-    loadQuestsToday()
-  }, [loadQuestsToday])
+    const query = searchQuery.trim()
+    const delay = query.length < 2 ? 0 : 300
 
-  // Cargar Recommended quests (paginado)
-  useEffect(() => {
-    setIsRecommendedLoading(true)
-    userService
-      .getRecommendedQuests(recommendedPage, 5)
-      .then((data) => {
-        setRecommendedQuests(data.items)
-        setRecommendedTotalPages(data.totalPages)
-        setRecommendedError(null)
-      })
-      .catch((err) => {
-        setRecommendedError(err?.response?.data?.message ?? 'Error al cargar recomendaciones')
-      })
-      .finally(() => {
-        setIsRecommendedLoading(false)
-      })
-  }, [recommendedPage])
-
-  // Search Debounce (300ms)
-  useEffect(() => {
-    if (searchQuery.trim().length < 2) {
-      setSearchResults(null)
-      setSearchError(null)
-      setIsSearching(false)
-      return
-    }
-
-    setIsSearching(true)
     const handler = setTimeout(() => {
+      if (query.length < 2) {
+        setSearchResults(null)
+        setSearchError(null)
+        setIsSearching(false)
+        return
+      }
+
+      setIsSearching(true)
       searchService
-        .searchGlobal(searchQuery.trim())
+        .searchGlobal(query)
         .then((data) => {
           setSearchResults(data)
           setSearchError(null)
@@ -136,12 +117,45 @@ const DashboardPage = () => {
         .finally(() => {
           setIsSearching(false)
         })
-    }, 300)
+    }, delay)
 
     return () => {
       clearTimeout(handler)
     }
   }, [searchQuery])
+
+  // Cierra el dropdown de búsqueda con Escape (devolviendo el foco al input)
+  // o al hacer click fuera del wrapper. Mismo patrón que StudyBotWidget.
+  useEffect(() => {
+    if (!isSearchOpen) return
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsSearchDismissed(true)
+        searchInputRef.current?.focus()
+      }
+    }
+    const onPointerDown = (e: PointerEvent) => {
+      if (searchWrapperRef.current && !searchWrapperRef.current.contains(e.target as Node)) {
+        setIsSearchDismissed(true)
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    document.addEventListener('pointerdown', onPointerDown)
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      document.removeEventListener('pointerdown', onPointerDown)
+    }
+  }, [isSearchOpen])
+
+  const closeSearchResults = () => {
+    setSearchQuery('')
+    setSearchResults(null)
+    setIsSearchDismissed(true)
+  }
+
+  const isInitialRecommendedLoad = isRecommendedLoading && recommendedQuests.length === 0 && !recommendedError
 
   return (
     <MobileLayout>
@@ -162,21 +176,31 @@ const DashboardPage = () => {
             </Reveal>
           )}
 
-          {/* Search Bar & Inline Results */}
-          <Reveal delay={0.1} className="relative mb-2">
+          {/* Search bar & floating results dropdown (does not push content) */}
+          <Reveal delay={0.1} className="mb-2">
+            <div className="relative" ref={searchWrapperRef}>
             <div className="flex gap-2 items-center">
               <input
+                ref={searchInputRef}
                 type="text"
+                role="combobox"
+                aria-label="Buscar usuarios, materias y quests"
+                aria-expanded={isSearchOpen}
+                aria-controls={SEARCH_LISTBOX_ID}
+                aria-autocomplete="list"
                 className="flex-1 w-full min-h-[2.75rem] px-3.5 py-2.5 bg-[var(--bg-input)] border border-[var(--border)] rounded-lg text-[var(--text-primary)] text-sm placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-glow)] focus:border-[var(--accent)] transition-all duration-200"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value)
+                  setIsSearchDismissed(false)
+                }}
                 placeholder="Buscar usuarios, materias y quests..."
               />
               {searchQuery && (
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setSearchQuery('')}
+                  onClick={closeSearchResults}
                   style={{ padding: '8px 12px' }}
                 >
                   Limpiar
@@ -184,21 +208,13 @@ const DashboardPage = () => {
               )}
             </div>
 
-            {(isSearching || searchResults || searchError) && (
+            {isSearchOpen && (
               <div
-                className="search-results-panel"
-                style={{
-                  background: 'var(--bg-surface)',
-                  border: '1px solid var(--border)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '16px',
-                  marginTop: '8px',
-                  boxShadow: 'var(--shadow-md)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '12px',
-                  zIndex: 10,
-                }}
+                id={SEARCH_LISTBOX_ID}
+                role="listbox"
+                aria-label="Resultados de búsqueda"
+                className="absolute left-0 right-0 top-full mt-2 z-30 max-h-[60vh] overflow-y-auto bg-surface border border-edge rounded-lg p-4 flex flex-col gap-3"
+                style={{ boxShadow: 'var(--shadow-md)' }}
               >
                 {isSearching && (
                   <div style={{ display: 'flex', justifyContent: 'center', padding: '8px' }}>
@@ -226,9 +242,18 @@ const DashboardPage = () => {
                               {searchResults.quests.map((q) => (
                                 <div
                                   key={q.id}
+                                  role="option"
+                                  aria-selected={false}
+                                  tabIndex={0}
                                   onClick={() => {
-                                    setSearchQuery('')
+                                    closeSearchResults()
                                     navigate(`/quiz/${q.id}`)
+                                  }}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      closeSearchResults()
+                                      navigate(`/quiz/${q.id}`)
+                                    }
                                   }}
                                   style={{
                                     background: 'var(--bg-elevated)',
@@ -259,6 +284,8 @@ const DashboardPage = () => {
                               {searchResults.subjects.map((s) => (
                                 <div
                                   key={s.id}
+                                  role="option"
+                                  aria-selected={false}
                                   style={{
                                     background: 'var(--bg-elevated)',
                                     padding: '10px',
@@ -281,6 +308,8 @@ const DashboardPage = () => {
                               {searchResults.users.map((u) => (
                                 <div
                                   key={u.id}
+                                  role="option"
+                                  aria-selected={false}
                                   style={{
                                     background: 'var(--bg-elevated)',
                                     padding: '10px',
@@ -324,6 +353,7 @@ const DashboardPage = () => {
                 )}
               </div>
             )}
+            </div>
           </Reveal>
 
           {activeParty && (
@@ -336,79 +366,112 @@ const DashboardPage = () => {
           <Reveal delay={0.15} className="flex flex-col lg:flex-row lg:items-start gap-4 lg:gap-6">
             {/* ── Main column ── */}
             <div className="flex flex-col gap-3 lg:flex-1 lg:min-w-0">
-              {/* Quests para hoy */}
-              <SectionTitle>Quests para hoy</SectionTitle>
+              {/* Quests para hoy (colapsable) */}
               {isQuestsTodayLoading ? (
-                <div style={{ display: 'flex', justifyContent: 'center', padding: '16px' }}><Spinner /></div>
-              ) : questsTodayError ? (
-                <Alert
-                  title="No pudimos cargar tus quests"
-                  description="La API no respondió. Podés seguir usando el resto de StudyQuest."
-                  actionLabel="Reintentar"
-                  onAction={loadQuestsToday}
-                />
-              ) : questsToday.length === 0 ? (
-                <div className="text-center py-10 px-5">
-                  <p className="text-5xl block mb-3">✨</p>
-                  <p className="text-lg font-semibold text-primary">¡Todo al día!</p>
-                  <p className="text-sm text-muted mt-1.5">No tenés quests pendientes para hoy.</p>
+                <div className="flex items-center justify-between pt-4 pb-1">
+                  <span className="text-base font-bold text-secondary uppercase tracking-[1px]">Quests para hoy</span>
+                  <Spinner size="sm" />
                 </div>
               ) : (
-                <div className="flex flex-col">
-                  {questsToday.map((q, i) => (
-                    <RecommendedQuestCard key={q.id} quest={q} index={i} />
-                  ))}
-                </div>
+                <Collapsible
+                  id="today"
+                  title="Quests para hoy"
+                  summary={questsTodayError ? undefined : questsToday.length === 0 ? 'Todo al día' : `${questsToday.length} pendientes`}
+                  defaultOpen={questsToday.length <= 2}
+                  forceOpen={!!questsTodayError}
+                >
+                  {questsTodayError ? (
+                    <Alert
+                      title="No pudimos cargar tus quests"
+                      description="La API no respondió. Podés seguir usando el resto de StudyQuest."
+                      actionLabel="Reintentar"
+                      onAction={loadQuestsToday}
+                    />
+                  ) : questsToday.length === 0 ? (
+                    <div className="text-center py-10 px-5">
+                      <p className="text-5xl block mb-3">✨</p>
+                      <p className="text-lg font-semibold text-primary">¡Todo al día!</p>
+                      <p className="text-sm text-muted mt-1.5">No tenés quests pendientes para hoy.</p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col">
+                      {questsToday.map((q, i) => (
+                        <RecommendedQuestCard key={q.id} quest={q} index={i} />
+                      ))}
+                    </div>
+                  )}
+                </Collapsible>
               )}
 
-              {/* Recomendados (Paginado) */}
-              <SectionTitle>Recomendados</SectionTitle>
-              {isRecommendedLoading ? (
-                <div style={{ display: 'flex', justifyContent: 'center', padding: '16px' }}><Spinner /></div>
-              ) : recommendedError ? (
-                <Alert
-                  title="No pudimos cargar las recomendaciones"
-                  description="La API no respondió. Intentá de nuevo en unos momentos."
-                  actionLabel="Reintentar"
-                  onAction={() => setRecommendedPage(1)}
-                />
-              ) : recommendedQuests.length === 0 ? (
-                <div className="text-center py-10 px-5">
-                  <p className="text-5xl block mb-3">📖</p>
-                  <p className="text-lg font-semibold text-primary">Sin recomendaciones</p>
-                  <p className="text-sm text-muted mt-1.5">Inscribite a más materias para ver quests recomendadas.</p>
+              {/* Recomendados (colapsable, paginado) */}
+              {isInitialRecommendedLoad ? (
+                <div className="flex items-center justify-between pt-4 pb-1">
+                  <span className="text-base font-bold text-secondary uppercase tracking-[1px]">Recomendados</span>
+                  <Spinner size="sm" />
                 </div>
               ) : (
-                <div>
-                  <div className="flex flex-col">
-                    {recommendedQuests.map((q, i) => (
-                      <RecommendedQuestCard key={q.id} quest={q} index={i} />
-                    ))}
-                  </div>
+                <Collapsible
+                  id="recommended"
+                  title="Recomendados"
+                  summary={recommendedError ? undefined : recommendedTotal}
+                  defaultOpen={false}
+                  forceOpen={!!recommendedError}
+                >
+                  {recommendedError ? (
+                    <Alert
+                      title="No pudimos cargar las recomendaciones"
+                      description="La API no respondió. Intentá de nuevo en unos momentos."
+                      actionLabel="Reintentar"
+                      onAction={reloadRecommended}
+                    />
+                  ) : recommendedQuests.length === 0 ? (
+                    <div className="text-center py-10 px-5">
+                      <p className="text-5xl block mb-3">📖</p>
+                      <p className="text-lg font-semibold text-primary">Sin recomendaciones</p>
+                      <p className="text-sm text-muted mt-1.5">Inscribite a más materias para ver quests recomendadas.</p>
+                    </div>
+                  ) : (
+                    <div>
+                      {/* Mismos ítems visibles (atenuados) mientras pagina, en vez de
+                          colapsar todo a un spinner: la altura de la lista no salta. */}
+                      <div className="relative">
+                        <div className={`flex flex-col ${isRecommendedLoading ? 'opacity-50 pointer-events-none' : ''}`}>
+                          {recommendedQuests.map((q, i) => (
+                            <RecommendedQuestCard key={q.id} quest={q} index={i} />
+                          ))}
+                        </div>
+                        {isRecommendedLoading && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <Spinner size="sm" />
+                          </div>
+                        )}
+                      </div>
 
-                  {/* Paginación */}
-                  <div className="flex justify-between items-center mt-3 gap-2">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      disabled={recommendedPage <= 1 || isRecommendedLoading}
-                      onClick={() => setRecommendedPage(p => p - 1)}
-                    >
-                      ← Anterior
-                    </Button>
-                    <span className="text-[13px] text-secondary">
-                      Pág. {recommendedPage} de {recommendedTotalPages || 1}
-                    </span>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      disabled={recommendedPage >= recommendedTotalPages || isRecommendedLoading}
-                      onClick={() => setRecommendedPage(p => p + 1)}
-                    >
-                      Siguiente →
-                    </Button>
-                  </div>
-                </div>
+                      {/* Paginación */}
+                      <div className="flex justify-between items-center mt-3 gap-2">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          disabled={recommendedPage <= 1 || isRecommendedLoading}
+                          onClick={() => setRecommendedPage(p => p - 1)}
+                        >
+                          ← Anterior
+                        </Button>
+                        <span className="text-[13px] text-secondary">
+                          Pág. {recommendedPage} de {recommendedTotalPages || 1}
+                        </span>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          disabled={recommendedPage >= recommendedTotalPages || isRecommendedLoading}
+                          onClick={() => setRecommendedPage(p => p + 1)}
+                        >
+                          Siguiente →
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </Collapsible>
               )}
             </div>
 
