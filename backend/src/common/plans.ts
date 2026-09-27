@@ -12,6 +12,14 @@ export type PlanSource = 'default' | 'promo' | 'admin' | 'mercadopago';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/** Pro with no expiry (admin grant with 0 days). Paid/promo days must not shorten it. */
+export function isPermanentPro(user: {
+  plan?: string | null;
+  planExpiresAt?: Date | string | null;
+}): boolean {
+  return user.plan === 'pro' && !user.planExpiresAt;
+}
+
 /**
  * New expiry after granting `days` more: stacks on top of an expiry that is
  * still in the future, otherwise counts from `now`. Shared by promo codes and

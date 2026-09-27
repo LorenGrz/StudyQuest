@@ -19,6 +19,7 @@ import {
   PlanSource,
   effectivePlan,
   extendExpiry,
+  isPermanentPro,
   planCatalog,
   planLimits,
 } from '../../common/plans';
@@ -126,9 +127,19 @@ export class BillingService implements OnModuleInit {
       });
       if (!u) throw new NotFoundException('Usuario no encontrado');
 
-      u.plan = promo.plan;
-      u.planExpiresAt = extendExpiry(u.planExpiresAt, promo.durationDays, now);
-      u.planSource = 'promo';
+      if (isPermanentPro(u) && promo.plan === 'pro') {
+        // Already Pro without expiry: the code is consumed but must not turn
+        // a permanent plan into a 30-day one.
+        this.logger.warn(`Usuario ${userId} con Pro permanente canjeó "${code}"`);
+      } else {
+        u.plan = promo.plan;
+        u.planExpiresAt = extendExpiry(
+          u.planExpiresAt,
+          promo.durationDays,
+          now,
+        );
+        u.planSource = 'promo';
+      }
       await em.save(u);
 
       promo.redeemedCount += 1;
@@ -143,7 +154,7 @@ export class BillingService implements OnModuleInit {
       );
 
       this.logger.log(
-        `Usuario ${userId} canjeó "${code}" → ${promo.plan} hasta ${u.planExpiresAt.toISOString()}`,
+        `Usuario ${userId} canjeó "${code}" → ${promo.plan} hasta ${u.planExpiresAt?.toISOString() ?? 'sin vencimiento'}`,
       );
       return u;
     });
@@ -158,20 +169,28 @@ export class BillingService implements OnModuleInit {
     plan: string,
     days?: number,
   ): Promise<BillingState> {
-    const user = await this.userRepo.findOne({ where: { id: userId } });
-    if (!user) throw new NotFoundException('Usuario no encontrado');
+    // Same row lock as promo redemption and payments, so an admin grant can't
+    // be lost to (or clobber) a concurrent plan extension.
+    const user = await this.dataSource.transaction(async (em) => {
+      const u = await em.findOne(User, {
+        where: { id: userId },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!u) throw new NotFoundException('Usuario no encontrado');
 
-    if (plan === 'free') {
-      user.plan = 'free';
-      user.planExpiresAt = null;
-      user.planSource = null;
-    } else {
-      user.plan = plan;
-      user.planExpiresAt =
-        days && days > 0 ? new Date(Date.now() + days * DAY_MS) : null;
-      user.planSource = 'admin';
-    }
-    await this.userRepo.save(user);
+      if (plan === 'free') {
+        u.plan = 'free';
+        u.planExpiresAt = null;
+        u.planSource = null;
+      } else {
+        u.plan = plan;
+        u.planExpiresAt =
+          days && days > 0 ? new Date(Date.now() + days * DAY_MS) : null;
+        u.planSource = 'admin';
+      }
+      await em.save(u);
+      return u;
+    });
     this.logger.log(
       `Admin asignó plan ${plan} a ${userId} (días: ${days ?? '∞'})`,
     );

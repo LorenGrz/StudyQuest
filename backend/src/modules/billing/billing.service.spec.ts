@@ -187,25 +187,56 @@ describe('BillingService', () => {
     });
   });
 
+  it('redeeming a code keeps a permanent Pro permanent', async () => {
+    em.findOne
+      .mockResolvedValueOnce({
+        code: 'STUDYQUEST-PRO-30',
+        plan: 'pro',
+        durationDays: 30,
+        maxRedemptions: 100,
+        redeemedCount: 0,
+        expiresAt: null,
+        isActive: true,
+      })
+      .mockResolvedValueOnce(null)
+      .mockResolvedValueOnce({
+        id: 'u1',
+        plan: 'pro',
+        planExpiresAt: null,
+        planSource: 'admin',
+      });
+
+    await service.redeemPromo('u1', 'STUDYQUEST-PRO-30');
+
+    const savedUser = em.save.mock.calls.find(
+      (c: any[]) => c[0]?.id === 'u1',
+    )?.[0];
+    expect(savedUser.planExpiresAt).toBeNull();
+    expect(savedUser.planSource).toBe('admin');
+  });
+
   describe('grantPlan', () => {
-    it('sets a pro plan with an expiry and admin source', async () => {
-      userRepo.findOne.mockResolvedValue({ id: 'u1', plan: 'free' });
+    it('sets a pro plan with an expiry and admin source, under a row lock', async () => {
+      em.findOne.mockResolvedValue({ id: 'u1', plan: 'free' });
       await service.grantPlan('u1', 'pro', 14);
-      const saved = userRepo.save.mock.calls[0][0];
+      expect(em.findOne.mock.calls[0][1].lock).toEqual({
+        mode: 'pessimistic_write',
+      });
+      const saved = em.save.mock.calls[0][0];
       expect(saved.plan).toBe('pro');
       expect(saved.planSource).toBe('admin');
       expect(saved.planExpiresAt.getTime()).toBeGreaterThan(Date.now());
     });
 
     it('clears the plan back to free', async () => {
-      userRepo.findOne.mockResolvedValue({
+      em.findOne.mockResolvedValue({
         id: 'u1',
         plan: 'pro',
         planExpiresAt: new Date(),
         planSource: 'promo',
       });
       await service.grantPlan('u1', 'free');
-      const saved = userRepo.save.mock.calls[0][0];
+      const saved = em.save.mock.calls[0][0];
       expect(saved.plan).toBe('free');
       expect(saved.planExpiresAt).toBeNull();
       expect(saved.planSource).toBeNull();
