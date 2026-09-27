@@ -204,6 +204,22 @@ export class SubmitAnswerDto {
   @IsNumber() @Min(0) timeSpentMs: number;
 }
 
+// ─── Leaderboard ──────────────────────────────────────────────────────────────
+
+export class GlobalLeaderboardQueryDto {
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100) limit?: number;
+  @IsOptional() @IsString() @MaxLength(200) university?: string;
+}
+
+export class SubjectLeaderboardQueryDto {
+  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100) limit?: number;
+}
+
+export class LeaderboardMeQueryDto {
+  @IsOptional() @IsString() @MaxLength(200) university?: string;
+  @IsOptional() @IsUUID() subjectId?: string;
+}
+
 // ─── Recommendations ──────────────────────────────────────────────────────────
 
 export class RecommendedQuestsQueryDto {

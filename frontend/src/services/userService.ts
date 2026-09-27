@@ -119,6 +119,12 @@ export interface LeaderboardEntry {
   elo: number
 }
 
+export interface MyLeaderboardPosition {
+  rank: number
+  elo: number
+  total: number
+}
+
 export interface RecommendedQuestDto {
   id: string
   title: string
@@ -205,10 +211,24 @@ export const userService = {
     return data
   },
 
-  async getGlobalLeaderboard(limit = 20): Promise<LeaderboardEntry[]> {
-    const { data } = await api.get<LeaderboardEntry[]>(
-      `/users/leaderboard/global?limit=${limit}`,
-    )
+  async getGlobalLeaderboard(limit = 20, university?: string): Promise<LeaderboardEntry[]> {
+    const { data } = await api.get<LeaderboardEntry[]>('/users/leaderboard/global', {
+      params: { limit, university },
+    })
+    return data
+  },
+
+  async getLeaderboardUniversities(): Promise<string[]> {
+    const { data } = await api.get<string[]>('/users/leaderboard/universities')
+    return data
+  },
+
+  async getMyLeaderboardPosition(
+    params: { university?: string; subjectId?: string } = {},
+  ): Promise<MyLeaderboardPosition> {
+    const { data } = await api.get<MyLeaderboardPosition>('/users/leaderboard/me', {
+      params,
+    })
     return data
   },
 }
