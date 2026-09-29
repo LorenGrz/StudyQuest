@@ -3,6 +3,8 @@
 Last validated against the code: 2026-09-26 (AWS migration, throttling + username fixes). When this file and the code disagree, the code wins — then fix this file.
 `AGENTS.md` holds the longer operational notes for other agents; keep both in sync.
 
+**Active plans / handoff:** start a new session with `docs/plans/HANDOFF.md` (current state, pending work, how to resume) and the active plan in `docs/plans/` (2026-09: official careers catalog + community-created subjects).
+
 ## What it is
 
 Collaborative study platform: users upload a source document, AI generates a quiz ("quest"), and players study solo or in parties with realtime chat, matchmaking, tournaments, leagues/ELO, skill tree, achievements, cosmetics and a Pro-only study bot.
