@@ -46,6 +46,10 @@ interface InventoryPayload {
 
 import { normalizeUsername } from '../../common/username';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import {
+  CareerChoice,
+  UniversitiesService,
+} from '../universities/universities.service';
 
 @Injectable()
 export class UsersService {
@@ -68,6 +72,7 @@ export class UsersService {
     private readonly playerResultRepo: Repository<PlayerResult>,
     private readonly dataSource: DataSource,
     private readonly eventEmitter: EventEmitter2,
+    private readonly universitiesService: UniversitiesService,
   ) {}
 
   async create(dto: RegisterDto): Promise<User> {
@@ -78,9 +83,43 @@ export class UsersService {
       const field = existing.email === dto.email ? 'email' : 'username';
       throw new ConflictException(`El ${field} ya está en uso`);
     }
+    const university = await this.universitiesService.getUniversity({
+      universityId: dto.universityId,
+      name: dto.university,
+    });
+    const resolved = await this.universitiesService.resolveCareer(
+      university.id,
+      pickCareerChoice(dto),
+    );
     const passwordHash = await bcrypt.hash(dto.password, 12);
-    const user = this.userRepo.create({ ...dto, passwordHash });
-    return this.userRepo.save(user);
+
+    return this.dataSource.transaction(async (em) => {
+      const repo = em.getRepository(User);
+      const user = await repo.save(
+        repo.create({
+          email: dto.email,
+          username: dto.username,
+          displayName: dto.displayName,
+          year: dto.year,
+          passwordHash,
+          // Legacy display copies (ranking por universidad, old frontend).
+          university: university.name,
+          universityId: university.id,
+          career: resolved.kind === 'career' ? resolved.career.name : '',
+          careerId: resolved.kind === 'career' ? resolved.career.id : null,
+        }),
+      );
+      if (resolved.kind === 'request') {
+        const request = await this.universitiesService.createCareerRequest(
+          user.id,
+          university.id,
+          resolved.name,
+          em,
+        );
+        user.pendingCareerRequestId = request.id;
+      }
+      return user;
+    });
   }
 
   async findById(id: string): Promise<User> {
@@ -314,16 +353,95 @@ export class UsersService {
   }
 
   async updateProfile(userId: string, dto: UpdateProfileDto): Promise<User> {
-    if (dto.username) {
+    const { universityId, university, careerId, careerName, career, ...rest } =
+      dto;
+    if (rest.username) {
       const existing = await this.userRepo.findOne({
-        where: { username: dto.username },
+        where: { username: rest.username },
       });
       if (existing && existing.id !== userId) {
         throw new ConflictException('Username already taken');
       }
     }
-    await this.userRepo.update(userId, dto as any);
+
+    const patch: ProfilePatch = { ...rest };
+    let requestedCareer: { universityId: string; name: string } | null = null;
+    const academic = { universityId, university, careerId, careerName, career };
+    if (Object.values(academic).some((v) => v !== undefined)) {
+      requestedCareer = await this.applyAcademicChange(
+        userId,
+        academic,
+        patch,
+      );
+    }
+
+    if (Object.keys(patch).length) await this.userRepo.update(userId, patch);
+    if (requestedCareer) {
+      await this.universitiesService.createCareerRequest(
+        userId,
+        requestedCareer.universityId,
+        requestedCareer.name,
+      );
+    }
     return this.findById(userId);
+  }
+
+  /**
+   * Validates a university/career change against the catalog and writes it
+   * into `patch` (ids + legacy display strings). Returns the "Otra" career to
+   * request, if any. The legacy frontend re-sends its current strings on every
+   * save: unchanged strings are accepted as-is.
+   */
+  private async applyAcademicChange(
+    userId: string,
+    input: CareerChoice & { universityId?: string; university?: string },
+    patch: ProfilePatch,
+  ): Promise<{ universityId: string; name: string } | null> {
+    const current = await this.userRepo.findOneBy({ id: userId });
+    if (!current) throw new NotFoundException('Usuario no encontrado');
+
+    const legacyUnchanged =
+      input.universityId === undefined &&
+      input.careerId === undefined &&
+      input.careerName === undefined &&
+      (input.university ?? current.university) === current.university &&
+      (input.career ?? current.career) === current.career;
+    if (legacyUnchanged) return null;
+
+    const universityGiven =
+      input.universityId !== undefined || input.university !== undefined;
+    if (!universityGiven && !current.universityId)
+      throw new BadRequestException('Elegí tu universidad');
+    const university = await this.universitiesService.getUniversity(
+      universityGiven
+        ? { universityId: input.universityId, name: input.university }
+        : { universityId: current.universityId ?? undefined },
+    );
+    patch.university = university.name;
+    patch.universityId = university.id;
+
+    const careerGiven =
+      input.careerId !== undefined ||
+      input.careerName !== undefined ||
+      input.career !== undefined;
+    if (!careerGiven) {
+      if (university.id === current.universityId) return null;
+      throw new BadRequestException('Elegí una carrera de esa universidad');
+    }
+
+    const resolved = await this.universitiesService.resolveCareer(
+      university.id,
+      pickCareerChoice(input),
+    );
+    if (resolved.kind === 'career') {
+      patch.career = resolved.career.name;
+      patch.careerId = resolved.career.id;
+      patch.pendingCareerRequestId = null;
+      return null;
+    }
+    patch.career = '';
+    patch.careerId = null;
+    return { universityId: university.id, name: resolved.name };
   }
 
   async changePassword(
@@ -490,12 +608,20 @@ export class UsersService {
 
   async unenrollSubject(userId: string, subjectId: string): Promise<User> {
     await this.dataSource.transaction(async (em) => {
-      await em
+      // Only decrement when a row was really removed: unenrolling twice (or
+      // from a subject you never joined) must not push enrolledCount below
+      // the real number of students.
+      const { affected } = await em
         .createQueryBuilder()
-        .relation(User, 'enrolledSubjects')
-        .of(userId)
-        .remove(subjectId);
-      await em.decrement(Subject, { id: subjectId }, 'enrolledCount', 1);
+        .delete()
+        .from('user_subjects')
+        .where('user_id = :userId AND subject_id = :subjectId', {
+          userId,
+          subjectId,
+        })
+        .execute();
+      if (affected)
+        await em.decrement(Subject, { id: subjectId }, 'enrolledCount', 1);
     });
     return this.findById(userId);
   }
@@ -919,4 +1045,31 @@ export class UsersService {
     const result = await this.getRecommendedQuests(userId, 1, 10);
     return result.items;
   }
+}
+
+/** Columns PATCH /users/me may write. */
+type ProfilePatch = Partial<
+  Pick<
+    User,
+    | 'username'
+    | 'bio'
+    | 'displayName'
+    | 'avatarUrl'
+    | 'year'
+    | 'availability'
+    | 'university'
+    | 'universityId'
+    | 'career'
+    | 'careerId'
+    | 'pendingCareerRequestId'
+  >
+>;
+
+/** Only the career fields, so extra DTO keys never reach the resolver. */
+function pickCareerChoice(input: CareerChoice): CareerChoice {
+  return {
+    careerId: input.careerId,
+    careerName: input.careerName,
+    career: input.career,
+  };
 }

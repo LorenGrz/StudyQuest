@@ -7,7 +7,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { SubjectsService } from './subjects.service';
 import { CreateSubjectDto, SubjectQueryDto } from '../../common/dto';
@@ -27,6 +27,8 @@ export class SubjectsController {
     return this.subjectsService.getUniversities(search);
   }
 
+  /** @deprecated use GET /universities/:id/careers */
+  @ApiOperation({ deprecated: true })
   @Get('careers')
   getCareers(@Query('university') university?: string) {
     return this.subjectsService.getCareers(university);

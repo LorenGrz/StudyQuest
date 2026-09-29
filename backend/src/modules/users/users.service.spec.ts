@@ -13,6 +13,7 @@ import { UserInventory } from '../cosmetics/user-inventory.entity';
 import { ProfileBorder } from '../cosmetics/profile-border.entity';
 import { Quest } from '../quests/quest.entity';
 import { PlayerResult } from '../quests/player-result.entity';
+import { UniversitiesService } from '../universities/universities.service';
 
 describe('UsersService (settings)', () => {
   let service: UsersService;
@@ -52,6 +53,7 @@ describe('UsersService (settings)', () => {
         { provide: getRepositoryToken(PlayerResult), useValue: {} },
         { provide: DataSource, useValue: {} },
         { provide: EventEmitter2, useValue: { emit: jest.fn() } },
+        { provide: UniversitiesService, useValue: {} },
       ],
     }).compile();
 
@@ -138,6 +140,7 @@ describe('UsersService (dashboard stats)', () => {
         { provide: getRepositoryToken(PlayerResult), useValue: {} },
         { provide: DataSource, useValue: { query } },
         { provide: EventEmitter2, useValue: { emit: jest.fn() } },
+        { provide: UniversitiesService, useValue: {} },
       ],
     }).compile();
 
@@ -219,6 +222,7 @@ describe('UsersService (leaderboard)', () => {
         { provide: getRepositoryToken(PlayerResult), useValue: {} },
         { provide: DataSource, useValue: {} },
         { provide: EventEmitter2, useValue: { emit: jest.fn() } },
+        { provide: UniversitiesService, useValue: {} },
       ],
     }).compile();
 

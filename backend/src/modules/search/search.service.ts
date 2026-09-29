@@ -60,6 +60,8 @@ export class SearchService {
         's.enrolled_count',
       ])
       .where('s.is_active = true')
+      .andWhere(`s.status = 'active'`)
+      .andWhere(`s.visibility = 'university'`)
       .andWhere(
         `(similarity(s.name, :search) > 0.2
         OR similarity(s.code, :search) > 0.3
