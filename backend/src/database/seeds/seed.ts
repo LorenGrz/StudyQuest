@@ -46,6 +46,9 @@ import { Tournament } from '../../modules/tournaments/tournament.entity';
 import { TournamentParticipant } from '../../modules/tournaments/tournament-participant.entity';
 import { PromoCode } from '../../modules/billing/promo-code.entity';
 import { PromoRedemption } from '../../modules/billing/promo-redemption.entity';
+import { University } from '../../modules/universities/university.entity';
+import { Career } from '../../modules/universities/career.entity';
+import { CareerRequest } from '../../modules/universities/career-request.entity';
 import { DEFAULT_ELO } from '../../common/leagues';
 import { CAREER_CATALOG } from './data/subjects-catalog';
 
@@ -93,6 +96,9 @@ const AppDataSource = new DataSource({
     TournamentParticipant,
     PromoCode,
     PromoRedemption,
+    University,
+    Career,
+    CareerRequest,
   ],
   synchronize: false,
   logging: false,
@@ -1116,7 +1122,7 @@ async function seedSkillTreesForSubjects(subjects: Subject[]) {
       continue;
     }
 
-    const template = loadSkillTreeTemplate(subject.code);
+    const template = loadSkillTreeTemplate(subject.code ?? undefined);
     const topicToId = new Map<string, string>();
 
     for (const node of template) {

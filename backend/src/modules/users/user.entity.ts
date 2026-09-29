@@ -7,12 +7,17 @@ import {
   ManyToMany,
   JoinTable,
   OneToMany,
+  ManyToOne,
+  JoinColumn,
   Index,
 } from 'typeorm';
 import { DEFAULT_ELO } from '../../common/leagues';
 import { Role } from '../../common/roles';
 import { Subject } from '../subjects/subject.entity';
 import { PartyMember } from '../parties/party-member.entity';
+import { University } from '../universities/university.entity';
+import { Career } from '../universities/career.entity';
+import { CareerRequest } from '../universities/career-request.entity';
 
 export interface AvailabilitySlot {
   day: number;
@@ -68,12 +73,55 @@ export class User {
   @Column({ type: 'varchar', length: 500, nullable: true, default: null })
   bio: string | null;
 
+  /**
+   * Deprecated display copies of the catalog names, still written on every
+   * register/profile change: the per-university ranking and the old frontend
+   * read them. Source of truth is `universityId` / `careerId`. `career` is ''
+   * while the user only has a pending career request.
+   */
   @Column({ length: 200 })
   @Index('IDX_users_university')
   university: string;
 
   @Column({ length: 200 })
   career: string;
+
+  @Column({ name: 'university_id', type: 'uuid', nullable: true, default: null })
+  @Index('IDX_users_university_id')
+  universityId: string | null;
+
+  @ManyToOne(() => University, { onDelete: 'SET NULL' })
+  @JoinColumn({
+    name: 'university_id',
+    foreignKeyConstraintName: 'FK_users_university_id',
+  })
+  universityRef: University | null;
+
+  @Column({ name: 'career_id', type: 'uuid', nullable: true, default: null })
+  careerId: string | null;
+
+  @ManyToOne(() => Career, { onDelete: 'SET NULL' })
+  @JoinColumn({
+    name: 'career_id',
+    foreignKeyConstraintName: 'FK_users_career_id',
+  })
+  careerRef: Career | null;
+
+  /** Set while the user's "Otra" career waits for an admin. */
+  @Column({
+    name: 'pending_career_request_id',
+    type: 'uuid',
+    nullable: true,
+    default: null,
+  })
+  pendingCareerRequestId: string | null;
+
+  @ManyToOne(() => CareerRequest, { onDelete: 'SET NULL' })
+  @JoinColumn({
+    name: 'pending_career_request_id',
+    foreignKeyConstraintName: 'FK_users_pending_career_request_id',
+  })
+  pendingCareerRequest: CareerRequest | null;
 
   @Column({ type: 'smallint', default: 1 })
   year: number;
