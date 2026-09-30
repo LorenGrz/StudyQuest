@@ -19,7 +19,8 @@ export interface AvailabilitySlot {
 export interface Subject {
   id: string
   name: string
-  code: string
+  /** Community subjects have no code. */
+  code: string | null
   career: string
   university: string
   year: number

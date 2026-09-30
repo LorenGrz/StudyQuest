@@ -130,7 +130,7 @@ export function GetStartedNotice() {
         className="self-start mt-1"
         onClick={() => navigate('/subjects')}
       >
-        Explorar materias →
+        Mis materias →
       </Button>
     </div>
   )
