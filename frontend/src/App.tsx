@@ -18,6 +18,7 @@ import TournamentResultsPage from './pages/TournamentResultsPage'
 import SettingsPage from './pages/SettingsPage'
 import BillingPage from './pages/BillingPage'
 import PartyDetailPage from './pages/PartyDetailPage'
+import AdminPage from './pages/AdminPage'
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
       <Route path="/tournaments" element={<ProtectedRoute><TournamentsPage /></ProtectedRoute>} />
       <Route path="/tournament/:id" element={<ProtectedRoute><TournamentLivePage /></ProtectedRoute>} />
       <Route path="/tournament/:id/results" element={<ProtectedRoute><TournamentResultsPage /></ProtectedRoute>} />
+      <Route path="/admin" element={<ProtectedRoute adminOnly><AdminPage /></ProtectedRoute>} />
 
       {/* 404 → auth */}
       <Route path="*" element={<Navigate to="/auth" replace />} />

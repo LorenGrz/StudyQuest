@@ -90,6 +90,7 @@ export interface User {
   careerId: string | null
   /** Set while an "Otra" career request waits for an admin (GET /career-requests/mine). */
   pendingCareerRequestId: string | null
+  role: 'USER' | 'ADMIN'
   year: number
   enrolledSubjects: Subject[]
   availability: AvailabilitySlot[]

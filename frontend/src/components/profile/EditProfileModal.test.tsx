@@ -53,6 +53,7 @@ const baseUser: User = {
   universityId: 'uni-uba',
   careerId: 'car-uba-1',
   pendingCareerRequestId: null,
+  role: 'USER',
   year: 3,
   enrolledSubjects: [],
   availability: [],
