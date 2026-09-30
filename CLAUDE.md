@@ -1,6 +1,6 @@
 # StudyQuest — Claude context
 
-Last validated against the code: 2026-09-26 (AWS migration, throttling + username fixes). When this file and the code disagree, the code wins — then fix this file.
+Last validated against the code: 2026-09-30 (universities/careers catalog, R1 of the community-subjects plan). When this file and the code disagree, the code wins — then fix this file.
 `AGENTS.md` holds the longer operational notes for other agents; keep both in sync.
 
 **Active plans / handoff:** start a new session with `docs/plans/HANDOFF.md` (current state, pending work, how to resume) and the active plan in `docs/plans/` (2026-09: official careers catalog + community-created subjects).
@@ -25,8 +25,8 @@ pnpm workspace at the root (`pnpm-workspace.yaml`: backend, frontend), but each 
 
 ## Backend modules (`backend/src/modules`)
 
-`auth` (JWT) · `users` (profile, avatars, dashboard, recommendations, leaderboard) · `subjects` (universities/careers/subjects, enrollment) · `parties` (study groups, rich chat: text/file/audio) · `quests` (upload → generate → play → results, daily retention job; quiz content in DynamoDB via `quiz-content/QuizContentRepository`) · `ai` (provider facade + Bedrock client + MarkItDown client) · `storage` (S3 `StorageService` + public `GET /api/v1/files/*key` → 302 presigned URL) · `skill-tree` · `tournaments` · `achievements` · `cosmetics` (avatar borders) · `search` (trigram) · `billing` (`free`/`pro` plans, promo codes, Mercado Pago payments in `billing/payments`) · `study-bot` (Pro chat grounded in the user's last 5 results).
-Shared: `src/common/plans.ts` is the single source of truth for per-plan limits; `common/pro-plan.guard.ts`; `common/leagues.ts`, `careers.ts`, `cors.ts`, `upload.util.ts`.
+`auth` (JWT) · `users` (profile, avatars, dashboard, recommendations, leaderboard by `university_id`) · `universities` (official universities/careers catalog, `GET /universities`, `GET /universities/:id/careers`, "Otra" `career_requests`, `mapUsersToCatalog`) · `subjects` (subjects, enrollment; `career_id` is only a tag — one subject per university + normalized name) · `parties` (study groups, rich chat: text/file/audio) · `quests` (upload → generate → play → results, daily retention job; quiz content in DynamoDB via `quiz-content/QuizContentRepository`) · `ai` (provider facade + Bedrock client + MarkItDown client) · `storage` (S3 `StorageService` + public `GET /api/v1/files/*key` → 302 presigned URL) · `skill-tree` · `tournaments` · `achievements` · `cosmetics` (avatar borders) · `search` (trigram) · `billing` (`free`/`pro` plans, promo codes, Mercado Pago payments in `billing/payments`) · `study-bot` (Pro chat grounded in the user's last 5 results).
+Shared: `src/common/plans.ts` is the single source of truth for per-plan limits; `common/pro-plan.guard.ts`; `common/leagues.ts`, `subject-name.ts` (`normalizeSubjectName`, dedup key), `university-name.ts` (`universityKey`, UTN alias), `cors.ts`, `upload.util.ts`.
 Realtime: one gateway `src/gateways/matchmaking/matchmaking.gateway.ts` (matchmaking, party presence, chat broadcast, tournament events).
 
 ## Key flows
@@ -47,7 +47,7 @@ Realtime: one gateway `src/gateways/matchmaking/matchmaking.gateway.ts` (matchma
 - Global prefix `/api/v1` except `/health` and the socket.
 - **Rate limiting:** `default` throttler (100/min) runs everywhere; `strict` is opt-in per route via `@Throttle({ strict: … })` (`common/throttle.ts` `onlyWhereDeclared`). `trust proxy` is 1 (Caddy) so limits are per client. Never register a named throttler without a `skipIf`, or it applies to every route.
 - **Usernames** are stored lowercase without `@` (`common/username.ts` normalizes register/profile/friend lookup; migration `LowercaseUsernames`). The UI shows a fixed `@` prefix (`Input prefix`) and lowercases as you type (`frontend/src/utils/username.ts`).
-- **API errors in the UI:** `services/api.ts` rewrites 429/5xx/network errors into Spanish user-facing text (`utils/apiErrors.ts`); other statuses keep the backend `message`. University fields are selects fed by `GET /subjects/universities`.
+- **API errors in the UI:** `services/api.ts` rewrites 429/5xx/network errors into Spanish user-facing text (`utils/apiErrors.ts`); other statuses keep the backend `message`. University fields are selects fed by `GET /subjects/universities` (catalog names; W1 moves them to `GET /universities`).
 
 ## Branches & deploy
 
@@ -66,12 +66,15 @@ Realtime: one gateway `src/gateways/matchmaking/matchmaking.gateway.ts` (matchma
 ```bash
 docker compose up -d postgres dynamodb-local   # local DB + Dynamo
 cd backend && pnpm dynamo:create-table
+cd backend && pnpm migration:run       # existing local DB: BEFORE start:dev (see below)
 cd backend && pnpm start:dev           # API on :3000, swagger /docs
 cd backend && pnpm seed && pnpm seed:skill-tree
 cd frontend && pnpm dev                # :5173
 cd backend && pnpm test && pnpm build   # pnpm lint is broken: no eslint.config for ESLint 9
 cd frontend && pnpm test && pnpm build  # pnpm lint has ~87 pre-existing errors
 ```
+
+With an existing local DB, run `pnpm migration:run` before `start:dev`: the sync boot fails adding NOT NULL `subjects.name_normalized`, and sync alone never creates the partial unique / GIN trigram indexes on `subjects` (migration-only). No `migrations` table yet → apply the `deploy.sh` baseline first.
 
 ## Env
 
