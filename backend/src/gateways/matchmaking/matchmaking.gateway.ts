@@ -16,6 +16,7 @@ import { v4 as uuid } from 'uuid';
 import { MatchmakingService, QueueCandidate } from './matchmaking.service';
 import { PartiesService } from '../../modules/parties/parties.service';
 import { UsersService } from '../../modules/users/users.service';
+import { CommunitySubjectsService } from '../../modules/subjects/community-subjects.service';
 import { JoinQueueDto, SendChatMessageDto } from '../../common/dto';
 import { corsOrigin } from '../../common/cors';
 
@@ -50,6 +51,7 @@ export class MatchmakingGateway
     private readonly matchmakingService: MatchmakingService,
     private readonly partiesService: PartiesService,
     private readonly usersService: UsersService,
+    private readonly communitySubjects: CommunitySubjectsService,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -102,12 +104,32 @@ export class MatchmakingGateway
       return;
     }
 
+    // Matches become parties on a shared subject: each one must be visible
+    // to and enrolled by the user (merged ids resolve to their target).
+    let subjectIds: string[];
+    try {
+      subjectIds = [
+        ...new Set(
+          await Promise.all(
+            (dto.subjectIds ?? []).map((id) =>
+              this.communitySubjects.resolveAttachable(conn.userId, id, {
+                requireEnrollment: true,
+              }),
+            ),
+          ),
+        ),
+      ];
+    } catch {
+      socket.emit('error', { code: 'SUBJECT_NOT_AVAILABLE' });
+      return;
+    }
+
     const elo = await this.usersService.getElo(conn.userId);
 
     const candidate: QueueCandidate = {
       userId: conn.userId,
       socketId: socket.id,
-      subjectIds: dto.subjectIds ?? [],
+      subjectIds,
       availability: dto.availability ?? [],
       career: '',
       elo,

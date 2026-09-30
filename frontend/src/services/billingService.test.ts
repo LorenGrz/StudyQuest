@@ -32,4 +32,28 @@ describe('billingService', () => {
       code: 'STUDYQUEST-PRO-30',
     })
   })
+
+  it('getQuote reads GET /payments/quote', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { available: false } })
+    await expect(billingService.getQuote()).resolves.toEqual({ available: false })
+    expect(api.get).toHaveBeenCalledWith('/payments/quote')
+  })
+
+  it('createCheckout posts to /payments/checkout', async () => {
+    vi.mocked(api.post).mockResolvedValue({ data: { initPoint: 'https://x' } })
+    await billingService.createCheckout()
+    expect(api.post).toHaveBeenCalledWith('/payments/checkout')
+  })
+
+  it('getPayment reads GET /payments/:id (encoded)', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { id: 'a/b' } })
+    await billingService.getPayment('a/b')
+    expect(api.get).toHaveBeenCalledWith('/payments/a%2Fb', undefined)
+  })
+
+  it('getPayment forwards the MP payment_id as a hint', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: { id: 'p1' } })
+    await billingService.getPayment('p1', '123456')
+    expect(api.get).toHaveBeenCalledWith('/payments/p1', { params: { hint: '123456' } })
+  })
 })

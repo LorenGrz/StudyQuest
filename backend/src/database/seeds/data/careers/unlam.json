@@ -1,0 +1,221 @@
+{
+  "university": {
+    "name": "Universidad Nacional de La Matanza",
+    "shortName": "UNLaM",
+    "website": "https://www.unlam.edu.ar",
+    "careersSourceUrls": [
+      "https://ingenieria.unlam.edu.ar/index.php?seccion=3&idArticulo=10",
+      "https://derecho.unlam.edu.ar/index.php?seccion=3&idArticulo=366",
+      "https://economicas.unlam.edu.ar/index.php?seccion=3&idArticulo=7",
+      "https://humanidades.unlam.edu.ar/index.php?seccion=3&idArticulo=12",
+      "https://salud.unlam.edu.ar/index.php?seccion=3&idArticulo=13",
+      "https://artesymedios.unlam.edu.ar/carreras/"
+    ]
+  },
+  "careers": [
+    {
+      "name": "Contador Público",
+      "faculty": "Departamento de Ciencias Económicas",
+      "level": "grado",
+      "sourceUrl": "https://economicas.unlam.edu.ar/index.php?seccion=3&idArticulo=7"
+    },
+    {
+      "name": "Licenciatura en Administración",
+      "faculty": "Departamento de Ciencias Económicas",
+      "level": "grado",
+      "sourceUrl": "https://economicas.unlam.edu.ar/index.php?seccion=3&idArticulo=8"
+    },
+    {
+      "name": "Licenciatura en Comercio Internacional",
+      "faculty": "Departamento de Ciencias Económicas",
+      "level": "grado",
+      "sourceUrl": "https://economicas.unlam.edu.ar/index.php?seccion=3&idArticulo=9"
+    },
+    {
+      "name": "Licenciatura en Economía",
+      "faculty": "Departamento de Ciencias Económicas",
+      "level": "grado",
+      "sourceUrl": "https://economicas.unlam.edu.ar/index.php?seccion=3&idArticulo=14"
+    },
+    {
+      "name": "Licenciatura en Enfermería",
+      "faculty": "Departamento de Ciencias de la Salud",
+      "level": "grado",
+      "sourceUrl": "https://salud.unlam.edu.ar/index.php?seccion=3&idArticulo=6"
+    },
+    {
+      "name": "Licenciatura en Kinesiología y Fisiatría",
+      "faculty": "Departamento de Ciencias de la Salud",
+      "level": "grado",
+      "sourceUrl": "https://salud.unlam.edu.ar/index.php?seccion=3&idArticulo=9"
+    },
+    {
+      "name": "Licenciatura en Nutrición",
+      "faculty": "Departamento de Ciencias de la Salud",
+      "level": "grado",
+      "sourceUrl": "https://salud.unlam.edu.ar/index.php?seccion=3&idArticulo=8"
+    },
+    {
+      "name": "Medicina",
+      "faculty": "Departamento de Ciencias de la Salud",
+      "level": "grado",
+      "sourceUrl": "https://salud.unlam.edu.ar/index.php?seccion=3&idArticulo=13"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Anatomía Patológica",
+      "faculty": "Departamento de Ciencias de la Salud",
+      "level": "pregrado",
+      "sourceUrl": "https://salud.unlam.edu.ar/index.php?seccion=3&idArticulo=32"
+    },
+    {
+      "name": "Abogacía",
+      "faculty": "Departamento de Derecho y Ciencia Política",
+      "level": "grado",
+      "sourceUrl": "https://derecho.unlam.edu.ar/index.php?seccion=3&idArticulo=366"
+    },
+    {
+      "name": "Licenciatura en Ciencia Política",
+      "faculty": "Departamento de Derecho y Ciencia Política",
+      "level": "grado",
+      "sourceUrl": "https://derecho.unlam.edu.ar/index.php?seccion=3&idArticulo=367"
+    },
+    {
+      "name": "Procurador",
+      "faculty": "Departamento de Derecho y Ciencia Política",
+      "level": "pregrado",
+      "sourceUrl": "https://derecho.unlam.edu.ar/index.php?seccion=3&idArticulo=370"
+    },
+    {
+      "name": "Tecnicatura en Gestión Pública",
+      "faculty": "Departamento de Derecho y Ciencia Política",
+      "level": "pregrado",
+      "sourceUrl": "https://derecho.unlam.edu.ar/index.php?seccion=3&idArticulo=396"
+    },
+    {
+      "name": "Licenciatura en Comunicación Social",
+      "faculty": "Departamento de Humanidades y Ciencias Sociales",
+      "level": "grado",
+      "sourceUrl": "https://humanidades.unlam.edu.ar/index.php?seccion=3&idArticulo=12"
+    },
+    {
+      "name": "Licenciatura en Educación Física",
+      "faculty": "Departamento de Humanidades y Ciencias Sociales",
+      "level": "grado",
+      "sourceUrl": "https://humanidades.unlam.edu.ar/index.php?seccion=3&idArticulo=9"
+    },
+    {
+      "name": "Licenciatura en Relaciones Laborales",
+      "faculty": "Departamento de Humanidades y Ciencias Sociales",
+      "level": "grado",
+      "sourceUrl": "https://humanidades.unlam.edu.ar/index.php?seccion=3&idArticulo=8"
+    },
+    {
+      "name": "Licenciatura en Relaciones Públicas",
+      "faculty": "Departamento de Humanidades y Ciencias Sociales",
+      "level": "grado",
+      "sourceUrl": "https://humanidades.unlam.edu.ar/index.php?seccion=3&idArticulo=10"
+    },
+    {
+      "name": "Licenciatura en Trabajo Social",
+      "faculty": "Departamento de Humanidades y Ciencias Sociales",
+      "level": "grado",
+      "sourceUrl": "https://humanidades.unlam.edu.ar/index.php?seccion=3&idArticulo=6"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Ceremonial y Protocolo",
+      "faculty": "Departamento de Humanidades y Ciencias Sociales",
+      "level": "pregrado",
+      "sourceUrl": "https://humanidades.unlam.edu.ar/index.php?seccion=3&idArticulo=11"
+    },
+    {
+      "name": "Ingeniería Civil",
+      "faculty": "Departamento de Ingeniería e Investigaciones Tecnológicas",
+      "level": "grado",
+      "sourceUrl": "https://ingenieria.unlam.edu.ar/index.php?seccion=3&idArticulo=13"
+    },
+    {
+      "name": "Ingeniería Electrónica",
+      "faculty": "Departamento de Ingeniería e Investigaciones Tecnológicas",
+      "level": "grado",
+      "sourceUrl": "https://ingenieria.unlam.edu.ar/index.php?seccion=3&idArticulo=11"
+    },
+    {
+      "name": "Ingeniería Industrial",
+      "faculty": "Departamento de Ingeniería e Investigaciones Tecnológicas",
+      "level": "grado",
+      "sourceUrl": "https://ingenieria.unlam.edu.ar/index.php?seccion=3&idArticulo=12"
+    },
+    {
+      "name": "Ingeniería Mecánica",
+      "faculty": "Departamento de Ingeniería e Investigaciones Tecnológicas",
+      "level": "grado",
+      "sourceUrl": "https://ingenieria.unlam.edu.ar/index.php?seccion=3&idArticulo=371"
+    },
+    {
+      "name": "Ingeniería en Informática",
+      "faculty": "Departamento de Ingeniería e Investigaciones Tecnológicas",
+      "level": "grado",
+      "sourceUrl": "https://ingenieria.unlam.edu.ar/index.php?seccion=3&idArticulo=10"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Web",
+      "faculty": "Departamento de Ingeniería e Investigaciones Tecnológicas",
+      "level": "pregrado",
+      "sourceUrl": "https://ingenieria.unlam.edu.ar/index.php?seccion=3&idArticulo=18"
+    },
+    {
+      "name": "Tecnicatura en Desarrollo de Aplicaciones Móviles",
+      "faculty": "Departamento de Ingeniería e Investigaciones Tecnológicas",
+      "level": "pregrado",
+      "sourceUrl": "https://ingenieria.unlam.edu.ar/index.php?seccion=3&idArticulo=367"
+    },
+    {
+      "name": "Licenciatura en Animación Digital",
+      "faculty": "Escuela de Artes y Medios de Comunicación",
+      "level": "grado",
+      "sourceUrl": "https://artesymedios.unlam.edu.ar/licenciatura-animacion-digital/"
+    },
+    {
+      "name": "Licenciatura en Arte y Gestión Cultural",
+      "faculty": "Escuela de Artes y Medios de Comunicación",
+      "level": "grado",
+      "sourceUrl": "https://artesymedios.unlam.edu.ar/licenciatura-arte-y-gestion/"
+    },
+    {
+      "name": "Locutor Nacional",
+      "faculty": "Escuela de Artes y Medios de Comunicación",
+      "level": "pregrado",
+      "sourceUrl": "https://artesymedios.unlam.edu.ar/locutor-nacional/"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Artes Escénicas",
+      "faculty": "Escuela de Artes y Medios de Comunicación",
+      "level": "pregrado",
+      "sourceUrl": "https://artesymedios.unlam.edu.ar/artes-escenicas/"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Diseño Gráfico y Digital",
+      "faculty": "Escuela de Artes y Medios de Comunicación",
+      "level": "pregrado",
+      "sourceUrl": "https://artesymedios.unlam.edu.ar/diseno-grafico-y-digital/"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Guion Audiovisual",
+      "faculty": "Escuela de Artes y Medios de Comunicación",
+      "level": "pregrado",
+      "sourceUrl": "https://artesymedios.unlam.edu.ar/guion-audiovisual/"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Periodismo Deportivo Integral",
+      "faculty": "Escuela de Artes y Medios de Comunicación",
+      "level": "pregrado",
+      "sourceUrl": "https://artesymedios.unlam.edu.ar/periodismo-deportivo-integral/"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Publicidad y Comunicación Estratégica",
+      "faculty": "Escuela de Artes y Medios de Comunicación",
+      "level": "pregrado",
+      "sourceUrl": "https://artesymedios.unlam.edu.ar/publicidad/"
+    }
+  ]
+}

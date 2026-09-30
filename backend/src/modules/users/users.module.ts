@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { UniversitiesModule } from '../universities/universities.module';
+import { SubjectsModule } from '../subjects/subjects.module';
 import { User } from './user.entity';
 import { Subject } from '../subjects/subject.entity';
 import { PartyMember } from '../parties/party-member.entity';
@@ -14,6 +16,8 @@ import { UsersController } from './users.controller';
 
 @Module({
   imports: [
+    UniversitiesModule,
+    SubjectsModule,
     TypeOrmModule.forFeature([
       User,
       Subject,

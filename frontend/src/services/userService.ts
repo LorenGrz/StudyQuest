@@ -19,7 +19,8 @@ export interface AvailabilitySlot {
 export interface Subject {
   id: string
   name: string
-  code: string
+  /** Community subjects have no code. */
+  code: string | null
   career: string
   university: string
   year: number
@@ -83,6 +84,13 @@ export interface User {
   bio: string | null
   university: string
   career: string
+  /** GET /universities id; source of truth (`university` is the legacy display name). */
+  universityId: string | null
+  /** GET /universities/:id/careers id; `null` while a career request is pending. */
+  careerId: string | null
+  /** Set while an "Otra" career request waits for an admin (GET /career-requests/mine). */
+  pendingCareerRequestId: string | null
+  role: 'USER' | 'ADMIN'
   year: number
   enrolledSubjects: Subject[]
   availability: AvailabilitySlot[]
@@ -98,8 +106,11 @@ export interface UpdateProfilePayload {
   bio?: string
   displayName?: string
   avatarUrl?: string
-  university?: string
-  career?: string
+  universityId?: string
+  /** A career from the catalog (GET /universities/:id/careers). */
+  careerId?: string
+  /** "Otra (no está en la lista)": creates a pending career request. */
+  careerName?: string
   year?: number
   availability?: AvailabilitySlot[]
 }
@@ -117,6 +128,12 @@ export interface LeaderboardEntry {
   avatarUrl: string | null
   activeCosmetics?: ActiveCosmetics
   elo: number
+}
+
+export interface MyLeaderboardPosition {
+  rank: number
+  elo: number
+  total: number
 }
 
 export interface RecommendedQuestDto {
@@ -205,10 +222,24 @@ export const userService = {
     return data
   },
 
-  async getGlobalLeaderboard(limit = 20): Promise<LeaderboardEntry[]> {
-    const { data } = await api.get<LeaderboardEntry[]>(
-      `/users/leaderboard/global?limit=${limit}`,
-    )
+  async getGlobalLeaderboard(limit = 20, university?: string): Promise<LeaderboardEntry[]> {
+    const { data } = await api.get<LeaderboardEntry[]>('/users/leaderboard/global', {
+      params: { limit, university },
+    })
+    return data
+  },
+
+  async getLeaderboardUniversities(): Promise<string[]> {
+    const { data } = await api.get<string[]>('/users/leaderboard/universities')
+    return data
+  },
+
+  async getMyLeaderboardPosition(
+    params: { university?: string; subjectId?: string } = {},
+  ): Promise<MyLeaderboardPosition> {
+    const { data } = await api.get<MyLeaderboardPosition>('/users/leaderboard/me', {
+      params,
+    })
     return data
   },
 }

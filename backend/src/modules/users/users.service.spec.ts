@@ -13,6 +13,8 @@ import { UserInventory } from '../cosmetics/user-inventory.entity';
 import { ProfileBorder } from '../cosmetics/profile-border.entity';
 import { Quest } from '../quests/quest.entity';
 import { PlayerResult } from '../quests/player-result.entity';
+import { UniversitiesService } from '../universities/universities.service';
+import { University } from '../universities/university.entity';
 
 describe('UsersService (settings)', () => {
   let service: UsersService;
@@ -50,8 +52,15 @@ describe('UsersService (settings)', () => {
         { provide: getRepositoryToken(ProfileBorder), useValue: {} },
         { provide: getRepositoryToken(Quest), useValue: {} },
         { provide: getRepositoryToken(PlayerResult), useValue: {} },
-        { provide: DataSource, useValue: {} },
+        {
+          provide: DataSource,
+          useValue: {
+            transaction: (fn: (em: unknown) => unknown) =>
+              fn({ getRepository: () => userRepo }),
+          },
+        },
         { provide: EventEmitter2, useValue: { emit: jest.fn() } },
+        { provide: UniversitiesService, useValue: {} },
       ],
     }).compile();
 
@@ -138,6 +147,7 @@ describe('UsersService (dashboard stats)', () => {
         { provide: getRepositoryToken(PlayerResult), useValue: {} },
         { provide: DataSource, useValue: { query } },
         { provide: EventEmitter2, useValue: { emit: jest.fn() } },
+        { provide: UniversitiesService, useValue: {} },
       ],
     }).compile();
 
@@ -178,5 +188,233 @@ describe('UsersService (dashboard stats)', () => {
       },
     ]);
     expect(stats.weeklyStudy).toHaveLength(7);
+  });
+});
+
+function createLeaderboardQbMock() {
+  return {
+    select: jest.fn().mockReturnThis(),
+    addSelect: jest.fn().mockReturnThis(),
+    where: jest.fn().mockReturnThis(),
+    andWhere: jest.fn().mockReturnThis(),
+    innerJoin: jest.fn().mockReturnThis(),
+    distinct: jest.fn().mockReturnThis(),
+    orderBy: jest.fn().mockReturnThis(),
+    addOrderBy: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    getRawMany: jest.fn(),
+    getRawOne: jest.fn(),
+  };
+}
+
+describe('UsersService (leaderboard)', () => {
+  let service: UsersService;
+  let userRepo: { createQueryBuilder: jest.Mock };
+  let qb: ReturnType<typeof createLeaderboardQbMock>;
+  let resolveUniversityId: jest.Mock;
+
+  beforeEach(async () => {
+    qb = createLeaderboardQbMock();
+    userRepo = { createQueryBuilder: jest.fn().mockReturnValue(qb) };
+    resolveUniversityId = jest.fn(async (name: string) =>
+      /tecnol[oó]gica nacional/i.test(name) ? 'uni-utn' : name === 'UBA' ? 'uni-uba' : null,
+    );
+
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        UsersService,
+        { provide: getRepositoryToken(User), useValue: userRepo },
+        { provide: getRepositoryToken(Subject), useValue: {} },
+        { provide: getRepositoryToken(FriendRequest), useValue: {} },
+        { provide: getRepositoryToken(UserTitle), useValue: {} },
+        { provide: getRepositoryToken(UserInventory), useValue: {} },
+        { provide: getRepositoryToken(ProfileBorder), useValue: {} },
+        { provide: getRepositoryToken(Quest), useValue: {} },
+        { provide: getRepositoryToken(PlayerResult), useValue: {} },
+        { provide: DataSource, useValue: {} },
+        { provide: EventEmitter2, useValue: { emit: jest.fn() } },
+        { provide: UniversitiesService, useValue: { resolveUniversityId } },
+      ],
+    }).compile();
+
+    service = moduleRef.get(UsersService);
+  });
+
+  describe('getGlobalLeaderboard', () => {
+    it('assigns rank by array position and orders by elo desc with a username tie-breaker', async () => {
+      qb.getRawMany.mockResolvedValue([
+        {
+          userId: 'u1',
+          username: 'ana',
+          displayName: 'Ana',
+          avatarUrl: null,
+          activeCosmetics: null,
+          elo: 1200,
+        },
+        {
+          userId: 'u2',
+          username: 'bob',
+          displayName: 'Bob',
+          avatarUrl: null,
+          activeCosmetics: null,
+          elo: 1000,
+        },
+      ]);
+
+      const result = await service.getGlobalLeaderboard(20);
+
+      expect(qb.where).not.toHaveBeenCalled();
+      expect(qb.orderBy).toHaveBeenCalledWith('elo', 'DESC');
+      expect(qb.addOrderBy).toHaveBeenCalledWith('u.username', 'ASC');
+      expect(qb.limit).toHaveBeenCalledWith(20);
+      expect(result).toEqual([
+        {
+          rank: 1,
+          userId: 'u1',
+          username: 'ana',
+          displayName: 'Ana',
+          avatarUrl: null,
+          activeCosmetics: null,
+          elo: 1200,
+        },
+        {
+          rank: 2,
+          userId: 'u2',
+          username: 'bob',
+          displayName: 'Bob',
+          avatarUrl: null,
+          activeCosmetics: null,
+          elo: 1000,
+        },
+      ]);
+    });
+
+    it('filters by university_id when one is provided', async () => {
+      qb.getRawMany.mockResolvedValue([]);
+      await service.getGlobalLeaderboard(20, { universityId: 'uni-uba' });
+      expect(qb.where).toHaveBeenCalledWith('u.university_id = :universityId', {
+        universityId: 'uni-uba',
+      });
+      expect(resolveUniversityId).not.toHaveBeenCalled();
+    });
+
+    it('resolves a legacy name, so both UTN spellings share one ranking', async () => {
+      qb.getRawMany.mockResolvedValue([]);
+      await service.getGlobalLeaderboard(20, {
+        university: 'Universidad Tecnológica Nacional',
+      });
+      await service.getGlobalLeaderboard(20, {
+        university: 'Universidad Tecnológica Nacional – FRBA',
+      });
+      expect(qb.where).toHaveBeenNthCalledWith(
+        1,
+        'u.university_id = :universityId',
+        { universityId: 'uni-utn' },
+      );
+      expect(qb.where).toHaveBeenNthCalledWith(
+        2,
+        'u.university_id = :universityId',
+        { universityId: 'uni-utn' },
+      );
+    });
+
+    it('returns an empty ranking for an unknown university name', async () => {
+      await expect(
+        service.getGlobalLeaderboard(20, { university: 'Mi Uni Inventada' }),
+      ).resolves.toEqual([]);
+      expect(qb.getRawMany).not.toHaveBeenCalled();
+    });
+
+    it('defaults the limit to 20 when omitted', async () => {
+      qb.getRawMany.mockResolvedValue([]);
+      await service.getGlobalLeaderboard();
+      expect(qb.limit).toHaveBeenCalledWith(20);
+    });
+  });
+
+  describe('getLeaderboardUniversities', () => {
+    it('returns the catalog names of universities with users, ordered ascending', async () => {
+      qb.getRawMany.mockResolvedValue([
+        { university: 'UBA' },
+        { university: 'UTN' },
+      ]);
+
+      const result = await service.getLeaderboardUniversities();
+
+      expect(qb.distinct).toHaveBeenCalledWith(true);
+      expect(qb.innerJoin).toHaveBeenCalledWith(
+        University,
+        'un',
+        'un.id = u.university_id',
+      );
+      expect(qb.orderBy).toHaveBeenCalledWith('un.name', 'ASC');
+      expect(result).toEqual(['UBA', 'UTN']);
+    });
+  });
+
+  describe('getMyLeaderboardPosition', () => {
+    beforeEach(() => {
+      jest.spyOn(service, 'getElo').mockResolvedValue(1200);
+    });
+
+    it('computes rank from the count of users with a strictly higher elo (global scope)', async () => {
+      qb.getRawOne
+        .mockResolvedValueOnce({ count: '10' })
+        .mockResolvedValueOnce({ count: '3' });
+
+      const result = await service.getMyLeaderboardPosition('u1');
+
+      expect(result).toEqual({ rank: 4, elo: 1200, total: 10 });
+      expect(qb.andWhere).toHaveBeenCalledWith(
+        expect.stringContaining("COALESCE((u.stats->>'elo')::int"),
+        { elo: 1200 },
+      );
+      expect(qb.where).not.toHaveBeenCalled();
+      expect(qb.innerJoin).not.toHaveBeenCalled();
+    });
+
+    it('scopes the count by university when no subject is given', async () => {
+      qb.getRawOne
+        .mockResolvedValueOnce({ count: '5' })
+        .mockResolvedValueOnce({ count: '1' });
+
+      const result = await service.getMyLeaderboardPosition('u1', {
+        university: 'UBA',
+      });
+
+      expect(result).toEqual({ rank: 2, elo: 1200, total: 5 });
+      expect(qb.where).toHaveBeenCalledWith('u.university_id = :universityId', {
+        universityId: 'uni-uba',
+      });
+      expect(qb.innerJoin).not.toHaveBeenCalled();
+    });
+
+    it('scopes the count by subject enrollment when subjectId is given, ignoring university', async () => {
+      qb.getRawOne
+        .mockResolvedValueOnce({ count: '8' })
+        .mockResolvedValueOnce({ count: '0' });
+
+      const result = await service.getMyLeaderboardPosition('u1', {
+        university: 'UBA',
+        subjectId: 'subj-1',
+      });
+
+      expect(result).toEqual({ rank: 1, elo: 1200, total: 8 });
+      expect(qb.innerJoin).toHaveBeenCalledWith(
+        'u.enrolledSubjects',
+        's',
+        's.id = :subjectId',
+        { subjectId: 'subj-1' },
+      );
+      expect(qb.where).not.toHaveBeenCalled();
+    });
+
+    it('returns rank 1 and total 0 when the scope has no users', async () => {
+      qb.getRawOne.mockResolvedValueOnce(undefined).mockResolvedValueOnce(undefined);
+
+      const result = await service.getMyLeaderboardPosition('u1');
+
+      expect(result).toEqual({ rank: 1, elo: 1200, total: 0 });
+    });
   });
 });

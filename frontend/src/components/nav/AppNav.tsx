@@ -9,9 +9,11 @@ import {
   Trophy,
   Sparkles,
   Settings,
+  ShieldCheck,
   LogOut,
 } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
+import { useAuthStore } from '../../store/authStore'
 
 type NavItem = { path: string; label: string; Icon: typeof Home }
 
@@ -62,6 +64,7 @@ function SidebarLink({ path, label, Icon }: NavItem) {
 
 export function DesktopSidebar() {
   const { logout } = useAuth()
+  const isAdmin = useAuthStore((s) => s.user?.role === 'ADMIN')
 
   return (
     <aside className="hidden md:flex md:flex-col md:w-16 lg:w-60 shrink-0 border-r border-edge bg-surface">
@@ -90,6 +93,7 @@ export function DesktopSidebar() {
       </nav>
 
       <div className="mt-auto px-2 lg:px-3 pb-4 pt-2 border-t border-edge flex flex-col gap-1">
+        {isAdmin && <SidebarLink path="/admin" label="Admin" Icon={ShieldCheck} />}
         <SidebarLink path="/plan" label="Plan" Icon={Sparkles} />
         <SidebarLink path="/settings" label="Ajustes" Icon={Settings} />
         <button

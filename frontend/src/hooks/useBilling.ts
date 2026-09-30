@@ -4,6 +4,7 @@ import {
   billingService,
   type BillingState,
   type PlanDescriptor,
+  type ProQuote,
 } from '../services/billingService'
 
 function messageFromError(err: unknown, fallback: string): string {
@@ -21,8 +22,20 @@ export function useBilling() {
   const [plans, setPlans] = useState<PlanDescriptor[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [quote, setQuote] = useState<ProQuote | null>(null)
+
+  // The Mercado Pago price is optional: if it can't be loaded the page still
+  // works (promo codes) and the pay button is just hidden.
+  const loadQuote = useCallback(async () => {
+    try {
+      setQuote(await billingService.getQuote())
+    } catch {
+      setQuote({ available: false })
+    }
+  }, [])
 
   const recargar = useCallback(async () => {
+    void loadQuote()
     setLoading(true)
     setError(null)
     try {
@@ -37,7 +50,7 @@ export function useBilling() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [loadQuote])
 
   useEffect(() => {
     void recargar()
@@ -49,5 +62,24 @@ export function useBilling() {
     return next
   }, [])
 
-  return { state, plans, loading, error, recargar, redeem, messageFromError }
+  /** Re-reads the plan without the full-page loading state (e.g. after a payment). */
+  const refreshState = useCallback(async () => {
+    try {
+      setState(await billingService.getState())
+    } catch {
+      // Keep the current state; the next full reload will surface errors.
+    }
+  }, [])
+
+  return {
+    state,
+    plans,
+    quote,
+    loading,
+    error,
+    recargar,
+    redeem,
+    refreshState,
+    messageFromError,
+  }
 }

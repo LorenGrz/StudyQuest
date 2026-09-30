@@ -10,8 +10,11 @@ export interface RegisterPayload {
   password: string
   username: string
   displayName: string
-  university: string
-  career: string
+  universityId: string
+  /** A career from the catalog (GET /universities/:id/careers). */
+  careerId?: string
+  /** "Otra (no está en la lista)": creates a pending career request. */
+  careerName?: string
   year: number
   avatarUrl?: string
 }

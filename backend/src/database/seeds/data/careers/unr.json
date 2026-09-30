@@ -1,0 +1,612 @@
+{
+  "university": {
+    "name": "Universidad Nacional de Rosario",
+    "shortName": "UNR",
+    "website": "https://www.unr.edu.ar",
+    "careersSourceUrls": [
+      "https://unr.edu.ar/buscador-de-carreras-y-diplomaturas/"
+    ]
+  },
+  "careers": [
+    {
+      "name": "Arquitectura",
+      "faculty": "Facultad de Arquitectura, Planeamiento y Diseño",
+      "level": "grado",
+      "sourceUrl": "https://fapyd.unr.edu.ar/"
+    },
+    {
+      "name": "Licenciatura en Diseño Gráfico",
+      "faculty": "Facultad de Arquitectura, Planeamiento y Diseño",
+      "level": "grado",
+      "sourceUrl": "https://fapyd.unr.edu.ar/"
+    },
+    {
+      "name": "Licenciatura en Diseño Industrial",
+      "faculty": "Facultad de Arquitectura, Planeamiento y Diseño",
+      "level": "grado",
+      "sourceUrl": "https://fapyd.unr.edu.ar/"
+    },
+    {
+      "name": "Profesorado en Arquitectura",
+      "faculty": "Facultad de Arquitectura, Planeamiento y Diseño",
+      "level": "grado",
+      "sourceUrl": "https://fapyd.unr.edu.ar/"
+    },
+    {
+      "name": "Licenciatura en Ciencia Política",
+      "faculty": "Facultad de Ciencia Política y Relaciones Internacionales",
+      "level": "grado",
+      "sourceUrl": "https://fcpolit.unr.edu.ar/escuelacienciapolitica/liccienciapolitica/"
+    },
+    {
+      "name": "Licenciatura en Comunicación Social",
+      "faculty": "Facultad de Ciencia Política y Relaciones Internacionales",
+      "level": "grado",
+      "sourceUrl": "https://fcpolit.unr.edu.ar/escuelacomsoc/licenciatura/"
+    },
+    {
+      "name": "Licenciatura en Relaciones Internacionales",
+      "faculty": "Facultad de Ciencia Política y Relaciones Internacionales",
+      "level": "grado",
+      "sourceUrl": "https://fcpolit.unr.edu.ar/escuelarrii/licrrii/"
+    },
+    {
+      "name": "Licenciatura en Seguridad Ciudadana",
+      "faculty": "Facultad de Ciencia Política y Relaciones Internacionales",
+      "level": "grado",
+      "sourceUrl": "https://fcpolit.unr.edu.ar/escuelacienciapolitica/seguridadciudadana/"
+    },
+    {
+      "name": "Licenciatura en Trabajo Social",
+      "faculty": "Facultad de Ciencia Política y Relaciones Internacionales",
+      "level": "grado",
+      "sourceUrl": "https://fcpolit.unr.edu.ar/escuelats/lictrabajosocial/"
+    },
+    {
+      "name": "Licenciatura en Turismo",
+      "faculty": "Facultad de Ciencia Política y Relaciones Internacionales",
+      "level": "grado",
+      "sourceUrl": "https://fcpolit.unr.edu.ar/licturismo"
+    },
+    {
+      "name": "Profesorado de Comunicación Educativa",
+      "faculty": "Facultad de Ciencia Política y Relaciones Internacionales",
+      "level": "grado",
+      "sourceUrl": "https://fcpolit.unr.edu.ar/escuelacomsoc/profcomeducativa/"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Administración Pública",
+      "faculty": "Facultad de Ciencia Política y Relaciones Internacionales",
+      "level": "pregrado",
+      "sourceUrl": "https://fcpolit.unr.edu.ar/escuelacienciapolitica/tuap/"
+    },
+    {
+      "name": "Tecnicatura en Relaciones del Trabajo",
+      "faculty": "Facultad de Ciencia Política y Relaciones Internacionales",
+      "level": "pregrado",
+      "sourceUrl": "https://fcpolit.unr.edu.ar/escuelacienciapolitica/tecnicatura-en-relaciones-del-trabajo/"
+    },
+    {
+      "name": "Ingeniería Agronómica",
+      "faculty": "Facultad de Ciencias Agrarias",
+      "level": "grado",
+      "sourceUrl": "https://fcagr.unr.edu.ar/ingenieria-agronomica/"
+    },
+    {
+      "name": "Licenciatura en Recursos Naturales",
+      "faculty": "Facultad de Ciencias Agrarias",
+      "level": "grado",
+      "sourceUrl": "https://fcagr.unr.edu.ar/licenciatura-rrnn/"
+    },
+    {
+      "name": "Bioquímica",
+      "faculty": "Facultad de Ciencias Bioquímicas y Farmacéuticas",
+      "level": "grado",
+      "sourceUrl": "https://www.fbioyf.unr.edu.ar/website/ofertaeducativa/bioquimica.php"
+    },
+    {
+      "name": "Farmacia",
+      "faculty": "Facultad de Ciencias Bioquímicas y Farmacéuticas",
+      "level": "grado",
+      "sourceUrl": "https://www.fbioyf.unr.edu.ar/website/ofertaeducativa/farmacia.php"
+    },
+    {
+      "name": "Licenciatura en Biotecnología",
+      "faculty": "Facultad de Ciencias Bioquímicas y Farmacéuticas",
+      "level": "grado",
+      "sourceUrl": "https://www.fbioyf.unr.edu.ar/website/ofertaeducativa/licbiotecnologia.php"
+    },
+    {
+      "name": "Licenciatura en Ciencia y Tecnología de los Alimentos",
+      "faculty": "Facultad de Ciencias Bioquímicas y Farmacéuticas",
+      "level": "grado",
+      "sourceUrl": "https://www.fbioyf.unr.edu.ar/website/ofertaeducativa/liccytalimentos.php"
+    },
+    {
+      "name": "Licenciatura en Química",
+      "faculty": "Facultad de Ciencias Bioquímicas y Farmacéuticas",
+      "level": "grado",
+      "sourceUrl": "https://www.fbioyf.unr.edu.ar/website/ofertaeducativa/licquimica.php"
+    },
+    {
+      "name": "Profesorado en Química",
+      "faculty": "Facultad de Ciencias Bioquímicas y Farmacéuticas",
+      "level": "grado",
+      "sourceUrl": "https://www.fbioyf.unr.edu.ar/website/ofertaeducativa/profquimica.php"
+    },
+    {
+      "name": "Contador Público",
+      "faculty": "Facultad de Ciencias Económicas y Estadística",
+      "level": "grado",
+      "sourceUrl": "https://www.fcecon.unr.edu.ar/"
+    },
+    {
+      "name": "Licenciatura en Administración",
+      "faculty": "Facultad de Ciencias Económicas y Estadística",
+      "level": "grado",
+      "sourceUrl": "https://www.fcecon.unr.edu.ar/"
+    },
+    {
+      "name": "Licenciatura en Ciencia de Datos",
+      "faculty": "Facultad de Ciencias Económicas y Estadística",
+      "level": "grado",
+      "sourceUrl": "https://www.fcecon.unr.edu.ar/"
+    },
+    {
+      "name": "Licenciatura en Economía",
+      "faculty": "Facultad de Ciencias Económicas y Estadística",
+      "level": "grado",
+      "sourceUrl": "https://www.fcecon.unr.edu.ar/"
+    },
+    {
+      "name": "Licenciatura en Estadística",
+      "faculty": "Facultad de Ciencias Económicas y Estadística",
+      "level": "grado",
+      "sourceUrl": "https://www.fcecon.unr.edu.ar/"
+    },
+    {
+      "name": "Profesorado en Administración",
+      "faculty": "Facultad de Ciencias Económicas y Estadística",
+      "level": "grado",
+      "sourceUrl": "https://www.fcecon.unr.edu.ar/"
+    },
+    {
+      "name": "Profesorado en Contabilidad",
+      "faculty": "Facultad de Ciencias Económicas y Estadística",
+      "level": "grado",
+      "sourceUrl": "https://www.fcecon.unr.edu.ar/"
+    },
+    {
+      "name": "Profesorado en Economía",
+      "faculty": "Facultad de Ciencias Económicas y Estadística",
+      "level": "grado",
+      "sourceUrl": "https://www.fcecon.unr.edu.ar/"
+    },
+    {
+      "name": "Profesorado en Estadística",
+      "faculty": "Facultad de Ciencias Económicas y Estadística",
+      "level": "grado",
+      "sourceUrl": "https://www.fcecon.unr.edu.ar/"
+    },
+    {
+      "name": "Agrimensura",
+      "faculty": "Facultad de Ciencias Exactas, Ingeniería y Agrimensura",
+      "level": "grado",
+      "sourceUrl": "https://web.fceia.unr.edu.ar/es/agrimensura.html"
+    },
+    {
+      "name": "Ingeniería Civil",
+      "faculty": "Facultad de Ciencias Exactas, Ingeniería y Agrimensura",
+      "level": "grado",
+      "sourceUrl": "https://web.fceia.unr.edu.ar/es/ingenier%c3%ada-civil.html"
+    },
+    {
+      "name": "Ingeniería Electrónica",
+      "faculty": "Facultad de Ciencias Exactas, Ingeniería y Agrimensura",
+      "level": "grado",
+      "sourceUrl": "https://web.fceia.unr.edu.ar/es/ingenieria-electr%c3%b3nica.html"
+    },
+    {
+      "name": "Ingeniería Eléctrica",
+      "faculty": "Facultad de Ciencias Exactas, Ingeniería y Agrimensura",
+      "level": "grado",
+      "sourceUrl": "https://web.fceia.unr.edu.ar/es/ingenier%c3%ada-el%c3%a9ctrica.html"
+    },
+    {
+      "name": "Ingeniería Industrial",
+      "faculty": "Facultad de Ciencias Exactas, Ingeniería y Agrimensura",
+      "level": "grado",
+      "sourceUrl": "https://web.fceia.unr.edu.ar/es/ingenier%c3%ada-industrial.html"
+    },
+    {
+      "name": "Ingeniería Mecánica",
+      "faculty": "Facultad de Ciencias Exactas, Ingeniería y Agrimensura",
+      "level": "grado",
+      "sourceUrl": "https://web.fceia.unr.edu.ar/es/ingenier%c3%ada-mec%c3%a1nica.html"
+    },
+    {
+      "name": "Licenciatura en Ciencias de la Computación",
+      "faculty": "Facultad de Ciencias Exactas, Ingeniería y Agrimensura",
+      "level": "grado",
+      "sourceUrl": "https://web.fceia.unr.edu.ar/es/licenciatura-en-ciencias-de-la-computaci%c3%b3n.html"
+    },
+    {
+      "name": "Licenciatura en Física",
+      "faculty": "Facultad de Ciencias Exactas, Ingeniería y Agrimensura",
+      "level": "grado",
+      "sourceUrl": "https://web.fceia.unr.edu.ar/es/licenciatura-en-f%c3%adsica.html"
+    },
+    {
+      "name": "Licenciatura en Matemática",
+      "faculty": "Facultad de Ciencias Exactas, Ingeniería y Agrimensura",
+      "level": "grado",
+      "sourceUrl": "https://web.fceia.unr.edu.ar/es/licenciatura-en-matem%c3%a1tica.html"
+    },
+    {
+      "name": "Profesorado en Física",
+      "faculty": "Facultad de Ciencias Exactas, Ingeniería y Agrimensura",
+      "level": "grado",
+      "sourceUrl": "https://web.fceia.unr.edu.ar/es/profesorado-en-f%c3%adsica.html"
+    },
+    {
+      "name": "Profesorado en Matemática",
+      "faculty": "Facultad de Ciencias Exactas, Ingeniería y Agrimensura",
+      "level": "grado",
+      "sourceUrl": "https://web.fceia.unr.edu.ar/es/profesorado-de-matem%c3%a1tica.html"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Inteligencia Artificial",
+      "faculty": "Facultad de Ciencias Exactas, Ingeniería y Agrimensura",
+      "level": "pregrado",
+      "sourceUrl": "https://web.fceia.unr.edu.ar/es/carreras/carreras-de-pregrado/2165-tecnicatura-universitaria-en-inteligencia-artificial.html"
+    },
+    {
+      "name": "Licenciatura en Enfermería",
+      "faculty": "Facultad de Ciencias Médicas",
+      "level": "grado",
+      "sourceUrl": "https://fcm.unr.edu.ar/enfermeria/"
+    },
+    {
+      "name": "Licenciatura en Fonoaudiología",
+      "faculty": "Facultad de Ciencias Médicas",
+      "level": "grado",
+      "sourceUrl": "https://fcm.unr.edu.ar/fonoaudiologia/"
+    },
+    {
+      "name": "Licenciatura en Terapia Ocupacional",
+      "faculty": "Facultad de Ciencias Médicas",
+      "level": "grado",
+      "sourceUrl": "https://fcm.unr.edu.ar/terapiaocupacional/"
+    },
+    {
+      "name": "Medicina",
+      "faculty": "Facultad de Ciencias Médicas",
+      "level": "grado",
+      "sourceUrl": "https://fcm.unr.edu.ar/medicina/"
+    },
+    {
+      "name": "Medicina Veterinaria",
+      "faculty": "Facultad de Ciencias Veterinarias",
+      "level": "grado",
+      "sourceUrl": "https://fveter.unr.edu.ar/"
+    },
+    {
+      "name": "Licenciatura en Actividad Física y Deporte",
+      "faculty": "Facultad de Ciencias del Movimiento Humano y el Cuidado",
+      "level": "grado",
+      "sourceUrl": "https://famhyc.unr.edu.ar/licenciatura-en-actividad-fisica-y-deporte/"
+    },
+    {
+      "name": "Licenciatura en Sistemas Integrales de Cuidado",
+      "faculty": "Facultad de Ciencias del Movimiento Humano y el Cuidado",
+      "level": "grado",
+      "sourceUrl": "https://famhyc.unr.edu.ar/licenciatura-en-sistemas-integrales-de-cuidado/"
+    },
+    {
+      "name": "Profesorado Universitario en Educación Física",
+      "faculty": "Facultad de Ciencias del Movimiento Humano y el Cuidado",
+      "level": "grado",
+      "sourceUrl": "https://famhyc.unr.edu.ar/profesorado-universitario-en-educacion-fisica/"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Acompañamiento y Cuidado de las Personas Mayores",
+      "faculty": "Facultad de Ciencias del Movimiento Humano y el Cuidado",
+      "level": "pregrado",
+      "sourceUrl": "https://famhyc.unr.edu.ar/tecnicatura-universitaria-en-acompanamiento-y-cuidado-de-las-personas-mayores/"
+    },
+    {
+      "name": "Abogacía",
+      "faculty": "Facultad de Derecho",
+      "level": "grado",
+      "sourceUrl": "https://www.fder.unr.edu.ar/wp-content/uploads/2021/03/PLAN_2012-1.pdf"
+    },
+    {
+      "name": "Licenciatura en Corretaje Inmobiliario",
+      "faculty": "Facultad de Derecho",
+      "level": "grado",
+      "sourceUrl": "https://www.fder.unr.edu.ar"
+    },
+    {
+      "name": "Profesorado en Derecho",
+      "faculty": "Facultad de Derecho",
+      "level": "grado",
+      "sourceUrl": "https://www.fder.unr.edu.ar"
+    },
+    {
+      "name": "Licenciatura en Antropología",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/licenciatura-en-antropologia/"
+    },
+    {
+      "name": "Licenciatura en Bellas Artes",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/licenciatura-en-bellas-artes/"
+    },
+    {
+      "name": "Licenciatura en Canto",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/licenciatura-en-canto/"
+    },
+    {
+      "name": "Licenciatura en Ciencias de la Educación",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/licenciatura-en-ciencias-de-la-educacion/"
+    },
+    {
+      "name": "Licenciatura en Composición",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/licenciatura-en-composicion/"
+    },
+    {
+      "name": "Licenciatura en Cuerdas (Violín, Viola, Violoncello y Contrabajo)",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/licenciatura-en-cuerdas-violin-viola-violoncello-y-contrabajo/"
+    },
+    {
+      "name": "Licenciatura en Dirección Coral",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/licenciatura-en-direccion-coral/"
+    },
+    {
+      "name": "Licenciatura en Diseño de Indumentaria y Textil",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/diseno-de-indumentaria-y-textil/"
+    },
+    {
+      "name": "Licenciatura en Educación Musical",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/licenciatura-en-educacion-musical/"
+    },
+    {
+      "name": "Licenciatura en Filosofía",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/licenciatura-en-filosofia/"
+    },
+    {
+      "name": "Licenciatura en Gestión Cultural",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/licenciatura-en-gestion-cultural/"
+    },
+    {
+      "name": "Licenciatura en Guitarra",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/licenciatura-en-guitarra/"
+    },
+    {
+      "name": "Licenciatura en Historia",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/licenciatura-en-historia/"
+    },
+    {
+      "name": "Licenciatura en Letras",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/licenciatura-en-letras/"
+    },
+    {
+      "name": "Licenciatura en Piano",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/licenciatura-en-piano/"
+    },
+    {
+      "name": "Licenciatura en Portugués",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/licenciatura-en-portugues/"
+    },
+    {
+      "name": "Licenciatura en Tecnologías Aplicadas al Arte Sonoro",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/licenciatura-en-tecnologias-aplicadas-al-arte-sonoro/"
+    },
+    {
+      "name": "Licenciatura en Vientos (Flauta, Clarinete, Saxofón, Fagot, Oboe, Trompeta, Trombón, Trompa)",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/licenciatura-en-vientos-flauta-clarinete-saxofon-fagot-oboe-trompeta-trombon-trompa/"
+    },
+    {
+      "name": "Licenciatura en Órgano",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/licenciatura-en-organo/"
+    },
+    {
+      "name": "Profesorado en Antropología",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/profesorado-en-antropologia/"
+    },
+    {
+      "name": "Profesorado en Bellas Artes",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/profesorado-en-bellas-artes/"
+    },
+    {
+      "name": "Profesorado en Canto",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/profesorado-en-canto/"
+    },
+    {
+      "name": "Profesorado en Ciencias de la Educación",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/profesorado-en-ciencias-de-la-educacion/"
+    },
+    {
+      "name": "Profesorado en Composición",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/profesorado-en-composicion/"
+    },
+    {
+      "name": "Profesorado en Cuerdas (Violín, Viola, Violoncello y Contrabajo)",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/profesorado-en-cuerdas-violin-viola-violoncello-y-contrabajo/"
+    },
+    {
+      "name": "Profesorado en Dirección Coral",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/profesorado-en-direccion-coral/"
+    },
+    {
+      "name": "Profesorado en Educación Musical",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/profesorado-en-educacion-musical/"
+    },
+    {
+      "name": "Profesorado en Filosofía",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/profesorado-en-filosofia/"
+    },
+    {
+      "name": "Profesorado en Guitarra",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/profesorado-en-guitarra/"
+    },
+    {
+      "name": "Profesorado en Historia",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/profesorado-en-historia/"
+    },
+    {
+      "name": "Profesorado en Letras",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/profesorado-en-letras/"
+    },
+    {
+      "name": "Profesorado en Piano",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/profesorado-en-piano/"
+    },
+    {
+      "name": "Profesorado en Portugués",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/profesorado-en-portugues/"
+    },
+    {
+      "name": "Profesorado en Vientos (Flauta, Clarinete, Saxofón, Fagot, Oboe, Trompeta, Trombón, Trompa)",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/profesorado-en-vientos-flauta-clarinete-saxofon-fagot-oboe-trompeta-trombon-trompa/"
+    },
+    {
+      "name": "Profesorado en Órgano",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/profesorado-en-organo/"
+    },
+    {
+      "name": "Tecnicatura en Bajo Eléctrico",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "pregrado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/tecnicatura-en-bajo-electrico/"
+    },
+    {
+      "name": "Tecnicatura en Bandoneón",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "pregrado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/tecnicatura-en-bandoneon/"
+    },
+    {
+      "name": "Tecnicatura en Batería",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "pregrado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/tecnicatura-en-bateria/"
+    },
+    {
+      "name": "Tecnicatura en Diseño de Indumentaria y Textil",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "pregrado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/tecnicatura-en-diseno-de-indumentaria-y-textil/"
+    },
+    {
+      "name": "Tecnicatura en Gestión Cultural",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "pregrado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/tecnicatura-en-gestion-cultural/"
+    },
+    {
+      "name": "Tecnicatura en Guitarra Eléctrica",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "pregrado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/tecnicatura-en-guitarra-electrica/"
+    },
+    {
+      "name": "Traductor Público de Portugués",
+      "faculty": "Facultad de Humanidades y Artes",
+      "level": "grado",
+      "sourceUrl": "https://fhumyar.unr.edu.ar/traductor-publico-nacional-de-portugues/"
+    },
+    {
+      "name": "Odontología",
+      "faculty": "Facultad de Odontología",
+      "level": "grado",
+      "sourceUrl": "https://fodonto.unr.edu.ar/"
+    },
+    {
+      "name": "Profesorado en Psicología",
+      "faculty": "Facultad de Psicología",
+      "level": "grado",
+      "sourceUrl": "https://fpsico.unr.edu.ar/"
+    },
+    {
+      "name": "Psicología",
+      "faculty": "Facultad de Psicología",
+      "level": "grado",
+      "sourceUrl": "https://fpsico.unr.edu.ar/"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Acompañamiento Terapéutico",
+      "faculty": "Facultad de Psicología",
+      "level": "pregrado",
+      "sourceUrl": "https://fpsico.unr.edu.ar/carreras/tecnicatura-universitaria-en-acompanamiento-terapeutico/"
+    }
+  ]
+}

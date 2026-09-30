@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Param,
+  ParseUUIDPipe,
   Body,
   Request,
   UseGuards,
@@ -10,6 +11,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { SkillTreeService } from './skill-tree.service';
+import { CommunitySubjectsService } from '../subjects/community-subjects.service';
 import { CreateSkillNodeDto } from '../../common/dto';
 
 @ApiTags('skill-tree')
@@ -17,7 +19,10 @@ import { CreateSkillNodeDto } from '../../common/dto';
 @UseGuards(JwtAuthGuard)
 @Controller('subjects/:subjectId/skill-tree')
 export class SkillTreeController {
-  constructor(private readonly skillTreeService: SkillTreeService) {}
+  constructor(
+    private readonly skillTreeService: SkillTreeService,
+    private readonly communitySubjects: CommunitySubjectsService,
+  ) {}
 
   @Get()
   getForUser(@Param('subjectId') subjectId: string, @Request() req: any) {
@@ -30,13 +35,21 @@ export class SkillTreeController {
   }
 
   @Post('nodes')
-  createNode(
-    @Param('subjectId') subjectId: string,
+  async createNode(
+    @Request() req: any,
+    @Param('subjectId', ParseUUIDPipe) subjectId: string,
     @Body() dto: CreateSkillNodeDto,
   ) {
+    // Visibility only (no enrollment rule here): 404 for subjects the user
+    // can't see; merged ids attach to the target.
+    const target = await this.communitySubjects.resolveAttachable(
+      req.user.userId,
+      subjectId,
+      { requireEnrollment: false },
+    );
     return this.skillTreeService.createNode({
       ...dto,
-      subjectId,
+      subjectId: target,
     });
   }
 }

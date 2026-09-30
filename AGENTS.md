@@ -49,7 +49,9 @@ Primary backend areas:
 
 - `backend/src/modules/auth`
 - `backend/src/modules/users`
-- `backend/src/modules/subjects`
+- `backend/src/modules/subjects` (incl. community subjects: suggest, create with 3-layer validation, reports)
+- `backend/src/modules/universities` (official universities/careers catalog, "Otra" career requests)
+- `backend/src/modules/admin` (`/admin/*`, ADMIN only: career requests, community-subject moderation and merge)
 - `backend/src/modules/parties`
 - `backend/src/modules/quests`
 - `backend/src/modules/skill-tree`
@@ -101,8 +103,18 @@ docker compose up -d postgres dynamodb-local
 ```bash
 cd backend
 pnpm install
+pnpm run migration:run   # with an EXISTING local DB: before start:dev
 pnpm run start:dev
 ```
+
+With an existing local DB (already has data), run `pnpm migration:run` before
+`start:dev`: the `TYPEORM_SYNC=true` boot sync fails adding the NOT NULL
+`subjects.name_normalized` to rows that have no value yet, and sync alone never
+creates the partial unique index `UQ_subjects_university_name_normalized` nor
+the GIN trigram index (they are `synchronize: false`, migration-only). If that
+DB has no `migrations` table, apply the same baseline as
+`deploy/lightsail/deploy.sh` first so `ResetUsersEloToZero` doesn't re-run.
+A brand-new empty DB can still boot with sync first and run migrations after.
 
 4. Seed base data after backend has initialized the schema:
 
@@ -187,11 +199,19 @@ In Docker Compose those are already provided for the `web` service.
 ### Quests
 
 - Users create quests by uploading a source document (PDF, DOCX/DOC, MD, TXT, RTF, PPTX, CSV, HTML, EPUB, XLSX — anything MarkItDown parses). The optional "instrucciones / temas" text field is question guidance (topics/focus/difficulty), not the study source.
-- Subscription plans are manual tiers (`free` / `pro`) — no payment processor. `src/common/plans.ts` is the single source of truth for per-plan limits (quests/day, upload MB, instructions length, AI model tier, party size). `BillingModule` exposes `GET/POST /billing/*`; `pro` is granted by a promo code or an admin and lapses at `planExpiresAt`.
+- Subscription plans are `free` / `pro`. Pro comes from a promo code, an admin grant, or a Mercado Pago Checkout Pro payment (`backend/src/modules/billing/payments`, see CLAUDE.md "Payments"). `src/common/plans.ts` is the single source of truth for per-plan limits (quests/day, upload MB, instructions length, AI model tier, party size). `BillingModule` exposes `GET/POST /billing/*`; `pro` lapses at `planExpiresAt`.
 - Party chat also supports file and audio uploads
 - Backend stores uploaded quest source files in S3 (`quests/<uuid>.<ext>`), exposed as `/api/v1/files/<key>` (302 to a presigned URL)
 - Quiz content (questions + options) lives in DynamoDB, one document per quest (table `DYNAMO_QUIZZES_TABLE`, PK `questId`, TTL `expiresAt`). Postgres keeps `Quest` metadata (incl. `question_count`) and `PlayerResult`. Access goes through `QuizContentRepository` (`backend/src/modules/quests/quiz-content/`); unit tests use `InMemoryQuizContentRepository`. Write order on generation: Dynamo put → quest `ready`. Deletes (user + retention) remove the Postgres row first, then the Dynamo item.
 - Local: `docker compose up -d dynamodb-local`, set `DYNAMO_ENDPOINT=http://localhost:8000`, then `pnpm run dynamo:create-table`. One-off backfill from the legacy `quiz_questions`/`quiz_options` tables: `pnpm run migrate:quizzes-dynamo -- --dry-run`, then without the flag.
+
+### Catalog and community subjects
+
+- Universities/careers: curated JSON in `backend/src/database/seeds/data/careers/` (`pnpm careers:validate`), applied with `pnpm careers:sync [--dry-run]` (prod: `node dist/database/scripts/careers-sync.js`, also run by `deploy.sh`). Careers are retired, never deleted.
+- Official informática subjects: `seeds/data/official-subjects.ts` (`pnpm subjects:validate-official`, which rejects generic "Electiva I"-style slots), applied manually with `pnpm subjects:seed-official --dry-run` then without the flag (prod: `node dist/database/scripts/seed-official-subjects.js`). Idempotent; never modifies active legacy subjects or rows hidden by moderation.
+- Students create subjects via `POST /subjects/community` (private at first, public at 3 enrolled users, hidden at 3 reports). Validation: format → profanity → Bedrock classifier (fail-closed). Visibility checks live in `CommunitySubjectsService.resolveReadable` / `resolveAttachable`: reuse them for any new entry point that takes a `subjectId`.
+- Admin panel: frontend `/admin` (ADMIN role) over `backend/src/modules/admin`. Every admin action writes `subjects.moderation`.
+- Plan and state: `docs/plans/2026-09-community-subjects.md`, `docs/plans/HANDOFF.md`.
 
 ### Study bot (Pro)
 
