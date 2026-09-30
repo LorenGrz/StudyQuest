@@ -25,6 +25,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "seed": "ts-node -P tsconfig.seed.json src/database/seeds/seed.ts",
     "seed:skill-tree": "ts-node -P tsconfig.seed.json src/database/seeds/skill-tree.seed.ts",
+    "subjects:validate-official": "ts-node -P tsconfig.seed.json src/database/seeds/data/validate-official-subjects.ts",
     "migration:run": "TS_NODE_PROJECT=tsconfig.seed.json typeorm-ts-node-commonjs migration:run -d src/config/typeorm.config.ts",
     "migrate:quizzes-dynamo": "ts-node -P tsconfig.seed.json src/database/scripts/migrate-quizzes-to-dynamo.ts",
     "dynamo:create-table": "ts-node -P tsconfig.seed.json src/database/scripts/create-dynamo-table.ts",
