@@ -12,38 +12,30 @@
  *   (detecta un "Programación 1" sin corregir a numeral romano — el resto de
  *   universidades escribe algunas materias con arábigo en su plan oficial
  *   real, ver `official-subjects.ts`, así que esa regla no aplica ahí).
+ * - Cada (university, career) existe en `careers/*.json`.
  *
  * Imprime conteos por universidad y por carrera.
  */
+import { readdirSync, readFileSync } from 'fs';
+import { join } from 'path';
+import { normalizeSubjectName } from '../../../common/subject-name';
 import { OFFICIAL_SUBJECTS, OfficialSubjectRow } from './official-subjects';
 
 const UNSAM = 'Universidad Nacional de San Martín';
 
-const ARABIC_TO_ROMAN = [
-  '',
-  'i',
-  'ii',
-  'iii',
-  'iv',
-  'v',
-  'vi',
-  'vii',
-  'viii',
-  'ix',
-  'x',
-];
-
-// TODO: use common/subject-name.ts after R1 merges (same normalization,
-// already shared with the backend and the backfill migration).
-/** lowercase, strip accents (NFD), arabic 1-10 standalone tokens -> roman,
- * strip decorative punctuation, collapse spaces. */
-function normalizeSubjectName(raw: string): string {
-  let s = raw.normalize('NFD').replace(/[̀-ͯ]/g, '');
-  s = s.toLowerCase();
-  s = s.replace(/\b(10|[1-9])\b/g, (m) => ARABIC_TO_ROMAN[parseInt(m, 10)]);
-  s = s.replace(/[.,:()\-]/g, ' ');
-  s = s.replace(/\s+/g, ' ').trim();
-  return s;
+/** `universidad|||carrera` de todos los `careers/*.json` (catálogo C1). */
+function loadCatalogCareers(): Set<string> {
+  const dir = join(__dirname, 'careers');
+  const keys = new Set<string>();
+  for (const file of readdirSync(dir).filter((f) => f.endsWith('.json'))) {
+    const data = JSON.parse(readFileSync(join(dir, file), 'utf8')) as {
+      university: { name: string };
+      careers: { name: string }[];
+    };
+    for (const c of data.careers)
+      keys.add(`${data.university.name}|||${c.name}`);
+  }
+  return keys;
 }
 
 function endsInArabicDigit(name: string): boolean {
@@ -70,7 +62,16 @@ function main(): void {
   // cross-career share reporting)
   const nameCareersByUni = new Map<string, Map<string, Set<string>>>();
 
+  const catalogCareers = loadCatalogCareers();
+
   for (const row of rows) {
+    if (!catalogCareers.has(`${row.university}|||${row.career}`)) {
+      issues.push({
+        level: 'error',
+        message: `Carrera fuera del catálogo careers/*.json: ${row.university} / ${row.career}`,
+      });
+    }
+
     if (!row.name || row.name.trim().length === 0) {
       issues.push({
         level: 'error',
