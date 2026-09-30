@@ -1,9 +1,26 @@
-# Handoff — StudyQuest (actualizado 2026-09-29)
+# Handoff — StudyQuest (actualizado 2026-09-30)
 
 Punto de entrada para retomar el trabajo en una sesión nueva. Leé esto, después el `CLAUDE.md` del proyecto y el plan activo.
 
-- **Plan activo:** [`2026-09-community-subjects.md`](./2026-09-community-subjects.md): catálogo oficial de carreras + materias creadas por la comunidad.
-- **Estado del plan:** aprobado; solo T0 (este handoff) hecho. Lo siguiente es **R1** (modelo de datos) en paralelo con **C1** y **C2**.
+- **Plan:** [`2026-09-community-subjects.md`](./2026-09-community-subjects.md) (catálogo oficial de carreras + materias de la comunidad). **Desplegado en prod el 2026-09-30** (`dev` @ `6924302`).
+  - T5 hecho:
+    - backup `s3://studyquest-files-493735739644/backups/studyquest-2026-09-30T18-42-47Z.dump.gz`;
+    - 3 migraciones (`1790500000000`, `1790510000000`, `1790600000000`);
+    - `careers:sync`: 601 cambios, la 2ª corrida da 0;
+    - `seed-official`: 514 materias (464 nuevas + 50 promovidas), la 2ª corrida da 0; 7 legacy activas intactas;
+    - smoke OK: registro con carrera y con "Otra", suggest, materia privada, insulto rechazado y llamada real a Nova Lite (589 ms). Las cuentas de prueba se borraron.
+  - Estado en prod:
+    - 9 usuarios, todos vinculados a una universidad;
+    - sus carreras legacy quedaron `retired`, así que tienen que elegirla de nuevo en el perfil;
+    - UNC "Ingeniería en Sistemas de Información" no existe como carrera.
+  - **Pendiente:**
+    - la rutina trimestral de `careers:sync` (`/schedule`), que espera el OK de Loren;
+    - borrar las ramas y worktrees `catalog-*`, `agent-*` y `feature/community-subjects*`.
+  - **Deuda:**
+    - cualquier usuario logueado puede crear skill nodes;
+    - el picker de merge del admin solo lista la pestaña actual;
+    - los errores de lint `set-state-in-effect` en los hooks nuevos (patrón existente);
+    - `GET /subjects/:id` para materias fusionadas devuelve la materia destino, con otro `id`.
 
 ## Qué está en producción
 
@@ -22,6 +39,34 @@ Punto de entrada para retomar el trabajo en una sesión nueva. Leé esto, despu�
   - Código en `backend/src/modules/billing/payments/`, migraciones `1790200000000` a `1790400000000`.
 - **Usernames y universidad:** usernames siempre en minúsculas y con `@` fijo en la UI. Universidad elegida desde un select.
 - **Throttling:** el throttler `strict` es opt-in (`common/throttle.ts`) y `trust proxy` = 1.
+
+## Runbook T5: rollout de catálogo + materias de la comunidad
+
+Requiere OK de Loren antes de tocar prod. SSH: `ssh -i <lightsail.pem> ubuntu@54.156.9.166`. `C` = `docker compose -f /opt/studyquest/deploy/lightsail/docker-compose.prod.yml --env-file /opt/studyquest/deploy/lightsail/.env`.
+
+1. **Antes de mergear**, revisar los strings de universidad que hay en prod (el backfill solo crea universidades a partir de `subjects.university`):
+   `$C exec -T postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT university, count(*) FROM users GROUP BY 1 ORDER BY 2 DESC"'`
+2. **Merge:** `feature/community-subjects` → `dev` con `--no-ff`. El push a `dev` despliega el frontend (W1/W2/W3) en GH Pages; el backend tiene que desplegarse enseguida, porque el registro nuevo depende de `/universities`.
+3. **Backup:** `/opt/studyquest/deploy/lightsail/backup.sh`, y confirmar que el dump quedó en `s3://…/backups/`.
+4. **Deploy:** `/opt/studyquest/deploy/lightsail/deploy.sh` corre las migraciones `1790500000000`, `1790510000000`, `1790600000000` y después `careers:sync`. Revisar en el log las altas y retiros de carreras.
+5. **Materias oficiales:**
+   - `$C exec -T api node dist/database/scripts/seed-official-subjects.js --dry-run`: se esperan ~562 materias (nuevas + promovidas), 0 errores, y ninguna legacy activa modificada.
+   - Si todo está bien, correrlo sin `--dry-run` y después otra vez con `--dry-run`, que tiene que dar `Cambios: 0`.
+6. **Smoke en prod:**
+   - registro con UNSAM → Lic. en Desarrollo de Software;
+   - registro con "Otra" → aparece en `/admin`;
+   - crear "Taller de Tesis" → queda privada;
+   - intentar un insulto → rechazado;
+   - `/subjects/suggest?q=analisis 1` → encuentra "Análisis I".
+7. **Rollback:**
+   - revertir las 3 migraciones en orden inverso: `$C exec -T api node_modules/.bin/typeorm migration:revert -d dist/config/typeorm.config.js` ×3;
+   - hacer `git revert` del merge en `dev`;
+   - en último caso, restaurar el dump del paso 3.
+8. **Cierre:**
+   - borrar las ramas y worktrees `catalog-*` y `agent-*`;
+   - `dev` → `master` con `--no-ff`;
+   - actualizar CLAUDE.md y AGENTS.md;
+   - crear la rutina trimestral (`/schedule`).
 
 ## Pendiente de Loren: activar Mercado Pago
 
