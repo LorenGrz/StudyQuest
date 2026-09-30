@@ -14,7 +14,7 @@ export interface MapUsersResult {
 /**
  * Links users to the catalog by name, only where the link is still missing:
  *  - `university_id IS NULL` → the catalog university whose universityKey()
- *    matches `users.university` (UTN alias included);
+ *    matches `users.university` (UTN alias included), or its short name;
  *  - `career_id IS NULL` (and no pending career request) → the career of that
  *    university whose normalized name matches `users.career`.
  * Unmatched users keep NULL and their legacy strings. Never touches the
@@ -27,11 +27,17 @@ export async function mapUsersToCatalog(
   db: SqlRunner,
 ): Promise<MapUsersResult> {
   const universities = (await db.query(
-    `SELECT id, name FROM universities ORDER BY name`,
-  )) as { id: string; name: string }[];
+    `SELECT id, name, short_name FROM universities ORDER BY name`,
+  )) as { id: string; name: string; short_name: string | null }[];
   const universityIdByKey = new Map<string, string>();
   for (const u of universities) {
     const key = universityKey(u.name);
+    if (key && !universityIdByKey.has(key)) universityIdByKey.set(key, u.id);
+  }
+  // Legacy free text is often just the acronym ("Unsam", "UBA"). Full names
+  // win on a clash, so an acronym never shadows another university's name.
+  for (const u of universities) {
+    const key = universityKey(u.short_name);
     if (key && !universityIdByKey.has(key)) universityIdByKey.set(key, u.id);
   }
 

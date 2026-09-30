@@ -18,6 +18,11 @@ function fakeRunner(selects: unknown[][]) {
 
 const UTN = { id: 'uni-utn', name: 'Universidad Tecnológica Nacional – FRBA' };
 const UBA = { id: 'uni-uba', name: 'Universidad de Buenos Aires' };
+const UNSAM = {
+  id: 'uni-unsam',
+  name: 'Universidad Nacional de San Martín',
+  short_name: 'UNSAM',
+};
 
 describe('mapUsersToCatalog', () => {
   it('maps by normalized name (UTN alias included) and leaves free text unmapped', async () => {
@@ -55,6 +60,20 @@ describe('mapUsersToCatalog', () => {
     expect(updates[0].sql).toMatch(/u\.university_id IS NULL/);
     expect(updates[1].params).toEqual([['u1'], ['car-cc']]);
     expect(updates[1].sql).toMatch(/u\.career_id IS NULL/);
+  });
+
+  it('also maps an acronym to the university with that short name', async () => {
+    const { db, updates } = fakeRunner([
+      [UBA, UNSAM],
+      [{ id: 'u1', university: 'Unsam' }],
+      [],
+      [],
+    ]);
+    await expect(mapUsersToCatalog(db)).resolves.toEqual({
+      universitiesMapped: 1,
+      careersMapped: 0,
+    });
+    expect(updates[0].params).toEqual([['u1'], [UNSAM.id]]);
   });
 
   it('issues no UPDATE when there is nothing to map', async () => {
