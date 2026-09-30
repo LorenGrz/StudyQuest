@@ -11,6 +11,8 @@ export interface BedrockConverseParams {
   userMessage: string;
   temperature?: number;
   maxTokens?: number;
+  /** Cancels the HTTP request (caller-side timeout). */
+  abortSignal?: AbortSignal;
 }
 
 /**
@@ -41,7 +43,10 @@ export class BedrockClientService {
       },
     });
 
-    const result = await this.client.send(command);
+    const result = await this.client.send(
+      command,
+      params.abortSignal ? { abortSignal: params.abortSignal } : undefined,
+    );
     const text = result.output?.message?.content
       ?.map((block) => block.text)
       .find((t): t is string => typeof t === 'string');
