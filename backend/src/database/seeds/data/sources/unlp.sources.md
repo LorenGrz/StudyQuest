@@ -68,34 +68,15 @@ Informática"):
 
 ## Fixes aplicados en C2
 
-El plan oficial real de la Facultad de Informática numera varias materias
-con dígito arábigo standalone (confirmado explícitamente en la rama origen,
-p. ej. "Ingeniería de Software 1" es el nombre real, no una errata). Para
-mantener consistencia de estilo con el resto del catálogo y satisfacer el
-validador de C2 (que rechaza nombres terminados en dígito arábigo 1-10), se
-corrigieron a numeral romano en las 6 carreras:
-
-| Nombre real del plan (arábigo) | Nombre en `official-subjects.ts` (romano) |
-| ------------------------------ | ----------------------------------------- |
-| Matemática 1                   | Matemática I                              |
-| Matemática 2                   | Matemática II                             |
-| Matemática 3                   | Matemática III                            |
-| Matemática 4                   | Matemática IV                             |
-| Ingeniería de Software 1       | Ingeniería de Software I                  |
-| Ingeniería de Software 2       | Ingeniería de Software II                 |
-| Ingeniería de Software 3       | Ingeniería de Software III                |
-| Orientación a Objetos 1        | Orientación a Objetos I                   |
-| Orientación a Objetos 2        | Orientación a Objetos II                  |
-| Bases de Datos 1               | Bases de Datos I                          |
-| Bases de Datos 2               | Bases de Datos II                         |
-| Redes de Datos 1               | Redes de Datos I                          |
-| Optativa 1                     | Optativa I                                |
-| Optativa 2                     | Optativa II                               |
-
-**"Matemática 0" (curso de nivelación) no se tocó**: 0 está fuera del rango
-1-10 del validador y no tiene numeral romano; se mantuvo tal cual figura en
-el plan oficial.
-
-Esta es una **desviación intencional** del nombre exacto del plan oficial de
-UNLP (que sí usa arábigo) — ver nota completa en el header de
-`official-subjects.ts` y el reporte de la tarea C2.
+Ninguno. El plan oficial real de la Facultad de Informática numera varias
+materias con dígito arábigo standalone (confirmado explícitamente en la rama
+origen, p. ej. "Ingeniería de Software 1" es el nombre real, no una errata):
+"Matemática 1-4" (más "Matemática 0" de nivelación), "Ingeniería de Software
+1-3", "Orientación a Objetos 1/2", "Bases de Datos 1/2", "Redes de Datos 1",
+"Optativa 1/2". Se mantuvo esa ortografía tal cual en las 6 carreras. Un
+primer borrador de esta tarea había normalizado estos nombres a numeral
+romano por consistencia con el resto del catálogo; se revirtió: la
+ortografía oficial tiene prioridad sobre la consistencia visual, y el
+normalizador de dedupe (`normalizeSubjectName`, tanto en el validador local
+como en `common/subject-name.ts` de R1) ya trata arábigo y romano como
+equivalentes, así que no hace falta para evitar duplicados.

@@ -58,24 +58,13 @@ Universidad string: `Universidad Nacional de Rosario`. Fecha de consulta:
 
 ## Fixes aplicados en C2
 
-En **Licenciatura en Ciencia de Datos**, el plan oficial numera varias
-materias con dígito arábigo standalone. Para mantener consistencia de estilo
-con el resto del catálogo y satisfacer el validador de C2, se corrigieron a
-numeral romano:
-
-| Nombre real del plan (arábigo) | Nombre en `official-subjects.ts` (romano) |
-| ------------------------------ | ----------------------------------------- |
-| Laboratorio de Datos 1         | Laboratorio de Datos I                    |
-| Laboratorio de Datos 2         | Laboratorio de Datos II                   |
-| Estadística 1                  | Estadística I                             |
-| Estadística 2                  | Estadística II                            |
-| Programación 1                 | Programación I                            |
-| Programación 2                 | Programación II                           |
-| Análisis Matemático 1          | Análisis Matemático I                     |
-| Análisis Matemático 2          | Análisis Matemático II                    |
-| Aprendizaje Estadístico 1      | Aprendizaje Estadístico I                 |
-| Aprendizaje Estadístico 2      | Aprendizaje Estadístico II                |
-
-Esta es una **desviación intencional** del nombre exacto del plan oficial
-(que sí usa arábigo) — ver nota completa en el header de
-`official-subjects.ts` y el reporte de la tarea C2.
+Ninguno. **Licenciatura en Ciencia de Datos** numera varias materias con
+dígito arábigo standalone en el plan oficial ("Laboratorio de Datos 1/2",
+"Estadística 1/2", "Programación 1/2", "Análisis Matemático 1/2",
+"Aprendizaje Estadístico 1/2"); se mantuvo esa ortografía tal cual. Un primer
+borrador de esta tarea había normalizado estos nombres a numeral romano por
+consistencia con el resto del catálogo; se revirtió: la ortografía oficial
+tiene prioridad sobre la consistencia visual, y el normalizador de dedupe
+(`normalizeSubjectName`, tanto en el validador local como en
+`common/subject-name.ts` de R1) ya trata arábigo y romano como equivalentes,
+así que no hace falta para evitar duplicados.

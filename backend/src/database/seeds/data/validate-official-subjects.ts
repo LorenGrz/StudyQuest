@@ -8,12 +8,16 @@
  * - Sin `code` duplicado dentro de una universidad, salvo que el nombre
  *   normalizado coincida (la misma materia compartida entre carreras es
  *   esperable y se reporta como "cross-career share", no como error).
- * - Ningún nombre termina en un dígito arábigo 1-10 (detecta un
- *   "Programación 1" sin corregir a numeral romano).
+ * - Solo para UNSAM: ningún nombre termina en un dígito arábigo 1-10
+ *   (detecta un "Programación 1" sin corregir a numeral romano — el resto de
+ *   universidades escribe algunas materias con arábigo en su plan oficial
+ *   real, ver `official-subjects.ts`, así que esa regla no aplica ahí).
  *
  * Imprime conteos por universidad y por carrera.
  */
 import { OFFICIAL_SUBJECTS, OfficialSubjectRow } from './official-subjects';
+
+const UNSAM = 'Universidad Nacional de San Martín';
 
 const ARABIC_TO_ROMAN = [
   '',
@@ -29,9 +33,11 @@ const ARABIC_TO_ROMAN = [
   'x',
 ];
 
+// TODO: use common/subject-name.ts after R1 merges (same normalization,
+// already shared with the backend and the backfill migration).
 /** lowercase, strip accents (NFD), arabic 1-10 standalone tokens -> roman,
  * strip decorative punctuation, collapse spaces. */
-export function normalizeSubjectName(raw: string): string {
+function normalizeSubjectName(raw: string): string {
   let s = raw.normalize('NFD').replace(/[̀-ͯ]/g, '');
   s = s.toLowerCase();
   s = s.replace(/\b(10|[1-9])\b/g, (m) => ARABIC_TO_ROMAN[parseInt(m, 10)]);
@@ -79,7 +85,7 @@ function main(): void {
       });
     }
 
-    if (endsInArabicDigit(row.name)) {
+    if (row.university === UNSAM && endsInArabicDigit(row.name)) {
       issues.push({
         level: 'error',
         message: `Nombre termina en dígito arábigo sin corregir: ${row.university} / ${row.career} / "${row.name}"`,

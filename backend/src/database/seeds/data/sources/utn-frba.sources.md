@@ -9,9 +9,9 @@ quedan fuera). Investigación original completa:
 Universidad string: `Universidad Tecnológica Nacional – FRBA` (con guion en
 dash, U+2013). Fecha de consulta: 2026-09-27.
 
-**Cross-check contra `careers/<uni>.json` (C1):** no disponible todavía para
-UTN FRBA. "Ingeniería en Sistemas de Información" ya coincide con el nombre
-existente en `backend/src/common/careers.ts` (documentado en la rama origen).
+**Cross-check contra `careers/utn-frba.json` (C1, rama `feature/careers-catalog-a`):**
+las 2 carreras **coinciden exactamente**: "Ingeniería en Sistemas de
+Información", "Tecnicatura Universitaria en Programación". Sin renombres.
 
 ## Ingeniería en Sistemas de Información — Plan 2023 — 44 materias
 

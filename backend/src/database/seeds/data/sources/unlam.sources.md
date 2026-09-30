@@ -9,11 +9,10 @@ pertenecen al Departamento de Ingeniería e Investigaciones Tecnológicas (DIIT)
 sitio `https://ingenieria.unlam.edu.ar/`. Fecha de consulta de todas las
 fuentes: **2026-09-26**.
 
-**Cross-check contra `careers/<uni>.json` (C1):** no disponible todavía para
-UNLaM (branch `feature/careers-catalog-b` solo trae UNC/UNLP/UNR). Nombre de
-carrera tomado tal cual del `.sources.md` de la rama `catalog-unlam`, que ya
-documenta que coincide con el nombre existente en `backend/src/common/careers.ts`
-para "Ingeniería en Informática".
+**Cross-check contra `careers/unlam.json` (C1, rama `feature/careers-catalog-a`):**
+las 3 carreras **coinciden exactamente** (nombre y facultad "Ingeniería"):
+"Ingeniería en Informática", "Tecnicatura Universitaria en Web",
+"Tecnicatura en Desarrollo de Aplicaciones Móviles". Sin renombres.
 
 ## Ingeniería en Informática (plan 2023) — 57 materias
 

@@ -11,28 +11,26 @@
  * de los `.sources.md` de cada rama `catalog-*` (recortados a las carreras
  * incluidas acá).
  *
- * Nombres de carrera: para UNC/UNLP/UNR se usó el nombre exacto de
- * `careers/<uni>.json` en la rama `feature/careers-catalog-b` cuando existe
- * esa carrera ahí (ver detalle en cada `sources/<slug>.sources.md`, sección
- * "cross-check"). Para UNLaM/UNSAM/UTN FRBA/UBA (sin JSON de carreras
- * todavía) se usó el nombre oficial documentado en el `.sources.md` de la
- * propia rama `catalog-*`.
+ * Nombres de carrera: se usó el nombre exacto de `careers/<uni>.json` cuando
+ * existe esa carrera ahí — UNC/UNLP/UNR en `feature/careers-catalog-b`,
+ * UNLaM/UNSAM/UTN FRBA/UBA en `feature/careers-catalog-a` — ver detalle por
+ * carrera en cada `sources/<slug>.sources.md`, sección "cross-check". La
+ * única carrera sin JSON de careers que la liste es UNC "Analista en
+ * Computación" (título intermedio, no aparece en `careers/unc.json`); se
+ * mantuvo el nombre oficial documentado en `sources/unc.sources.md`.
  *
- * Fix de numeración (arábigo → romano): varias materias de los planes reales
- * terminan su nombre en un dígito arábigo standalone (p. ej. UNSAM
- * "Análisis 1"/"Programación 1" — el plan oficial usa numeral romano y el
- * catálogo original solo no lo aplicó bien; UNLP/UNC/UNR sí numeran así en su
- * propio plan oficial, confirmado en los `.sources.md` de esas ramas). Para
- * mantener un estilo consistente en todo el catálogo y satisfacer el
- * validador (`validate-official-subjects.ts`, que rechaza nombres terminados
- * en dígito arábigo 1-10), se normalizaron TODOS los casos a numeral romano
- * ("Análisis 1" → "Análisis I", "Matemática 4" → "Matemática IV", etc.),
- * no solo los de UNSAM que pedía explícitamente el plan. Esto es una
- * desviación del nombre tal cual aparece en el plan oficial de UNLP/UNC/UNR
- * (que sí usa arábigo) — documentada por carrera en los comentarios de cada
- * bloque de abajo y en el reporte de la tarea C2. "Matemática 0" (UNLP) no
- * se tocó: 0 está fuera del rango 1-10 del validador y no tiene numeral
- * romano.
+ * Numeración de materias (arábigo vs. romano): el nombre de cada materia
+ * respeta la ortografía real del plan oficial de su universidad. Varios
+ * planes (UNLP, UNC "Ingeniería en Computación", UNR "Licenciatura en
+ * Ciencia de Datos") numeran secuencias oficialmente con dígito arábigo
+ * standalone (p. ej. "Ingeniería de Software 1", confirmado explícitamente
+ * en los `.sources.md` de esas ramas) — esos nombres se dejaron tal cual,
+ * sin convertir a romano. La única excepción es UNSAM "Licenciatura en
+ * Ciencia de Datos", donde el catálogo original dejó en arábigo nombres que
+ * el plan oficial sí escribe en romano ("Análisis I", "Programación I"); ahí
+ * se corrigió por instrucción explícita del plan de la tarea C2. El
+ * validador (`validate-official-subjects.ts`) solo rechaza dígitos arábigos
+ * sin corregir en materias de UNSAM, no en el resto de universidades.
  *
  * Códigos: se mantiene el código propio de cada rama tal cual (nunca se
  * reutiliza una reasignación posicional contra `subjects-catalog.ts`); las
@@ -56,6 +54,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ──────────────────────────────────────────────────────────────────
   // Ingeniería en Informática (57 materias)
   // Plan 2023 (DIIT). 57 materias, mapa de correlatividades oficial (PDF).
+  // Cross-check: careers/unlam.json (feature/careers-catalog-a) — coincide exactamente.
   // Fuente y verificación completa: sources/unlam.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
@@ -523,6 +522,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ──────────────────────────────────────────────────────────────────
   // Tecnicatura Universitaria en Web (20 materias)
   // Plan vigente (sin número publicado), 5 cuatrimestres. 20 materias, tabla HTML oficial.
+  // Cross-check: careers/unlam.json (feature/careers-catalog-a) — coincide exactamente.
   // Fuente: sources/unlam.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
@@ -689,6 +689,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ──────────────────────────────────────────────────────────────────
   // Tecnicatura en Desarrollo de Aplicaciones Móviles (20 materias)
   // Plan vigente (sin número publicado), 5 cuatrimestres. 20 materias, tabla HTML oficial.
+  // Cross-check: careers/unlam.json (feature/careers-catalog-a) — coincide exactamente.
   // Fuente: sources/unlam.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
@@ -859,6 +860,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ──────────────────────────────────────────────────────────────────
   // Licenciatura en Desarrollo de Software (34 materias)
   // Resolución S.E - MSH 1107/24. 34 materias (8 cuatrimestres + 4 Proyecto Integrador anuales).
+  // Cross-check: careers/unsam.json (feature/careers-catalog-a) — coincide exactamente.
   // Fuente: sources/unsam.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
@@ -1137,6 +1139,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ──────────────────────────────────────────────────────────────────
   // Tecnicatura Universitaria en Programación Informática (18 materias)
   // Resolución Ministerial 0299/06. 18 materias (6 cuatrimestres), ciclo común con TU Redes Informáticas.
+  // Cross-check: careers/unsam.json (feature/careers-catalog-a) — coincide exactamente.
   // Fuente: sources/unsam.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
@@ -1287,6 +1290,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ──────────────────────────────────────────────────────────────────
   // Tecnicatura Universitaria en Redes Informáticas (18 materias)
   // Resolución Ministerial 0377/06. 18 materias (6 cuatrimestres), ciclo común con TU Programación Informática.
+  // Cross-check: careers/unsam.json (feature/careers-catalog-a) — coincide exactamente.
   // Fuente: sources/unsam.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
@@ -1437,7 +1441,8 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ──────────────────────────────────────────────────────────────────
   // Licenciatura en Ciencia de Datos (24 materias)
   // Resolución Ministerial RM 3079/21. 24 materias (8 cuatrimestres).
-  // Nombres "Análisis 1/2", "Programación 1/2", "Electiva 1-3" y "Optativa 1-3" corregidos a numeral romano (fix explícito del plan C2).
+  // Cross-check: careers/unsam.json (feature/careers-catalog-a) — coincide exactamente.
+  // Nombres "Análisis 1/2", "Programación 1/2", "Electiva 1-3" y "Optativa 1-3" corregidos a numeral romano (fix explícito del plan C2, solo para UNSAM).
   // Fuente: sources/unsam.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
@@ -1640,6 +1645,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ──────────────────────────────────────────────────────────────────
   // Ingeniería en Sistemas de Información (44 materias)
   // Plan 2023, Ordenanza CSU 1877. 44 materias (36 obligatorias + PPS + 7 slots de electivas).
+  // Cross-check: careers/utn-frba.json (feature/careers-catalog-a) — coincide exactamente.
   // Fuente: sources/utn-frba.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
@@ -2028,6 +2034,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ──────────────────────────────────────────────────────────────────
   // Tecnicatura Universitaria en Programación (18 materias)
   // Plan vigente (SCEU/UTN.BA). 18 materias (4 cuatrimestres), sin electivas declaradas.
+  // Cross-check: careers/utn-frba.json (feature/careers-catalog-a) — coincide exactamente.
   // Fuente: sources/utn-frba.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
@@ -2194,13 +2201,14 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ======================================================================
 
   // ──────────────────────────────────────────────────────────────────
-  // Ciencias de la Computación (30 materias)
+  // Licenciatura en Ciencias de la Computación (30 materias)
   // Plan 2023 (FCEN, Departamento de Computación). 30 materias (6 CBC + 24 de la carrera).
+  // Cross-check: careers/uba.json (feature/careers-catalog-a) — el JSON usa "Licenciatura en Ciencias de la Computación" (nombre completo); la rama catalog-uba había usado la forma corta "Ciencias de la Computación" (igual al enum cerrado careers.ts). Se renombró para matchear el JSON exacto.
   // Fuente: sources/uba.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Introducción al Conocimiento de la Sociedad y el Estado',
     code: 'UBACC13',
     year: 1,
@@ -2208,7 +2216,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Introducción al Pensamiento Científico',
     code: 'UBACC14',
     year: 1,
@@ -2216,7 +2224,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Análisis Matemático A',
     code: 'UBACC15',
     year: 1,
@@ -2224,7 +2232,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Álgebra',
     code: 'UBACC16',
     year: 1,
@@ -2232,7 +2240,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Química',
     code: 'UBACC17',
     year: 1,
@@ -2240,7 +2248,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Física',
     code: 'UBACC18',
     year: 1,
@@ -2248,7 +2256,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Introducción a la Programación',
     code: 'UBACC19',
     year: 2,
@@ -2257,7 +2265,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Álgebra I',
     code: 'UBACC20',
     year: 2,
@@ -2266,7 +2274,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Algoritmos y Estructuras de Datos',
     code: 'UBACC21',
     year: 2,
@@ -2275,7 +2283,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Análisis I',
     code: 'UBACC22',
     year: 2,
@@ -2284,7 +2292,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Paradigmas de Programación',
     code: 'UBACC23',
     year: 3,
@@ -2293,7 +2301,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Técnicas de Diseño de Algoritmos',
     code: 'UBACC24',
     year: 3,
@@ -2302,7 +2310,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Sistemas Digitales',
     code: 'UBACC25',
     year: 3,
@@ -2311,7 +2319,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Ingeniería de Software',
     code: 'UBACC26',
     year: 3,
@@ -2320,7 +2328,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Lenguajes Formales, Autómatas y Computabilidad',
     code: 'UBACC27',
     year: 3,
@@ -2329,7 +2337,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Arquitectura y Organización de Computadores',
     code: 'UBACC28',
     year: 3,
@@ -2338,7 +2346,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Álgebra Lineal Computacional',
     code: 'UBACC02',
     year: 4,
@@ -2347,7 +2355,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Complejidad Computacional',
     code: 'UBACC29',
     year: 4,
@@ -2356,7 +2364,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Sistemas Operativos',
     code: 'UBACC10',
     year: 4,
@@ -2365,7 +2373,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Estadística Computacional',
     code: 'UBACC30',
     year: 4,
@@ -2374,7 +2382,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Almacenamiento y Recuperación de la Información',
     code: 'UBACC31',
     year: 4,
@@ -2383,7 +2391,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Materia Optativa (Ciclo Superior) I',
     code: 'UBACC32',
     year: 4,
@@ -2392,7 +2400,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Programación Concurrente y Paralela',
     code: 'UBACC33',
     year: 5,
@@ -2401,7 +2409,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Redes de Comunicaciones y Cómputo Distribuido',
     code: 'UBACC34',
     year: 5,
@@ -2410,7 +2418,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Materia Optativa (Ciclo Superior) II',
     code: 'UBACC35',
     year: 5,
@@ -2418,7 +2426,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Seminario sobre Tecnología y Sociedad',
     code: 'UBACC36',
     year: 5,
@@ -2427,7 +2435,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Materia Optativa (Ciclo Superior) III',
     code: 'UBACC37',
     year: 5,
@@ -2436,7 +2444,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Materia Optativa (Ciclo Superior) IV',
     code: 'UBACC38',
     year: 5,
@@ -2445,7 +2453,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Práctica Social Educativa',
     code: 'UBACC39',
     year: 5,
@@ -2454,7 +2462,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Ciencias de la Computación',
+    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Trabajo Final - Tesis de Licenciatura',
     code: 'UBACC40',
     year: 5,
@@ -2463,14 +2471,14 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
 
   // ──────────────────────────────────────────────────────────────────
-  // Licenciatura en Ciencia de Datos (25 materias)
+  // Licenciatura en Ciencias de Datos (25 materias)
   // Plan aprobado por ACS-2020-96-UBA-SG (FCEN, Instituto de Cálculo). 25 materias (6 CBC + 19 de la carrera).
-  // Nombre oficial completo es "Licenciatura en Ciencias de Datos" (plural); se usa la forma singular ya cerrada en careers.ts/careers.spec.ts.
+  // Cross-check: careers/uba.json (feature/careers-catalog-a) — el JSON usa "Licenciatura en Ciencias de Datos" (plural); la rama catalog-uba había usado la forma singular "Licenciatura en Ciencia de Datos" (igual al enum cerrado careers.ts). Se renombró para matchear el JSON exacto.
   // Fuente: sources/uba.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Introducción al Conocimiento de la Sociedad y el Estado',
     code: 'UBALCD01',
     year: 1,
@@ -2478,7 +2486,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Introducción al Pensamiento Científico',
     code: 'UBALCD02',
     year: 1,
@@ -2486,7 +2494,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Análisis Matemático A',
     code: 'UBALCD03',
     year: 1,
@@ -2494,7 +2502,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Álgebra',
     code: 'UBALCD04',
     year: 1,
@@ -2502,7 +2510,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Química',
     code: 'UBALCD05',
     year: 1,
@@ -2510,7 +2518,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Física',
     code: 'UBALCD06',
     year: 1,
@@ -2518,7 +2526,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Análisis I',
     code: 'UBALCD07',
     year: 2,
@@ -2527,7 +2535,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Álgebra I',
     code: 'UBALCD08',
     year: 2,
@@ -2536,7 +2544,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Algoritmos y Estructuras de Datos I',
     code: 'UBALCD09',
     year: 2,
@@ -2545,7 +2553,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Electiva de Introducción a las Ciencias Naturales',
     code: 'UBALCD10',
     year: 2,
@@ -2554,7 +2562,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Análisis II',
     code: 'UBALCD11',
     year: 3,
@@ -2563,7 +2571,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Algoritmos y Estructuras de Datos II',
     code: 'UBALCD12',
     year: 3,
@@ -2572,7 +2580,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Laboratorio de Datos',
     code: 'UBALCD13',
     year: 3,
@@ -2581,7 +2589,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Análisis Avanzado',
     code: 'UBALCD14',
     year: 3,
@@ -2590,7 +2598,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Álgebra Lineal Computacional',
     code: 'UBALCD15',
     year: 3,
@@ -2599,7 +2607,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Probabilidad',
     code: 'UBALCD16',
     year: 4,
@@ -2608,7 +2616,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Algoritmos y Estructuras de Datos III',
     code: 'UBALCD17',
     year: 4,
@@ -2617,7 +2625,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Introducción a la Estadística y Ciencia de Datos',
     code: 'UBALCD18',
     year: 4,
@@ -2626,7 +2634,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Introducción a la Investigación Operativa y Optimización',
     code: 'UBALCD19',
     year: 4,
@@ -2635,7 +2643,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Introducción al Modelado Continuo',
     code: 'UBALCD20',
     year: 4,
@@ -2644,7 +2652,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Materia Electiva del Ciclo Superior I',
     code: 'UBALCD21',
     year: 5,
@@ -2653,7 +2661,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Materia Electiva del Ciclo Superior II',
     code: 'UBALCD22',
     year: 5,
@@ -2662,7 +2670,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Materia Electiva del Ciclo Superior III',
     code: 'UBALCD23',
     year: 5,
@@ -2671,7 +2679,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Materia Electiva del Ciclo Superior IV',
     code: 'UBALCD24',
     year: 5,
@@ -2680,7 +2688,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   },
   {
     university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencia de Datos',
+    career: 'Licenciatura en Ciencias de Datos',
     name: 'Tesis de Licenciatura / Trabajo Final',
     code: 'UBALCD25',
     year: 5,
@@ -2691,6 +2699,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ──────────────────────────────────────────────────────────────────
   // Ingeniería en Informática (35 materias)
   // Plan 2023 (FIUBA), Resolución CD 2023-526. 35 materias (6 CBC + 29 de la carrera).
+  // Cross-check: careers/uba.json (feature/careers-catalog-a) — coincide exactamente.
   // Fuente: sources/uba.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
@@ -2994,6 +3003,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ──────────────────────────────────────────────────────────────────
   // Licenciatura en Ciencias de la Computación (27 materias)
   // Plan 2002, versión 2021 (FAMAF). 27 materias.
+  // Cross-check: careers/unc.json (feature/careers-catalog-b) — coincide exactamente.
   // Fuente: sources/unc.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
@@ -3230,7 +3240,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ──────────────────────────────────────────────────────────────────
   // Analista en Computación (19 materias)
   // Título intermedio de FAMAF: mismas materias que los 3 primeros años de la Licenciatura en Ciencias de la Computación. 19 materias.
-  // No pudo cruzarse contra un careers.json de UNC (branch feature/careers-catalog-b no la lista) — ver reporte C2.
+  // No está en careers/unc.json (feature/careers-catalog-b): esa carrera de título intermedio no figura en el JSON de C1 — ver reporte C2.
   // Fuente: sources/unc.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
@@ -3390,7 +3400,8 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ──────────────────────────────────────────────────────────────────
   // Ingeniería en Computación (42 materias)
   // Plan 2025 (FCEFyN, HCS 11/06/2024). 42 materias.
-  // Nombres "Análisis Matemático 1/2/3", "Física 1/2", "Electrónica Digital 1/2/3", "Sistemas de Control 1/2" y "Selectiva 1/2" corregidos a numeral romano (arábigo real del plan oficial; fix aplicado para consistencia con el resto del catálogo y el validador — ver reporte C2).
+  // Cross-check: careers/unc.json (feature/careers-catalog-b) — coincide exactamente.
+  // El plan oficial numera con arábigos ("Análisis Matemático 1/2/3", "Física 1/2", "Electrónica Digital 1/2/3", "Sistemas de Control 1/2", "Selectiva 1/2"); se mantuvo la ortografía oficial (arábigo) tal cual — ver reporte C2.
   // Fuente: sources/unc.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
@@ -3436,7 +3447,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Córdoba',
     career: 'Ingeniería en Computación',
-    name: 'Análisis Matemático I',
+    name: 'Análisis Matemático 1',
     code: 'UNCIC06',
     year: 1,
     description: 'Primer año, primer cuatrimestre.',
@@ -3468,7 +3479,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Córdoba',
     career: 'Ingeniería en Computación',
-    name: 'Física I',
+    name: 'Física 1',
     code: 'UNCIC10',
     year: 1,
     description: 'Primer año, segundo cuatrimestre.',
@@ -3492,7 +3503,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Córdoba',
     career: 'Ingeniería en Computación',
-    name: 'Electrónica Digital I',
+    name: 'Electrónica Digital 1',
     code: 'UNCIC13',
     year: 2,
     description: 'Segundo año, primer cuatrimestre.',
@@ -3500,7 +3511,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Córdoba',
     career: 'Ingeniería en Computación',
-    name: 'Física II',
+    name: 'Física 2',
     code: 'UNCIC14',
     year: 2,
     description: 'Segundo año, primer cuatrimestre.',
@@ -3508,7 +3519,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Córdoba',
     career: 'Ingeniería en Computación',
-    name: 'Análisis Matemático II',
+    name: 'Análisis Matemático 2',
     code: 'UNCIC15',
     year: 2,
     description: 'Segundo año, primer cuatrimestre.',
@@ -3516,7 +3527,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Córdoba',
     career: 'Ingeniería en Computación',
-    name: 'Electrónica Digital II',
+    name: 'Electrónica Digital 2',
     code: 'UNCIC16',
     year: 2,
     description: 'Segundo año, segundo cuatrimestre.',
@@ -3532,7 +3543,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Córdoba',
     career: 'Ingeniería en Computación',
-    name: 'Análisis Matemático III',
+    name: 'Análisis Matemático 3',
     code: 'UNCIC18',
     year: 2,
     description: 'Segundo año, segundo cuatrimestre.',
@@ -3564,7 +3575,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Córdoba',
     career: 'Ingeniería en Computación',
-    name: 'Electrónica Digital III',
+    name: 'Electrónica Digital 3',
     code: 'UNCIC22',
     year: 3,
     description: 'Tercer año, primer cuatrimestre.',
@@ -3580,7 +3591,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Córdoba',
     career: 'Ingeniería en Computación',
-    name: 'Sistemas de Control I',
+    name: 'Sistemas de Control 1',
     code: 'UNCIC24',
     year: 3,
     description: 'Tercer año, segundo cuatrimestre.',
@@ -3668,7 +3679,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Córdoba',
     career: 'Ingeniería en Computación',
-    name: 'Sistemas de Control II',
+    name: 'Sistemas de Control 2',
     code: 'UNCIC35',
     year: 4,
     description: 'Cuarto año, segundo cuatrimestre.',
@@ -3692,7 +3703,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Córdoba',
     career: 'Ingeniería en Computación',
-    name: 'Selectiva I',
+    name: 'Selectiva 1',
     code: 'UNCIC38',
     year: 5,
     description:
@@ -3701,7 +3712,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Córdoba',
     career: 'Ingeniería en Computación',
-    name: 'Selectiva II',
+    name: 'Selectiva 2',
     code: 'UNCIC39',
     year: 5,
     description:
@@ -3740,7 +3751,8 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ──────────────────────────────────────────────────────────────────
   // Licenciatura en Informática (37 materias)
   // Plan 2021 (Facultad de Informática). 37 materias.
-  // El plan oficial numera con arábigos ("Matemática 1..4", "Ingeniería de Software 1/2", "Orientación a Objetos 1/2"); se corrigieron a numeral romano para consistencia con el resto del catálogo y el validador — ver reporte C2.
+  // Cross-check: careers/unlp.json (feature/careers-catalog-b) — coincide exactamente.
+  // El plan oficial numera con arábigos ("Matemática 1..4", "Ingeniería de Software 1/2", "Orientación a Objetos 1/2"); se mantuvo la ortografía oficial (arábigo) tal cual — ver reporte C2.
   // Fuente: sources/unlp.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
@@ -3786,7 +3798,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Licenciatura en Informática',
-    name: 'Matemática I',
+    name: 'Matemática 1',
     code: 'UNLPINF03',
     year: 1,
     description: '1er semestre. Cuatrimestral.',
@@ -3810,7 +3822,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Licenciatura en Informática',
-    name: 'Matemática II',
+    name: 'Matemática 2',
     code: 'UNLPINF13',
     year: 1,
     description: '2do semestre. Cuatrimestral.',
@@ -3851,7 +3863,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Licenciatura en Informática',
-    name: 'Ingeniería de Software I',
+    name: 'Ingeniería de Software 1',
     code: 'UNLPINF08',
     year: 2,
     description: '4to semestre. Cuatrimestral.',
@@ -3859,7 +3871,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Licenciatura en Informática',
-    name: 'Orientación a Objetos I',
+    name: 'Orientación a Objetos 1',
     code: 'UNLPINF17',
     year: 2,
     description: '4to semestre. Cuatrimestral.',
@@ -3883,7 +3895,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Licenciatura en Informática',
-    name: 'Matemática III',
+    name: 'Matemática 3',
     code: 'UNLPINF20',
     year: 3,
     description: '5to semestre. Cuatrimestral.',
@@ -3891,7 +3903,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Licenciatura en Informática',
-    name: 'Ingeniería de Software II',
+    name: 'Ingeniería de Software 2',
     code: 'UNLPINF21',
     year: 3,
     description: '5to semestre. Cuatrimestral.',
@@ -3907,7 +3919,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Licenciatura en Informática',
-    name: 'Orientación a Objetos II',
+    name: 'Orientación a Objetos 2',
     code: 'UNLPINF23',
     year: 3,
     description: '5to semestre. Cuatrimestral.',
@@ -3988,7 +4000,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Licenciatura en Informática',
-    name: 'Matemática IV',
+    name: 'Matemática 4',
     code: 'UNLPINF33',
     year: 4,
     description: '8vo semestre. Cuatrimestral.',
@@ -4045,7 +4057,8 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ──────────────────────────────────────────────────────────────────
   // Licenciatura en Sistemas (37 materias)
   // Plan 2021 (Facultad de Informática). 37 materias, comparte el 90% del plan con Licenciatura en Informática.
-  // Mismo fix de numeración arábigo → romano aplicado (ver Licenciatura en Informática arriba).
+  // Cross-check: careers/unlp.json (feature/careers-catalog-b) — coincide exactamente.
+  // Ortografía oficial (arábigo) mantenida — ver Licenciatura en Informática arriba.
   // Fuente: sources/unlp.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
@@ -4091,7 +4104,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Licenciatura en Sistemas',
-    name: 'Matemática I',
+    name: 'Matemática 1',
     code: 'UNLPSIS06',
     year: 1,
     description: '1er semestre. Cuatrimestral.',
@@ -4115,7 +4128,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Licenciatura en Sistemas',
-    name: 'Matemática II',
+    name: 'Matemática 2',
     code: 'UNLPSIS09',
     year: 1,
     description: '2do semestre. Cuatrimestral.',
@@ -4156,7 +4169,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Licenciatura en Sistemas',
-    name: 'Ingeniería de Software I',
+    name: 'Ingeniería de Software 1',
     code: 'UNLPSIS14',
     year: 2,
     description: '4to semestre. Cuatrimestral.',
@@ -4164,7 +4177,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Licenciatura en Sistemas',
-    name: 'Orientación a Objetos I',
+    name: 'Orientación a Objetos 1',
     code: 'UNLPSIS15',
     year: 2,
     description: '4to semestre. Cuatrimestral.',
@@ -4188,7 +4201,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Licenciatura en Sistemas',
-    name: 'Matemática III',
+    name: 'Matemática 3',
     code: 'UNLPSIS18',
     year: 3,
     description: '5to semestre. Cuatrimestral.',
@@ -4196,7 +4209,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Licenciatura en Sistemas',
-    name: 'Ingeniería de Software II',
+    name: 'Ingeniería de Software 2',
     code: 'UNLPSIS19',
     year: 3,
     description: '5to semestre. Cuatrimestral.',
@@ -4212,7 +4225,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Licenciatura en Sistemas',
-    name: 'Orientación a Objetos II',
+    name: 'Orientación a Objetos 2',
     code: 'UNLPSIS21',
     year: 3,
     description: '5to semestre. Cuatrimestral.',
@@ -4244,7 +4257,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Licenciatura en Sistemas',
-    name: 'Bases de Datos I',
+    name: 'Bases de Datos 1',
     code: 'UNLPSIS25',
     year: 3,
     description: '6to semestre. Cuatrimestral.',
@@ -4268,7 +4281,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Licenciatura en Sistemas',
-    name: 'Bases de Datos II',
+    name: 'Bases de Datos 2',
     code: 'UNLPSIS28',
     year: 4,
     description: '7mo semestre. Cuatrimestral.',
@@ -4276,7 +4289,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Licenciatura en Sistemas',
-    name: 'Ingeniería de Software III',
+    name: 'Ingeniería de Software 3',
     code: 'UNLPSIS29',
     year: 4,
     description: '7mo semestre. Cuatrimestral.',
@@ -4292,7 +4305,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Licenciatura en Sistemas',
-    name: 'Matemática IV',
+    name: 'Matemática 4',
     code: 'UNLPSIS31',
     year: 4,
     description: '8vo semestre. Cuatrimestral.',
@@ -4351,7 +4364,8 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ──────────────────────────────────────────────────────────────────
   // Analista Programador Universitario (24 materias)
   // Plan 2021 (Facultad de Informática). 24 materias.
-  // Mismo fix de numeración arábigo → romano aplicado.
+  // Cross-check: careers/unlp.json (feature/careers-catalog-b) — coincide exactamente.
+  // Ortografía oficial (arábigo) mantenida.
   // Fuente: sources/unlp.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
@@ -4397,7 +4411,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Analista Programador Universitario',
-    name: 'Matemática I',
+    name: 'Matemática 1',
     code: 'UNLPAPU06',
     year: 1,
     description: '1er semestre. Cuatrimestral.',
@@ -4421,7 +4435,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Analista Programador Universitario',
-    name: 'Matemática II',
+    name: 'Matemática 2',
     code: 'UNLPAPU09',
     year: 1,
     description: '2do semestre. Cuatrimestral.',
@@ -4462,7 +4476,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Analista Programador Universitario',
-    name: 'Ingeniería de Software I',
+    name: 'Ingeniería de Software 1',
     code: 'UNLPAPU14',
     year: 2,
     description: '4to semestre. Cuatrimestral.',
@@ -4470,7 +4484,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Analista Programador Universitario',
-    name: 'Orientación a Objetos I',
+    name: 'Orientación a Objetos 1',
     code: 'UNLPAPU15',
     year: 2,
     description: '4to semestre. Cuatrimestral.',
@@ -4494,7 +4508,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Analista Programador Universitario',
-    name: 'Matemática III',
+    name: 'Matemática 3',
     code: 'UNLPAPU18',
     year: 3,
     description: '5to semestre. Cuatrimestral.',
@@ -4502,7 +4516,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Analista Programador Universitario',
-    name: 'Ingeniería de Software II',
+    name: 'Ingeniería de Software 2',
     code: 'UNLPAPU19',
     year: 3,
     description: '5to semestre. Cuatrimestral.',
@@ -4510,7 +4524,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Analista Programador Universitario',
-    name: 'Orientación a Objetos II',
+    name: 'Orientación a Objetos 2',
     code: 'UNLPAPU20',
     year: 3,
     description: '5to semestre. Cuatrimestral.',
@@ -4553,7 +4567,8 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ──────────────────────────────────────────────────────────────────
   // Analista en Tecnologías de la Información y la Comunicación (24 materias)
   // Plan 2021 (Facultad de Informática). 24 materias.
-  // Mismo fix de numeración arábigo → romano aplicado.
+  // Cross-check: careers/unlp.json (feature/careers-catalog-b) — coincide exactamente.
+  // Ortografía oficial (arábigo) mantenida.
   // Fuente: sources/unlp.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
@@ -4599,7 +4614,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Analista en Tecnologías de la Información y la Comunicación',
-    name: 'Matemática I',
+    name: 'Matemática 1',
     code: 'UNLPATIC06',
     year: 1,
     description: '1er semestre. Cuatrimestral.',
@@ -4623,7 +4638,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Analista en Tecnologías de la Información y la Comunicación',
-    name: 'Matemática II',
+    name: 'Matemática 2',
     code: 'UNLPATIC09',
     year: 1,
     description: '2do semestre. Cuatrimestral.',
@@ -4664,7 +4679,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Analista en Tecnologías de la Información y la Comunicación',
-    name: 'Ingeniería de Software I',
+    name: 'Ingeniería de Software 1',
     code: 'UNLPATIC14',
     year: 2,
     description: '4to semestre. Cuatrimestral.',
@@ -4672,7 +4687,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Analista en Tecnologías de la Información y la Comunicación',
-    name: 'Orientación a Objetos I',
+    name: 'Orientación a Objetos 1',
     code: 'UNLPATIC15',
     year: 2,
     description: '4to semestre. Cuatrimestral.',
@@ -4697,7 +4712,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Analista en Tecnologías de la Información y la Comunicación',
-    name: 'Ingeniería de Software II',
+    name: 'Ingeniería de Software 2',
     code: 'UNLPATIC18',
     year: 3,
     description: '5to semestre. Cuatrimestral.',
@@ -4705,7 +4720,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Analista en Tecnologías de la Información y la Comunicación',
-    name: 'Orientación a Objetos II',
+    name: 'Orientación a Objetos 2',
     code: 'UNLPATIC19',
     year: 3,
     description: '5to semestre. Cuatrimestral.',
@@ -4756,7 +4771,8 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ──────────────────────────────────────────────────────────────────
   // Ingeniería en Computación (46 materias)
   // Plan de Estudio 2024 (carrera conjunta Fac. de Informática / Fac. de Ingeniería), acreditada RESFC-2017-346-APN-CONEAU#ME. 46 materias.
-  // Mismo fix de numeración arábigo → romano aplicado ("Redes de Datos 1", "Optativa 1/2").
+  // Cross-check: careers/unlp.json (feature/careers-catalog-b) — coincide exactamente.
+  // Ortografía oficial (arábigo) mantenida ("Redes de Datos 1", "Optativa 1/2").
   // Fuente: sources/unlp.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
@@ -4946,7 +4962,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Ingeniería en Computación',
-    name: 'Redes de Datos I',
+    name: 'Redes de Datos 1',
     code: 'UNLPIC24',
     year: 3,
     description: '3er año, 2do semestre.',
@@ -5058,7 +5074,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Ingeniería en Computación',
-    name: 'Optativa I',
+    name: 'Optativa 1',
     code: 'UNLPIC38',
     year: 5,
     description:
@@ -5100,7 +5116,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Ingeniería en Computación',
-    name: 'Optativa II',
+    name: 'Optativa 2',
     code: 'UNLPIC43',
     year: 5,
     description:
@@ -5134,6 +5150,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ──────────────────────────────────────────────────────────────────
   // Ciencia de Datos en Organizaciones (29 materias)
   // Plan de Estudio 2024 (carrera conjunta Fac. de Informática / Fac. de Ciencias Económicas). 29 materias.
+  // Cross-check: careers/unlp.json (feature/careers-catalog-b) — coincide exactamente.
   // Fuente: sources/unlp.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
@@ -5378,8 +5395,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ──────────────────────────────────────────────────────────────────
   // Licenciatura en Ciencias de la Computación (33 materias)
   // Plan 2023, Resolución CD FCEIA 850/2023. 33 materias.
-  // Nombre corregido de "Ciencias de la Computación" (forma usada en el branch, igual a careers.ts) a la forma completa que usa careers/unr.json.
-  // Nombres "Análisis Matemático 1/2" corregidos a numeral romano (fix arábigo → romano).
+  // Cross-check: careers/unr.json (feature/careers-catalog-b) — el JSON usa la forma completa "Licenciatura en Ciencias de la Computación"; la rama catalog-unr había usado la forma corta "Ciencias de la Computación" (igual al enum cerrado careers.ts). Se renombró para matchear el JSON exacto.
   // NO verificado por herramientas de texto: PDF escaneado, extraído por render de imagen (ver sources/unr.sources.md).
   // Fuente: sources/unr.sources.md.
   // ──────────────────────────────────────────────────────────────────
@@ -5684,14 +5700,15 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ──────────────────────────────────────────────────────────────────
   // Licenciatura en Ciencia de Datos (35 materias)
   // Plan de Estudios 2024, Resolución CS 603/2024. 35 materias.
-  // Nombres "Laboratorio de Datos 1/2", "Estadística 1/2", "Programación 1/2", "Aprendizaje Estadístico 1/2" corregidos a numeral romano (fix arábigo → romano).
+  // Cross-check: careers/unr.json (feature/careers-catalog-b) — coincide exactamente.
+  // El plan oficial numera con arábigos ("Laboratorio de Datos 1/2", "Estadística 1/2", "Programación 1/2", "Aprendizaje Estadístico 1/2"); se mantuvo la ortografía oficial (arábigo) tal cual — ver reporte C2.
   // NO verificado por herramientas de texto: fuente en Google Drive, sin extracción automatizada confiable (ver sources/unr.sources.md).
   // Fuente: sources/unr.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
     university: 'Universidad Nacional de Rosario',
     career: 'Licenciatura en Ciencia de Datos',
-    name: 'Laboratorio de Datos I',
+    name: 'Laboratorio de Datos 1',
     code: 'UNRLCD01',
     year: 1,
     description:
@@ -5700,7 +5717,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Rosario',
     career: 'Licenciatura en Ciencia de Datos',
-    name: 'Estadística I',
+    name: 'Estadística 1',
     code: 'UNRLCD02',
     year: 1,
     description:
@@ -5709,7 +5726,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Rosario',
     career: 'Licenciatura en Ciencia de Datos',
-    name: 'Programación I',
+    name: 'Programación 1',
     code: 'UNRLCD03',
     year: 1,
     description:
@@ -5727,7 +5744,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Rosario',
     career: 'Licenciatura en Ciencia de Datos',
-    name: 'Estadística II',
+    name: 'Estadística 2',
     code: 'UNRLCD05',
     year: 1,
     description:
@@ -5736,7 +5753,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Rosario',
     career: 'Licenciatura en Ciencia de Datos',
-    name: 'Programación II',
+    name: 'Programación 2',
     code: 'UNRLCD06',
     year: 1,
     description:
@@ -5745,7 +5762,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Rosario',
     career: 'Licenciatura en Ciencia de Datos',
-    name: 'Análisis Matemático I',
+    name: 'Análisis Matemático 1',
     code: 'UNRLCD07',
     year: 1,
     description:
@@ -5763,7 +5780,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Rosario',
     career: 'Licenciatura en Ciencia de Datos',
-    name: 'Aprendizaje Estadístico I',
+    name: 'Aprendizaje Estadístico 1',
     code: 'UNRLCD09',
     year: 2,
     description:
@@ -5781,7 +5798,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Rosario',
     career: 'Licenciatura en Ciencia de Datos',
-    name: 'Análisis Matemático II',
+    name: 'Análisis Matemático 2',
     code: 'UNRLCD11',
     year: 2,
     description:
@@ -5808,7 +5825,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Rosario',
     career: 'Licenciatura en Ciencia de Datos',
-    name: 'Aprendizaje Estadístico II',
+    name: 'Aprendizaje Estadístico 2',
     code: 'UNRLCD14',
     year: 2,
     description:
@@ -5826,7 +5843,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Rosario',
     career: 'Licenciatura en Ciencia de Datos',
-    name: 'Laboratorio de Datos II',
+    name: 'Laboratorio de Datos 2',
     code: 'UNRLCD16',
     year: 3,
     description:
@@ -6007,6 +6024,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // ──────────────────────────────────────────────────────────────────
   // Tecnicatura Universitaria en Inteligencia Artificial (26 materias)
   // Creación por Resolución CD FCEIA 555/2021. 26 materias.
+  // Cross-check: careers/unr.json (feature/careers-catalog-b) — coincide exactamente.
   // Fuente: sources/unr.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {

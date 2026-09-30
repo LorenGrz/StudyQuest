@@ -53,27 +53,14 @@ Universidad string: `Universidad Nacional de Córdoba`. Fecha de consulta:
 
 ## Fixes aplicados en C2
 
-En **Ingeniería en Computación**, el plan oficial real numera varias
-materias con dígito arábigo standalone (confirmado en la rama origen). Para
-mantener consistencia de estilo con el resto del catálogo y satisfacer el
-validador de C2 (que rechaza nombres terminados en dígito arábigo 1-10), se
-corrigieron a numeral romano:
-
-| Nombre real del plan (arábigo) | Nombre en `official-subjects.ts` (romano) |
-| ------------------------------ | ----------------------------------------- |
-| Análisis Matemático 1          | Análisis Matemático I                     |
-| Análisis Matemático 2          | Análisis Matemático II                    |
-| Análisis Matemático 3          | Análisis Matemático III                   |
-| Física 1                       | Física I                                  |
-| Física 2                       | Física II                                 |
-| Electrónica Digital 1          | Electrónica Digital I                     |
-| Electrónica Digital 2          | Electrónica Digital II                    |
-| Electrónica Digital 3          | Electrónica Digital III                   |
-| Sistemas de Control 1          | Sistemas de Control I                     |
-| Sistemas de Control 2          | Sistemas de Control II                    |
-| Selectiva 1                    | Selectiva I                               |
-| Selectiva 2                    | Selectiva II                              |
-
-Esta es una **desviación intencional** del nombre exacto del plan oficial de
-Ingeniería en Computación (que sí usa arábigo) — ver nota completa en el
-header de `official-subjects.ts` y el reporte de la tarea C2.
+Ninguno. **Ingeniería en Computación** numera varias materias con dígito
+arábigo standalone en el plan oficial real ("Análisis Matemático 1/2/3",
+"Física 1/2", "Electrónica Digital 1/2/3", "Sistemas de Control 1/2",
+"Selectiva 1/2"); se mantuvo esa ortografía tal cual la escribe el plan
+oficial (confirmado en la rama origen). Un primer borrador de esta tarea
+había normalizado estos nombres a numeral romano por consistencia con el
+resto del catálogo; se revirtió: la ortografía oficial tiene prioridad sobre
+la consistencia visual, y el normalizador de dedupe (`normalizeSubjectName`,
+tanto en el validador local como en `common/subject-name.ts` de R1) ya trata
+arábigo y romano como equivalentes, así que no hace falta para evitar
+duplicados.

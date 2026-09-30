@@ -9,10 +9,11 @@ Universidad string: `Universidad Nacional de San Martín`. Todas dictadas por
 la Escuela de Ciencia y Tecnología (ECyT), sede Campus Miguelete. Fecha de
 consulta: 2026-09-26 (investigación) / 2026-09-27 (cierre de la rama origen).
 
-**Cross-check contra `careers/<uni>.json` (C1):** no disponible todavía para
-UNSAM. Nombres de carrera tomados tal cual del `.sources.md` de la rama
-`catalog-unsam`, que los documenta como "carreras nuevas" a agregar a
-`careers.ts` en un cambio aparte.
+**Cross-check contra `careers/unsam.json` (C1, rama `feature/careers-catalog-a`):**
+las 4 carreras **coinciden exactamente**: "Licenciatura en Desarrollo de
+Software", "Tecnicatura Universitaria en Programación Informática",
+"Tecnicatura Universitaria en Redes Informáticas", "Licenciatura en Ciencia
+de Datos". Sin renombres.
 
 ## Licenciatura en Desarrollo de Software (carrera nueva) — 34 materias
 
