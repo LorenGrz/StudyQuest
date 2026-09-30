@@ -13,6 +13,9 @@
  *   universidades escribe algunas materias con arábigo en su plan oficial
  *   real, ver `official-subjects.ts`, así que esa regla no aplica ahí).
  * - Cada (university, career) existe en `careers/*.json`.
+ * - Sin cupos genéricos ("Electiva I", "Optativa 2", "Materia Electiva del
+ *   Ciclo Superior III"…): no son materias reales y nadie arma quests para
+ *   ellas. Las electivas con nombre propio sí entran.
  *
  * Imprime conteos por universidad y por carrera.
  */
@@ -37,6 +40,10 @@ function loadCatalogCareers(): Set<string> {
   }
   return keys;
 }
+
+/** Cupos de electiva/optativa sin contenido propio en el plan. */
+const PLACEHOLDER_NAME =
+  /^(?:(?:Asignatura|Materia) )?(?:Electiva|Optativa|Selectiva)s?(?:\/Optativa)?(?: de Orientación| Técnica APU| \(Ciclo Superior\)| del Ciclo Superior)?(?: (?:[IVX]+|\d+))?(?:\s*[–(].*)?$|^Espacio Electivo$|^Actividades de Formación Complementaria [IVX]+$/;
 
 function endsInArabicDigit(name: string): boolean {
   return /^(.*\S) (10|[1-9])$/.test(name.trim());
@@ -90,6 +97,13 @@ function main(): void {
       issues.push({
         level: 'error',
         message: `Nombre termina en dígito arábigo sin corregir: ${row.university} / ${row.career} / "${row.name}"`,
+      });
+    }
+
+    if (PLACEHOLDER_NAME.test(row.name)) {
+      issues.push({
+        level: 'error',
+        message: `Cupo genérico, no es una materia: ${row.university} / ${row.career} / "${row.name}"`,
       });
     }
 

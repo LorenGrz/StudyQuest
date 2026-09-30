@@ -486,33 +486,6 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Matanza',
     career: 'Ingeniería en Informática',
-    name: 'Electiva I',
-    code: 'ULMINF54',
-    year: 5,
-    description:
-      'Cuatrimestre 1. Materia electiva (código UNLaM 3672). Plan 2023.',
-  },
-  {
-    university: 'Universidad Nacional de La Matanza',
-    career: 'Ingeniería en Informática',
-    name: 'Electiva II',
-    code: 'ULMINF55',
-    year: 5,
-    description:
-      'Cuatrimestre 2. Materia electiva (código UNLaM 3673). Plan 2023.',
-  },
-  {
-    university: 'Universidad Nacional de La Matanza',
-    career: 'Ingeniería en Informática',
-    name: 'Electiva III',
-    code: 'ULMINF56',
-    year: 5,
-    description:
-      'Cuatrimestre 2. Materia electiva (código UNLaM 3674). Plan 2023.',
-  },
-  {
-    university: 'Universidad Nacional de La Matanza',
-    career: 'Ingeniería en Informática',
     name: 'Práctica Profesional Supervisada',
     code: 'ULMINF57',
     year: 5,
@@ -1442,7 +1415,7 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   // Licenciatura en Ciencia de Datos (24 materias)
   // Resolución Ministerial RM 3079/21. 24 materias (8 cuatrimestres).
   // Cross-check: careers/unsam.json (feature/careers-catalog-a) — coincide exactamente.
-  // Nombres "Análisis 1/2", "Programación 1/2", "Electiva 1-3" y "Optativa 1-3" corregidos a numeral romano (fix explícito del plan C2, solo para UNSAM).
+  // Nombres "Análisis 1/2" y "Programación 1/2" corregidos a numeral romano (fix explícito del plan C2, solo para UNSAM).
   // Fuente: sources/unsam.sources.md.
   // ──────────────────────────────────────────────────────────────────
   {
@@ -1536,14 +1509,6 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de San Martín',
     career: 'Licenciatura en Ciencia de Datos',
-    name: 'Electiva I',
-    code: 'UNSAMCD12',
-    year: 2,
-    description: 'Cuatrimestre 4 (electiva).',
-  },
-  {
-    university: 'Universidad Nacional de San Martín',
-    career: 'Licenciatura en Ciencia de Datos',
     name: 'Estadística e Inferencia II',
     code: 'UNSAMCD13',
     year: 3,
@@ -1556,14 +1521,6 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
     code: 'UNSAMCD14',
     year: 3,
     description: 'Cuatrimestre 5.',
-  },
-  {
-    university: 'Universidad Nacional de San Martín',
-    career: 'Licenciatura en Ciencia de Datos',
-    name: 'Electiva II',
-    code: 'UNSAMCD15',
-    year: 3,
-    description: 'Cuatrimestre 5 (electiva).',
   },
   {
     university: 'Universidad Nacional de San Martín',
@@ -1600,42 +1557,10 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de San Martín',
     career: 'Licenciatura en Ciencia de Datos',
-    name: 'Electiva III',
-    code: 'UNSAMCD20',
-    year: 4,
-    description: 'Cuatrimestre 7 (electiva).',
-  },
-  {
-    university: 'Universidad Nacional de San Martín',
-    career: 'Licenciatura en Ciencia de Datos',
-    name: 'Optativa I',
-    code: 'UNSAMCD21',
-    year: 4,
-    description: 'Cuatrimestre 7 (optativa).',
-  },
-  {
-    university: 'Universidad Nacional de San Martín',
-    career: 'Licenciatura en Ciencia de Datos',
     name: 'Aprendizaje Profundo',
     code: 'UNSAMCD22',
     year: 4,
     description: 'Cuatrimestre 8.',
-  },
-  {
-    university: 'Universidad Nacional de San Martín',
-    career: 'Licenciatura en Ciencia de Datos',
-    name: 'Optativa II',
-    code: 'UNSAMCD23',
-    year: 4,
-    description: 'Cuatrimestre 8 (optativa).',
-  },
-  {
-    university: 'Universidad Nacional de San Martín',
-    career: 'Licenciatura en Ciencia de Datos',
-    name: 'Optativa III',
-    code: 'UNSAMCD24',
-    year: 4,
-    description: 'Cuatrimestre 8 (optativa).',
   },
 
   // ======================================================================
@@ -1849,15 +1774,6 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Tecnológica Nacional – FRBA',
     career: 'Ingeniería en Sistemas de Información',
-    name: 'Electiva I – Tercer Nivel',
-    code: 'UTNISI17',
-    year: 3,
-    description:
-      'Materia electiva de tercer nivel (1 materia, elección del catálogo de electivas del plan 2023). No se expande el catálogo de electivas.',
-  },
-  {
-    university: 'Universidad Tecnológica Nacional – FRBA',
-    career: 'Ingeniería en Sistemas de Información',
     name: 'Legislación',
     code: 'UTNISI18',
     year: 4,
@@ -1926,24 +1842,6 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Tecnológica Nacional – FRBA',
     career: 'Ingeniería en Sistemas de Información',
-    name: 'Electiva I – Cuarto Nivel',
-    code: 'UTNISI26',
-    year: 4,
-    description:
-      'Materia electiva de cuarto nivel (1 de 2 materias electivas del nivel). No se expande el catálogo de electivas.',
-  },
-  {
-    university: 'Universidad Tecnológica Nacional – FRBA',
-    career: 'Ingeniería en Sistemas de Información',
-    name: 'Electiva II – Cuarto Nivel',
-    code: 'UTNISI27',
-    year: 4,
-    description:
-      'Materia electiva de cuarto nivel (2 de 2 materias electivas del nivel). No se expande el catálogo de electivas.',
-  },
-  {
-    university: 'Universidad Tecnológica Nacional – FRBA',
-    career: 'Ingeniería en Sistemas de Información',
     name: 'Inteligencia Artificial',
     code: 'UTN-IA',
     year: 5,
@@ -1993,42 +1891,6 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
     year: 5,
     description:
       'Práctica profesional supervisada obligatoria (200 horas reloj).',
-  },
-  {
-    university: 'Universidad Tecnológica Nacional – FRBA',
-    career: 'Ingeniería en Sistemas de Información',
-    name: 'Electiva I – Quinto Nivel',
-    code: 'UTNISI32',
-    year: 5,
-    description:
-      'Materia electiva de quinto nivel (1 de 4 materias electivas del nivel). No se expande el catálogo de electivas.',
-  },
-  {
-    university: 'Universidad Tecnológica Nacional – FRBA',
-    career: 'Ingeniería en Sistemas de Información',
-    name: 'Electiva II – Quinto Nivel',
-    code: 'UTNISI33',
-    year: 5,
-    description:
-      'Materia electiva de quinto nivel (2 de 4 materias electivas del nivel). No se expande el catálogo de electivas.',
-  },
-  {
-    university: 'Universidad Tecnológica Nacional – FRBA',
-    career: 'Ingeniería en Sistemas de Información',
-    name: 'Electiva III – Quinto Nivel',
-    code: 'UTNISI34',
-    year: 5,
-    description:
-      'Materia electiva de quinto nivel (3 de 4 materias electivas del nivel). No se expande el catálogo de electivas.',
-  },
-  {
-    university: 'Universidad Tecnológica Nacional – FRBA',
-    career: 'Ingeniería en Sistemas de Información',
-    name: 'Electiva IV – Quinto Nivel',
-    code: 'UTNISI35',
-    year: 5,
-    description:
-      'Materia electiva de quinto nivel (4 de 4 materias electivas del nivel). No se expande el catálogo de electivas.',
   },
 
   // ──────────────────────────────────────────────────────────────────
@@ -2392,15 +2254,6 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad de Buenos Aires',
     career: 'Licenciatura en Ciencias de la Computación',
-    name: 'Materia Optativa (Ciclo Superior) I',
-    code: 'UBACC32',
-    year: 4,
-    description:
-      '6to cuatrimestre, 80 hs. A elegir entre robótica, IA, teoría de juegos, computación gráfica, bioinformática, aprendizaje automático, seguridad informática, entre otras.',
-  },
-  {
-    university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Programación Concurrente y Paralela',
     code: 'UBACC33',
     year: 5,
@@ -2419,37 +2272,11 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad de Buenos Aires',
     career: 'Licenciatura en Ciencias de la Computación',
-    name: 'Materia Optativa (Ciclo Superior) II',
-    code: 'UBACC35',
-    year: 5,
-    description: '7mo cuatrimestre, 80 hs. Ciclo superior.',
-  },
-  {
-    university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Seminario sobre Tecnología y Sociedad',
     code: 'UBACC36',
     year: 5,
     description:
       '8vo cuatrimestre. Marco legal de la ciencia e informática en Argentina; ética profesional; ciencia, tecnología y sociedad.',
-  },
-  {
-    university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencias de la Computación',
-    name: 'Materia Optativa (Ciclo Superior) III',
-    code: 'UBACC37',
-    year: 5,
-    description:
-      '8vo cuatrimestre, 80 hs (parte del bloque de 160 hs del cuatrimestre).',
-  },
-  {
-    university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencias de la Computación',
-    name: 'Materia Optativa (Ciclo Superior) IV',
-    code: 'UBACC38',
-    year: 5,
-    description:
-      '8vo cuatrimestre, 80 hs (parte del bloque de 160 hs del cuatrimestre).',
   },
   {
     university: 'Universidad de Buenos Aires',
@@ -2649,42 +2476,6 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
     year: 4,
     description:
       '8vo cuatrimestre. Modelado matemático continuo: ecuaciones diferenciales y sistemas dinámicos.',
-  },
-  {
-    university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencias de Datos',
-    name: 'Materia Electiva del Ciclo Superior I',
-    code: 'UBALCD21',
-    year: 5,
-    description:
-      '160 hs aprox. Orientación definida junto a un/a tutor/a de estudios en el Plan de Estudios Individual (PEI).',
-  },
-  {
-    university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencias de Datos',
-    name: 'Materia Electiva del Ciclo Superior II',
-    code: 'UBALCD22',
-    year: 5,
-    description:
-      '160 hs aprox. Orientación definida junto a un/a tutor/a de estudios en el Plan de Estudios Individual (PEI).',
-  },
-  {
-    university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencias de Datos',
-    name: 'Materia Electiva del Ciclo Superior III',
-    code: 'UBALCD23',
-    year: 5,
-    description:
-      '160 hs aprox. Orientación definida junto a un/a tutor/a de estudios en el Plan de Estudios Individual (PEI).',
-  },
-  {
-    university: 'Universidad de Buenos Aires',
-    career: 'Licenciatura en Ciencias de Datos',
-    name: 'Materia Electiva del Ciclo Superior IV',
-    code: 'UBALCD24',
-    year: 5,
-    description:
-      '160 hs aprox. Orientación definida junto a un/a tutor/a de estudios en el Plan de Estudios Individual (PEI).',
   },
   {
     university: 'Universidad de Buenos Aires',
@@ -2948,43 +2739,11 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad de Buenos Aires',
     career: 'Ingeniería en Informática',
-    name: 'Materia Electiva/Optativa I',
-    code: 'UBAINF35',
-    year: 5,
-    description: '9no cuatrimestre.',
-  },
-  {
-    university: 'Universidad de Buenos Aires',
-    career: 'Ingeniería en Informática',
-    name: 'Materia Electiva/Optativa II',
-    code: 'UBAINF36',
-    year: 5,
-    description: '9no cuatrimestre.',
-  },
-  {
-    university: 'Universidad de Buenos Aires',
-    career: 'Ingeniería en Informática',
     name: 'Empresas de Base Tecnológica II',
     code: 'UBAINF37',
     year: 5,
     description:
       '10mo cuatrimestre. Correlativa: Empresas de Base Tecnológica I.',
-  },
-  {
-    university: 'Universidad de Buenos Aires',
-    career: 'Ingeniería en Informática',
-    name: 'Materia Electiva/Optativa III',
-    code: 'UBAINF38',
-    year: 5,
-    description: '10mo cuatrimestre.',
-  },
-  {
-    university: 'Universidad de Buenos Aires',
-    career: 'Ingeniería en Informática',
-    name: 'Materia Electiva/Optativa IV',
-    code: 'UBAINF39',
-    year: 5,
-    description: '10mo cuatrimestre.',
   },
   {
     university: 'Universidad de Buenos Aires',
@@ -3217,15 +2976,6 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
     code: 'UNCLCC25',
     year: 5,
     description: 'Quinto año.',
-  },
-  {
-    university: 'Universidad Nacional de Córdoba',
-    career: 'Licenciatura en Ciencias de la Computación',
-    name: 'Optativas',
-    code: 'UNCLCC26',
-    year: 5,
-    description:
-      'Quinto año. Cupo de materia optativa: la persona estudiante elige una de la nómina vigente (incluye, entre otras, Análisis Numérico, Matemática Discreta II, Paradigmas de Programación, Redes y Sistemas Distribuidos, Base de Datos, Arquitectura de Computadoras, Ingeniería del Software I, Lenguajes Formales y Computabilidad, Modelos y Simulación, Lógica y Física).',
   },
   {
     university: 'Universidad Nacional de Córdoba',
@@ -3703,24 +3453,6 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Córdoba',
     career: 'Ingeniería en Computación',
-    name: 'Selectiva 1',
-    code: 'UNCIC38',
-    year: 5,
-    description:
-      'Quinto año, primer cuatrimestre. Cupo de materia electiva/selectiva, sin nombre fijo en el plan oficial.',
-  },
-  {
-    university: 'Universidad Nacional de Córdoba',
-    career: 'Ingeniería en Computación',
-    name: 'Selectiva 2',
-    code: 'UNCIC39',
-    year: 5,
-    description:
-      'Quinto año, primer cuatrimestre. Cupo de materia electiva/selectiva, sin nombre fijo en el plan oficial.',
-  },
-  {
-    university: 'Universidad Nacional de Córdoba',
-    career: 'Ingeniería en Computación',
     name: 'Ingeniería Económica y Legal',
     code: 'UNCIC40',
     year: 5,
@@ -3979,15 +3711,6 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
     code: 'UNLPINF30',
     year: 4,
     description: '7mo semestre. Cuatrimestral.',
-  },
-  {
-    university: 'Universidad Nacional de La Plata',
-    career: 'Licenciatura en Informática',
-    name: 'Optativa I',
-    code: 'UNLPINF31',
-    year: 4,
-    description:
-      '7mo semestre. Optativa. Cuatrimestral. A elegir del listado anual de optativas de la Licenciatura en Informática.',
   },
   {
     university: 'Universidad Nacional de La Plata',
@@ -4321,15 +4044,6 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Licenciatura en Sistemas',
-    name: 'Optativa I',
-    code: 'UNLPSIS33',
-    year: 4,
-    description:
-      '8vo semestre. Optativa. Cuatrimestral. A elegir del listado anual de optativas de la Licenciatura en Sistemas.',
-  },
-  {
-    university: 'Universidad Nacional de La Plata',
-    career: 'Licenciatura en Sistemas',
     name: 'Aspectos Sociales y Profesionales de Informática',
     code: 'UNLPSIS34',
     year: 5,
@@ -4342,15 +4056,6 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
     code: 'UNLPSIS35',
     year: 5,
     description: '9no semestre. Cuatrimestral.',
-  },
-  {
-    university: 'Universidad Nacional de La Plata',
-    career: 'Licenciatura en Sistemas',
-    name: 'Optativa II',
-    code: 'UNLPSIS36',
-    year: 5,
-    description:
-      '9no semestre. Optativa. Cuatrimestral. A elegir del listado anual de optativas de la Licenciatura en Sistemas.',
   },
   {
     university: 'Universidad Nacional de La Plata',
@@ -4554,15 +4259,6 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
     description:
       '6to semestre. Cuatrimestral. A elegir una opción: Java, Ingeniería de Software Aplicada, Técnicas y Estrategias, Ruby o Desarrollo Guiado por Requerimientos.',
   },
-  {
-    university: 'Universidad Nacional de La Plata',
-    career: 'Analista Programador Universitario',
-    name: 'Optativa Técnica APU',
-    code: 'UNLPAPU24',
-    year: 3,
-    description:
-      '5to/6to semestre. Optativa. Cuatrimestral. Elegir una asignatura entre: Conceptos y Paradigmas de Lenguajes de Programación, Redes y Comunicaciones, Bases de Datos 1 o Sistemas y Organizaciones.',
-  },
 
   // ──────────────────────────────────────────────────────────────────
   // Analista en Tecnologías de la Información y la Comunicación (24 materias)
@@ -4748,24 +4444,6 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
     code: 'UNLPATIC22',
     year: 3,
     description: '6to semestre. Práctica profesional supervisada.',
-  },
-  {
-    university: 'Universidad Nacional de La Plata',
-    career: 'Analista en Tecnologías de la Información y la Comunicación',
-    name: 'Optativa de Orientación I',
-    code: 'UNLPATIC23',
-    year: 3,
-    description:
-      '6to semestre. Optativa. Cuatrimestral. Elegir dos optativas según la orientación (se cursan 2 en total entre esta fila y "Optativa de Orientación II"): Aplicaciones Web (Ingeniería de Aplicaciones Web, Calidad en Sistemas de Software, Métodos Ágiles para Aplicaciones Web), Cloud Computing y Big Data (Cloud Computing y Cloud Robotics, Conceptos y Aplicaciones de Big Data, Taller de Programación sobre GPU), Aplicaciones Móviles (Introducción a la Computación Móvil, Enfoques para el Desarrollo de Aplicaciones Móviles Multiplataforma, Diseño de Interacciones en Aplicaciones Móviles) o Seguridad y Privacidad (Seguridad y Privacidad en Redes, Introducción a la Ciberseguridad, Introducción a la Forensia Digital).',
-  },
-  {
-    university: 'Universidad Nacional de La Plata',
-    career: 'Analista en Tecnologías de la Información y la Comunicación',
-    name: 'Optativa de Orientación II',
-    code: 'UNLPATIC24',
-    year: 3,
-    description:
-      '6to semestre. Optativa. Cuatrimestral. Segunda optativa de la misma orientación elegida en "Optativa de Orientación I".',
   },
 
   // ──────────────────────────────────────────────────────────────────
@@ -5002,14 +4680,6 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Ingeniería en Computación',
-    name: 'Actividades de Formación Complementaria I',
-    code: 'UNLPIC29',
-    year: 4,
-    description: '4to año, 1er semestre. Requiere 10 asignaturas aprobadas.',
-  },
-  {
-    university: 'Universidad Nacional de La Plata',
-    career: 'Ingeniería en Computación',
     name: 'Redes de Datos II',
     code: 'UNLPIC30',
     year: 4,
@@ -5042,14 +4712,6 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de La Plata',
     career: 'Ingeniería en Computación',
-    name: 'Actividades de Formación Complementaria II',
-    code: 'UNLPIC34',
-    year: 4,
-    description: '4to año, 2do semestre.',
-  },
-  {
-    university: 'Universidad Nacional de La Plata',
-    career: 'Ingeniería en Computación',
     name: 'Sistemas Distribuidos y Paralelos',
     code: 'UNLPIC35',
     year: 5,
@@ -5068,23 +4730,6 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
     career: 'Ingeniería en Computación',
     name: 'Introducción a la Arquitectura de Computadoras Cuánticas',
     code: 'UNLPIC37',
-    year: 5,
-    description: '5to año, 1er semestre.',
-  },
-  {
-    university: 'Universidad Nacional de La Plata',
-    career: 'Ingeniería en Computación',
-    name: 'Optativa 1',
-    code: 'UNLPIC38',
-    year: 5,
-    description:
-      '5to año, 1er semestre. Optativa. Cuatrimestral. Se debe realizar al menos una optativa Tipo A y una Tipo B (esta fila y "Optativa 2").',
-  },
-  {
-    university: 'Universidad Nacional de La Plata',
-    career: 'Ingeniería en Computación',
-    name: 'Actividades de Formación Complementaria III',
-    code: 'UNLPIC39',
     year: 5,
     description: '5to año, 1er semestre.',
   },
@@ -5110,23 +4755,6 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
     career: 'Ingeniería en Computación',
     name: 'Introducción a la Programación Cuántica',
     code: 'UNLPIC42',
-    year: 5,
-    description: '5to año, 2do semestre.',
-  },
-  {
-    university: 'Universidad Nacional de La Plata',
-    career: 'Ingeniería en Computación',
-    name: 'Optativa 2',
-    code: 'UNLPIC43',
-    year: 5,
-    description:
-      '5to año, 2do semestre. Optativa. Cuatrimestral. Se debe realizar al menos una optativa Tipo A y una Tipo B (esta fila y "Optativa 1").',
-  },
-  {
-    university: 'Universidad Nacional de La Plata',
-    career: 'Ingeniería en Computación',
-    name: 'Actividades de Formación Complementaria IV',
-    code: 'UNLPIC44',
     year: 5,
     description: '5to año, 2do semestre.',
   },
@@ -5369,15 +4997,6 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
     code: 'UNLPCDO27',
     year: 4,
     description: '4to año, 2do semestre.',
-  },
-  {
-    university: 'Universidad Nacional de La Plata',
-    career: 'Ciencia de Datos en Organizaciones',
-    name: 'Optativa',
-    code: 'UNLPCDO28',
-    year: 4,
-    description:
-      '4to año, 2do semestre. Optativa. Según la temática ofrecida ese año.',
   },
   {
     university: 'Universidad Nacional de La Plata',
@@ -5672,29 +5291,11 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Rosario',
     career: 'Licenciatura en Ciencias de la Computación',
-    name: 'Materia Electiva (5to año, 1er cuatrimestre)',
-    code: 'UNRLCC31',
-    year: 5,
-    description:
-      'Espacio curricular electivo del plan (75 hs, 1er cuatrimestre de 5to año); el plan no fija una materia específica para este bloque.',
-  },
-  {
-    university: 'Universidad Nacional de Rosario',
-    career: 'Licenciatura en Ciencias de la Computación',
     name: 'Tesina',
     code: 'UNRLCC32',
     year: 5,
     description:
       'Cuatrimestral, 2do cuatrimestre. Elaboración y defensa de la Tesina de licenciatura.',
-  },
-  {
-    university: 'Universidad Nacional de Rosario',
-    career: 'Licenciatura en Ciencias de la Computación',
-    name: 'Materia Electiva (5to año, 2do cuatrimestre)',
-    code: 'UNRLCC33',
-    year: 5,
-    description:
-      'Espacio curricular electivo del plan (150 hs, 2do cuatrimestre de 5to año); el plan no fija una materia específica para este bloque.',
   },
 
   // ──────────────────────────────────────────────────────────────────
@@ -5996,24 +5597,6 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
   {
     university: 'Universidad Nacional de Rosario',
     career: 'Licenciatura en Ciencia de Datos',
-    name: 'Asignatura Electiva (4to año, 2do cuatrimestre — E4.2.29)',
-    code: 'UNRLCD33',
-    year: 4,
-    description:
-      'Espacio curricular optativo, electivo o de contenido variable (64 hs, código E4.2.29); el plan no fija una materia específica para este bloque.',
-  },
-  {
-    university: 'Universidad Nacional de Rosario',
-    career: 'Licenciatura en Ciencia de Datos',
-    name: 'Asignatura Electiva (4to año, 2do cuatrimestre — E4.2.30)',
-    code: 'UNRLCD34',
-    year: 4,
-    description:
-      'Espacio curricular optativo, electivo o de contenido variable (64 hs, código E4.2.30); el plan no fija una materia específica para este bloque.',
-  },
-  {
-    university: 'Universidad Nacional de Rosario',
-    career: 'Licenciatura en Ciencia de Datos',
     name: 'Seminario de Integración y Aplicación Profesional',
     code: 'UNRLCD35',
     year: 4,
@@ -6251,14 +5834,5 @@ export const OFFICIAL_SUBJECTS: OfficialSubjectRow[] = [
     year: 3,
     description:
       'Cuatrimestral, 5to cuatrimestre (IA5.3), 200 hs. Práctica profesional final de la tecnicatura.',
-  },
-  {
-    university: 'Universidad Nacional de Rosario',
-    career: 'Tecnicatura Universitaria en Inteligencia Artificial',
-    name: 'Espacio Electivo',
-    code: 'UNRTIA26',
-    year: 3,
-    description:
-      'Espacio curricular electivo del plan (96 hs a acreditar desde el 2do cuatrimestre, código IA5.4) a completar con actividades curriculares del listado oficial de electivas (p. ej. Modelado y Simulación, Procesamiento de Voz, hackathones, congresos).',
   },
 ];
