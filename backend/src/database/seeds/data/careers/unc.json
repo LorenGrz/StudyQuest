@@ -1,0 +1,643 @@
+{
+  "university": {
+    "name": "Universidad Nacional de Córdoba",
+    "shortName": "UNC",
+    "website": "https://www.unc.edu.ar",
+    "careersSourceUrls": [
+      "https://www.unc.edu.ar/acad%C3%A9micas/guia-de-carreras-de-grado-0",
+      "https://www.unc.edu.ar/acad%C3%A9micas/carreras-de-pregrado-de-la-unc-0"
+    ]
+  },
+  "careers": [
+    {
+      "name": "Bibliotecólogo",
+      "faculty": "Escuela de Bibliotecología",
+      "level": "pregrado",
+      "sourceUrl": "https://sitio.ffyh.unc.edu.ar/bibliotecologia/"
+    },
+    {
+      "name": "Tecnicatura en Corrección Literaria",
+      "faculty": "Escuela de Letras",
+      "level": "pregrado",
+      "sourceUrl": "https://ffyh.unc.edu.ar/grado/escuela-de-letras/"
+    },
+    {
+      "name": "Tecnicatura en Laboratorio Clínico e Histopatológico",
+      "faculty": "Escuela de Tecnología Médica",
+      "level": "pregrado",
+      "sourceUrl": "https://tecnologia.fcm.unc.edu.ar/laboratorio-clinico-e-histopatologia/"
+    },
+    {
+      "name": "Arquitectura",
+      "faculty": "Facultad de Arquitectura, Urbanismo y Diseño",
+      "level": "grado",
+      "sourceUrl": "https://faud.unc.edu.ar/carrera-de-arquitectura/"
+    },
+    {
+      "name": "Diseño Industrial",
+      "faculty": "Facultad de Arquitectura, Urbanismo y Diseño",
+      "level": "grado",
+      "sourceUrl": "https://faud.unc.edu.ar/carrera-de-diseno-industrial/"
+    },
+    {
+      "name": "Licenciatura en Diseño del Paisaje",
+      "faculty": "Facultad de Arquitectura, Urbanismo y Diseño",
+      "level": "grado",
+      "sourceUrl": "https://faud.unc.edu.ar/carrera-de-diseno-del-paisaje/"
+    },
+    {
+      "name": "Licenciatura en Artes Visuales",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://artes.unc.edu.ar/departamentos/departamento-de-artes-visuales/carreras/"
+    },
+    {
+      "name": "Licenciatura en Cine y Artes Audiovisuales",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://artes.unc.edu.ar/departamentos/departamento-de-cine-y-television/carreras/"
+    },
+    {
+      "name": "Licenciatura en Composición Musical",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://artes.unc.edu.ar/departamentos/departamento-de-musica/carreras/"
+    },
+    {
+      "name": "Licenciatura en Dirección Coral",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://artes.unc.edu.ar/departamentos/departamento-de-musica/carreras/"
+    },
+    {
+      "name": "Licenciatura en Educación Musical",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://artes.unc.edu.ar/departamentos/departamento-de-musica/carreras/"
+    },
+    {
+      "name": "Licenciatura en Interpretación Instrumental",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://artes.unc.edu.ar/departamentos/departamento-de-musica/carreras/"
+    },
+    {
+      "name": "Licenciatura en Teatro",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://artes.unc.edu.ar/departamentos/departamento-de-teatro/carreras/"
+    },
+    {
+      "name": "Profesorado en Educación Musical",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://artes.unc.edu.ar/departamentos/departamento-de-musica/carreras/"
+    },
+    {
+      "name": "Profesorado en Educación Plástica y Visual",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://artes.unc.edu.ar/departamentos/departamento-de-artes-visuales/carreras/"
+    },
+    {
+      "name": "Profesorado en Teatro",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://artes.unc.edu.ar/departamentos/departamento-de-teatro/carreras/"
+    },
+    {
+      "name": "Ingeniería Agronómica",
+      "faculty": "Facultad de Ciencias Agropecuarias",
+      "level": "grado",
+      "sourceUrl": "https://agro.unc.edu.ar/estudios/carreras-de-grado/"
+    },
+    {
+      "name": "Ingeniería Zootecnista",
+      "faculty": "Facultad de Ciencias Agropecuarias",
+      "level": "grado",
+      "sourceUrl": "https://agro.unc.edu.ar/estudios/carreras-de-grado/"
+    },
+    {
+      "name": "Licenciatura Universitaria en Agroalimentos",
+      "faculty": "Facultad de Ciencias Agropecuarias",
+      "level": "grado",
+      "sourceUrl": "https://agro.unc.edu.ar/estudios/carreras-de-grado/"
+    },
+    {
+      "name": "Licenciatura Universitaria en Diseño del Paisaje",
+      "faculty": "Facultad de Ciencias Agropecuarias",
+      "level": "grado",
+      "sourceUrl": "https://agro.unc.edu.ar/estudios/carreras-de-grado/"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Agroalimentos",
+      "faculty": "Facultad de Ciencias Agropecuarias",
+      "level": "pregrado",
+      "sourceUrl": "https://www.agro.unc.edu.ar/~alumnos/?page_id=7927"
+    },
+    {
+      "name": "Tecnicatura en Jardinería y Floricultura",
+      "faculty": "Facultad de Ciencias Agropecuarias",
+      "level": "pregrado",
+      "sourceUrl": "https://www.agro.unc.edu.ar/~alumnos/?page_id=3971"
+    },
+    {
+      "name": "Contador/a Público/a",
+      "faculty": "Facultad de Ciencias Económicas",
+      "level": "grado",
+      "sourceUrl": "https://www.eco.unc.edu.ar/carreras-de-grado-estudios/contador-publico"
+    },
+    {
+      "name": "Licenciatura en Administración",
+      "faculty": "Facultad de Ciencias Económicas",
+      "level": "grado",
+      "sourceUrl": "https://www.eco.unc.edu.ar/index.php/carreras-de-grado-estudios/lic-en-administracion"
+    },
+    {
+      "name": "Licenciatura en Economía",
+      "faculty": "Facultad de Ciencias Económicas",
+      "level": "grado",
+      "sourceUrl": "https://www.eco.unc.edu.ar/index.php/carreras-de-grado-estudios/lic-en-economia"
+    },
+    {
+      "name": "Licenciatura en Gestión Universitaria",
+      "faculty": "Facultad de Ciencias Económicas",
+      "level": "grado",
+      "sourceUrl": "https://www.eco.unc.edu.ar/carreras-de-grado-estudios/licenciatura-en-gestion-universitaria#informacion-general"
+    },
+    {
+      "name": "Profesorado en Ciencias Económicas",
+      "faculty": "Facultad de Ciencias Económicas",
+      "level": "grado",
+      "sourceUrl": "https://www.eco.unc.edu.ar/carreras-de-grado-estudios/profesorado-en-cs-economicas"
+    },
+    {
+      "name": "Ciencias Biológicas",
+      "faculty": "Facultad de Ciencias Exactas, Físicas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://fcefyn.unc.edu.ar/facultad/secretarias/academica/escuelas/biologia/ciencias-biologicas/"
+    },
+    {
+      "name": "Ciencias Geológicas",
+      "faculty": "Facultad de Ciencias Exactas, Físicas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://fcefyn.unc.edu.ar/facultad/secretarias/academica/escuelas/escuela-de-geologia/carrera-ciencias-geologicas/"
+    },
+    {
+      "name": "Constructor",
+      "faculty": "Facultad de Ciencias Exactas, Físicas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://fcefyn.unc.edu.ar/facultad/secretarias/academica/escuelas/escuela-de-ingenieria-civil/carrera-constructor/"
+    },
+    {
+      "name": "Ingeniería Aeroespacial",
+      "faculty": "Facultad de Ciencias Exactas, Físicas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://fcefyn.unc.edu.ar/facultad/secretarias/academica/escuelas/escuela-de-ingenieria-mecanica-aeronautica/carrera-ingenieria-aeroespacial/"
+    },
+    {
+      "name": "Ingeniería Ambiental",
+      "faculty": "Facultad de Ciencias Exactas, Físicas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://fcefyn.unc.edu.ar/facultad/secretarias/academica/escuelas/escuela-de-ingenieria-civil/carrera-ingenieria-ambiental/"
+    },
+    {
+      "name": "Ingeniería Biomédica",
+      "faculty": "Facultad de Ciencias Exactas, Físicas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://fcefyn.unc.edu.ar/facultad/secretarias/academica/escuelas/ingenieria-biomedica/carrera-ingenieria-biomedica/"
+    },
+    {
+      "name": "Ingeniería Civil",
+      "faculty": "Facultad de Ciencias Exactas, Físicas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://fcefyn.unc.edu.ar/facultad/secretarias/academica/escuelas/escuela-de-ingenieria-civil/carrera-ingenieria-civil/"
+    },
+    {
+      "name": "Ingeniería Electromecánica",
+      "faculty": "Facultad de Ciencias Exactas, Físicas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://fcefyn.unc.edu.ar/facultad/secretarias/academica/escuelas/escuela-de-ingenieria-mecanica-electricista/carrera-ingenieria-electromecanica/"
+    },
+    {
+      "name": "Ingeniería Electrónica",
+      "faculty": "Facultad de Ciencias Exactas, Físicas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://fcefyn.unc.edu.ar/facultad/secretarias/academica/escuelas/escuela-de-ingenieria-electronica/carrera-ingenieria-electronica/"
+    },
+    {
+      "name": "Ingeniería Industrial",
+      "faculty": "Facultad de Ciencias Exactas, Físicas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://fcefyn.unc.edu.ar/facultad/secretarias/academica/escuelas/ingenieria-industrial/carrera-ingenieria-industrial/"
+    },
+    {
+      "name": "Ingeniería Mecánica",
+      "faculty": "Facultad de Ciencias Exactas, Físicas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://fcefyn.unc.edu.ar/facultad/secretarias/academica/escuelas/escuela-de-ingenieria-mecanica-electricista/carrera-ingenieria-mecanica/"
+    },
+    {
+      "name": "Ingeniería Química",
+      "faculty": "Facultad de Ciencias Exactas, Físicas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://fcefyn.unc.edu.ar/facultad/secretarias/academica/escuelas/escuela-de-ingenieria-quimica/carrera-ingenieria-quimica/"
+    },
+    {
+      "name": "Ingeniería en Agrimensura",
+      "faculty": "Facultad de Ciencias Exactas, Físicas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://fcefyn.unc.edu.ar/facultad/secretarias/academica/escuelas/escuela-agrimensura/carrera-ingenieria-en-agrimensura/"
+    },
+    {
+      "name": "Ingeniería en Computación",
+      "faculty": "Facultad de Ciencias Exactas, Físicas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://fcefyn.unc.edu.ar/facultad/secretarias/academica/escuelas/ingenieria-computacion/carrera-ingenieria-en-computacion/"
+    },
+    {
+      "name": "Profesorado en Ciencias Biológicas",
+      "faculty": "Facultad de Ciencias Exactas, Físicas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://fcefyn.unc.edu.ar/facultad/secretarias/academica/escuelas/biologia/carrera-profesorado-en-ciencias-biologicas/"
+    },
+    {
+      "name": "Técnico Mecánico Electricista",
+      "faculty": "Facultad de Ciencias Exactas, Físicas y Naturales",
+      "level": "pregrado",
+      "sourceUrl": "https://fcefyn.unc.edu.ar/facultad/secretarias/academica/escuelas/escuela-de-ingenieria-mecanica-electricista/carrera-tecnicatura-en-mecanica-electricista/"
+    },
+    {
+      "name": "Licenciatura en Enfermería",
+      "faculty": "Facultad de Ciencias Médicas",
+      "level": "grado",
+      "sourceUrl": "https://enfermeria.fcm.unc.edu.ar/"
+    },
+    {
+      "name": "Licenciatura en Fonoaudiología",
+      "faculty": "Facultad de Ciencias Médicas",
+      "level": "grado",
+      "sourceUrl": "https://fono.fcm.unc.edu.ar/"
+    },
+    {
+      "name": "Licenciatura en Kinesiología y Fisioterapia",
+      "faculty": "Facultad de Ciencias Médicas",
+      "level": "grado",
+      "sourceUrl": "https://ekyf.fcm.unc.edu.ar/"
+    },
+    {
+      "name": "Licenciatura en Nutrición",
+      "faculty": "Facultad de Ciencias Médicas",
+      "level": "grado",
+      "sourceUrl": "https://nutricion.fcm.unc.edu.ar/carrera/"
+    },
+    {
+      "name": "Licenciatura en Producción de Bioimágenes",
+      "faculty": "Facultad de Ciencias Médicas",
+      "level": "grado",
+      "sourceUrl": "https://tecnologia.fcm.unc.edu.ar/produccion-de-bio-imagenes/"
+    },
+    {
+      "name": "Medicina",
+      "faculty": "Facultad de Ciencias Médicas",
+      "level": "grado",
+      "sourceUrl": "https://fcm.unc.edu.ar/carrera-de-medicina/"
+    },
+    {
+      "name": "Tecnicatura en Instrumentación Quirúrgica",
+      "faculty": "Facultad de Ciencias Médicas",
+      "level": "grado",
+      "sourceUrl": "https://tecnologia.fcm.unc.edu.ar/instrumentacion-quirurgica/"
+    },
+    {
+      "name": "Tecnicatura en Laboratorio y Hemoterapia",
+      "faculty": "Facultad de Ciencias Médicas",
+      "level": "grado",
+      "sourceUrl": "https://tecnologia.fcm.unc.edu.ar/laboratorio-y-hemoterapia/"
+    },
+    {
+      "name": "Tecnicatura en Radiología",
+      "faculty": "Facultad de Ciencias Médicas",
+      "level": "grado",
+      "sourceUrl": "https://tecnologia.fcm.unc.edu.ar/radiologia/"
+    },
+    {
+      "name": "Bioquímica",
+      "faculty": "Facultad de Ciencias Químicas",
+      "level": "grado",
+      "sourceUrl": "https://www.fcq.unc.edu.ar/bioquimica/"
+    },
+    {
+      "name": "Farmacia",
+      "faculty": "Facultad de Ciencias Químicas",
+      "level": "grado",
+      "sourceUrl": "https://www.fcq.unc.edu.ar/farmacia/"
+    },
+    {
+      "name": "Licenciatura en Biotecnología",
+      "faculty": "Facultad de Ciencias Químicas",
+      "level": "grado",
+      "sourceUrl": "https://www.fcq.unc.edu.ar/biotecnologia/"
+    },
+    {
+      "name": "Licenciatura en Química",
+      "faculty": "Facultad de Ciencias Químicas",
+      "level": "grado",
+      "sourceUrl": "https://www.fcq.unc.edu.ar/quimica/"
+    },
+    {
+      "name": "Licenciatura en Ciencia Política",
+      "faculty": "Facultad de Ciencias Sociales",
+      "level": "grado",
+      "sourceUrl": "https://sociales.unc.edu.ar/licenciaturacienciapolitica"
+    },
+    {
+      "name": "Licenciatura en Sociología",
+      "faculty": "Facultad de Ciencias Sociales",
+      "level": "grado",
+      "sourceUrl": "https://sociales.unc.edu.ar/licenciaturasociologia"
+    },
+    {
+      "name": "Licenciatura en Trabajo Social",
+      "faculty": "Facultad de Ciencias Sociales",
+      "level": "grado",
+      "sourceUrl": "https://sociales.unc.edu.ar/licenciaturatrabajosocial"
+    },
+    {
+      "name": "Licenciatura en Comunicación Social",
+      "faculty": "Facultad de Ciencias de la Comunicación",
+      "level": "grado",
+      "sourceUrl": "https://fcc.unc.edu.ar/oferta-academica/carreras/licenciatura-en-comunicacion-social/"
+    },
+    {
+      "name": "Profesorado en Comunicación Social",
+      "faculty": "Facultad de Ciencias de la Comunicación",
+      "level": "grado",
+      "sourceUrl": "https://fcc.unc.edu.ar/oferta-academica/carreras/profesorado-en-comunicacion-social/"
+    },
+    {
+      "name": "Abogacía",
+      "faculty": "Facultad de Derecho",
+      "level": "grado",
+      "sourceUrl": "https://derecho.unc.edu.ar/alumnos/abogacia/"
+    },
+    {
+      "name": "Notariado",
+      "faculty": "Facultad de Derecho",
+      "level": "grado",
+      "sourceUrl": "https://derecho.unc.edu.ar/departamento-notariado/"
+    },
+    {
+      "name": "Profesorado en Ciencias Jurídicas",
+      "faculty": "Facultad de Derecho",
+      "level": "grado",
+      "sourceUrl": "https://derecho.unc.edu.ar/profesorado-en-ciencias-juridicas/"
+    },
+    {
+      "name": "Ciclo de Licenciatura en Ciencias de la Educación",
+      "faculty": "Facultad de Filosofía y Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://sitio.ffyh.unc.edu.ar/escuelacienciaseducacion/carreras/ciclo-de-licenciatura-en-ciencias-de-la-educacion/"
+    },
+    {
+      "name": "Licenciatura en Antropología",
+      "faculty": "Facultad de Filosofía y Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://sitio.ffyh.unc.edu.ar/antropologia/"
+    },
+    {
+      "name": "Licenciatura en Archivología",
+      "faculty": "Facultad de Filosofía y Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://sitio.ffyh.unc.edu.ar/archivologia/"
+    },
+    {
+      "name": "Licenciatura en Ciencias de la Educación",
+      "faculty": "Facultad de Filosofía y Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://sitio.ffyh.unc.edu.ar/escuelacienciaseducacion/carreras/profesorado-en-ciencias-de-la-educacion/"
+    },
+    {
+      "name": "Licenciatura en Filosofía",
+      "faculty": "Facultad de Filosofía y Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://sitio.ffyh.unc.edu.ar/escueladefilosofia/licenciatura/"
+    },
+    {
+      "name": "Licenciatura en Geografía",
+      "faculty": "Facultad de Filosofía y Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://sitio.ffyh.unc.edu.ar/deptodegeografia/plan-de-estudio/"
+    },
+    {
+      "name": "Licenciatura en Historia",
+      "faculty": "Facultad de Filosofía y Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://sitio.ffyh.unc.edu.ar/escueladehistoria/institucional/plan-de-estudios/"
+    },
+    {
+      "name": "Licenciatura en Letras Clásicas",
+      "faculty": "Facultad de Filosofía y Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://sitio.ffyh.unc.edu.ar/escueladeletras/plan-de-estudios-y-cursado/"
+    },
+    {
+      "name": "Licenciatura en Letras Modernas",
+      "faculty": "Facultad de Filosofía y Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://sitio.ffyh.unc.edu.ar/escueladeletras/plan-de-estudios-y-cursado/"
+    },
+    {
+      "name": "Profesorado en Ciencias de la Educación",
+      "faculty": "Facultad de Filosofía y Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://sitio.ffyh.unc.edu.ar/escuelacienciaseducacion/carreras/profesorado-en-ciencias-de-la-educacion/"
+    },
+    {
+      "name": "Profesorado en Filosofía",
+      "faculty": "Facultad de Filosofía y Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://sitio.ffyh.unc.edu.ar/escueladefilosofia/profesorado/"
+    },
+    {
+      "name": "Profesorado en Geografía",
+      "faculty": "Facultad de Filosofía y Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://sitio.ffyh.unc.edu.ar/deptodegeografia/profesorado-en-geografia/"
+    },
+    {
+      "name": "Profesorado en Historia",
+      "faculty": "Facultad de Filosofía y Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://sitio.ffyh.unc.edu.ar/escueladehistoria/institucional/plan-de-estudios/"
+    },
+    {
+      "name": "Profesorado en Letras Clásicas",
+      "faculty": "Facultad de Filosofía y Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://ffyh.unc.edu.ar/grado/escuela-de-letras/"
+    },
+    {
+      "name": "Profesorado en Letras Modernas",
+      "faculty": "Facultad de Filosofía y Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://ffyh.unc.edu.ar/grado/escuela-de-letras/"
+    },
+    {
+      "name": "Licenciatura en Español Lengua Materna y Lengua Extranjera",
+      "faculty": "Facultad de Lenguas",
+      "level": "grado",
+      "sourceUrl": "https://lenguas.unc.edu.ar/carreras-de-grado/lic-espanol-maternaextranjera"
+    },
+    {
+      "name": "Licenciatura en Lengua y Literatura Alemanas",
+      "faculty": "Facultad de Lenguas",
+      "level": "grado",
+      "sourceUrl": "https://lenguas.unc.edu.ar/carreras-de-grado/lic-lenguayliteratura-alemanas"
+    },
+    {
+      "name": "Licenciatura en Lengua y Literatura Francesas",
+      "faculty": "Facultad de Lenguas",
+      "level": "grado",
+      "sourceUrl": "https://lenguas.unc.edu.ar/carreras-de-grado/lic-lenguayliteratura-francesas"
+    },
+    {
+      "name": "Licenciatura en Lengua y Literatura Inglesas",
+      "faculty": "Facultad de Lenguas",
+      "level": "grado",
+      "sourceUrl": "https://lenguas.unc.edu.ar/carreras-de-grado/lic-lenguayliteratura-inglesas"
+    },
+    {
+      "name": "Licenciatura en Lengua y Literatura Italianas",
+      "faculty": "Facultad de Lenguas",
+      "level": "grado",
+      "sourceUrl": "https://lenguas.unc.edu.ar/carreras-de-grado/lic-lenguayliteratura-inglesas"
+    },
+    {
+      "name": "Profesorado de Lengua Alemana",
+      "faculty": "Facultad de Lenguas",
+      "level": "grado",
+      "sourceUrl": "https://lenguas.unc.edu.ar/carreras-de-grado/prof-aleman"
+    },
+    {
+      "name": "Profesorado de Lengua Francesa",
+      "faculty": "Facultad de Lenguas",
+      "level": "grado",
+      "sourceUrl": "https://lenguas.unc.edu.ar/carreras-de-grado/prof-francesa"
+    },
+    {
+      "name": "Profesorado de Lengua Inglesa",
+      "faculty": "Facultad de Lenguas",
+      "level": "grado",
+      "sourceUrl": "https://lenguas.unc.edu.ar/carreras-de-grado/prof-ingles"
+    },
+    {
+      "name": "Profesorado de Lengua Italiana",
+      "faculty": "Facultad de Lenguas",
+      "level": "grado",
+      "sourceUrl": "https://lenguas.unc.edu.ar/carreras-de-grado/prof-italiano"
+    },
+    {
+      "name": "Profesorado de Portugués",
+      "faculty": "Facultad de Lenguas",
+      "level": "grado",
+      "sourceUrl": "https://lenguas.unc.edu.ar/carreras-de-grado/prof-portugues"
+    },
+    {
+      "name": "Profesorado en Español Lengua Materna y Lengua Extranjera",
+      "faculty": "Facultad de Lenguas",
+      "level": "grado",
+      "sourceUrl": "https://lenguas.unc.edu.ar/carreras-de-grado/prof-espanol-maternaextranjera"
+    },
+    {
+      "name": "Traductorado Público Nacional de Alemán",
+      "faculty": "Facultad de Lenguas",
+      "level": "grado",
+      "sourceUrl": "https://lenguas.unc.edu.ar/carreras-de-grado/prof-aleman"
+    },
+    {
+      "name": "Traductorado Público Nacional de Francés",
+      "faculty": "Facultad de Lenguas",
+      "level": "grado",
+      "sourceUrl": "https://lenguas.unc.edu.ar/carreras-de-grado/trad-publiconacional-frances"
+    },
+    {
+      "name": "Traductorado Público Nacional de Inglés",
+      "faculty": "Facultad de Lenguas",
+      "level": "grado",
+      "sourceUrl": "https://lenguas.unc.edu.ar/carreras-de-grado/trad-publiconacional-ingles"
+    },
+    {
+      "name": "Traductorado Público Nacional de Italiano",
+      "faculty": "Facultad de Lenguas",
+      "level": "grado",
+      "sourceUrl": "https://lenguas.unc.edu.ar/carreras-de-grado/trad-publiconacional-italiano"
+    },
+    {
+      "name": "Licenciatura Universitaria en Astronomía",
+      "faculty": "Facultad de Matemática, Astronomía, Física y Computación",
+      "level": "grado",
+      "sourceUrl": "https://famaf.unc.edu.ar/academica/grado/licenciatura-en-astronom%C3%ADa/"
+    },
+    {
+      "name": "Licenciatura Universitaria en Matemática Aplicada",
+      "faculty": "Facultad de Matemática, Astronomía, Física y Computación",
+      "level": "grado",
+      "sourceUrl": "https://famaf.unc.edu.ar/academica/grado/licenciatura-en-matem%C3%A1tica-aplicada/"
+    },
+    {
+      "name": "Licenciatura en Ciencias de la Computación",
+      "faculty": "Facultad de Matemática, Astronomía, Física y Computación",
+      "level": "grado",
+      "sourceUrl": "https://famaf.unc.edu.ar/academica/grado/licenciatura-en-ciencias-de-la-computaci%C3%B3n/"
+    },
+    {
+      "name": "Licenciatura en Física",
+      "faculty": "Facultad de Matemática, Astronomía, Física y Computación",
+      "level": "grado",
+      "sourceUrl": "https://famaf.unc.edu.ar/academica/grado/licenciatura-en-f%C3%ADsica/"
+    },
+    {
+      "name": "Licenciatura en Hidrometeorología",
+      "faculty": "Facultad de Matemática, Astronomía, Física y Computación",
+      "level": "grado",
+      "sourceUrl": "https://famaf.unc.edu.ar/academica/grado/licenciatura-en-hidrometeorolog%C3%ADa/"
+    },
+    {
+      "name": "Licenciatura en Matemática",
+      "faculty": "Facultad de Matemática, Astronomía, Física y Computación",
+      "level": "grado",
+      "sourceUrl": "https://famaf.unc.edu.ar/academica/grado/licenciatura-en-matem%C3%A1tica-aplicada/"
+    },
+    {
+      "name": "Profesorado en Física",
+      "faculty": "Facultad de Matemática, Astronomía, Física y Computación",
+      "level": "grado",
+      "sourceUrl": "https://famaf.unc.edu.ar/academica/grado/profesorado-en-f%C3%ADsica/"
+    },
+    {
+      "name": "Profesorado en Matemática",
+      "faculty": "Facultad de Matemática, Astronomía, Física y Computación",
+      "level": "grado",
+      "sourceUrl": "https://famaf.unc.edu.ar/academica/grado/profesorado-en-matem%C3%A1tica/"
+    },
+    {
+      "name": "Odontología",
+      "faculty": "Facultad de Odontología",
+      "level": "grado",
+      "sourceUrl": "https://www.odo.unc.edu.ar/carrera/nuevo-plan-de-estudio"
+    },
+    {
+      "name": "Licenciatura en Psicología",
+      "faculty": "Facultad de Psicología",
+      "level": "grado",
+      "sourceUrl": "https://psicologia.unc.edu.ar/carreras/licenciatura-en-psicologia/"
+    },
+    {
+      "name": "Profesorado en Psicología",
+      "faculty": "Facultad de Psicología",
+      "level": "grado",
+      "sourceUrl": "https://psicologia.unc.edu.ar/carreras/profesorado-en-psicologia/"
+    }
+  ]
+}
