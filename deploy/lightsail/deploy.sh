@@ -44,6 +44,11 @@ SQL
 docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" exec -T api \
   node_modules/.bin/typeorm migration:run -d dist/config/typeorm.config.js
 
+# Apply the official careers catalog (backend/src/database/seeds/data/careers).
+# Idempotent: upserts, retires careers that left the source, never deletes.
+docker compose -f "$COMPOSE_FILE" --env-file "$ENV_FILE" exec -T api \
+  node dist/database/scripts/careers-sync.js
+
 docker image prune -f
 
 echo "Deploy done."
