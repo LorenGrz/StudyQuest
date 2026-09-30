@@ -26,6 +26,8 @@ export interface DbSubjectRow {
   source: string;
   status: string;
   visibility: string;
+  /** `moderation IS NOT NULL`: someone (R2 validation, reports, an admin) reviewed it. */
+  moderated: boolean;
 }
 
 export interface OfficialSubjectValues {
@@ -49,11 +51,23 @@ export interface SeedOfficialPlan {
     changes: string[];
     promotedFrom: string | null;
   }[];
-  /** Active legacy rows with the same name: left exactly as they are. */
-  keptLegacy: { id: string; name: string; university: string }[];
+  /**
+   * Rows with the same name left exactly as they are: active legacy (may have
+   * parties/quests/enrollments) and rows hidden by a moderation decision.
+   */
+  kept: { id: string; name: string; university: string; reason: string }[];
   unchanged: number;
   errors: string[];
   warnings: string[];
+}
+
+/** Why an existing non-official row must not be touched, or null to promote it. */
+function keepReason(s: DbSubjectRow): string | null {
+  if (s.source === 'official') return null;
+  if (s.source === 'legacy' && s.status === 'active') return 'legacy activa';
+  if (s.status === 'hidden' && (s.source !== 'legacy' || s.moderated))
+    return 'oculta por moderación';
+  return null;
 }
 
 const COMPARED = ['name', 'code', 'year', 'careerId', 'description'] as const;
@@ -66,7 +80,9 @@ const COMPARED = ['name', 'code', 'year', 'careerId', 'description'] as const;
  * Existing rows with the same key:
  *  - `official` → updated when the catalog data changed;
  *  - active `legacy` → untouched (it may have parties/quests/enrollments);
- *  - hidden `legacy` or `community` → promoted to official + public.
+ *  - hidden by moderation (reports, an admin, R2 validation) → untouched;
+ *  - hidden by the backfill (`legacy`, no moderation) or active `community`
+ *    → promoted to official + public.
  * A code already used by another subject of the same university string is
  * dropped (`UNIQUE(code, university)`) with a warning.
  */
@@ -132,7 +148,7 @@ export function planSeedOfficial(
   const plan: SeedOfficialPlan = {
     inserts: [],
     updates: [],
-    keptLegacy: [],
+    kept: [],
     unchanged: 0,
     errors,
     warnings,
@@ -142,17 +158,19 @@ export function planSeedOfficial(
   // nulls them before updating), so a code moving between two rows is free.
   for (const key of grouped.keys()) {
     const s = existingByKey.get(key);
-    if (s?.code && !(s.source === 'legacy' && s.status === 'active'))
+    if (s?.code && !keepReason(s))
       codesInUse.delete(`${s.university}|${s.code}`);
   }
 
   for (const [key, values] of grouped) {
     const existing = existingByKey.get(key);
-    if (existing?.source === 'legacy' && existing.status === 'active') {
-      plan.keptLegacy.push({
+    const reason = existing && keepReason(existing);
+    if (existing && reason) {
+      plan.kept.push({
         id: existing.id,
         name: existing.name,
         university: existing.university,
+        reason,
       });
       continue;
     }

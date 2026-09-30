@@ -35,7 +35,8 @@ async function readDb(qr: QueryRunner) {
   const subjects = (await qr.query(
     `SELECT id, university_id AS "universityId", university,
             name_normalized AS "nameNormalized", name, code, year,
-            career_id AS "careerId", description, source, status, visibility
+            career_id AS "careerId", description, source, status, visibility,
+            moderation IS NOT NULL AS moderated
      FROM subjects`,
   )) as DbSubjectRow[];
   return { universities, careers, subjects };
@@ -85,7 +86,7 @@ function print(plan: SeedOfficialPlan): void {
   const promoted = plan.updates.filter((u) => u.promotedFrom);
   console.log(
     `Oficiales: +${plan.inserts.length} nuevas, ~${plan.updates.length - promoted.length} actualizadas, ` +
-      `${promoted.length} promovidas (legacy oculta/comunidad → oficial), ${plan.unchanged} sin cambios.`,
+      `${promoted.length} promovidas (legacy oculta por el backfill / comunidad → oficial), ${plan.unchanged} sin cambios.`,
   );
   for (const u of plan.updates)
     console.log(
@@ -93,12 +94,10 @@ function print(plan: SeedOfficialPlan): void {
         (u.promotedFrom ? ` [${u.promotedFrom} → official]` : '') +
         (u.changes.length ? ` (${u.changes.join(', ')})` : ''),
     );
-  if (plan.keptLegacy.length) {
-    console.log(
-      `Legacy activas con el mismo nombre, sin tocar: ${plan.keptLegacy.length}`,
-    );
-    for (const k of plan.keptLegacy)
-      console.log(`    = ${k.university} / ${k.name}`);
+  if (plan.kept.length) {
+    console.log(`Con el mismo nombre, sin tocar: ${plan.kept.length}`);
+    for (const k of plan.kept)
+      console.log(`    = ${k.university} / ${k.name} (${k.reason})`);
   }
   for (const w of plan.warnings) console.warn(`AVISO: ${w}`);
   for (const e of plan.errors) console.error(`ERROR: ${e}`);

@@ -46,6 +46,7 @@ const existing = (
   source: 'official',
   status: 'active',
   visibility: 'university',
+  moderated: false,
   ...extra,
 });
 
@@ -86,8 +87,8 @@ describe('planSeedOfficial', () => {
     ]);
     expect(plan.updates).toHaveLength(0);
     expect(plan.inserts).toHaveLength(0);
-    expect(plan.keptLegacy).toEqual([
-      { id: 's1', name: 'Algebra I', university: UNI },
+    expect(plan.kept).toEqual([
+      { id: 's1', name: 'Algebra I', university: UNI, reason: 'legacy activa' },
     ]);
   });
 
@@ -107,6 +108,28 @@ describe('planSeedOfficial', () => {
     expect(plan.updates.map((u) => [u.id, u.promotedFrom])).toEqual([
       ['s1', 'legacy/hidden'],
       ['s2', 'community/active'],
+    ]);
+  });
+
+  it('never promotes rows hidden by moderation (reports, admin)', () => {
+    const plan = planSeedOfficial(
+      [row('Álgebra I'), row('Física I')],
+      universities,
+      careers,
+      [
+        existing('s1', 'Álgebra I', { source: 'community', status: 'hidden' }),
+        existing('s2', 'Física I', {
+          source: 'legacy',
+          status: 'hidden',
+          moderated: true,
+        }),
+      ],
+    );
+    expect(plan.updates).toHaveLength(0);
+    expect(plan.inserts).toHaveLength(0);
+    expect(plan.kept.map((k) => k.reason)).toEqual([
+      'oculta por moderación',
+      'oculta por moderación',
     ]);
   });
 
