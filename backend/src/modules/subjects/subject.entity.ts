@@ -116,6 +116,7 @@ export class Subject {
   source: SubjectSource;
 
   @Column({ name: 'created_by', type: 'uuid', nullable: true, default: null })
+  @Index('IDX_subjects_created_by')
   createdBy: string | null;
 
   @ManyToOne(() => User, { onDelete: 'SET NULL' })
