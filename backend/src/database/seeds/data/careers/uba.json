@@ -1,0 +1,726 @@
+{
+  "university": {
+    "name": "Universidad de Buenos Aires",
+    "shortName": "UBA",
+    "website": "https://www.uba.ar",
+    "careersSourceUrls": [
+      "https://www.uba.ar/carreras/1",
+      "https://www.uba.ar/carreras/2",
+      "https://www.uba.ar/carreras/3",
+      "https://www.uba.ar/carreras/4",
+      "https://www.uba.ar/carreras/5",
+      "https://www.uba.ar/carreras/6",
+      "https://www.uba.ar/carreras/7",
+      "https://www.uba.ar/carreras/8",
+      "https://www.uba.ar/carreras/9",
+      "https://www.uba.ar/carreras/10",
+      "https://www.uba.ar/carreras/11",
+      "https://www.uba.ar/carreras/12",
+      "https://www.uba.ar/carreras/13"
+    ]
+  },
+  "careers": [
+    {
+      "name": "Agronomía",
+      "faculty": "Facultad de Agronomía",
+      "level": "grado",
+      "sourceUrl": "https://www.agro.uba.ar/carreras/agronomia"
+    },
+    {
+      "name": "Licenciatura en Biotecnología",
+      "faculty": "Facultad de Agronomía",
+      "level": "grado",
+      "sourceUrl": "https://www.agro.uba.ar/carreras/biotecnologia"
+    },
+    {
+      "name": "Licenciatura en Ciencias Ambientales",
+      "faculty": "Facultad de Agronomía",
+      "level": "grado",
+      "sourceUrl": "https://www.agro.uba.ar/carreras/ambientales"
+    },
+    {
+      "name": "Licenciatura en Economía y Administración Agrarias",
+      "faculty": "Facultad de Agronomía",
+      "level": "grado",
+      "sourceUrl": "https://www.agro.uba.ar/carreras/leaa"
+    },
+    {
+      "name": "Licenciatura en Gestión de Agroalimentos",
+      "faculty": "Facultad de Agronomía",
+      "level": "grado",
+      "sourceUrl": "https://www.agro.uba.ar/carreras/agroalimentos"
+    },
+    {
+      "name": "Licenciatura en Planificación y Diseño del Paisaje",
+      "faculty": "Facultad de Agronomía",
+      "level": "grado",
+      "sourceUrl": "https://www.agro.uba.ar/carreras/paisaje"
+    },
+    {
+      "name": "Profesorado de Enseñanza Secundaria y Superior en Ciencias Ambientales",
+      "faculty": "Facultad de Agronomía",
+      "level": "grado",
+      "sourceUrl": "https://www.agro.uba.ar/carreras/profesorado-ambiental"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Jardinería",
+      "faculty": "Facultad de Agronomía",
+      "level": "pregrado",
+      "sourceUrl": "https://www.agro.uba.ar/carreras/jardineria"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Producción Florihortícola",
+      "faculty": "Facultad de Agronomía",
+      "level": "pregrado",
+      "sourceUrl": "https://www.agro.uba.ar/carreras/florihorticola"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Producción Vegetal Orgánica",
+      "faculty": "Facultad de Agronomía",
+      "level": "pregrado",
+      "sourceUrl": "https://www.agro.uba.ar/carreras/organica"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Turismo Rural",
+      "faculty": "Facultad de Agronomía",
+      "level": "pregrado",
+      "sourceUrl": "https://www.agro.uba.ar/carreras/turismo"
+    },
+    {
+      "name": "Arquitectura",
+      "faculty": "Facultad de Arquitectura, Diseño y Urbanismo",
+      "level": "grado",
+      "sourceUrl": "https://www.fadu.uba.ar/arquitectura"
+    },
+    {
+      "name": "Diseño Gráfico",
+      "faculty": "Facultad de Arquitectura, Diseño y Urbanismo",
+      "level": "grado",
+      "sourceUrl": "https://www.fadu.uba.ar/diseno-grafico"
+    },
+    {
+      "name": "Diseño Industrial",
+      "faculty": "Facultad de Arquitectura, Diseño y Urbanismo",
+      "level": "grado",
+      "sourceUrl": "https://www.fadu.uba.ar/nuevo-plan-de-estudios-de-diseno-industrial"
+    },
+    {
+      "name": "Diseño Textil",
+      "faculty": "Facultad de Arquitectura, Diseño y Urbanismo",
+      "level": "grado",
+      "sourceUrl": "https://www.fadu.uba.ar/diseno-textil"
+    },
+    {
+      "name": "Diseño de Imagen y Sonido",
+      "faculty": "Facultad de Arquitectura, Diseño y Urbanismo",
+      "level": "grado",
+      "sourceUrl": "https://www.fadu.uba.ar/diseno-de-imagen-y-sonido"
+    },
+    {
+      "name": "Diseño de Indumentaria",
+      "faculty": "Facultad de Arquitectura, Diseño y Urbanismo",
+      "level": "grado",
+      "sourceUrl": "https://www.fadu.uba.ar/diseno-de-indumentaria"
+    },
+    {
+      "name": "Actuario",
+      "faculty": "Facultad de Ciencias Económicas",
+      "level": "grado",
+      "sourceUrl": "https://www.economicas.uba.ar/alumnos/actuario"
+    },
+    {
+      "name": "Contador Público",
+      "faculty": "Facultad de Ciencias Económicas",
+      "level": "grado",
+      "sourceUrl": "https://www.economicas.uba.ar/carreras/contador/"
+    },
+    {
+      "name": "Licenciatura en Administración",
+      "faculty": "Facultad de Ciencias Económicas",
+      "level": "grado",
+      "sourceUrl": "https://www.economicas.uba.ar/alumnos/administracion"
+    },
+    {
+      "name": "Licenciatura en Economía",
+      "faculty": "Facultad de Ciencias Económicas",
+      "level": "grado",
+      "sourceUrl": "https://www.economicas.uba.ar/alumnos/economia"
+    },
+    {
+      "name": "Licenciatura en Sistemas de Información de las Organizaciones",
+      "faculty": "Facultad de Ciencias Económicas",
+      "level": "grado",
+      "sourceUrl": "https://www.economicas.uba.ar/alumnos/sistemas"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Gestión y Análisis de Datos en Organizaciones",
+      "faculty": "Facultad de Ciencias Económicas",
+      "level": "pregrado",
+      "sourceUrl": "https://www.uba.ar/carreras/3"
+    },
+    {
+      "name": "Licenciatura en Ciencia y Tecnología de Alimentos",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://exactas.uba.ar/ensenanza/carreras-de-grado/ciencia-y-tecnologia-de-alimentos"
+    },
+    {
+      "name": "Licenciatura en Ciencias Biológicas",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://exactas.uba.ar/ensenanza/carreras-de-grado/ciencias-biologicas"
+    },
+    {
+      "name": "Licenciatura en Ciencias Físicas",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://exactas.uba.ar/ensenanza/carreras-de-grado/ciencias-fisicas"
+    },
+    {
+      "name": "Licenciatura en Ciencias Geológicas",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://exactas.uba.ar/ensenanza/carreras-de-grado/ciencias-geologicas"
+    },
+    {
+      "name": "Licenciatura en Ciencias Matemáticas",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://exactas.uba.ar/ensenanza/carreras-de-grado/ciencias-matematicas"
+    },
+    {
+      "name": "Licenciatura en Ciencias Oceanográficas",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://exactas.uba.ar/ensenanza/carreras-de-grado/oceanografia"
+    },
+    {
+      "name": "Licenciatura en Ciencias Químicas",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://exactas.uba.ar/ensenanza/carreras-de-grado/ciencias-quimicas"
+    },
+    {
+      "name": "Licenciatura en Ciencias de Datos",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://exactas.uba.ar/ensenanza/carreras-de-grado/ciencias-de-datos"
+    },
+    {
+      "name": "Licenciatura en Ciencias de la Atmósfera",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://exactas.uba.ar/ensenanza/carreras-de-grado/ciencias-de-la-atmosfera"
+    },
+    {
+      "name": "Licenciatura en Ciencias de la Computación",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://exactas.uba.ar/ensenanza/carreras-de-grado/ciencias-de-la-computacion"
+    },
+    {
+      "name": "Licenciatura en Paleontología",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://exactas.uba.ar/ensenanza/carreras-de-grado/paleontologia"
+    },
+    {
+      "name": "Profesorado Universitario en Biología",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://ccpems.exactas.uba.ar/profesorado-universitario-en-biologia/"
+    },
+    {
+      "name": "Profesorado Universitario en Computación",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://ccpems.exactas.uba.ar/profesorado-universitario-en-computacion/"
+    },
+    {
+      "name": "Profesorado Universitario en Física",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://ccpems.exactas.uba.ar/profesorado-universitario-en-fisica/"
+    },
+    {
+      "name": "Profesorado Universitario en Matemática",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://ccpems.exactas.uba.ar/profesorado-universitario-en-matematica/"
+    },
+    {
+      "name": "Profesorado Universitario en Química",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://ccpems.exactas.uba.ar/profesorado-universitario-en-quimica/"
+    },
+    {
+      "name": "Profesorado Universitario para la Educación Secundaria en Biología y Química",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://ccpems.exactas.uba.ar/profesorado-universitario-para-la-educacion-secundaria-en-biologia-y-quimica/"
+    },
+    {
+      "name": "Profesorado Universitario para la Educación Secundaria en Computación y Física",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://ccpems.exactas.uba.ar/profesorado-universitario-para-la-educacion-secundaria-en-computacion-y-fisica/"
+    },
+    {
+      "name": "Profesorado Universitario para la Educación Secundaria en Física y Matemática",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://ccpems.exactas.uba.ar/profesorado-universitario-para-la-educacion-secundaria-en-fisica-y-matematica/"
+    },
+    {
+      "name": "Profesorado Universitario para la Educación Secundaria en Matemática y Computación",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://ccpems.exactas.uba.ar/profesorado-universitario-para-la-educacion-secundaria-en-matematica-y-computacion/"
+    },
+    {
+      "name": "Profesorado Universitario para la Educación Secundaria en Química y Física",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://ccpems.exactas.uba.ar/profesorado-universitario-para-la-educacion-secundaria-en-quimica-y-fisica/"
+    },
+    {
+      "name": "Profesorado de Enseñanza Media y Superior en Ciencias Geológicas",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://ccpems.exactas.uba.ar/profesorado-de-ensenanza-media-y-superior-en-geologia/"
+    },
+    {
+      "name": "Profesorado de Enseñanza Media y Superior en Ciencias de la Atmósfera",
+      "faculty": "Facultad de Ciencias Exactas y Naturales",
+      "level": "grado",
+      "sourceUrl": "https://ccpems.exactas.uba.ar/profesorado-de-ensenanza-media-y-superior-en-ciencias-de-la-atmosfera/"
+    },
+    {
+      "name": "Licenciatura en Ciencia Política",
+      "faculty": "Facultad de Ciencias Sociales",
+      "level": "grado",
+      "sourceUrl": "https://cienciapolitica.sociales.uba.ar/"
+    },
+    {
+      "name": "Licenciatura en Ciencias de la Comunicación",
+      "faculty": "Facultad de Ciencias Sociales",
+      "level": "grado",
+      "sourceUrl": "https://comunicacion.sociales.uba.ar/"
+    },
+    {
+      "name": "Licenciatura en Relaciones del Trabajo",
+      "faculty": "Facultad de Ciencias Sociales",
+      "level": "grado",
+      "sourceUrl": "https://relacionesdeltrabajo.sociales.uba.ar/"
+    },
+    {
+      "name": "Licenciatura en Trabajo Social",
+      "faculty": "Facultad de Ciencias Sociales",
+      "level": "grado",
+      "sourceUrl": "https://trabajosocial.sociales.uba.ar/"
+    },
+    {
+      "name": "Profesor de Enseñanza Secundaria, Normal y Especial en Sociología",
+      "faculty": "Facultad de Ciencias Sociales",
+      "level": "grado",
+      "sourceUrl": "https://www.sociales.uba.ar/carreras/profesorados/profesorado-de-sociologia"
+    },
+    {
+      "name": "Profesorado de Enseñanza Media y Superior en Ciencia Política",
+      "faculty": "Facultad de Ciencias Sociales",
+      "level": "grado",
+      "sourceUrl": "https://www.sociales.uba.ar/carreras/profesorados/cspolitica"
+    },
+    {
+      "name": "Profesorado de Enseñanza Media y Superior en Ciencias de la Comunicación",
+      "faculty": "Facultad de Ciencias Sociales",
+      "level": "grado",
+      "sourceUrl": "https://www.sociales.uba.ar/carreras/profesorados/prof-cs-de-la-comunicacion"
+    },
+    {
+      "name": "Profesorado de Enseñanza Media y Superior en Relaciones del Trabajo",
+      "faculty": "Facultad de Ciencias Sociales",
+      "level": "grado",
+      "sourceUrl": "https://www.sociales.uba.ar/carreras/profesorados/profesorado-relaciones-del-trabajo"
+    },
+    {
+      "name": "Profesorado de Enseñanza Media y Superior en Trabajo Social",
+      "faculty": "Facultad de Ciencias Sociales",
+      "level": "grado",
+      "sourceUrl": "https://www.sociales.uba.ar/carreras/profesorados/profesorado-de-trabajo-social"
+    },
+    {
+      "name": "Sociología",
+      "faculty": "Facultad de Ciencias Sociales",
+      "level": "grado",
+      "sourceUrl": "https://sociologia.sociales.uba.ar/"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Gestión Integral de Bioterios",
+      "faculty": "Facultad de Ciencias Veterinarias",
+      "level": "pregrado",
+      "sourceUrl": "https://www.uba.ar/carreras/6"
+    },
+    {
+      "name": "Veterinaria",
+      "faculty": "Facultad de Ciencias Veterinarias",
+      "level": "grado",
+      "sourceUrl": "https://www.uba.ar/carreras/6"
+    },
+    {
+      "name": "Abogacía",
+      "faculty": "Facultad de Derecho",
+      "level": "grado",
+      "sourceUrl": "https://www.derecho.uba.ar/academica/carreras_grado/abogacia.php"
+    },
+    {
+      "name": "Calígrafo Público",
+      "faculty": "Facultad de Derecho",
+      "level": "grado",
+      "sourceUrl": "https://www.derecho.uba.ar/academica/carreras_grado/caligrafo.php"
+    },
+    {
+      "name": "Profesorado para la Enseñanza Media y Superior en Ciencias Jurídicas",
+      "faculty": "Facultad de Derecho",
+      "level": "grado",
+      "sourceUrl": "https://www.derecho.uba.ar/academica/profesorado_en_med_sup"
+    },
+    {
+      "name": "Traductorado Público",
+      "faculty": "Facultad de Derecho",
+      "level": "grado",
+      "sourceUrl": "https://www.derecho.uba.ar/academica/carreras_grado/traductorado.php"
+    },
+    {
+      "name": "Bioquímica",
+      "faculty": "Facultad de Farmacia y Bioquímica",
+      "level": "grado",
+      "sourceUrl": "https://www.ffyb.uba.ar/?page_id=5693"
+    },
+    {
+      "name": "Farmacia",
+      "faculty": "Facultad de Farmacia y Bioquímica",
+      "level": "grado",
+      "sourceUrl": "https://www.uba.ar/carreras/8"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Medicina Nuclear",
+      "faculty": "Facultad de Farmacia y Bioquímica",
+      "level": "pregrado",
+      "sourceUrl": "https://www.ffyb.uba.ar/?page_id=5715"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Óptica y Contactología",
+      "faculty": "Facultad de Farmacia y Bioquímica",
+      "level": "pregrado",
+      "sourceUrl": "https://www.ffyb.uba.ar/?page_id=5725"
+    },
+    {
+      "name": "Edición",
+      "faculty": "Facultad de Filosofía y Letras",
+      "level": "grado",
+      "sourceUrl": "https://edicion.filo.uba.ar/content/plan-de-estudios"
+    },
+    {
+      "name": "Licenciatura en Artes",
+      "faculty": "Facultad de Filosofía y Letras",
+      "level": "grado",
+      "sourceUrl": "https://artes.filo.uba.ar"
+    },
+    {
+      "name": "Licenciatura en Ciencia de la Información (Ciclo de Complementación Curricular)",
+      "faculty": "Facultad de Filosofía y Letras",
+      "level": "grado",
+      "sourceUrl": "https://bibliotecologia.filo.uba.ar"
+    },
+    {
+      "name": "Licenciatura en Ciencias Antropológicas",
+      "faculty": "Facultad de Filosofía y Letras",
+      "level": "grado",
+      "sourceUrl": "https://antropologia.filo.uba.ar/plan-de-estudios"
+    },
+    {
+      "name": "Licenciatura en Ciencias de la Educación",
+      "faculty": "Facultad de Filosofía y Letras",
+      "level": "grado",
+      "sourceUrl": "https://educacion.filo.uba.ar/plan-de-estudios"
+    },
+    {
+      "name": "Licenciatura en Filosofía",
+      "faculty": "Facultad de Filosofía y Letras",
+      "level": "grado",
+      "sourceUrl": "https://filosofia.filo.uba.ar"
+    },
+    {
+      "name": "Licenciatura en Geografía",
+      "faculty": "Facultad de Filosofía y Letras",
+      "level": "grado",
+      "sourceUrl": "https://geografia.filo.uba.ar/presentaci%C3%B3n-de-la-carrera"
+    },
+    {
+      "name": "Licenciatura en Historia",
+      "faculty": "Facultad de Filosofía y Letras",
+      "level": "grado",
+      "sourceUrl": "https://historia.filo.uba.ar/content/plan-de-estudios"
+    },
+    {
+      "name": "Licenciatura en Letras",
+      "faculty": "Facultad de Filosofía y Letras",
+      "level": "grado",
+      "sourceUrl": "https://letras.filo.uba.ar/content/plan-de-estudios"
+    },
+    {
+      "name": "Profesorado de Enseñanza Secundaria y Superior en Ciencias Antropológicas",
+      "faculty": "Facultad de Filosofía y Letras",
+      "level": "grado",
+      "sourceUrl": "https://antropologia.filo.uba.ar/plan-de-estudios"
+    },
+    {
+      "name": "Profesorado de Enseñanza Secundaria y Superior en Geografía",
+      "faculty": "Facultad de Filosofía y Letras",
+      "level": "grado",
+      "sourceUrl": "https://geografia.filo.uba.ar/presentaci%C3%B3n-de-la-carrera"
+    },
+    {
+      "name": "Profesorado en Enseñanza Secundaria y Superior en Artes",
+      "faculty": "Facultad de Filosofía y Letras",
+      "level": "grado",
+      "sourceUrl": "https://artes.filo.uba.ar"
+    },
+    {
+      "name": "Profesorado en Enseñanza Secundaria y Superior en Ciencias de la Educación",
+      "faculty": "Facultad de Filosofía y Letras",
+      "level": "grado",
+      "sourceUrl": "https://educacion.filo.uba.ar/plan-de-estudios"
+    },
+    {
+      "name": "Profesorado en Filosofía",
+      "faculty": "Facultad de Filosofía y Letras",
+      "level": "grado",
+      "sourceUrl": "https://filosofia.filo.uba.ar"
+    },
+    {
+      "name": "Profesorado en Historia",
+      "faculty": "Facultad de Filosofía y Letras",
+      "level": "grado",
+      "sourceUrl": "https://historia.filo.uba.ar/content/plan-de-estudios"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Acompañamiento de Trayectorias Educativas",
+      "faculty": "Facultad de Filosofía y Letras",
+      "level": "pregrado",
+      "sourceUrl": "https://educacion.filo.uba.ar/"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Archivística",
+      "faculty": "Facultad de Filosofía y Letras",
+      "level": "pregrado",
+      "sourceUrl": "https://bibliotecologia.filo.uba.ar/"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Bibliotecología",
+      "faculty": "Facultad de Filosofía y Letras",
+      "level": "pregrado",
+      "sourceUrl": "https://bibliotecologia.filo.uba.ar/"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Producción y Gestión de las Artes",
+      "faculty": "Facultad de Filosofía y Letras",
+      "level": "pregrado",
+      "sourceUrl": "https://artes.filo.uba.ar/node/717"
+    },
+    {
+      "name": "Bioingeniería",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://www.fi.uba.ar/grado/carreras/bioingenieria"
+    },
+    {
+      "name": "Ingeniería Civil",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://www.fi.uba.ar/grado/carreras/ingenieria-civil"
+    },
+    {
+      "name": "Ingeniería Electrónica",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://www.fi.uba.ar/grado/carreras/ingenieria-electronica"
+    },
+    {
+      "name": "Ingeniería Industrial",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://www.fi.uba.ar/grado/carreras/ingenieria-industrial"
+    },
+    {
+      "name": "Ingeniería Mecánica",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://www.fi.uba.ar/grado/carreras/ingenieria-mecanica"
+    },
+    {
+      "name": "Ingeniería Naval",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://www.fi.uba.ar/grado/carreras/ingenieria-naval"
+    },
+    {
+      "name": "Ingeniería Química",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://www.fi.uba.ar/grado/carreras/ingenieria-quimica"
+    },
+    {
+      "name": "Ingeniería en Agrimensura",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://www.fi.uba.ar/grado/carreras/ingenieria-en-agrimensura"
+    },
+    {
+      "name": "Ingeniería en Alimentos",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://www.fi.uba.ar/grado/carreras/ingenieria-en-alimentos"
+    },
+    {
+      "name": "Ingeniería en Energía Eléctrica",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://www.fi.uba.ar/grado/carreras/ingenieria-electricista"
+    },
+    {
+      "name": "Ingeniería en Informática",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://www.fi.uba.ar/grado/carreras/ingenieria-en-informatica"
+    },
+    {
+      "name": "Ingeniería en Petróleo",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://www.fi.uba.ar/grado/carreras/ingenieria-en-petroleo"
+    },
+    {
+      "name": "Licenciatura en Análisis de Sistemas",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://www.fi.uba.ar/grado/carreras/lic-en-analisis-de-sistemas"
+    },
+    {
+      "name": "Licenciatura en Enfermería",
+      "faculty": "Facultad de Medicina",
+      "level": "grado",
+      "sourceUrl": "https://www.fmed.uba.ar/carreras/licenciatura-en-enfermeria/informacion-general"
+    },
+    {
+      "name": "Licenciatura en Fonoaudiología",
+      "faculty": "Facultad de Medicina",
+      "level": "grado",
+      "sourceUrl": "https://www.fmed.uba.ar/carreras/licenciatura-en-fonoaudiologia/incumbencias-profesionales-y-funciones-del-graduado"
+    },
+    {
+      "name": "Licenciatura en Kinesiología y Fisiatría",
+      "faculty": "Facultad de Medicina",
+      "level": "grado",
+      "sourceUrl": "https://www.fmed.uba.ar/index.php/carreras/licenciatura-en-kinesiologia-y-fisiatria/estructura-y-contenidos-generales-de-la-carrera"
+    },
+    {
+      "name": "Licenciatura en Nutrición",
+      "faculty": "Facultad de Medicina",
+      "level": "grado",
+      "sourceUrl": "https://www.fmed.uba.ar/carreras/licenciatura-en-nutricion-institucional/sobre-la-carrera"
+    },
+    {
+      "name": "Licenciatura en Obstetricia",
+      "faculty": "Facultad de Medicina",
+      "level": "grado",
+      "sourceUrl": "https://www.fmed.uba.ar/index.php/carreras/licenciatura-en-obstetricia/incumbencias-profesionales-y-funciones-del-graduado"
+    },
+    {
+      "name": "Licenciatura en Podología",
+      "faculty": "Facultad de Medicina",
+      "level": "grado",
+      "sourceUrl": "https://www.fmed.uba.ar/carreras/licenciatura-en-podologia/ingreso-la-licenciatura"
+    },
+    {
+      "name": "Licenciatura en Producción de Bioimágenes",
+      "faculty": "Facultad de Medicina",
+      "level": "grado",
+      "sourceUrl": "https://www.fmed.uba.ar/carreras/curso-de-tec-radiologo-universitario-lic-en-produccion-de-bioimagenes/plan-de-estudios"
+    },
+    {
+      "name": "Medicina",
+      "faculty": "Facultad de Medicina",
+      "level": "grado",
+      "sourceUrl": "https://www.fmed.uba.ar/carreras/medicina/informacion-general"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Anestesia",
+      "faculty": "Facultad de Medicina",
+      "level": "pregrado",
+      "sourceUrl": "https://www.fmed.uba.ar/index.php/carreras/tecnicatura-universitaria-en-anestesia/informacion-general"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Cosmetología Facial y Corporal",
+      "faculty": "Facultad de Medicina",
+      "level": "pregrado",
+      "sourceUrl": "https://www.fmed.uba.ar/index.php/carreras/tecnicatura-universitaria-en-cosmetologia-facial-y-corporal/informacion-general"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Hemoterapia e Inmunohematología",
+      "faculty": "Facultad de Medicina",
+      "level": "pregrado",
+      "sourceUrl": "https://www.fmed.uba.ar/index.php/carreras/tecnicatura-universitaria-en-hemoterapia-e-inmunohematologia/informacion-general"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Instrumentación Quirúrgica",
+      "faculty": "Facultad de Medicina",
+      "level": "pregrado",
+      "sourceUrl": "https://www.fmed.uba.ar/index.php/carreras/tecnicatura-universitaria-en-instrumentacion-quirurgica/informacion-general"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Podología",
+      "faculty": "Facultad de Medicina",
+      "level": "pregrado",
+      "sourceUrl": "https://www.fmed.uba.ar/index.php/carreras/tecnicatura-universitaria-en-podologia/informacion-general"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Prácticas Cardiológicas",
+      "faculty": "Facultad de Medicina",
+      "level": "pregrado",
+      "sourceUrl": "https://www.fmed.uba.ar/index.php/carreras/tecnicatura-universitaria-en-practicas-cardiologicas/informacion-general"
+    },
+    {
+      "name": "Odontología",
+      "faculty": "Facultad de Odontología",
+      "level": "grado",
+      "sourceUrl": "https://www.uba.ar/carreras/12"
+    },
+    {
+      "name": "Licenciatura en Musicoterapia",
+      "faculty": "Facultad de Psicología",
+      "level": "grado",
+      "sourceUrl": "https://www.psi.uba.ar/musicoterapia.php?var=academica/carrerasdegrado/musicoterapia/index.php"
+    },
+    {
+      "name": "Licenciatura en Psicología",
+      "faculty": "Facultad de Psicología",
+      "level": "grado",
+      "sourceUrl": "https://www.psi.uba.ar/psicologia.php?var=academica/carrerasdegrado/psicologia/index.php"
+    },
+    {
+      "name": "Profesorado de Enseñanza Media y Superior en Psicología",
+      "faculty": "Facultad de Psicología",
+      "level": "grado",
+      "sourceUrl": "https://www.psi.uba.ar/profesorado.php?var=academica/carrerasdegrado/profesorado/index.php"
+    },
+    {
+      "name": "Terapia Ocupacional",
+      "faculty": "Facultad de Psicología",
+      "level": "grado",
+      "sourceUrl": "https://www.psi.uba.ar/terapiaocupacional.php?var=academica/carrerasdegrado/terapiaocupacional/index.php"
+    }
+  ]
+}
