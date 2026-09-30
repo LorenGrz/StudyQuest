@@ -50,6 +50,7 @@ Primary backend areas:
 - `backend/src/modules/auth`
 - `backend/src/modules/users`
 - `backend/src/modules/subjects`
+- `backend/src/modules/universities` (official universities/careers catalog, "Otra" career requests)
 - `backend/src/modules/parties`
 - `backend/src/modules/quests`
 - `backend/src/modules/skill-tree`
@@ -101,8 +102,18 @@ docker compose up -d postgres dynamodb-local
 ```bash
 cd backend
 pnpm install
+pnpm run migration:run   # with an EXISTING local DB: before start:dev
 pnpm run start:dev
 ```
+
+With an existing local DB (already has data), run `pnpm migration:run` before
+`start:dev`: the `TYPEORM_SYNC=true` boot sync fails adding the NOT NULL
+`subjects.name_normalized` to rows that have no value yet, and sync alone never
+creates the partial unique index `UQ_subjects_university_name_normalized` nor
+the GIN trigram index (they are `synchronize: false`, migration-only). If that
+DB has no `migrations` table, apply the same baseline as
+`deploy/lightsail/deploy.sh` first so `ResetUsersEloToZero` doesn't re-run.
+A brand-new empty DB can still boot with sync first and run migrations after.
 
 4. Seed base data after backend has initialized the schema:
 

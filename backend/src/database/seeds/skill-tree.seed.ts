@@ -63,7 +63,7 @@ async function seedSkillTreeForSubject(subjectId: string) {
     throw new Error(`Materia no encontrada: ${subjectId}`);
   }
 
-  const template = loadTemplate(subject.code);
+  const template = loadTemplate(subject.code ?? undefined);
   const force = process.argv.includes('--force');
 
   const existing = await nodeRepo.count({ where: { subjectId } });

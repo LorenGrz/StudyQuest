@@ -1,31 +1,67 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { AxiosError } from 'axios'
 import { motion } from 'framer-motion'
 import { Button } from '../../components/UI'
-import { useCareers, useUniversities } from '../../hooks/useUniversities'
-import { userService } from '../../services/userService'
+import { useUniversities, useUniversityCareers } from '../../hooks/useUniversities'
+import { userService, type User } from '../../services/userService'
+import { universityService } from '../../services/universityService'
+import { OTHER_CAREER_LABEL, OTHER_CAREER_VALUE } from '../../utils/careers'
 
 interface EditProfileModalProps {
-  user: any
+  user: User
   onClose: () => void
-  onUpdate: (user: any) => void
+  onUpdate: (user: User) => void
+}
+
+function messageFromError(err: unknown, fallback: string): string {
+  if (err instanceof AxiosError) {
+    const m: unknown = err.response?.data?.message
+    if (typeof m === 'string' && m.trim()) return m
+    if (err.message) return err.message
+  }
+  return fallback
 }
 
 export function EditProfileModal({ user, onClose, onUpdate }: EditProfileModalProps) {
-  const { careers } = useCareers()
   const { universities } = useUniversities()
   const [formData, setFormData] = useState({
     displayName: user.displayName,
-    university: user.university,
-    career: user.career,
+    universityId: user.universityId ?? '',
+    careerId: user.careerId ?? '',
+    careerName: '',
     year: user.year,
   })
+  const { groups: careerGroups } = useUniversityCareers(formData.universityId || undefined)
+  const [pendingCareerName, setPendingCareerName] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  // Keep a legacy free-text university selectable so saving the profile doesn't blank it.
-  const universityOptions =
-    formData.university && !universities.includes(formData.university)
-      ? [formData.university, ...universities]
-      : universities
   const [error, setError] = useState<string | null>(null)
+  const isOtherCareer = formData.careerId === OTHER_CAREER_VALUE
+
+  // The pending request only carries an id on the user; its name lives on
+  // GET /career-requests/mine.
+  useEffect(() => {
+    let cancelled = false
+    if (!user.pendingCareerRequestId) {
+      setPendingCareerName(null)
+      return
+    }
+    universityService.getMyCareerRequests().then((requests) => {
+      if (cancelled) return
+      const match = requests.find((r) => r.id === user.pendingCareerRequestId)
+      setPendingCareerName(match?.name ?? null)
+    })
+    return () => { cancelled = true }
+  }, [user.pendingCareerRequestId])
+
+  const setUniversityId = (universityId: string) =>
+    setFormData((prev) => ({ ...prev, universityId, careerId: '', careerName: '' }))
+
+  const setCareerId = (careerId: string) =>
+    setFormData((prev) => ({
+      ...prev,
+      careerId,
+      careerName: careerId === OTHER_CAREER_VALUE ? prev.careerName : '',
+    }))
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,13 +69,19 @@ export function EditProfileModal({ user, onClose, onUpdate }: EditProfileModalPr
     setError(null)
     try {
       const updatedUser = await userService.updateMe({
-        ...formData,
+        displayName: formData.displayName,
+        universityId: formData.universityId,
+        ...(isOtherCareer
+          ? { careerName: formData.careerName.trim() }
+          : formData.careerId
+            ? { careerId: formData.careerId }
+            : {}),
         year: Number(formData.year),
       })
       onUpdate(updatedUser)
       onClose()
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "Error al actualizar perfil")
+    } catch (err) {
+      setError(messageFromError(err, 'Error al actualizar perfil'))
     } finally {
       setIsLoading(false)
     }
@@ -67,6 +109,12 @@ export function EditProfileModal({ user, onClose, onUpdate }: EditProfileModalPr
 
         {error && <div className="px-4 py-3 rounded-lg text-sm bg-[rgba(239,68,68,0.1)] text-danger border border-[rgba(239,68,68,0.2)]">{error}</div>}
 
+        {pendingCareerName && (
+          <div className="px-4 py-3 rounded-lg text-sm bg-[rgba(245,158,11,0.1)] text-warning border border-[rgba(245,158,11,0.2)]">
+            Carrera pendiente de aprobación: «{pendingCareerName}»
+          </div>
+        )}
+
         <form
           onSubmit={handleSubmit}
           className="flex flex-col gap-4 mt-4"
@@ -83,41 +131,60 @@ export function EditProfileModal({ user, onClose, onUpdate }: EditProfileModalPr
             />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-[13px] font-medium text-secondary">Universidad</label>
+            <label className="text-[13px] font-medium text-secondary" htmlFor="profile-university">Universidad</label>
             <select
+              id="profile-university"
               className="w-full px-3.5 py-3 bg-panel border border-[var(--overlay-border)] rounded-lg text-primary text-[15px] transition-[border-color,box-shadow] duration-200 outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(124,58,237,0.3)] min-h-[44px]"
-              value={formData.university}
-              onChange={(e) =>
-                setFormData({ ...formData, university: e.target.value })
-              }
+              value={formData.universityId}
+              onChange={(e) => setUniversityId(e.target.value)}
               required
             >
               <option value="">Seleccionar...</option>
-              {universityOptions.map((u) => (
-                <option key={u} value={u}>
-                  {u}
+              {universities.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.name}
                 </option>
               ))}
             </select>
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-[13px] font-medium text-secondary">Carrera</label>
+            <label className="text-[13px] font-medium text-secondary" htmlFor="profile-career">Carrera</label>
             <select
+              id="profile-career"
               className="w-full px-3.5 py-3 bg-panel border border-[var(--overlay-border)] rounded-lg text-primary text-[15px] transition-[border-color,box-shadow] duration-200 outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(124,58,237,0.3)] min-h-[44px]"
-              value={formData.career}
-              onChange={(e) =>
-                setFormData({ ...formData, career: e.target.value })
-              }
-              required
+              value={formData.careerId}
+              onChange={(e) => setCareerId(e.target.value)}
+              disabled={!formData.universityId}
             >
               <option value="">Seleccionar...</option>
-              {careers.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
+              {careerGroups.map((g) => (
+                <optgroup key={g.faculty} label={g.faculty}>
+                  {g.careers.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </optgroup>
               ))}
+              {formData.universityId && (
+                <option value={OTHER_CAREER_VALUE}>{OTHER_CAREER_LABEL}</option>
+              )}
             </select>
           </div>
+          {isOtherCareer && (
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[13px] font-medium text-secondary" htmlFor="profile-career-name">Nombre de tu carrera</label>
+              <input
+                id="profile-career-name"
+                className="w-full px-3.5 py-3 bg-panel border border-[var(--overlay-border)] rounded-lg text-primary text-[15px] transition-[border-color,box-shadow] duration-200 outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(124,58,237,0.3)] min-h-[44px]"
+                value={formData.careerName}
+                onChange={(e) => setFormData({ ...formData, careerName: e.target.value })}
+                minLength={3}
+                maxLength={120}
+                required
+              />
+            </div>
+          )}
           <div className="flex flex-col gap-1.5">
             <label className="text-[13px] font-medium text-secondary">Año actual</label>
             <input
@@ -125,7 +192,7 @@ export function EditProfileModal({ user, onClose, onUpdate }: EditProfileModalPr
               className="w-full px-3.5 py-3 bg-panel border border-[var(--overlay-border)] rounded-lg text-primary text-[15px] transition-[border-color,box-shadow] duration-200 outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(124,58,237,0.3)] min-h-[44px]"
               value={formData.year}
               onChange={(e) =>
-                setFormData({ ...formData, year: e.target.value })
+                setFormData({ ...formData, year: Number(e.target.value) })
               }
               min="1"
               max="7"

@@ -1,0 +1,346 @@
+{
+  "university": {
+    "name": "Universidad Nacional de San Martín",
+    "shortName": "UNSAM",
+    "website": "https://www.unsam.edu.ar",
+    "careersSourceUrls": [
+      "https://www.unsam.edu.ar/escuelas/ecyt/carreras-grado.php",
+      "https://www.unsam.edu.ar/escuelas/ecyt/carreras-pregrado.php",
+      "https://www.unsam.edu.ar/escuelas/eh/carreras-grado.php",
+      "https://www.unsam.edu.ar/escuelas/eidaes/carreras-grado.php",
+      "https://www.unsam.edu.ar/escuelas/epyg/carreras-grado.php",
+      "https://www.unsam.edu.ar/escuelas/ehys/oferta.php",
+      "https://www.unsam.edu.ar/escuelas/eayp/grado.php",
+      "https://www.unsam.edu.ar/escuelas/ebyn/oferta.php",
+      "https://www.unsam.edu.ar/escuelas/eeyn",
+      "https://www.unsam.edu.ar/institutos/icrm/oferta.php",
+      "https://ibeninson.cnea.edu.ar/carreras/"
+    ]
+  },
+  "careers": [
+    {
+      "name": "Licenciatura en Antropología Social y Cultural",
+      "faculty": "Escuela Interdisciplinaria de Altos Estudios Sociales (IDAES)",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eidaes/142/idaes/antropologia-social"
+    },
+    {
+      "name": "Licenciatura en Sociología",
+      "faculty": "Escuela Interdisciplinaria de Altos Estudios Sociales (IDAES)",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eidaes/133/idaes/sociologia"
+    },
+    {
+      "name": "Licenciatura en Artes Escénicas",
+      "faculty": "Escuela de Arte y Patrimonio",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eayp/319/artes/artes-escenicas"
+    },
+    {
+      "name": "Licenciatura en Cine Documental",
+      "faculty": "Escuela de Arte y Patrimonio",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eayp/320/artes/cine-documental"
+    },
+    {
+      "name": "Licenciatura en Conservación y Restauración del Patrimonio Cultural",
+      "faculty": "Escuela de Arte y Patrimonio",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eayp/407/tarea/conservacion-restauracion-cultural"
+    },
+    {
+      "name": "Licenciatura en Fotografía",
+      "faculty": "Escuela de Arte y Patrimonio",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eayp/385/artes/fotografia"
+    },
+    {
+      "name": "Licenciatura en Música Argentina",
+      "faculty": "Escuela de Arte y Patrimonio",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eayp/386/artes/musica-argentina"
+    },
+    {
+      "name": "Licenciatura en Prácticas Artísticas Contemporáneas",
+      "faculty": "Escuela de Arte y Patrimonio",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eayp/733/tarea/practicas-artisticas-contemporaneas"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Animación 3D y Efectos Visuales",
+      "faculty": "Escuela de Arte y Patrimonio",
+      "level": "pregrado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eayp/455/artes/animacion-3d-efectos-visuales"
+    },
+    {
+      "name": "Ingeniería en Agrobiotecnología",
+      "faculty": "Escuela de Bio y Nanotecnología",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/ebyn/254/ebyn/agrobiotecnologia"
+    },
+    {
+      "name": "Licenciatura en Biotecnología",
+      "faculty": "Escuela de Bio y Nanotecnología",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/ebyn/233/ebyn/biotecnologia"
+    },
+    {
+      "name": "Tecnicatura Universitaria de Laboratorio",
+      "faculty": "Escuela de Bio y Nanotecnología",
+      "level": "pregrado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/ebyn/102/ebyn/laboratorio"
+    },
+    {
+      "name": "Ingeniería Ambiental",
+      "faculty": "Escuela de Ciencia y Tecnología",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/ecyt/171/ciencia/ingenieria-ambiental"
+    },
+    {
+      "name": "Ingeniería Biomédica",
+      "faculty": "Escuela de Ciencia y Tecnología",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/ecyt/172/ciencia/ingenieria-biomedica"
+    },
+    {
+      "name": "Ingeniería Electrónica",
+      "faculty": "Escuela de Ciencia y Tecnología",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/ecyt/89/ciencia/ingenieria-electronica"
+    },
+    {
+      "name": "Ingeniería Industrial",
+      "faculty": "Escuela de Ciencia y Tecnología",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/ecyt/175/ciencia/ingenieria-industrial"
+    },
+    {
+      "name": "Ingeniería en Energía",
+      "faculty": "Escuela de Ciencia y Tecnología",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/ecyt/173/ciencia/ingenieria-energia"
+    },
+    {
+      "name": "Ingeniería en Sistemas Espaciales",
+      "faculty": "Escuela de Ciencia y Tecnología",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/ecyt/738/ecyt/sistemas-espaciales"
+    },
+    {
+      "name": "Ingeniería en Telecomunicaciones",
+      "faculty": "Escuela de Ciencia y Tecnología",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/ecyt/174/ciencia/ingenieria-telecomunicaciones"
+    },
+    {
+      "name": "Ingeniería en Transporte",
+      "faculty": "Escuela de Ciencia y Tecnología",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/ecyt/617/ciencia/transporte"
+    },
+    {
+      "name": "Licenciatura en Ciencia de Datos",
+      "faculty": "Escuela de Ciencia y Tecnología",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/ecyt/661/ciencia/ciencia-de-datos"
+    },
+    {
+      "name": "Licenciatura en Desarrollo de Software",
+      "faculty": "Escuela de Ciencia y Tecnología",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/ecyt/775/ecyt/desarrollo-software"
+    },
+    {
+      "name": "Licenciatura en Física Médica",
+      "faculty": "Escuela de Ciencia y Tecnología",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/ecyt/13/ciencia/fisica-medica"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Diagnóstico por Imágenes",
+      "faculty": "Escuela de Ciencia y Tecnología",
+      "level": "pregrado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/ecyt/15/ciencia/diagnostico-imagenes"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Programación Informática",
+      "faculty": "Escuela de Ciencia y Tecnología",
+      "level": "pregrado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/ecyt/107/ciencia/programacion-informatica"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Redes Informáticas",
+      "faculty": "Escuela de Ciencia y Tecnología",
+      "level": "pregrado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/ecyt/109/ciencia/redes-informaticas"
+    },
+    {
+      "name": "Contador Público",
+      "faculty": "Escuela de Economía y Negocios",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eeyn/84/economia/contador-publico"
+    },
+    {
+      "name": "Licenciatura en Administración y Gestión Empresarial",
+      "faculty": "Escuela de Economía y Negocios",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eeyn/85/economia/administracion-gestion-empresarial"
+    },
+    {
+      "name": "Licenciatura en Economía",
+      "faculty": "Escuela de Economía y Negocios",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eeyn/86/economia/economia"
+    },
+    {
+      "name": "Licenciatura en Economía del Conocimiento",
+      "faculty": "Escuela de Economía y Negocios",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eeyn/773/eeyn/economia-conocimiento"
+    },
+    {
+      "name": "Licenciatura en Turismo",
+      "faculty": "Escuela de Economía y Negocios",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eeyn/83/economia/turismo"
+    },
+    {
+      "name": "Martillero Público y Corredor de Comercio",
+      "faculty": "Escuela de Economía y Negocios",
+      "level": "pregrado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eeyn/81/economia/martillero-publico"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Guía de Turismo",
+      "faculty": "Escuela de Economía y Negocios",
+      "level": "pregrado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eeyn/714/economia/guia-turismo"
+    },
+    {
+      "name": "Licenciatura en Educación",
+      "faculty": "Escuela de Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eh/143/humanidades/educacion"
+    },
+    {
+      "name": "Licenciatura en Estudios de la Comunicación",
+      "faculty": "Escuela de Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eh/453/humanidades/estudios-comunicacion"
+    },
+    {
+      "name": "Licenciatura en Filosofía",
+      "faculty": "Escuela de Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eh/7/humanidades/filosofia"
+    },
+    {
+      "name": "Licenciatura en Historia",
+      "faculty": "Escuela de Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eh/375/humanidades/historia"
+    },
+    {
+      "name": "Licenciatura en Letras",
+      "faculty": "Escuela de Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eh/809/eh/letras"
+    },
+    {
+      "name": "Licenciatura en Psicopedagogía",
+      "faculty": "Escuela de Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eh/6/humanidades/psicopedagogia"
+    },
+    {
+      "name": "Profesorado Universitario en Ciencias de la Educación",
+      "faculty": "Escuela de Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eh/168/humanidades/ciencias-educacion"
+    },
+    {
+      "name": "Profesorado Universitario en Historia",
+      "faculty": "Escuela de Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eh/807/eh/profesorado-historia"
+    },
+    {
+      "name": "Profesorado Universitario en Letras",
+      "faculty": "Escuela de Humanidades",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eh/194/humanidades/letras"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Acompañamiento Terapéutico",
+      "faculty": "Escuela de Humanidades",
+      "level": "pregrado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/eh/812/eh/acompanamiento-terapeutico"
+    },
+    {
+      "name": "Arquitectura",
+      "faculty": "Escuela de Hábitat y Sostenibilidad",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/ehys/325/ia/arquitectura"
+    },
+    {
+      "name": "Licenciatura en Gestión y Tecnología Ferroviaria",
+      "faculty": "Escuela de Hábitat y Sostenibilidad",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/ehys/573/transporte/Gestion-Tecnologia-Ferroviaria"
+    },
+    {
+      "name": "Licenciatura en Administración Pública",
+      "faculty": "Escuela de Política y Gobierno",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/epyg/130/politica/administracion-publica"
+    },
+    {
+      "name": "Licenciatura en Ciencia Política",
+      "faculty": "Escuela de Política y Gobierno",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/epyg/131/politica/ciencia-politica"
+    },
+    {
+      "name": "Licenciatura en Relaciones Internacionales",
+      "faculty": "Escuela de Política y Gobierno",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/epyg/452/politica/relaciones-internacionales"
+    },
+    {
+      "name": "Profesorado Universitario en Ciencia Política",
+      "faculty": "Escuela de Política y Gobierno",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/escuelas/epyg/394/politica/Ciencia-Politica"
+    },
+    {
+      "name": "Licenciatura en Enfermería",
+      "faculty": "Instituto de Ciencias de la Rehabilitación y el Movimiento",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/institutos/ICRyM/419/icrym/enfermeria"
+    },
+    {
+      "name": "Licenciatura en Ortesis y Prótesis",
+      "faculty": "Instituto de Ciencias de la Rehabilitación y el Movimiento",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/institutos/ICRyM/63/icrym/ortesis-protesis"
+    },
+    {
+      "name": "Licenciatura en Terapia Ocupacional",
+      "faculty": "Instituto de Ciencias de la Rehabilitación y el Movimiento",
+      "level": "grado",
+      "sourceUrl": "https://www.unsam.edu.ar/institutos/ICRyM/64/icrym/terapia-ocupacional"
+    },
+    {
+      "name": "Ingeniería Nuclear con Orientación en Aplicaciones",
+      "faculty": "Instituto de Tecnología Nuclear Dan Beninson",
+      "level": "grado",
+      "sourceUrl": "https://ibeninson.cnea.edu.ar/inoa_inicio/"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Aplicaciones Nucleares",
+      "faculty": "Instituto de Tecnología Nuclear Dan Beninson",
+      "level": "pregrado",
+      "sourceUrl": "https://ibeninson.cnea.edu.ar/tuan_inicio/"
+    }
+  ]
+}

@@ -1,0 +1,912 @@
+{
+  "university": {
+    "name": "Universidad Nacional de La Plata",
+    "shortName": "UNLP",
+    "website": "https://unlp.edu.ar",
+    "careersSourceUrls": [
+      "https://unlp.edu.ar/?s=&post_type=carrera&tipobuscadorcgyp=all&facultadbuscadorcgyp=all&duracionbuscadorcgyp=all&areadisciplinarbuscadorcgyp=all"
+    ]
+  },
+  "careers": [
+    {
+      "name": "Arquitectura",
+      "faculty": "Facultad de Arquitectura y Urbanismo",
+      "level": "grado",
+      "sourceUrl": "https://www.fau.unlp.edu.ar/grado/plan-vi/"
+    },
+    {
+      "name": "Diseño Industrial",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/diseno-industrial/"
+    },
+    {
+      "name": "Licenciatura en Artes Audiovisuales or. Dirección de Fotografía",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/licenciatura-en-artes-audiovisuales/"
+    },
+    {
+      "name": "Licenciatura en Artes Audiovisuales or. Guión",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/licenciatura-en-artes-audiovisuales/"
+    },
+    {
+      "name": "Licenciatura en Artes Audiovisuales or. Realización",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/licenciatura-en-artes-audiovisuales/"
+    },
+    {
+      "name": "Licenciatura en Artes Audiovisuales or. Teoría y Crítica",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/licenciatura-en-artes-audiovisuales/"
+    },
+    {
+      "name": "Licenciatura en Artes Plásticas or. Cerámica",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/licenciatura-en-artes-visualea/"
+    },
+    {
+      "name": "Licenciatura en Artes Plásticas or. Dibujo",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/licenciatura-en-artes-visualea/"
+    },
+    {
+      "name": "Licenciatura en Artes Plásticas or. Escenografía",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/licenciatura-en-artes-visualea/"
+    },
+    {
+      "name": "Licenciatura en Artes Plásticas or. Escultura",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/licenciatura-en-artes-visualea/"
+    },
+    {
+      "name": "Licenciatura en Artes Plásticas or. Grabado",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/licenciatura-en-artes-visualea/"
+    },
+    {
+      "name": "Licenciatura en Artes Plásticas or. Muralismo",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/licenciatura-en-artes-visualea/"
+    },
+    {
+      "name": "Licenciatura en Artes Plásticas or. Pintura",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/licenciatura-en-artes-visualea/"
+    },
+    {
+      "name": "Licenciatura en Diseño Multimedial",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/licenciatura-en-diseno-multimedial/"
+    },
+    {
+      "name": "Licenciatura en Diseño en Comunicación Visual",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/diseno-en-comunicacion-visual/"
+    },
+    {
+      "name": "Licenciatura en Historia de las Artes, Orientación Artes Visuales",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/licenciatura-en-historia-del-arte/"
+    },
+    {
+      "name": "Licenciatura en Música or. Composición",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/composicion/"
+    },
+    {
+      "name": "Licenciatura en Música or. Dirección Coral",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/direccion-coral/"
+    },
+    {
+      "name": "Licenciatura en Música or. Dirección Orquestal",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/direccion-orquestal/"
+    },
+    {
+      "name": "Licenciatura en Música or. Educación Musical",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/educacion-musical/"
+    },
+    {
+      "name": "Licenciatura en Música or. Guitarra",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/guitarra/"
+    },
+    {
+      "name": "Licenciatura en Música or. Música Popular",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/musica-popular/"
+    },
+    {
+      "name": "Licenciatura en Música or. Piano",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/piano/"
+    },
+    {
+      "name": "Profesorado en Artes Audiovisuales",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/profesorado-en-artes-audiovisuales/"
+    },
+    {
+      "name": "Profesorado en Artes Plásticas or. Cerámica",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/profesorado-en-artes-visuales/"
+    },
+    {
+      "name": "Profesorado en Artes Plásticas or. Dibujo",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/profesorado-en-artes-visuales/"
+    },
+    {
+      "name": "Profesorado en Artes Plásticas or. Escenografía",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/profesorado-en-artes-visuales/"
+    },
+    {
+      "name": "Profesorado en Artes Plásticas or. Escultura",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/profesorado-en-artes-visuales/"
+    },
+    {
+      "name": "Profesorado en Artes Plásticas or. Grabado",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/profesorado-en-artes-visuales/"
+    },
+    {
+      "name": "Profesorado en Artes Plásticas or. Muralismo",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/profesorado-en-artes-visuales/"
+    },
+    {
+      "name": "Profesorado en Artes Plásticas or. Pintura",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/profesorado-en-artes-visuales/"
+    },
+    {
+      "name": "Profesorado en Diseño Industrial",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/profesorado-en-diseno-industrial-2/"
+    },
+    {
+      "name": "Profesorado en Diseño Multimedial",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/profesorado-en-diseno-multimedial/"
+    },
+    {
+      "name": "Profesorado en Diseño en Comunicación Visual",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/profesorado-en-diseno-en-comunicacion-visual/"
+    },
+    {
+      "name": "Profesorado en Historia de las Artes con orientación en Artes Visuales",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/profesorado-en-en-historia-del-arte/"
+    },
+    {
+      "name": "Profesorado en Música or. Composición",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/composicion/"
+    },
+    {
+      "name": "Profesorado en Música or. Dirección Coral",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/direccion-coral/"
+    },
+    {
+      "name": "Profesorado en Música or. Dirección Orquestal",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/direccion-orquestal/"
+    },
+    {
+      "name": "Profesorado en Música or. Educación Musical",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/educacion-musical/"
+    },
+    {
+      "name": "Profesorado en Música or. Guitarra",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/guitarra/"
+    },
+    {
+      "name": "Profesorado en Música or. Música Popular",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/musica-popular/"
+    },
+    {
+      "name": "Profesorado en Música or. Piano",
+      "faculty": "Facultad de Artes",
+      "level": "grado",
+      "sourceUrl": "https://fba.unlp.edu.ar/piano/"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Fotografía",
+      "faculty": "Facultad de Artes",
+      "level": "pregrado",
+      "sourceUrl": "https://www2.fba.unlp.edu.ar/artesvisuales/fotografia/"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Sonido y Grabación",
+      "faculty": "Facultad de Artes",
+      "level": "pregrado",
+      "sourceUrl": "https://fba.unlp.edu.ar/tecnicatura-en-sonido-y-grabacion/"
+    },
+    {
+      "name": "Tecnicatura en Música Popular",
+      "faculty": "Facultad de Artes",
+      "level": "pregrado",
+      "sourceUrl": "https://www2.fba.unlp.edu.ar/musica/tecnicatura/"
+    },
+    {
+      "name": "Ingeniería Agronómica",
+      "faculty": "Facultad de Ciencias Agrarias y Forestales",
+      "level": "grado",
+      "sourceUrl": "https://www.agro.unlp.edu.ar/ensenanza/carreras/ingenieria-agronomica/"
+    },
+    {
+      "name": "Ingeniería Forestal",
+      "faculty": "Facultad de Ciencias Agrarias y Forestales",
+      "level": "grado",
+      "sourceUrl": "https://www.agro.unlp.edu.ar/ensenanza/carreras/ingenieria-forestal/"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Agroecología",
+      "faculty": "Facultad de Ciencias Agrarias y Forestales",
+      "level": "pregrado",
+      "sourceUrl": "https://www.agro.unlp.edu.ar/ensenanza/carreras/tecnicatura-universitaria-en-agroecologia/"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Cultivos Protegidos y Ambientes Controlados",
+      "faculty": "Facultad de Ciencias Agrarias y Forestales",
+      "level": "pregrado",
+      "sourceUrl": "https://www.agro.unlp.edu.ar/ensenanza/carreras/tecnicatura-universitaria-en-cultivos-protegidos-y-ambientes-controlados/"
+    },
+    {
+      "name": "Geofísica",
+      "faculty": "Facultad de Ciencias Astronómicas y Geofísicas",
+      "level": "grado",
+      "sourceUrl": "https://www.fcaglp.unlp.edu.ar/index.php/carreras-grado/geofisica/"
+    },
+    {
+      "name": "Licenciatura en Astronomía",
+      "faculty": "Facultad de Ciencias Astronómicas y Geofísicas",
+      "level": "grado",
+      "sourceUrl": "https://www.fcaglp.unlp.edu.ar/index.php/carreras-grado/astronomia/"
+    },
+    {
+      "name": "Licenciatura en Meteorología y Ciencias de la Atmósfera",
+      "faculty": "Facultad de Ciencias Astronómicas y Geofísicas",
+      "level": "grado",
+      "sourceUrl": "https://www.fcaglp.unlp.edu.ar/index.php/carreras-grado/meteorologia/"
+    },
+    {
+      "name": "Ciencia de Datos en Organizaciones",
+      "faculty": "Facultad de Ciencias Económicas",
+      "level": "grado",
+      "sourceUrl": "https://www.econo.unlp.edu.ar/cdo"
+    },
+    {
+      "name": "Contador Público",
+      "faculty": "Facultad de Ciencias Económicas",
+      "level": "grado",
+      "sourceUrl": "https://www.econo.unlp.edu.ar/contador_publico"
+    },
+    {
+      "name": "Licenciatura en Administración",
+      "faculty": "Facultad de Ciencias Económicas",
+      "level": "grado",
+      "sourceUrl": "https://www.econo.unlp.edu.ar/licenciatura_en_administracion"
+    },
+    {
+      "name": "Licenciatura en Economía",
+      "faculty": "Facultad de Ciencias Económicas",
+      "level": "grado",
+      "sourceUrl": "https://www.econo.unlp.edu.ar/licenciatura_en_economia"
+    },
+    {
+      "name": "Licenciatura en Turismo",
+      "faculty": "Facultad de Ciencias Económicas",
+      "level": "grado",
+      "sourceUrl": "https://www.econo.unlp.edu.ar/licenciatura_en_turismo"
+    },
+    {
+      "name": "Tecnicatura en Cooperativismo",
+      "faculty": "Facultad de Ciencias Económicas",
+      "level": "pregrado",
+      "sourceUrl": "https://www.econo.unlp.edu.ar/tecnicatura_en_cooperativismo"
+    },
+    {
+      "name": "Farmacia",
+      "faculty": "Facultad de Ciencias Exactas",
+      "level": "grado",
+      "sourceUrl": "https://www.exactas.unlp.edu.ar/farmacia"
+    },
+    {
+      "name": "Licenciatura en Bioquímica",
+      "faculty": "Facultad de Ciencias Exactas",
+      "level": "grado",
+      "sourceUrl": "https://www.exactas.unlp.edu.ar/licenciatura_en_bioquimica"
+    },
+    {
+      "name": "Licenciatura en Biotecnología y Biología Molecular",
+      "faculty": "Facultad de Ciencias Exactas",
+      "level": "grado",
+      "sourceUrl": "https://www.exactas.unlp.edu.ar/licenciatura_en_biotecnologia_y_biologia_molecular"
+    },
+    {
+      "name": "Licenciatura en Ciencia y Tecnología de Alimentos",
+      "faculty": "Facultad de Ciencias Exactas",
+      "level": "grado",
+      "sourceUrl": "https://www.exactas.unlp.edu.ar/alimentos"
+    },
+    {
+      "name": "Licenciatura en Física",
+      "faculty": "Facultad de Ciencias Exactas",
+      "level": "grado",
+      "sourceUrl": "https://www.exactas.unlp.edu.ar/licenciatura_en_fisica"
+    },
+    {
+      "name": "Licenciatura en Física Médica",
+      "faculty": "Facultad de Ciencias Exactas",
+      "level": "grado",
+      "sourceUrl": "https://www.exactas.unlp.edu.ar/licenciatura_en_fisica_medica"
+    },
+    {
+      "name": "Licenciatura en Matemática",
+      "faculty": "Facultad de Ciencias Exactas",
+      "level": "grado",
+      "sourceUrl": "https://www.exactas.unlp.edu.ar/licenciatura_en_matematicas"
+    },
+    {
+      "name": "Licenciatura en Química",
+      "faculty": "Facultad de Ciencias Exactas",
+      "level": "grado",
+      "sourceUrl": "https://www.exactas.unlp.edu.ar/licenciatura_en_quimica"
+    },
+    {
+      "name": "Licenciatura en Química y Tecnología Ambiental",
+      "faculty": "Facultad de Ciencias Exactas",
+      "level": "grado",
+      "sourceUrl": "https://www.exactas.unlp.edu.ar/licenciatura_en_quimica_y_tecnologia_ambiental"
+    },
+    {
+      "name": "Licenciatura en Óptica Ocular y Optometría",
+      "faculty": "Facultad de Ciencias Exactas",
+      "level": "grado",
+      "sourceUrl": "https://www.exactas.unlp.edu.ar/licenciatura_en_optica_ocular_y_optometria"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Alimentos",
+      "faculty": "Facultad de Ciencias Exactas",
+      "level": "pregrado",
+      "sourceUrl": "https://www.exactas.unlp.edu.ar/tecnicatura_universitaria_en_alimentos"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Química",
+      "faculty": "Facultad de Ciencias Exactas",
+      "level": "pregrado",
+      "sourceUrl": "https://www.exactas.unlp.edu.ar/tecnicatura_universitaria_en_quimica"
+    },
+    {
+      "name": "Abogacía",
+      "faculty": "Facultad de Ciencias Jurídicas y Sociales",
+      "level": "grado",
+      "sourceUrl": "https://jursoc.unlp.edu.ar/index.php/estudiantes/informacion/carreras.html"
+    },
+    {
+      "name": "Escribanía",
+      "faculty": "Facultad de Ciencias Jurídicas y Sociales",
+      "level": "grado",
+      "sourceUrl": "https://jursoc.unlp.edu.ar/index.php/estudiantes/informacion/carreras.html"
+    },
+    {
+      "name": "Técnico Gestión de Recursos para Instituciones Universitarias (sólo para trabajadores no docentes)",
+      "faculty": "Facultad de Ciencias Jurídicas y Sociales",
+      "level": "pregrado",
+      "sourceUrl": "https://jursoc.unlp.edu.ar/index.php/estudiantes/informacion/carreras.html"
+    },
+    {
+      "name": "Técnico Superior Universitario de Martillero público y Corredor",
+      "faculty": "Facultad de Ciencias Jurídicas y Sociales",
+      "level": "pregrado",
+      "sourceUrl": "https://jursoc.unlp.edu.ar/index.php/estudiantes/informacion/carreras.html"
+    },
+    {
+      "name": "Enfermería Universitaria",
+      "faculty": "Facultad de Ciencias Médicas",
+      "level": "grado",
+      "sourceUrl": "https://www.med.unlp.edu.ar/index.php/carreras/enfermeria-universitaria/plan-de-estudio"
+    },
+    {
+      "name": "Licenciatura en Nutrición",
+      "faculty": "Facultad de Ciencias Médicas",
+      "level": "grado",
+      "sourceUrl": "https://www.med.unlp.edu.ar/index.php/carreras/lic-en-nutricion/plan-de-estudio"
+    },
+    {
+      "name": "Licenciatura en Obstetricia",
+      "faculty": "Facultad de Ciencias Médicas",
+      "level": "grado",
+      "sourceUrl": "https://www.med.unlp.edu.ar/index.php/carreras/lic-en-obstetricia/plan-de-estudio"
+    },
+    {
+      "name": "Medicina",
+      "faculty": "Facultad de Ciencias Médicas",
+      "level": "grado",
+      "sourceUrl": "https://www.med.unlp.edu.ar/index.php/carreras/medicina/plan-de-estudio"
+    },
+    {
+      "name": "Tecnicatura en Prácticas Cardiológicas",
+      "faculty": "Facultad de Ciencias Médicas",
+      "level": "pregrado",
+      "sourceUrl": "https://www.med.unlp.edu.ar/index.php/carreras/tec-en-practicas-cardiologicas/plan-de-estudio"
+    },
+    {
+      "name": "Licenciatura en Antropología",
+      "faculty": "Facultad de Ciencias Naturales y Museo",
+      "level": "grado",
+      "sourceUrl": "https://www.fcnym.unlp.edu.ar/grado/carreras/licenciatura-en-antropologia/"
+    },
+    {
+      "name": "Licenciatura en Biología Or. Botánica",
+      "faculty": "Facultad de Ciencias Naturales y Museo",
+      "level": "grado",
+      "sourceUrl": "https://www.fcnym.unlp.edu.ar/grado/carreras/licenciatura-en-biologia-orientacion-botanica/"
+    },
+    {
+      "name": "Licenciatura en Biología Or. Ecología",
+      "faculty": "Facultad de Ciencias Naturales y Museo",
+      "level": "grado",
+      "sourceUrl": "https://www.fcnym.unlp.edu.ar/grado/carreras/licenciatura-en-biologia-orientacion-ecologia/"
+    },
+    {
+      "name": "Licenciatura en Biología Or. Paleontología",
+      "faculty": "Facultad de Ciencias Naturales y Museo",
+      "level": "grado",
+      "sourceUrl": "https://www.fcnym.unlp.edu.ar/grado/carreras/licenciatura-en-biologia-orientacion-paleontologia/"
+    },
+    {
+      "name": "Licenciatura en Biología Or. Zoología",
+      "faculty": "Facultad de Ciencias Naturales y Museo",
+      "level": "grado",
+      "sourceUrl": "https://www.fcnym.unlp.edu.ar/grado/carreras/licenciatura-en-biologia-orientacion-zoologia/"
+    },
+    {
+      "name": "Licenciatura en Geología",
+      "faculty": "Facultad de Ciencias Naturales y Museo",
+      "level": "grado",
+      "sourceUrl": "https://www.fcnym.unlp.edu.ar/grado/carreras/licenciatura-en-geologia/"
+    },
+    {
+      "name": "Licenciatura en Geoquímica",
+      "faculty": "Facultad de Ciencias Naturales y Museo",
+      "level": "grado",
+      "sourceUrl": "https://www.fcnym.unlp.edu.ar/grado/carreras/licenciatura-en-geoquimica/"
+    },
+    {
+      "name": "Medicina Veterinaria",
+      "faculty": "Facultad de Ciencias Veterinarias",
+      "level": "grado",
+      "sourceUrl": "https://www.fcv.unlp.edu.ar/index.php/carrera-de-medicina-veterinaria/"
+    },
+    {
+      "name": "Microbiología",
+      "faculty": "Facultad de Ciencias Veterinarias",
+      "level": "grado",
+      "sourceUrl": "https://www.fcv.unlp.edu.ar/index.php/carrera-de-microbiologia/"
+    },
+    {
+      "name": "Licenciatura en Bibliotecología y Ciencia de la Información",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/bibliotecologia/carreras/licenciatura-en-bibliotecologia-y-ciencia-de-la-informacion"
+    },
+    {
+      "name": "Licenciatura en Cs. de la Educación",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/ciencias-de-la-educacion/carreras/licenciatura-en-ciencias-de-la-educacion"
+    },
+    {
+      "name": "Licenciatura en Educación Física",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/educacion-fisica/carreras/licenciatura-en-educacion-fisica"
+    },
+    {
+      "name": "Licenciatura en Filosofía",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/filosofia/carreras/licenciatura-en-filosofia"
+    },
+    {
+      "name": "Licenciatura en Francés Orientación Lingüística",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/lenguas-y-literaturas-modernas/carreras/licenciatura-en-frances-orientacion-linguistica"
+    },
+    {
+      "name": "Licenciatura en Francés Orientación Literaria",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/lenguas-y-literaturas-modernas/carreras/licenciatura-en-frances-orientacion-literaria"
+    },
+    {
+      "name": "Licenciatura en Geografía",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/geografia/carreras/licenciatura-en-geografia"
+    },
+    {
+      "name": "Licenciatura en Historia",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/historia/carreras/licenciatura-en-historia"
+    },
+    {
+      "name": "Licenciatura en Inglés Orientación Lingüística",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/lenguas-y-literaturas-modernas/carreras/licenciatura-en-ingles-orientacion-linguistica"
+    },
+    {
+      "name": "Licenciatura en Inglés Orientación Literaria",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/lenguas-y-literaturas-modernas/carreras/licenciatura-en-ingles-orientacion-literaria"
+    },
+    {
+      "name": "Licenciatura en Letras",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/letras/carreras/licenciatura-en-letras"
+    },
+    {
+      "name": "Licenciatura en Sociología",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/sociologia/carreras/licenciatura-en-sociologia"
+    },
+    {
+      "name": "Profesorado de Bibliotecología y Ciencia de la Información",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/bibliotecologia/carreras/profesorado-en-bibliotecologia-y-ciencia-de-la-informacion"
+    },
+    {
+      "name": "Profesorado de Ciencias Biológicas",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/ciencias-exactas-y-naturales/carreras/profesorado-de-ciencias-biologicas"
+    },
+    {
+      "name": "Profesorado de Física",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/ciencias-exactas-y-naturales/carreras/profesorado-de-fisica"
+    },
+    {
+      "name": "Profesorado de Matemática",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/ciencias-exactas-y-naturales/carreras/profesorado-de-matematica"
+    },
+    {
+      "name": "Profesorado de Química",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/ciencias-exactas-y-naturales/carreras/profesorado-de-quimica"
+    },
+    {
+      "name": "Profesorado en Ciencias de la Educación",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/ciencias-de-la-educacion/carreras/profesorado-en-ciencias-de-la-educacion"
+    },
+    {
+      "name": "Profesorado en Educación Física",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/educacion-fisica/carreras/profesorado-en-educacion-fisica"
+    },
+    {
+      "name": "Profesorado en Filosofía",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/filosofia/carreras/profesorado-en-filosofia"
+    },
+    {
+      "name": "Profesorado en Geografía",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/geografia/carreras/profesorado-en-geografia"
+    },
+    {
+      "name": "Profesorado en Historia",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/historia/carreras/profesorado-en-historia"
+    },
+    {
+      "name": "Profesorado en Lengua y Literatura Francesas",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/lenguas-y-literaturas-modernas/carreras/profesorado-en-lengua-y-literatura-francesas"
+    },
+    {
+      "name": "Profesorado en Lengua y Literatura inglesas",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/lenguas-y-literaturas-modernas/carreras/profesorado-en-lengua-y-literatura-inglesas"
+    },
+    {
+      "name": "Profesorado en Letras",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/letras/carreras/profesorado-en-letras"
+    },
+    {
+      "name": "Profesorado en Portugués",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/lenguas-y-literaturas-modernas/carreras/profesorado-en-portugues"
+    },
+    {
+      "name": "Profesorado en Sociología",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/sociologia/carreras/profesorado-en-sociologia"
+    },
+    {
+      "name": "Traductorado Público Nacional en Lengua Francesa",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/lenguas-y-literaturas-modernas/carreras/traductorado-publico-nacional-en-lengua-francesa"
+    },
+    {
+      "name": "Traductorado Público Nacional en Lengua Inglesa",
+      "faculty": "Facultad de Humanidades y Ciencias de la Educación",
+      "level": "grado",
+      "sourceUrl": "https://www.fahce.unlp.edu.ar/facultad/secretarias-y-prosecretarias/academica/deptos/lenguas-y-literaturas-modernas/carreras/traductorado-publico-nacional-en-lengua-inglesa"
+    },
+    {
+      "name": "Analista Programador Universitario",
+      "faculty": "Facultad de Informática",
+      "level": "pregrado",
+      "sourceUrl": "https://www.info.unlp.edu.ar/analista-programador-universitario/"
+    },
+    {
+      "name": "Analista en Tecnologías de la Información y la Comunicación",
+      "faculty": "Facultad de Informática",
+      "level": "pregrado",
+      "sourceUrl": "https://www.info.unlp.edu.ar/analista-en-tic/"
+    },
+    {
+      "name": "Ingeniería en Computación",
+      "faculty": "Facultad de Informática",
+      "level": "grado",
+      "sourceUrl": "https://ic.info.unlp.edu.ar/alcances-del-titulo-y-competencias-profesionales-de-ingenieria-en-computacion/"
+    },
+    {
+      "name": "Licenciatura en Informática",
+      "faculty": "Facultad de Informática",
+      "level": "grado",
+      "sourceUrl": "https://www.info.unlp.edu.ar/carreras-de-grado-lic-en-informatica/"
+    },
+    {
+      "name": "Licenciatura en Sistemas",
+      "faculty": "Facultad de Informática",
+      "level": "grado",
+      "sourceUrl": "https://www.info.unlp.edu.ar/licenciatura-en-sistemas/"
+    },
+    {
+      "name": "Ingeniería Aeroespacial",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://ing.unlp.edu.ar/grado/carreras/ingenieria-aeroespacial/"
+    },
+    {
+      "name": "Ingeniería Civil",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://ing.unlp.edu.ar/grado/carreras/ingenieria-civil/"
+    },
+    {
+      "name": "Ingeniería Electromecánica",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://ing.unlp.edu.ar/grado/carreras/ingenieria-electromecanica/"
+    },
+    {
+      "name": "Ingeniería Electrónica",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://ing.unlp.edu.ar/grado/carreras/ingenieria-electronica/"
+    },
+    {
+      "name": "Ingeniería Hidráulica",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://ing.unlp.edu.ar/grado/carreras/ingenieria-hidraulica/"
+    },
+    {
+      "name": "Ingeniería Industrial",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://ing.unlp.edu.ar/grado/carreras/ingenieria-industrial/"
+    },
+    {
+      "name": "Ingeniería Mecánica",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://ing.unlp.edu.ar/grado/carreras/ingenieria-mecanica/"
+    },
+    {
+      "name": "Ingeniería Química",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://ing.unlp.edu.ar/grado/carreras/ingenieria-quimica/"
+    },
+    {
+      "name": "Ingeniería en Agrimensura",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://ing.unlp.edu.ar/grado/carreras/ingenieria-agrimensura/"
+    },
+    {
+      "name": "Ingeniería en Energía Eléctrica",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://ing.unlp.edu.ar/grado/carreras/ingenieria-energia_electrica/"
+    },
+    {
+      "name": "Ingeniería en Materiales",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://ing.unlp.edu.ar/grado/carreras/ingenieria-materiales/"
+    },
+    {
+      "name": "Ingeniería en Telecomunicaciones",
+      "faculty": "Facultad de Ingeniería",
+      "level": "grado",
+      "sourceUrl": "https://ing.unlp.edu.ar/grado/carreras/ingenieria-telecomunicaciones/"
+    },
+    {
+      "name": "Odontología",
+      "faculty": "Facultad de Odontología",
+      "level": "grado",
+      "sourceUrl": "https://www.folp.unlp.edu.ar/caratulacar/"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Asistencia Odontológica",
+      "faculty": "Facultad de Odontología",
+      "level": "pregrado",
+      "sourceUrl": "https://www.folp.unlp.edu.ar/tecuniversitarias/"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Prótesis de Laboratorio Odontológico",
+      "faculty": "Facultad de Odontología",
+      "level": "pregrado",
+      "sourceUrl": "https://www.folp.unlp.edu.ar/tecuniversitarias/"
+    },
+    {
+      "name": "Licenciatura en Comunicación Social con Orientación Periodismo, Producción de contenidos y Gestión de Medios",
+      "faculty": "Facultad de Periodismo y Comunicación Social",
+      "level": "grado",
+      "sourceUrl": "https://perio.unlp.edu.ar/academica/carreras/licenciatura/"
+    },
+    {
+      "name": "Licenciatura en Comunicación Social con Orientación Planificación y Gestión de la Comunicación en Organizaciones",
+      "faculty": "Facultad de Periodismo y Comunicación Social",
+      "level": "grado",
+      "sourceUrl": "https://perio.unlp.edu.ar/academica/carreras/licenciatura/"
+    },
+    {
+      "name": "Profesorado en Comunicación Social",
+      "faculty": "Facultad de Periodismo y Comunicación Social",
+      "level": "grado",
+      "sourceUrl": "https://perio.unlp.edu.ar/academica/carreras/profesorado/"
+    },
+    {
+      "name": "Tecnicatura Superior Universitaria en Comunicación Digital",
+      "faculty": "Facultad de Periodismo y Comunicación Social",
+      "level": "pregrado",
+      "sourceUrl": "https://perio.unlp.edu.ar/academica/carreras/comunicacion-digital/"
+    },
+    {
+      "name": "Tecnicatura Superior Universitaria en Comunicación Pública y Política",
+      "faculty": "Facultad de Periodismo y Comunicación Social",
+      "level": "pregrado",
+      "sourceUrl": "https://perio.unlp.edu.ar/academica/carreras/comunicacion-publica-y-politica/"
+    },
+    {
+      "name": "Tecnicatura Superior Universitaria en Periodismo Deportivo",
+      "faculty": "Facultad de Periodismo y Comunicación Social",
+      "level": "pregrado",
+      "sourceUrl": "https://perio.unlp.edu.ar/academica/carreras/periodismo-deportivo/"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Comunicación Popular",
+      "faculty": "Facultad de Periodismo y Comunicación Social",
+      "level": "pregrado",
+      "sourceUrl": "https://perio.unlp.edu.ar/academica/carreras/comunicacion-popular/"
+    },
+    {
+      "name": "Licenciatura en Psicología",
+      "faculty": "Facultad de Psicología",
+      "level": "grado",
+      "sourceUrl": "https://www.psico.unlp.edu.ar/carreras"
+    },
+    {
+      "name": "Profesorado en Psicología",
+      "faculty": "Facultad de Psicología",
+      "level": "grado",
+      "sourceUrl": "https://www.psico.unlp.edu.ar/carreras"
+    },
+    {
+      "name": "Licenciatura en Fonoaudiología",
+      "faculty": "Facultad de Trabajo Social",
+      "level": "grado",
+      "sourceUrl": "https://trabajosocial.unlp.edu.ar/carreras-2/"
+    },
+    {
+      "name": "Licenciatura en Trabajo Social",
+      "faculty": "Facultad de Trabajo Social",
+      "level": "grado",
+      "sourceUrl": "https://trabajosocial.unlp.edu.ar/carreras-2/"
+    },
+    {
+      "name": "Profesorado en Trabajo Social",
+      "faculty": "Facultad de Trabajo Social",
+      "level": "grado",
+      "sourceUrl": "https://trabajosocial.unlp.edu.ar/carreras-2/"
+    },
+    {
+      "name": "Tecnicatura en Gestión Comunitaria del Riesgo",
+      "faculty": "Facultad de Trabajo Social",
+      "level": "pregrado",
+      "sourceUrl": "https://trabajosocial.unlp.edu.ar/carreras-2/"
+    }
+  ]
+}

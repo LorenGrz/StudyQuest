@@ -1,5 +1,18 @@
 import { describe, expect, it } from 'vitest'
-import { friendlyApiErrorMessage } from './apiErrors'
+import { apiErrorData, friendlyApiErrorMessage } from './apiErrors'
+
+describe('apiErrorData', () => {
+  it('should read the response body of an axios-style error', () => {
+    const err = { response: { status: 409, data: { code: 'SIMILAR_SUBJECTS', message: 'x' } } }
+    expect(apiErrorData(err)).toEqual({ code: 'SIMILAR_SUBJECTS', message: 'x' })
+  })
+
+  it('should return undefined for errors with no response body', () => {
+    expect(apiErrorData(new Error('network error'))).toBeUndefined()
+    expect(apiErrorData(null)).toBeUndefined()
+    expect(apiErrorData('boom')).toBeUndefined()
+  })
+})
 
 describe('friendlyApiErrorMessage', () => {
   it('should explain rate limiting when the status is 429', () => {

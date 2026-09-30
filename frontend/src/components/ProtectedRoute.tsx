@@ -5,11 +5,14 @@ import type { ReactNode } from 'react'
 
 interface Props {
   children: ReactNode
+  /** Redirects non-ADMIN users to /dashboard instead of just requiring login. */
+  adminOnly?: boolean
 }
 
-export function ProtectedRoute({ children }: Props) {
-  const { isAuthenticated } = useAuthStore()
+export function ProtectedRoute({ children, adminOnly }: Props) {
+  const { isAuthenticated, user } = useAuthStore()
   useAchievementNotifier()
   if (!isAuthenticated) return <Navigate to="/auth" replace />
+  if (adminOnly && user?.role !== 'ADMIN') return <Navigate to="/dashboard" replace />
   return <>{children}</>
 }

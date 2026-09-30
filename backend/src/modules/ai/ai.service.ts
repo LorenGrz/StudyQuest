@@ -45,12 +45,19 @@ export class AiService {
 
   /**
    * Generic single-shot chat backed by Bedrock Converse, independent of the
-   * AI_PROVIDER used for quiz generation. Used by the study bot.
+   * AI_PROVIDER used for quiz generation. Used by the study bot and the
+   * subject-name classifier (which passes `temperature: 0` and an
+   * `abortSignal` for its timeout).
    */
   async chat(
     system: string,
     user: string,
-    opts?: { model?: string; maxTokens?: number },
+    opts?: {
+      model?: string;
+      maxTokens?: number;
+      temperature?: number;
+      abortSignal?: AbortSignal;
+    },
   ): Promise<string> {
     const model =
       opts?.model ??
@@ -63,6 +70,8 @@ export class AiService {
       system,
       userMessage: user,
       maxTokens: opts?.maxTokens,
+      temperature: opts?.temperature,
+      abortSignal: opts?.abortSignal,
     });
   }
 

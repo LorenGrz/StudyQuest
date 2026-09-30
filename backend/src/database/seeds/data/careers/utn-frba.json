@@ -1,0 +1,145 @@
+{
+  "university": {
+    "name": "Universidad Tecnológica Nacional – FRBA",
+    "shortName": "UTN FRBA",
+    "website": "https://www.frba.utn.edu.ar",
+    "careersSourceUrls": [
+      "https://frba.utn.edu.ar/carreras-de-grado/",
+      "https://sceu.frba.utn.edu.ar/e-learning/listado/Tipo%5Bcarrera%5D"
+    ]
+  },
+  "careers": [
+    {
+      "name": "Ingeniería Civil",
+      "faculty": "Departamento de Ingeniería Civil",
+      "level": "grado",
+      "sourceUrl": "https://frba.utn.edu.ar/civil/"
+    },
+    {
+      "name": "Ingeniería Electrónica",
+      "faculty": "Departamento de Ingeniería Electrónica",
+      "level": "grado",
+      "sourceUrl": "https://frba.utn.edu.ar/electronica/plan-de-estudios/"
+    },
+    {
+      "name": "Ingeniería Industrial",
+      "faculty": "Departamento de Ingeniería Industrial",
+      "level": "grado",
+      "sourceUrl": "https://frba.utn.edu.ar/industrial/plan-07/"
+    },
+    {
+      "name": "Ingeniería Mecánica",
+      "faculty": "Departamento de Ingeniería Mecánica",
+      "level": "grado",
+      "sourceUrl": "https://frba.utn.edu.ar/mecanica/plan-de-estudios-2023/"
+    },
+    {
+      "name": "Ingeniería Naval",
+      "faculty": "Departamento de Ingeniería Naval",
+      "level": "grado",
+      "sourceUrl": "https://frba.utn.edu.ar/naval/"
+    },
+    {
+      "name": "Ingeniería Química",
+      "faculty": "Departamento de Ingeniería Química",
+      "level": "grado",
+      "sourceUrl": "https://frba.utn.edu.ar/quimica/plan-de-estudios-2023-implementados-1o-2o-nivel/"
+    },
+    {
+      "name": "Ingeniería Textil",
+      "faculty": "Departamento de Ingeniería Textil",
+      "level": "grado",
+      "sourceUrl": "https://frba.utn.edu.ar/textil/"
+    },
+    {
+      "name": "Ingeniería en Energía Eléctrica",
+      "faculty": "Departamento de Ingeniería en Energía Eléctrica",
+      "level": "grado",
+      "sourceUrl": "https://frba.utn.edu.ar/electrica/"
+    },
+    {
+      "name": "Ingeniería en Sistemas de Información",
+      "faculty": "Departamento de Ingeniería en Sistemas de Información",
+      "level": "grado",
+      "sourceUrl": "https://www.frba.utn.edu.ar/sistemas/plan-de-estudios-2023/"
+    },
+    {
+      "name": "Licenciatura en Administración de Empresas",
+      "faculty": "Secretaría de Cultura y Extensión Universitaria",
+      "level": "grado",
+      "sourceUrl": "https://sceu.frba.utn.edu.ar/e-learning/detalle/carrera/2276/licenciatura-en-administracion-de-empresas"
+    },
+    {
+      "name": "Licenciatura en Gestión Ambiental",
+      "faculty": "Secretaría de Cultura y Extensión Universitaria",
+      "level": "grado",
+      "sourceUrl": "https://sceu.frba.utn.edu.ar/e-learning/detalle/carrera/3512/licenciatura-en-gestion-ambiental"
+    },
+    {
+      "name": "Licenciatura en Higiene y Seguridad en el Trabajo",
+      "faculty": "Secretaría de Cultura y Extensión Universitaria",
+      "level": "grado",
+      "sourceUrl": "https://sceu.frba.utn.edu.ar/e-learning/detalle/carrera/1478/licenciatura-en-higiene-y-seguridad-en-el-trabajo"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Administración",
+      "faculty": "Secretaría de Cultura y Extensión Universitaria",
+      "level": "pregrado",
+      "sourceUrl": "https://sceu.frba.utn.edu.ar/e-learning/detalle/carrera/4296/tecnicatura-universitaria-en-administracion"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Comercio Electrónico y Marketing Digital",
+      "faculty": "Secretaría de Cultura y Extensión Universitaria",
+      "level": "pregrado",
+      "sourceUrl": "https://sceu.frba.utn.edu.ar/e-learning/detalle/carrera/1603/tecnicatura-universitaria-en-comercio-electronico-y-marketing-digital"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Desarrollo y Producción de Videojuegos",
+      "faculty": "Secretaría de Cultura y Extensión Universitaria",
+      "level": "pregrado",
+      "sourceUrl": "https://sceu.frba.utn.edu.ar/e-learning/detalle/carrera/3401/tecnicatura-universitaria-en-desarrollo-y-produccion-de-videojuegos"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Diseño Gráfico Digital",
+      "faculty": "Secretaría de Cultura y Extensión Universitaria",
+      "level": "pregrado",
+      "sourceUrl": "https://sceu.frba.utn.edu.ar/e-learning/detalle/carrera/181224/tecnicatura-universitaria-en-diseno-grafico-digital"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Gestión Aeronáutica",
+      "faculty": "Secretaría de Cultura y Extensión Universitaria",
+      "level": "pregrado",
+      "sourceUrl": "https://sceu.frba.utn.edu.ar/e-learning/detalle/carrera/2311/tecnicatura-universitaria-en-gestion-aeronautica"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Higiene y Seguridad en el Trabajo",
+      "faculty": "Secretaría de Cultura y Extensión Universitaria",
+      "level": "pregrado",
+      "sourceUrl": "https://sceu.frba.utn.edu.ar/e-learning/detalle/carrera/648/tecnicatura-universitaria-en-higiene-y-seguridad-en-el-trabajo"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Logística",
+      "faculty": "Secretaría de Cultura y Extensión Universitaria",
+      "level": "pregrado",
+      "sourceUrl": "https://sceu.frba.utn.edu.ar/e-learning/detalle/carrera/3274/tecnicatura-universitaria-en-logistica"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Negociación de Bienes",
+      "faculty": "Secretaría de Cultura y Extensión Universitaria",
+      "level": "pregrado",
+      "sourceUrl": "https://sceu.frba.utn.edu.ar/e-learning/detalle/carrera/4297/tecnicatura-universitaria-en-negociacion-de-bienes"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Programación",
+      "faculty": "Secretaría de Cultura y Extensión Universitaria",
+      "level": "pregrado",
+      "sourceUrl": "https://sceu.frba.utn.edu.ar/e-learning/detalle/carrera/3906/tecnicatura-universitaria-en-programacion"
+    },
+    {
+      "name": "Tecnicatura Universitaria en Telecomunicaciones",
+      "faculty": "Secretaría de Cultura y Extensión Universitaria",
+      "level": "pregrado",
+      "sourceUrl": "https://sceu.frba.utn.edu.ar/e-learning/detalle/carrera/2408/tecnicatura-universitaria-en-telecomunicaciones"
+    }
+  ]
+}
