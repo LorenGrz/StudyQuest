@@ -10,6 +10,7 @@ import { University } from './university.entity';
 import { Career } from './career.entity';
 import { CareerRequest } from './career-request.entity';
 import { User } from '../users/user.entity';
+import { DataSource } from 'typeorm';
 
 const UBA = { id: 'uni-uba', name: 'Universidad de Buenos Aires' };
 const MEDICINA = {
@@ -59,6 +60,7 @@ describe('UniversitiesService', () => {
         { provide: getRepositoryToken(Career), useValue: careerRepo },
         { provide: getRepositoryToken(CareerRequest), useValue: requestRepo },
         { provide: getRepositoryToken(User), useValue: userRepo },
+        { provide: DataSource, useValue: {} },
       ],
     }).compile();
     service = moduleRef.get(UniversitiesService);
@@ -70,6 +72,15 @@ describe('UniversitiesService', () => {
       await expect(
         service.getUniversity({ name: 'universidad de BUENOS aires' }),
       ).resolves.toBe(UBA);
+    });
+
+    it('resolves the legacy UTN spelling to the FRBA catalog entry', async () => {
+      const utn = { id: 'uni-utn', name: 'Universidad Tecnológica Nacional – FRBA' };
+      universityRepo.find.mockResolvedValue([UBA, utn]);
+      await expect(
+        service.resolveUniversityId('Universidad Tecnológica Nacional'),
+      ).resolves.toBe('uni-utn');
+      await expect(service.resolveUniversityId('Mi Uni Inventada')).resolves.toBeNull();
     });
 
     it('rejects an unknown university', async () => {
@@ -150,7 +161,12 @@ describe('UniversitiesService', () => {
 
     it('reuses the same pending request instead of duplicating it', async () => {
       requestRepo.find.mockResolvedValue([
-        { id: 'req-old', name: 'Arte Digital', status: 'pending' },
+        {
+          id: 'req-old',
+          universityId: UBA.id,
+          name: 'Arte Digital',
+          status: 'pending',
+        },
       ]);
       const request = await service.createCareerRequest(
         'u1',
@@ -159,6 +175,33 @@ describe('UniversitiesService', () => {
       );
       expect(request.id).toBe('req-old');
       expect(requestRepo.save).not.toHaveBeenCalled();
+    });
+
+    it('caps pending requests per user at 3 (409, nothing saved)', async () => {
+      requestRepo.find.mockResolvedValue([
+        { id: 'r1', universityId: UBA.id, name: 'Uno', status: 'pending' },
+        { id: 'r2', universityId: UBA.id, name: 'Dos', status: 'pending' },
+        { id: 'r3', universityId: 'uni-x', name: 'Tres', status: 'pending' },
+      ]);
+      await expect(
+        service.createCareerRequest('u1', UBA.id, 'Cuatro'),
+      ).rejects.toThrow(ConflictException);
+      expect(requestRepo.save).not.toHaveBeenCalled();
+      expect(userRepo.update).not.toHaveBeenCalled();
+      expect(requestRepo.find).toHaveBeenCalledWith({
+        where: { userId: 'u1', status: 'pending' },
+      });
+    });
+
+    it('re-submitting one of the 3 pending requests reuses it instead of 409', async () => {
+      requestRepo.find.mockResolvedValue([
+        { id: 'r1', universityId: UBA.id, name: 'Uno', status: 'pending' },
+        { id: 'r2', universityId: UBA.id, name: 'Dos', status: 'pending' },
+        { id: 'r3', universityId: UBA.id, name: 'Tres', status: 'pending' },
+      ]);
+      await expect(
+        service.createCareerRequest('u1', UBA.id, 'dos'),
+      ).resolves.toMatchObject({ id: 'r2' });
     });
 
     it('POST /career-requests answers 409 with the career when it exists', async () => {

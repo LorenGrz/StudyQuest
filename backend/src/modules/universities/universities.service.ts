@@ -5,12 +5,17 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
 import { University } from './university.entity';
 import { Career } from './career.entity';
 import { CareerRequest } from './career-request.entity';
 import { User } from '../users/user.entity';
 import { normalizeSubjectName } from '../../common/subject-name';
+import { universityKey } from '../../common/university-name';
+import { mapUsersToCatalog, MapUsersResult } from './map-users-to-catalog';
+
+/** Max pending "Otra" requests per user (anti-spam; admins review them). */
+export const MAX_PENDING_CAREER_REQUESTS = 3;
 
 /** What the client can send to pick a career (register / profile). */
 export interface CareerChoice {
@@ -70,7 +75,21 @@ export class UniversitiesService {
     private readonly careerRequestRepo: Repository<CareerRequest>,
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
+    private readonly dataSource: DataSource,
   ) {}
+
+  /**
+   * Legacy `university` name (query params, old frontend) → catalog id, with
+   * the UTN alias. `null` when it matches no catalog university.
+   */
+  async resolveUniversityId(name: string): Promise<string | null> {
+    return (await this.findUniversityByName(name))?.id ?? null;
+  }
+
+  /** See mapUsersToCatalog(); `careers:sync` calls this after inserting. */
+  mapUsersToCatalog(): Promise<MapUsersResult> {
+    return mapUsersToCatalog(this.dataSource);
+  }
 
   async listUniversities(search?: string): Promise<UniversitySummary[]> {
     const qb = this.universityRepo.createQueryBuilder('u').orderBy('u.name');
@@ -109,7 +128,7 @@ export class UniversitiesService {
     return rows.map((r) => r.name);
   }
 
-  /** By id, or by (deprecated) name matched with normalizeSubjectName. */
+  /** By id, or by (deprecated) name matched with universityKey (UTN alias). */
   async getUniversity(ref: {
     universityId?: string;
     name?: string;
@@ -171,7 +190,8 @@ export class UniversitiesService {
 
   /**
    * Records a pending request and points `users.pending_career_request_id` at
-   * it. Reuses the user's pending request for the same (university, name).
+   * it. Reuses the user's pending request for the same (university, name);
+   * 409 when the user already has MAX_PENDING_CAREER_REQUESTS pending.
    */
   async createCareerRequest(
     userId: string,
@@ -185,10 +205,18 @@ export class UniversitiesService {
     const key = normalizeSubjectName(cleanName);
 
     const pending = await repo.find({
-      where: { userId, universityId, status: 'pending' },
+      where: { userId, status: 'pending' },
     });
+    const existing = pending.find(
+      (r) =>
+        r.universityId === universityId && normalizeSubjectName(r.name) === key,
+    );
+    if (!existing && pending.length >= MAX_PENDING_CAREER_REQUESTS)
+      throw new ConflictException(
+        `Ya tenés ${MAX_PENDING_CAREER_REQUESTS} carreras pendientes de aprobación. Esperá a que las revisemos antes de pedir otra.`,
+      );
     const request =
-      pending.find((r) => normalizeSubjectName(r.name) === key) ??
+      existing ??
       (await repo.save(
         repo.create({
           userId,
@@ -230,9 +258,9 @@ export class UniversitiesService {
   private async findUniversityByName(name: string): Promise<University | null> {
     const exact = await this.universityRepo.findOneBy({ name });
     if (exact) return exact;
-    const key = normalizeSubjectName(name);
+    const key = universityKey(name);
     if (!key) return null;
     const all = await this.universityRepo.find({ order: { name: 'ASC' } });
-    return all.find((u) => normalizeSubjectName(u.name) === key) ?? null;
+    return all.find((u) => universityKey(u.name) === key) ?? null;
   }
 }

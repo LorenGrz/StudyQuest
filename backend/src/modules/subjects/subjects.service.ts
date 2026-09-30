@@ -18,7 +18,26 @@ export class SubjectsService {
   ) {}
 
   async findAll(query: SubjectQueryDto) {
-    const { search, university, career, year, page = 1, limit = 20 } = query;
+    const {
+      search,
+      university,
+      universityId,
+      career,
+      year,
+      page = 1,
+      limit = 20,
+    } = query;
+
+    // Filter by catalog id; a legacy `university` name (old frontend) is
+    // resolved to it, so "Universidad Tecnológica Nacional" and "… – FRBA"
+    // are the same university. An unknown name matches nothing.
+    const scopeId =
+      universityId ??
+      (university
+        ? await this.universitiesService.resolveUniversityId(university)
+        : undefined);
+    if (scopeId === null)
+      return { items: [], total: 0, page, limit, totalPages: 0 };
 
     const qb = this.subjectRepo
       .createQueryBuilder('s')
@@ -40,8 +59,8 @@ export class SubjectsService {
       qb.orderBy('s.enrolled_count', 'DESC');
     }
 
-    if (university)
-      qb.andWhere('s.university ILIKE :uni', { uni: `%${university}%` });
+    if (scopeId)
+      qb.andWhere('s.university_id = :universityId', { universityId: scopeId });
     // `career` viene de GET /subjects/careers → match exacto.
     if (career) qb.andWhere('s.career = :career', { career });
     if (year) qb.andWhere('s.year = :year', { year });
@@ -60,7 +79,10 @@ export class SubjectsService {
     return subject;
   }
 
-  /** Legacy create: university/career must exist in the catalog. */
+  /**
+   * Admin-only curated create (users get POST /subjects/community in R2):
+   * official + public; university/career must exist in the catalog.
+   */
   async create(dto: CreateSubjectDto): Promise<Subject> {
     const university = await this.universitiesService.getUniversity({
       name: dto.university,
@@ -74,6 +96,8 @@ export class SubjectsService {
       return await this.subjectRepo.save(
         this.subjectRepo.create({
           ...dto,
+          source: 'official',
+          visibility: 'university',
           university: university.name,
           universityId: university.id,
           career: career?.name ?? dto.career,

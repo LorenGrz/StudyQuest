@@ -14,6 +14,7 @@ import { ProfileBorder } from '../cosmetics/profile-border.entity';
 import { Quest } from '../quests/quest.entity';
 import { PlayerResult } from '../quests/player-result.entity';
 import { UniversitiesService } from '../universities/universities.service';
+import { University } from '../universities/university.entity';
 
 describe('UsersService (settings)', () => {
   let service: UsersService;
@@ -51,7 +52,13 @@ describe('UsersService (settings)', () => {
         { provide: getRepositoryToken(ProfileBorder), useValue: {} },
         { provide: getRepositoryToken(Quest), useValue: {} },
         { provide: getRepositoryToken(PlayerResult), useValue: {} },
-        { provide: DataSource, useValue: {} },
+        {
+          provide: DataSource,
+          useValue: {
+            transaction: (fn: (em: unknown) => unknown) =>
+              fn({ getRepository: () => userRepo }),
+          },
+        },
         { provide: EventEmitter2, useValue: { emit: jest.fn() } },
         { provide: UniversitiesService, useValue: {} },
       ],
@@ -204,10 +211,14 @@ describe('UsersService (leaderboard)', () => {
   let service: UsersService;
   let userRepo: { createQueryBuilder: jest.Mock };
   let qb: ReturnType<typeof createLeaderboardQbMock>;
+  let resolveUniversityId: jest.Mock;
 
   beforeEach(async () => {
     qb = createLeaderboardQbMock();
     userRepo = { createQueryBuilder: jest.fn().mockReturnValue(qb) };
+    resolveUniversityId = jest.fn(async (name: string) =>
+      /tecnol[oó]gica nacional/i.test(name) ? 'uni-utn' : name === 'UBA' ? 'uni-uba' : null,
+    );
 
     const moduleRef = await Test.createTestingModule({
       providers: [
@@ -222,7 +233,7 @@ describe('UsersService (leaderboard)', () => {
         { provide: getRepositoryToken(PlayerResult), useValue: {} },
         { provide: DataSource, useValue: {} },
         { provide: EventEmitter2, useValue: { emit: jest.fn() } },
-        { provide: UniversitiesService, useValue: {} },
+        { provide: UniversitiesService, useValue: { resolveUniversityId } },
       ],
     }).compile();
 
@@ -278,12 +289,40 @@ describe('UsersService (leaderboard)', () => {
       ]);
     });
 
-    it('filters by university when one is provided', async () => {
+    it('filters by university_id when one is provided', async () => {
       qb.getRawMany.mockResolvedValue([]);
-      await service.getGlobalLeaderboard(20, 'Universidad de Buenos Aires');
-      expect(qb.where).toHaveBeenCalledWith('u.university = :university', {
-        university: 'Universidad de Buenos Aires',
+      await service.getGlobalLeaderboard(20, { universityId: 'uni-uba' });
+      expect(qb.where).toHaveBeenCalledWith('u.university_id = :universityId', {
+        universityId: 'uni-uba',
       });
+      expect(resolveUniversityId).not.toHaveBeenCalled();
+    });
+
+    it('resolves a legacy name, so both UTN spellings share one ranking', async () => {
+      qb.getRawMany.mockResolvedValue([]);
+      await service.getGlobalLeaderboard(20, {
+        university: 'Universidad Tecnológica Nacional',
+      });
+      await service.getGlobalLeaderboard(20, {
+        university: 'Universidad Tecnológica Nacional – FRBA',
+      });
+      expect(qb.where).toHaveBeenNthCalledWith(
+        1,
+        'u.university_id = :universityId',
+        { universityId: 'uni-utn' },
+      );
+      expect(qb.where).toHaveBeenNthCalledWith(
+        2,
+        'u.university_id = :universityId',
+        { universityId: 'uni-utn' },
+      );
+    });
+
+    it('returns an empty ranking for an unknown university name', async () => {
+      await expect(
+        service.getGlobalLeaderboard(20, { university: 'Mi Uni Inventada' }),
+      ).resolves.toEqual([]);
+      expect(qb.getRawMany).not.toHaveBeenCalled();
     });
 
     it('defaults the limit to 20 when omitted', async () => {
@@ -294,7 +333,7 @@ describe('UsersService (leaderboard)', () => {
   });
 
   describe('getLeaderboardUniversities', () => {
-    it('returns distinct non-empty universities, ordered ascending', async () => {
+    it('returns the catalog names of universities with users, ordered ascending', async () => {
       qb.getRawMany.mockResolvedValue([
         { university: 'UBA' },
         { university: 'UTN' },
@@ -303,8 +342,12 @@ describe('UsersService (leaderboard)', () => {
       const result = await service.getLeaderboardUniversities();
 
       expect(qb.distinct).toHaveBeenCalledWith(true);
-      expect(qb.where).toHaveBeenCalledWith("u.university <> ''");
-      expect(qb.orderBy).toHaveBeenCalledWith('u.university', 'ASC');
+      expect(qb.innerJoin).toHaveBeenCalledWith(
+        University,
+        'un',
+        'un.id = u.university_id',
+      );
+      expect(qb.orderBy).toHaveBeenCalledWith('un.name', 'ASC');
       expect(result).toEqual(['UBA', 'UTN']);
     });
   });
@@ -335,14 +378,13 @@ describe('UsersService (leaderboard)', () => {
         .mockResolvedValueOnce({ count: '5' })
         .mockResolvedValueOnce({ count: '1' });
 
-      const result = await service.getMyLeaderboardPosition(
-        'u1',
-        'Universidad de Buenos Aires',
-      );
+      const result = await service.getMyLeaderboardPosition('u1', {
+        university: 'UBA',
+      });
 
       expect(result).toEqual({ rank: 2, elo: 1200, total: 5 });
-      expect(qb.where).toHaveBeenCalledWith('u.university = :university', {
-        university: 'Universidad de Buenos Aires',
+      expect(qb.where).toHaveBeenCalledWith('u.university_id = :universityId', {
+        universityId: 'uni-uba',
       });
       expect(qb.innerJoin).not.toHaveBeenCalled();
     });
@@ -352,11 +394,10 @@ describe('UsersService (leaderboard)', () => {
         .mockResolvedValueOnce({ count: '8' })
         .mockResolvedValueOnce({ count: '0' });
 
-      const result = await service.getMyLeaderboardPosition(
-        'u1',
-        'Universidad de Buenos Aires',
-        'subj-1',
-      );
+      const result = await service.getMyLeaderboardPosition('u1', {
+        university: 'UBA',
+        subjectId: 'subj-1',
+      });
 
       expect(result).toEqual({ rank: 1, elo: 1200, total: 8 });
       expect(qb.innerJoin).toHaveBeenCalledWith(

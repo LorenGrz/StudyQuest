@@ -30,6 +30,7 @@ describe('SubjectsService', () => {
   let universities: {
     listCareerNames: jest.Mock;
     listUniversities: jest.Mock;
+    resolveUniversityId: jest.Mock;
   };
 
   beforeEach(async () => {
@@ -39,6 +40,9 @@ describe('SubjectsService', () => {
       listUniversities: jest
         .fn()
         .mockResolvedValue([{ id: 'u1', name: 'UBA' }]),
+      resolveUniversityId: jest.fn(async (name: string) =>
+        /tecnol[oó]gica nacional/i.test(name) ? 'uni-utn' : null,
+      ),
     };
     const moduleRef = await Test.createTestingModule({
       providers: [
@@ -76,6 +80,46 @@ describe('SubjectsService', () => {
 
     expect(qb.andWhere).toHaveBeenCalledWith(`s.status = 'active'`);
     expect(qb.andWhere).toHaveBeenCalledWith(`s.visibility = 'university'`);
+  });
+
+  it('filters by university_id when universityId is given', async () => {
+    await service.findAll({ universityId: 'uni-utn' } as never);
+
+    expect(qb.andWhere).toHaveBeenCalledWith(
+      's.university_id = :universityId',
+      { universityId: 'uni-utn' },
+    );
+    expect(universities.resolveUniversityId).not.toHaveBeenCalled();
+  });
+
+  it('resolves the legacy university name to its id (UTN alias)', async () => {
+    await service.findAll({
+      university: 'Universidad Tecnológica Nacional',
+    } as never);
+
+    expect(qb.andWhere).toHaveBeenCalledWith(
+      's.university_id = :universityId',
+      { universityId: 'uni-utn' },
+    );
+    expect(qb.andWhere).not.toHaveBeenCalledWith(
+      expect.stringContaining('s.university ILIKE'),
+      expect.anything(),
+    );
+  });
+
+  it('returns an empty page for an unknown university name', async () => {
+    const result = await service.findAll({
+      university: 'Mi Uni Inventada',
+    } as never);
+
+    expect(result).toEqual({
+      items: [],
+      total: 0,
+      page: 1,
+      limit: 20,
+      totalPages: 0,
+    });
+    expect(qb.getManyAndCount).not.toHaveBeenCalled();
   });
 
   it('getCareers (deprecated) returns the catalog careers from the DB', async () => {

@@ -199,17 +199,9 @@ export class CreateSubjectDto {
 export class SubjectQueryDto {
   @IsOptional() @IsString() search?: string;
   @IsOptional() @IsUUID() universityId?: string;
-  @IsOptional() @IsUUID() careerId?: string;
-  @IsOptional()
-  @Transform(trimString)
-  @IsString()
-  @MinLength(3)
-  @MaxLength(120)
-  @Matches(CAREER_NAME_PATTERN, { message: CAREER_NAME_MESSAGE })
-  careerName?: string;
-  /** Deprecated: catalog name, validated against the DB. */
+  /** Deprecated: catalog name, resolved to universityId (UTN alias included). */
   @IsOptional() @IsString() @MaxLength(200) university?: string;
-  /** Deprecated: catalog name, validated against the DB. */
+  /** Exact legacy career string (a tag; filter by university instead). */
   @IsOptional() @IsString() @MaxLength(200) career?: string;
   @IsOptional() @IsNumber() @Min(1) @Max(7) year?: number;
   @IsOptional() @IsNumber() @Min(1) page?: number;
@@ -289,6 +281,8 @@ export class SubmitAnswerDto {
 
 export class GlobalLeaderboardQueryDto {
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100) limit?: number;
+  @IsOptional() @IsUUID() universityId?: string;
+  /** Deprecated: catalog name, resolved to universityId (UTN alias included). */
   @IsOptional() @IsString() @MaxLength(200) university?: string;
 }
 
@@ -297,6 +291,8 @@ export class SubjectLeaderboardQueryDto {
 }
 
 export class LeaderboardMeQueryDto {
+  @IsOptional() @IsUUID() universityId?: string;
+  /** Deprecated: catalog name, resolved to universityId (UTN alias included). */
   @IsOptional() @IsString() @MaxLength(200) university?: string;
   @IsOptional() @IsUUID() subjectId?: string;
 }

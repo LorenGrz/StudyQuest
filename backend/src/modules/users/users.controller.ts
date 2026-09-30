@@ -165,10 +165,10 @@ export class UsersController {
   // as a subject id.
   @Get('leaderboard/global')
   getGlobalLeaderboard(@Query() query: GlobalLeaderboardQueryDto) {
-    return this.usersService.getGlobalLeaderboard(
-      query.limit ?? 20,
-      query.university,
-    );
+    return this.usersService.getGlobalLeaderboard(query.limit ?? 20, {
+      universityId: query.universityId,
+      university: query.university,
+    });
   }
 
   @Get('leaderboard/me')
@@ -176,11 +176,11 @@ export class UsersController {
     @Request() req: any,
     @Query() query: LeaderboardMeQueryDto,
   ) {
-    return this.usersService.getMyLeaderboardPosition(
-      req.user.userId,
-      query.university,
-      query.subjectId,
-    );
+    return this.usersService.getMyLeaderboardPosition(req.user.userId, {
+      universityId: query.universityId,
+      university: query.university,
+      subjectId: query.subjectId,
+    });
   }
 
   @Get('leaderboard/universities')

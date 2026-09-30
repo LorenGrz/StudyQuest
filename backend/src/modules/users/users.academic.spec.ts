@@ -2,7 +2,7 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { DataSource } from 'typeorm';
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, ConflictException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './user.entity';
 import { Subject } from '../subjects/subject.entity';
@@ -26,7 +26,7 @@ describe('UsersService (university / career)', () => {
     findOneBy: jest.Mock;
     update: jest.Mock;
   };
-  let txUserRepo: { create: jest.Mock; save: jest.Mock };
+  let txUserRepo: { create: jest.Mock; save: jest.Mock; update: jest.Mock };
   let em: {
     getRepository: jest.Mock;
     createQueryBuilder: jest.Mock;
@@ -53,6 +53,8 @@ describe('UsersService (university / career)', () => {
     txUserRepo = {
       create: jest.fn((u: Partial<User>) => u),
       save: jest.fn((u: Partial<User>) => Promise.resolve({ id: 'new', ...u })),
+      // Profile updates go through the transaction's repository.
+      update: userRepo.update,
     };
     deleteQb = {
       delete: jest.fn().mockReturnThis(),
@@ -251,11 +253,29 @@ describe('UsersService (university / career)', () => {
         career: '',
         careerId: null,
       });
+      // Same transaction as the user update.
       expect(universities.createCareerRequest).toHaveBeenCalledWith(
         'u1',
         UTN.id,
         'Ingeniería Naval',
+        em,
       );
+    });
+
+    it('fails the whole update when the career request is rejected', async () => {
+      userRepo.findOneBy.mockResolvedValue(current);
+      universities.getUniversity.mockResolvedValue(UBA);
+      universities.resolveCareer.mockResolvedValue({
+        kind: 'request',
+        name: 'Otra Más',
+      });
+      universities.createCareerRequest.mockRejectedValue(
+        new ConflictException('Ya tenés 3 carreras pendientes'),
+      );
+
+      await expect(
+        service.updateProfile('u1', { careerName: 'Otra Más' }),
+      ).rejects.toThrow(ConflictException);
     });
   });
 

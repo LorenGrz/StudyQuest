@@ -50,6 +50,13 @@ import {
   CareerChoice,
   UniversitiesService,
 } from '../universities/universities.service';
+import { University } from '../universities/university.entity';
+
+/** Leaderboard scope: catalog id, or a deprecated name resolved to it. */
+export interface UniversityFilter {
+  universityId?: string;
+  university?: string;
+}
 
 @Injectable()
 export class UsersService {
@@ -375,14 +382,19 @@ export class UsersService {
       );
     }
 
-    if (Object.keys(patch).length) await this.userRepo.update(userId, patch);
-    if (requestedCareer) {
-      await this.universitiesService.createCareerRequest(
-        userId,
-        requestedCareer.universityId,
-        requestedCareer.name,
-      );
-    }
+    // One transaction: the career change and its "Otra" request land together.
+    await this.dataSource.transaction(async (em) => {
+      if (Object.keys(patch).length)
+        await em.getRepository(User).update(userId, patch);
+      if (requestedCareer) {
+        await this.universitiesService.createCareerRequest(
+          userId,
+          requestedCareer.universityId,
+          requestedCareer.name,
+          em,
+        );
+      }
+    });
     return this.findById(userId);
   }
 
@@ -717,9 +729,23 @@ export class UsersService {
     return user?.elo ?? DEFAULT_ELO;
   }
 
+  /**
+   * Leaderboard university scope → catalog id. `undefined` = no filter,
+   * `null` = the legacy name matches no catalog university (empty scope).
+   * Legacy names resolve through universityKey, so both UTN spellings rank
+   * together.
+   */
+  private async resolveUniversityScope(
+    filter: UniversityFilter,
+  ): Promise<string | null | undefined> {
+    if (filter.universityId) return filter.universityId;
+    if (!filter.university) return undefined;
+    return this.universitiesService.resolveUniversityId(filter.university);
+  }
+
   async getGlobalLeaderboard(
     limit = 20,
-    university?: string,
+    filter: UniversityFilter = {},
   ): Promise<
     {
       rank: number;
@@ -740,8 +766,10 @@ export class UsersService {
       .addSelect('u.active_cosmetics', 'activeCosmetics')
       .addSelect(`COALESCE((u.stats->>'elo')::int, ${DEFAULT_ELO})`, 'elo');
 
-    if (university) {
-      qb = qb.where('u.university = :university', { university });
+    const universityId = await this.resolveUniversityScope(filter);
+    if (universityId === null) return [];
+    if (universityId) {
+      qb = qb.where('u.university_id = :universityId', { universityId });
     }
 
     const rows = await qb
@@ -760,13 +788,14 @@ export class UsersService {
     return rows.map((row, index) => ({ rank: index + 1, ...row }));
   }
 
+  /** Catalog names of the universities that have users (by university_id). */
   async getLeaderboardUniversities(): Promise<string[]> {
     const rows = await this.userRepo
       .createQueryBuilder('u')
-      .select('u.university', 'university')
+      .innerJoin(University, 'un', 'un.id = u.university_id')
+      .select('un.name', 'university')
       .distinct(true)
-      .where("u.university <> ''")
-      .orderBy('u.university', 'ASC')
+      .orderBy('un.name', 'ASC')
       .getRawMany<{ university: string }>();
 
     return rows.map((row) => row.university);
@@ -774,10 +803,14 @@ export class UsersService {
 
   async getMyLeaderboardPosition(
     userId: string,
-    university?: string,
-    subjectId?: string,
+    scope: UniversityFilter & { subjectId?: string } = {},
   ): Promise<{ rank: number; elo: number; total: number }> {
     const elo = await this.getElo(userId);
+    const { subjectId } = scope;
+    const universityId = subjectId
+      ? undefined
+      : await this.resolveUniversityScope(scope);
+    if (universityId === null) return { rank: 1, elo, total: 0 };
 
     const scopedQuery = (): SelectQueryBuilder<User> => {
       let qb = this.userRepo.createQueryBuilder('u');
@@ -785,8 +818,8 @@ export class UsersService {
         qb = qb.innerJoin('u.enrolledSubjects', 's', 's.id = :subjectId', {
           subjectId,
         });
-      } else if (university) {
-        qb = qb.where('u.university = :university', { university });
+      } else if (universityId) {
+        qb = qb.where('u.university_id = :universityId', { universityId });
       }
       return qb;
     };
