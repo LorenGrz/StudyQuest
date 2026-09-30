@@ -56,6 +56,7 @@ const mockUser = {
   universityId: 'uni-1',
   careerId: 'car-1',
   pendingCareerRequestId: null,
+  role: 'USER' as const,
   year: 3,
   email: 'test@studyquest.dev',
   availability: [],

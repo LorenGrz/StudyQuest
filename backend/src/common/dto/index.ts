@@ -24,6 +24,19 @@ import {
   SUBJECT_REPORT_REASONS,
   type SubjectReportReason,
 } from '../../modules/subjects/subject-report-reasons';
+import { SUBJECT_NAME_MAX, SUBJECT_NAME_MIN } from '../subject-name.validator';
+import {
+  CAREER_LEVELS,
+  type CareerLevel,
+} from '../../modules/universities/career.entity';
+import {
+  CAREER_REQUEST_STATUSES,
+  type CareerRequestStatus,
+} from '../../modules/universities/career-request.entity';
+import {
+  ADMIN_COMMUNITY_SUBJECT_TABS,
+  type AdminCommunitySubjectTab,
+} from '../../modules/admin/admin-community-subjects.tabs';
 
 const trimString = ({ value }: { value: unknown }) =>
   typeof value === 'string' ? value.trim().replace(/\s+/g, ' ') : value;
@@ -45,7 +58,10 @@ export class RegisterDto {
   @MaxLength(64)
   password: string;
 
-  @ApiProperty({ example: 'juandev', description: 'Stored lowercase, without @' })
+  @ApiProperty({
+    example: 'juandev',
+    description: 'Stored lowercase, without @',
+  })
   @Transform(toNormalizedUsername)
   @IsString()
   @MinLength(3)
@@ -594,4 +610,76 @@ export class CreatePromoCodeDto {
 
 export class AskStudyBotDto {
   @IsString() @MinLength(3) @MaxLength(500) question: string;
+}
+
+// ─── Admin (W3) ───────────────────────────────────────────────────────────────
+
+export class AdminCareerRequestsQueryDto {
+  @ApiPropertyOptional({ enum: CAREER_REQUEST_STATUSES, default: 'pending' })
+  @IsOptional()
+  @IsIn(CAREER_REQUEST_STATUSES)
+  status?: CareerRequestStatus;
+}
+
+export class ApproveCareerRequestDto {
+  @ApiPropertyOptional({
+    description: 'Link this existing career instead of creating one',
+  })
+  @IsOptional()
+  @IsUUID()
+  careerId?: string;
+
+  @ApiPropertyOptional({ example: 'Licenciatura en Arte Digital' })
+  @IsOptional()
+  @Transform(trimString)
+  @IsString()
+  @MinLength(3)
+  @MaxLength(120)
+  @Matches(CAREER_NAME_PATTERN, { message: CAREER_NAME_MESSAGE })
+  name?: string;
+
+  @ApiPropertyOptional({ example: 'Facultad de Ingeniería' })
+  @IsOptional()
+  @Transform(trimString)
+  @IsString()
+  @MaxLength(200)
+  faculty?: string;
+
+  @ApiPropertyOptional({ enum: CAREER_LEVELS, default: 'grado' })
+  @IsOptional()
+  @IsIn(CAREER_LEVELS)
+  level?: CareerLevel;
+}
+
+export class RejectCareerRequestDto {
+  @ApiPropertyOptional({ maxLength: 500 })
+  @IsOptional()
+  @Transform(trimString)
+  @IsString()
+  @MaxLength(500)
+  adminNote?: string;
+}
+
+export class AdminCommunitySubjectsQueryDto {
+  @ApiProperty({ enum: ADMIN_COMMUNITY_SUBJECT_TABS })
+  @IsIn(ADMIN_COMMUNITY_SUBJECT_TABS)
+  tab: AdminCommunitySubjectTab;
+}
+
+export class AdminRenameSubjectDto {
+  @ApiProperty({ example: 'Análisis Matemático II' })
+  @IsString()
+  @MinLength(SUBJECT_NAME_MIN)
+  @MaxLength(SUBJECT_NAME_MAX)
+  name: string;
+}
+
+export class AdminMergeSubjectsDto {
+  @ApiProperty({ description: 'Subject merged away (becomes status=merged)' })
+  @IsUUID()
+  fromId: string;
+
+  @ApiProperty({ description: 'Subject that keeps receiving everything' })
+  @IsUUID()
+  toId: string;
 }
