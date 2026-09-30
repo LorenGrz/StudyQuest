@@ -420,14 +420,38 @@ export class CommunitySubjectsService {
     if (!row || row.status === 'merged')
       throw new NotFoundException('Materia no encontrada');
     const isOwner =
-      viewerId !== null &&
-      (row.createdBy === viewerId || row.enrolledByViewer);
+      viewerId !== null && (row.createdBy === viewerId || row.enrolledByViewer);
     const readable =
       isAdmin ||
-      (row.status !== 'hidden' &&
-        (row.visibility === 'university' || isOwner));
+      (row.status !== 'hidden' && (row.visibility === 'university' || isOwner));
     if (!readable) throw new NotFoundException('Materia no encontrada');
     return row.id;
+  }
+
+  /**
+   * Subject id to attach user-supplied data to (a party, a matchmaking queue
+   * entry, skill nodes). Same visibility rule as resolveReadable but with no
+   * admin bypass: nothing new is attached to a hidden subject. Merged ids
+   * resolve to their target. With `requireEnrollment`, the user must be
+   * enrolled in the resolved subject (the party/match pickers only offer
+   * enrolled subjects).
+   */
+  async resolveAttachable(
+    userId: string,
+    subjectId: string,
+    opts: { requireEnrollment: boolean },
+  ): Promise<string> {
+    const id = await this.resolveReadable(subjectId, { userId });
+    if (!opts.requireEnrollment) return id;
+    const row = await this.store.findById(id, userId);
+    if (!row?.enrolledByViewer)
+      throw new ForbiddenException({
+        statusCode: HttpStatus.FORBIDDEN,
+        error: 'Forbidden',
+        code: 'NOT_ENROLLED',
+        message: 'Primero inscribite en esa materia desde «Mis materias».',
+      });
+    return id;
   }
 
   // ── POST /subjects/:id/report ────────────────────────────────────────────

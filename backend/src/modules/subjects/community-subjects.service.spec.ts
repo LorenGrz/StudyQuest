@@ -62,7 +62,7 @@ class FakeStore {
     return s;
   }
 
-  private view(s: Subject, viewer: string): CommunitySubjectRow {
+  private view(s: Subject, viewer: string | null): CommunitySubjectRow {
     const { moderation, ...rest } = s;
     return {
       ...rest,
@@ -736,7 +736,10 @@ describe('CommunitySubjectsService', () => {
     const admin = { userId: 'admin', role: 'ADMIN' };
 
     it('public subjects are readable by anyone, anonymous included', async () => {
-      const s = store.addSubject({ name: 'Análisis I', visibility: 'university' });
+      const s = store.addSubject({
+        name: 'Análisis I',
+        visibility: 'university',
+      });
       await expect(service.resolveReadable(s.id, anon)).resolves.toBe(s.id);
       await expect(service.resolveReadable(s.id, beto)).resolves.toBe(s.id);
     });
@@ -750,8 +753,12 @@ describe('CommunitySubjectsService', () => {
         service.resolveReadable(s.id, { userId: 'caro' }),
       ).resolves.toBe(s.id);
       await expect(service.resolveReadable(s.id, admin)).resolves.toBe(s.id);
-      await expect(errorOf(service.resolveReadable(s.id, beto))).resolves.toMatchObject({ status: 404 });
-      await expect(errorOf(service.resolveReadable(s.id, anon))).resolves.toMatchObject({ status: 404 });
+      await expect(
+        errorOf(service.resolveReadable(s.id, beto)),
+      ).resolves.toMatchObject({ status: 404 });
+      await expect(
+        errorOf(service.resolveReadable(s.id, anon)),
+      ).resolves.toMatchObject({ status: 404 });
     });
 
     it('hidden: admins only, not even the creator', async () => {
@@ -761,34 +768,106 @@ describe('CommunitySubjectsService', () => {
         visibility: 'university',
         status: 'hidden',
       });
-      await expect(errorOf(service.resolveReadable(s.id, ana))).resolves.toMatchObject({ status: 404 });
-      await expect(errorOf(service.resolveReadable(s.id, anon))).resolves.toMatchObject({ status: 404 });
+      await expect(
+        errorOf(service.resolveReadable(s.id, ana)),
+      ).resolves.toMatchObject({ status: 404 });
+      await expect(
+        errorOf(service.resolveReadable(s.id, anon)),
+      ).resolves.toMatchObject({ status: 404 });
       await expect(service.resolveReadable(s.id, admin)).resolves.toBe(s.id);
     });
 
     it('merged resolves to the target, which is checked too', async () => {
+      const target = store.addSubject({
+        name: 'Física I',
+        visibility: 'university',
+      });
+      const merged = store.addSubject({
+        name: 'Fisica 1',
+        status: 'merged',
+        mergedIntoId: target.id,
+      });
+      await expect(service.resolveReadable(merged.id, anon)).resolves.toBe(
+        target.id,
+      );
+
+      const privateTarget = store.addSubject({
+        name: 'Química',
+        createdBy: 'ana',
+      });
+      const mergedPrivate = store.addSubject({
+        name: 'Quimica',
+        status: 'merged',
+        mergedIntoId: privateTarget.id,
+      });
+      await expect(
+        errorOf(service.resolveReadable(mergedPrivate.id, beto)),
+      ).resolves.toMatchObject({ status: 404 });
+      await expect(
+        service.resolveReadable(mergedPrivate.id, ana),
+      ).resolves.toBe(privateTarget.id);
+    });
+
+    it('404 for unknown ids and broken merges', async () => {
+      const broken = store.addSubject({ name: 'Rota', status: 'merged' });
+      await expect(
+        errorOf(service.resolveReadable('nope', admin)),
+      ).resolves.toMatchObject({ status: 404 });
+      await expect(
+        errorOf(service.resolveReadable(broken.id, admin)),
+      ).resolves.toMatchObject({ status: 404 });
+    });
+  });
+
+  describe('resolveAttachable (parties, matchmaking, skill nodes)', () => {
+    it('should return the subject when it is visible and I am enrolled', async () => {
+      const s = store.addSubject({ name: 'Física I', visibility: 'university' });
+      store.enrollments.add(`ana|${s.id}`);
+      await expect(
+        service.resolveAttachable('ana', s.id, { requireEnrollment: true }),
+      ).resolves.toBe(s.id);
+    });
+
+    it('should 404 for another user’s private subject', async () => {
+      const s = store.addSubject({ name: 'Taller de Tesis', createdBy: 'beto' });
+      await expect(
+        errorOf(service.resolveAttachable('ana', s.id, { requireEnrollment: false })),
+      ).resolves.toMatchObject({ status: 404 });
+    });
+
+    it('should 404 for hidden subjects even for admins and enrolled users', async () => {
+      const s = store.addSubject({
+        name: 'Taller de Tesis',
+        visibility: 'university',
+        status: 'hidden',
+      });
+      store.enrollments.add(`ana|${s.id}`);
+      await expect(
+        errorOf(service.resolveAttachable('ana', s.id, { requireEnrollment: true })),
+      ).resolves.toMatchObject({ status: 404 });
+    });
+
+    it('should 403 NOT_ENROLLED for a visible subject I am not enrolled in', async () => {
+      const s = store.addSubject({ name: 'Física I', visibility: 'university' });
+      await expect(
+        errorOf(service.resolveAttachable('ana', s.id, { requireEnrollment: true })),
+      ).resolves.toMatchObject({ status: 403, body: { code: 'NOT_ENROLLED' } });
+      await expect(
+        service.resolveAttachable('ana', s.id, { requireEnrollment: false }),
+      ).resolves.toBe(s.id);
+    });
+
+    it('should attach merged subjects to their target (enrollment checked on it)', async () => {
       const target = store.addSubject({ name: 'Física I', visibility: 'university' });
       const merged = store.addSubject({
         name: 'Fisica 1',
         status: 'merged',
         mergedIntoId: target.id,
       });
-      await expect(service.resolveReadable(merged.id, anon)).resolves.toBe(target.id);
-
-      const privateTarget = store.addSubject({ name: 'Química', createdBy: 'ana' });
-      const mergedPrivate = store.addSubject({
-        name: 'Quimica',
-        status: 'merged',
-        mergedIntoId: privateTarget.id,
-      });
-      await expect(errorOf(service.resolveReadable(mergedPrivate.id, beto))).resolves.toMatchObject({ status: 404 });
-      await expect(service.resolveReadable(mergedPrivate.id, ana)).resolves.toBe(privateTarget.id);
-    });
-
-    it('404 for unknown ids and broken merges', async () => {
-      const broken = store.addSubject({ name: 'Rota', status: 'merged' });
-      await expect(errorOf(service.resolveReadable('nope', admin))).resolves.toMatchObject({ status: 404 });
-      await expect(errorOf(service.resolveReadable(broken.id, admin))).resolves.toMatchObject({ status: 404 });
+      store.enrollments.add(`ana|${target.id}`);
+      await expect(
+        service.resolveAttachable('ana', merged.id, { requireEnrollment: true }),
+      ).resolves.toBe(target.id);
     });
   });
 });
