@@ -7,6 +7,8 @@ export interface SubjectFilters {
   career: string
   year: number | null
   university?: string
+  /** GET /universities id; scopes the catalog to the caller's university. */
+  universityId?: string
 }
 
 export function useSubjectExplorer(filters: SubjectFilters, search = '') {
@@ -21,6 +23,7 @@ export function useSubjectExplorer(filters: SubjectFilters, search = '') {
     const query: SubjectQuery = { search: search || undefined }
     if (filters.career) query.career = filters.career
     if (filters.university) query.university = filters.university
+    if (filters.universityId) query.universityId = filters.universityId
     if (filters.year != null) query.year = filters.year
 
     subjectService
@@ -30,7 +33,7 @@ export function useSubjectExplorer(filters: SubjectFilters, search = '') {
       .finally(() => { if (!cancelled) setIsLoading(false) })
 
     return () => { cancelled = true }
-  }, [filters.career, filters.year, filters.university, search])
+  }, [filters.career, filters.year, filters.university, filters.universityId, search])
 
   const enrolledIds = new Set(user?.enrolledSubjects?.map((s) => s.id) ?? [])
 
