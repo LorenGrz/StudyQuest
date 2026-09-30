@@ -13,8 +13,11 @@ Punto de entrada para retomar el trabajo en una sesión nueva. Leé esto, despu�
     - 9 usuarios, todos vinculados a una universidad;
     - sus carreras legacy quedaron `retired`, así que tienen que elegirla de nuevo en el perfil;
     - UNC "Ingeniería en Sistemas de Información" no existe como carrera.
+  - **Rutina trimestral** `trig_01Bpt6dwZnUnKPWC6nbUrp9B` (https://claude.ai/code/routines/trig_01Bpt6dwZnUnKPWC6nbUrp9B):
+    - corre el 1/1, 1/4, 1/7 y 1/10 a las 10:00 ART;
+    - revisa las fuentes y abre un PR contra `dev`, nunca mergea;
+    - después de mergear ese PR hay que correr `deploy.sh`, que aplica `careers:sync`.
   - **Pendiente:**
-    - la rutina trimestral de `careers:sync` (`/schedule`), que espera el OK de Loren;
     - borrar las ramas y worktrees `catalog-*`, `agent-*` y `feature/community-subjects*`.
   - **Deuda:**
     - cualquier usuario logueado puede crear skill nodes;
