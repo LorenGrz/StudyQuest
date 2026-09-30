@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
-import { useCareers, useUniversities } from '../../hooks/useUniversities'
+import { useUniversities, useUniversityCareers } from '../../hooks/useUniversities'
 import { normalizeUsernameInput } from '../../utils/username'
+import { OTHER_CAREER_LABEL, OTHER_CAREER_VALUE } from '../../utils/careers'
 import { Button, Input, Select } from '../UI'
 
 export function LoginForm() {
@@ -57,24 +58,37 @@ interface RegisterFormProps {
 
 export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   const { register, isLoading, error } = useAuth()
-  const { careers } = useCareers()
   const { universities } = useUniversities()
   const [step, setStep] = useState(1)
   const [form, setForm] = useState({
     email: '',
     password: '',
     confirmPassword: '',
-    university: '',
-    career: '',
+    universityId: '',
+    careerId: '',
+    careerName: '',
     year: 1,
     username: '',
     displayName: '',
     avatarUrl: '',
   })
+  const { groups: careerGroups } = useUniversityCareers(form.universityId || undefined)
   const [localError, setLocalError] = useState('')
 
   const set = (field: string, value: string | number) =>
     setForm((prev) => ({ ...prev, [field]: value }))
+
+  const setUniversityId = (universityId: string) =>
+    setForm((prev) => ({ ...prev, universityId, careerId: '', careerName: '' }))
+
+  const setCareerId = (careerId: string) =>
+    setForm((prev) => ({
+      ...prev,
+      careerId,
+      careerName: careerId === OTHER_CAREER_VALUE ? prev.careerName : '',
+    }))
+
+  const isOtherCareer = form.careerId === OTHER_CAREER_VALUE
 
   const nextStep = () => {
     if (step === 1) {
@@ -83,7 +97,12 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
       if (form.password !== form.confirmPassword) { setLocalError('Las contraseñas no coinciden'); return }
     }
     if (step === 2) {
-      if (!form.university || !form.career) { setLocalError('Completá universidad y carrera'); return }
+      if (!form.universityId) { setLocalError('Elegí tu universidad'); return }
+      if (!form.careerId) { setLocalError('Elegí tu carrera'); return }
+      if (isOtherCareer && form.careerName.trim().length < 3) {
+        setLocalError('Escribí el nombre de tu carrera (mínimo 3 caracteres)')
+        return
+      }
     }
     setLocalError('')
     setStep((s) => s + 1)
@@ -97,8 +116,10 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
       password: form.password,
       username: form.username,
       displayName: form.displayName,
-      university: form.university,
-      career: form.career,
+      universityId: form.universityId,
+      ...(isOtherCareer
+        ? { careerName: form.careerName.trim() }
+        : { careerId: form.careerId }),
       year: form.year,
       avatarUrl: form.avatarUrl || undefined,
     })
@@ -144,12 +165,40 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
 
       {step === 2 && (
         <>
-          <Select id="reg-uni" label="Universidad" value={form.university}
-            onChange={(e) => set('university', e.target.value)}
-            options={universities.map((u) => ({ value: u, label: u }))} required />
-          <Select id="reg-career" label="Carrera" value={form.career}
-            onChange={(e) => set('career', e.target.value)}
-            options={careers.map((c) => ({ value: c, label: c }))} required />
+          <Select id="reg-uni" label="Universidad" value={form.universityId}
+            onChange={(e) => setUniversityId(e.target.value)}
+            options={universities.map((u) => ({ value: u.id, label: u.name }))} required />
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[13px] font-medium text-secondary" htmlFor="reg-career">Carrera</label>
+            <select
+              id="reg-career"
+              className="w-full min-h-11 px-3.5 py-3 bg-panel border border-[var(--overlay-border)] rounded-lg text-primary text-[15px] transition-[border-color,box-shadow] duration-200 outline-none appearance-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30"
+              value={form.careerId}
+              onChange={(e) => setCareerId(e.target.value)}
+              disabled={!form.universityId}
+              required
+            >
+              <option value="">Seleccionar...</option>
+              {careerGroups.map((g) => (
+                <optgroup key={g.faculty} label={g.faculty}>
+                  {g.careers.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+              {form.universityId && (
+                <option value={OTHER_CAREER_VALUE}>{OTHER_CAREER_LABEL}</option>
+              )}
+            </select>
+          </div>
+          {isOtherCareer && (
+            <Input id="reg-career-name" label="Nombre de tu carrera" value={form.careerName}
+              onChange={(e) => set('careerName', e.target.value)}
+              placeholder="Ej: Licenciatura en Arte Digital"
+              minLength={3} maxLength={120} required />
+          )}
           <Input id="reg-year" label="Año actual" type="number" value={form.year}
             onChange={(e) => set('year', parseInt(e.target.value))} min={1} max={7} required />
         </>

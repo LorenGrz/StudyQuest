@@ -10,8 +10,8 @@ export interface SubjectQuery {
 
 export const subjectService = {
   async findAll(query: SubjectQuery = {}): Promise<Subject[]> {
-    const { data } = await api.get<any>('/subjects', { params: query })
-    return data.items || data
+    const { data } = await api.get<{ items?: Subject[] } | Subject[]>('/subjects', { params: query })
+    return Array.isArray(data) ? data : (data.items ?? [])
   },
 
   async findById(id: string): Promise<Subject> {
@@ -19,13 +19,7 @@ export const subjectService = {
     return data
   },
 
-  async getUniversities(search?: string): Promise<string[]> {
-    const { data } = await api.get<string[]>('/subjects/universities', {
-      params: search ? { search } : {},
-    })
-    return data
-  },
-
+  // Deprecated: register/profile now use universityService (GET /universities).
   async getCareers(): Promise<string[]> {
     const { data } = await api.get<string[]>('/subjects/careers')
     return data

@@ -83,6 +83,12 @@ export interface User {
   bio: string | null
   university: string
   career: string
+  /** GET /universities id; source of truth (`university` is the legacy display name). */
+  universityId: string | null
+  /** GET /universities/:id/careers id; `null` while a career request is pending. */
+  careerId: string | null
+  /** Set while an "Otra" career request waits for an admin (GET /career-requests/mine). */
+  pendingCareerRequestId: string | null
   year: number
   enrolledSubjects: Subject[]
   availability: AvailabilitySlot[]
@@ -98,8 +104,11 @@ export interface UpdateProfilePayload {
   bio?: string
   displayName?: string
   avatarUrl?: string
-  university?: string
-  career?: string
+  universityId?: string
+  /** A career from the catalog (GET /universities/:id/careers). */
+  careerId?: string
+  /** "Otra (no está en la lista)": creates a pending career request. */
+  careerName?: string
   year?: number
   availability?: AvailabilitySlot[]
 }
