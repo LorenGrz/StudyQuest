@@ -52,6 +52,10 @@ import { CareerRequest } from '../../modules/universities/career-request.entity'
 import { DEFAULT_ELO } from '../../common/leagues';
 import { CAREER_CATALOG } from './data/subjects-catalog';
 
+// Demo subjects are legacy + public: the column defaults are now
+// 'community'/'private' (safe defaults for anything created later).
+const LEGACY_SUBJECT = { source: 'legacy', visibility: 'university' } as const;
+
 // ─── Conexión ──────────────────────────────────────────────────────────────────
 const _dbUrl = process.env.DATABASE_URL;
 // pg >=8.16 trata `sslmode=require` como `verify-full` y rechaza las cadenas de
@@ -1179,6 +1183,7 @@ async function seed() {
       continue;
     }
     const subject = subjectRepo.create({
+      ...LEGACY_SUBJECT,
       name: sd.name,
       code: sd.code,
       description: sd.description,
@@ -1202,7 +1207,7 @@ async function seed() {
     }
     const { semester, ...rest } = sd;
     await subjectRepo.save(
-      subjectRepo.create({ ...rest, year: toYear(semester) }),
+      subjectRepo.create({ ...LEGACY_SUBJECT, ...rest, year: toYear(semester) }),
     );
     console.log(`   ✔  [${sd.university.split(' ').pop()}] ${sd.name}`);
   }
@@ -1221,7 +1226,7 @@ async function seed() {
       catalogSkipped += 1;
       continue;
     }
-    await subjectRepo.save(subjectRepo.create(sd));
+    await subjectRepo.save(subjectRepo.create({ ...LEGACY_SUBJECT, ...sd }));
     catalogCreated += 1;
   }
   console.log(

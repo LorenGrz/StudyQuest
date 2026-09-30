@@ -92,7 +92,11 @@ export class Subject {
   })
   universityRef: University | null;
 
-  /** Only a tag: the same subject can be taken in several careers. */
+  /**
+   * Hint only, not ownership: there is ONE subject per (university,
+   * normalized name), shared by every career that takes it, and the explorer
+   * filters by university. No subject↔career join table by design.
+   */
   @Column({ name: 'career_id', type: 'uuid', nullable: true, default: null })
   careerId: string | null;
 
@@ -107,7 +111,8 @@ export class Subject {
   @Column({ name: 'name_normalized', type: 'varchar', length: 255 })
   nameNormalized: string;
 
-  @Column({ type: 'varchar', length: 16, default: 'legacy' })
+  /** DB default is the safe one; legacy/official writers set it explicitly. */
+  @Column({ type: 'varchar', length: 16, default: 'community' })
   source: SubjectSource;
 
   @Column({ name: 'created_by', type: 'uuid', nullable: true, default: null })
@@ -120,7 +125,7 @@ export class Subject {
   })
   creator: User | null;
 
-  @Column({ type: 'varchar', length: 16, default: 'university' })
+  @Column({ type: 'varchar', length: 16, default: 'private' })
   visibility: SubjectVisibility;
 
   @Column({ type: 'varchar', length: 16, default: 'active' })
@@ -161,9 +166,9 @@ export class Subject {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  // Fills the dedup key on repository saves (seed, legacy POST /subjects).
-  // Only when missing: the backfill may have stored a disambiguated key, so
-  // renames (R2/W3) must set `nameNormalized` explicitly.
+  // Fills the dedup key on repository saves (seed, admin POST /subjects).
+  // Only when missing: the backfill may have stored a disambiguated key
+  // ("<normalized> ~<code>"), so renames (R2/W3) must set it explicitly.
   @BeforeInsert()
   @BeforeUpdate()
   normalizeName() {

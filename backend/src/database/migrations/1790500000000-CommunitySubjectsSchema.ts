@@ -11,6 +11,14 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  * `subjects.name_normalized` is added nullable here; CommunitySubjectsBackfill
  * fills it, sets NOT NULL and creates the unique/trigram indexes.
  *
+ * `subjects.source`/`visibility` are added with DEFAULT 'legacy'/'university'
+ * so every row that exists at this point is stamped legacy + public, then the
+ * defaults switch to 'community'/'private'. On a DB that got the columns from
+ * `synchronize` the ADD is skipped and rows keep what they have.
+ *
+ * `subjects.career_id` is only a hint: one subject per (university, normalized
+ * name) is shared by all careers; filtering is by university. No join table.
+ *
  * Also creates pg_trgm/unaccent so they no longer depend on the boot hook in
  * main.ts.
  *
@@ -139,6 +147,15 @@ export class CommunitySubjectsSchema1790500000000 implements MigrationInterface 
         ADD COLUMN IF NOT EXISTS status character varying(16) NOT NULL DEFAULT 'active',
         ADD COLUMN IF NOT EXISTS merged_into_id uuid,
         ADD COLUMN IF NOT EXISTS moderation jsonb
+    `);
+    // The 'legacy'/'university' defaults above only stamp the rows that exist
+    // right now (the legacy marker the backfill relies on). From here on the
+    // default is the safe one: nothing created later is public or legacy by
+    // accident; official seeds and the legacy seed set it explicitly.
+    await queryRunner.query(`
+      ALTER TABLE subjects
+        ALTER COLUMN source SET DEFAULT 'community',
+        ALTER COLUMN visibility SET DEFAULT 'private'
     `);
     await addForeignKey(
       queryRunner,

@@ -1,30 +1,44 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 import { normalizeSubjectName } from '../../common/subject-name';
+import { UTN_CANONICAL, universityKey } from '../../common/university-name';
+import { mapUsersToCatalog } from '../../modules/universities/map-users-to-catalog';
 
 /**
  * Backfill for CommunitySubjectsSchema (plan R1). Reads rows and normalizes in
- * TS with the same `normalizeSubjectName()` the API uses; never modifies a
- * pre-existing column (names, codes, legacy strings, FKs from parties/quests
- * stay untouched) and never deletes rows.
+ * TS with the same `normalizeSubjectName()` / `universityKey()` the API uses;
+ * never modifies a pre-existing column (names, codes, legacy strings, FKs from
+ * parties/quests stay untouched) and never deletes rows.
  *
- * 1. universities ← DISTINCT subjects.university ∪ users.university, grouped
- *    by normalized name; "Universidad Tecnológica Nacional" is unified into
+ * 1. universities ← DISTINCT subjects.university only (users.university was
+ *    free text for a while and must not become catalog entries), grouped by
+ *    universityKey(); "Universidad Tecnológica Nacional" is unified into
  *    "Universidad Tecnológica Nacional – FRBA".
- * 2. careers ← DISTINCT (university, career) of subjects ∪ users, `active`,
- *    level `grado`. The curated catalog (careers/*.json) is applied later by
- *    `careers:sync`, which retires what is not in the source.
- * 3. users.university_id / career_id mapped by normalized name.
- * 4. subjects: university_id, career_id (tag), name_normalized. Legacy rows
- *    keep source='legacy', visibility='university' (column defaults); legacy
- *    rows without references (user_subjects, parties, quests, skill_nodes)
- *    become status='hidden'.
+ * 2. careers ← DISTINCT (university, career) of subjects ∪ users, only for
+ *    universities from step 1; `active`, level `grado`. The curated catalog
+ *    (careers/*.json) is applied later by `careers:sync`, which retires what
+ *    is not in the source.
+ * 3. users ← mapUsersToCatalog(): university_id / career_id by normalized
+ *    name. Unmatched users keep NULL and their strings (careers:sync maps them
+ *    again after adding catalog universities).
+ * 4. subjects: university_id, career_id, name_normalized.
+ *    - `career_id` is only a hint/tag: there is ONE subject per
+ *      (university, normalized name), shared by every career that takes it;
+ *      the explorer filters by university. No subject↔career join table.
+ *    - Legacy marker: rows that existed when CommunitySubjectsSchema ran got
+ *      source='legacy', visibility='university' from the ADD COLUMN default
+ *      (the default is then switched to 'community'/'private'). The hide step
+ *      only touches `source='legacy' AND moderation IS NULL AND
+ *      status='active'` rows without references (user_subjects, parties,
+ *      quests, skill_nodes) → status='hidden'. Rows created later are never
+ *      legacy, and a reviewed legacy row (W3 writes `moderation`) is never
+ *      re-hidden by a re-run.
  * 5. name_normalized collisions inside one university, needed so the partial
  *    unique index can be built: the keeper is the referenced / most enrolled /
  *    oldest row. Unreferenced duplicates → status='merged',
  *    merged_into_id=keeper (nothing points at them). Referenced duplicates
- *    stay active with a disambiguated key "<normalized> #<code|id>" so their
- *    parties/quests/enrollments keep working; an admin merge (W3) can fold
- *    them later. They are logged.
+ *    stay active with a disambiguated key "<normalized> ~<code|id>" (the
+ *    normalizer never outputs "~") so their parties/quests/enrollments keep
+ *    working; an admin merge (W3) can fold them later. They are logged.
  * 6. name_normalized NOT NULL + partial unique index + GIN trigram index.
  *
  * Re-runnable: inserts are ON CONFLICT DO NOTHING and existing values
@@ -35,10 +49,7 @@ import { normalizeSubjectName } from '../../common/subject-name';
  * (documented no-op for data): they live only in columns/tables that
  * CommunitySubjectsSchema's down drops, and no legacy data was changed.
  */
-const UTN_ALIAS = 'Universidad Tecnológica Nacional';
-const UTN_CANONICAL = 'Universidad Tecnológica Nacional – FRBA';
-
-type Counted = { name: string; n: number; fromSubjects: number };
+type Counted = { name: string; n: number };
 
 interface SubjectRow {
   id: string;
@@ -54,6 +65,7 @@ interface SubjectRow {
   merged_into_id: string | null;
   enrolled_count: number;
   created_at: Date;
+  reviewed: boolean;
   referenced: boolean;
 }
 
@@ -61,47 +73,29 @@ export class CommunitySubjectsBackfill1790510000000 implements MigrationInterfac
   name = 'CommunitySubjectsBackfill1790510000000';
 
   async up(queryRunner: QueryRunner): Promise<void> {
-    const uniKey = (raw: string | null): string => {
-      const key = normalizeSubjectName(raw ?? '');
-      return key === normalizeSubjectName(UTN_ALIAS)
-        ? normalizeSubjectName(UTN_CANONICAL)
-        : key;
-    };
-
-    // ── 1. Universities ────────────────────────────────────────────────────
+    // ── 1. Universities (from subjects only) ──────────────────────────────
     const uniCandidates = new Map<string, Map<string, Counted>>();
-    const addCandidate = (
-      raw: string | null,
-      n: number,
-      fromSubjects: boolean,
-    ) => {
-      const name = (raw ?? '').trim().replace(/\s+/g, ' ');
-      const key = uniKey(name);
-      if (!key) return;
-      const variants = uniCandidates.get(key) ?? new Map<string, Counted>();
-      const c = variants.get(name) ?? { name, n: 0, fromSubjects: 0 };
-      c.n += n;
-      if (fromSubjects) c.fromSubjects += n;
-      variants.set(name, c);
-      uniCandidates.set(key, variants);
-    };
     const subjectUnis: { university: string; n: number }[] =
       await queryRunner.query(
         `SELECT university, count(*)::int AS n FROM subjects GROUP BY university`,
       );
-    const userUnis: { university: string; n: number }[] =
-      await queryRunner.query(
-        `SELECT university, count(*)::int AS n FROM users GROUP BY university`,
-      );
-    subjectUnis.forEach((r) => addCandidate(r.university, r.n, true));
-    userUnis.forEach((r) => addCandidate(r.university, r.n, false));
+    for (const r of subjectUnis) {
+      const name = (r.university ?? '').trim().replace(/\s+/g, ' ');
+      const key = universityKey(name);
+      if (!key) continue;
+      const variants = uniCandidates.get(key) ?? new Map<string, Counted>();
+      const c = variants.get(name) ?? { name, n: 0 };
+      c.n += r.n;
+      variants.set(name, c);
+      uniCandidates.set(key, variants);
+    }
 
-    const existingUnis = await this.loadUniversities(queryRunner, uniKey);
+    const existingUnis = await this.loadUniversities(queryRunner);
     const newUniNames: string[] = [];
     for (const [key, variants] of uniCandidates) {
       if (existingUnis.has(key)) continue;
       newUniNames.push(
-        key === normalizeSubjectName(UTN_CANONICAL)
+        key === universityKey(UTN_CANONICAL)
           ? UTN_CANONICAL
           : pickCanonical([...variants.values()]),
       );
@@ -114,23 +108,11 @@ export class CommunitySubjectsBackfill1790510000000 implements MigrationInterfac
         [newUniNames],
       );
     }
-    const uniIdByKey = await this.loadUniversities(queryRunner, uniKey);
-    const uniIdOf = (raw: string | null) => uniIdByKey.get(uniKey(raw));
+    const uniIdByKey = await this.loadUniversities(queryRunner);
+    const uniIdOf = (raw: string | null) => uniIdByKey.get(universityKey(raw));
 
     // ── 2. Careers ─────────────────────────────────────────────────────────
     const careerCandidates = new Map<string, Map<string, Counted>>();
-    const addCareer = (university: string, career: string, n: number) => {
-      const universityId = uniIdOf(university);
-      const name = (career ?? '').trim().replace(/\s+/g, ' ');
-      const nn = normalizeSubjectName(name);
-      if (!universityId || !nn) return;
-      const key = `${universityId}|${nn}`;
-      const variants = careerCandidates.get(key) ?? new Map<string, Counted>();
-      const c = variants.get(name) ?? { name, n: 0, fromSubjects: 0 };
-      c.n += n;
-      variants.set(name, c);
-      careerCandidates.set(key, variants);
-    };
     const careerPairs: { university: string; career: string; n: number }[] =
       await queryRunner.query(`
         SELECT university, career, count(*)::int AS n FROM (
@@ -139,7 +121,18 @@ export class CommunitySubjectsBackfill1790510000000 implements MigrationInterfac
           SELECT university, career FROM users
         ) t GROUP BY university, career
       `);
-    careerPairs.forEach((r) => addCareer(r.university, r.career, r.n));
+    for (const r of careerPairs) {
+      const universityId = uniIdOf(r.university);
+      const name = (r.career ?? '').trim().replace(/\s+/g, ' ');
+      const nn = normalizeSubjectName(name);
+      if (!universityId || !nn) continue;
+      const key = `${universityId}|${nn}`;
+      const variants = careerCandidates.get(key) ?? new Map<string, Counted>();
+      const c = variants.get(name) ?? { name, n: 0 };
+      c.n += r.n;
+      variants.set(name, c);
+      careerCandidates.set(key, variants);
+    }
 
     const careerRows: [string[], string[], string[]] = [[], [], []];
     for (const [key, variants] of careerCandidates) {
@@ -164,7 +157,7 @@ export class CommunitySubjectsBackfill1790510000000 implements MigrationInterfac
         )) as { id: string; university_id: string; name_normalized: string }[]
       ).map((c) => [`${c.university_id}|${c.name_normalized}`, c.id]),
     );
-    const careerIdOf = (universityId: string | undefined, career: string) =>
+    const careerIdOf = (universityId: string | null, career: string) =>
       universityId
         ? careerIdByKey.get(
             `${universityId}|${normalizeSubjectName(career ?? '')}`,
@@ -172,32 +165,7 @@ export class CommunitySubjectsBackfill1790510000000 implements MigrationInterfac
         : undefined;
 
     // ── 3. Users ───────────────────────────────────────────────────────────
-    const users: {
-      id: string;
-      university: string;
-      career: string;
-    }[] = await queryRunner.query(
-      `SELECT id, university, career FROM users
-       WHERE university_id IS NULL AND career_id IS NULL`,
-    );
-    const userUpdates: [string[], string[], (string | null)[]] = [[], [], []];
-    for (const u of users) {
-      const universityId = uniIdOf(u.university);
-      if (!universityId) continue;
-      userUpdates[0].push(u.id);
-      userUpdates[1].push(universityId);
-      userUpdates[2].push(careerIdOf(universityId, u.career) ?? null);
-    }
-    if (userUpdates[0].length) {
-      await queryRunner.query(
-        `UPDATE users u
-         SET university_id = v.university_id, career_id = v.career_id
-         FROM unnest($1::uuid[], $2::uuid[], $3::uuid[])
-           AS v(id, university_id, career_id)
-         WHERE u.id = v.id`,
-        userUpdates,
-      );
-    }
+    const usersMapped = await mapUsersToCatalog(queryRunner);
 
     // ── 4. Subjects ────────────────────────────────────────────────────────
     const refChecks = await this.referenceChecks(queryRunner);
@@ -205,6 +173,7 @@ export class CommunitySubjectsBackfill1790510000000 implements MigrationInterfac
       SELECT s.id, s.name, s.code, s.university, s.career, s.university_id,
              s.career_id, s.name_normalized, s.source, s.status,
              s.merged_into_id, s.enrolled_count, s.created_at,
+             (s.moderation IS NOT NULL) AS reviewed,
              (${refChecks}) AS referenced
       FROM subjects s
     `);
@@ -218,11 +187,16 @@ export class CommunitySubjectsBackfill1790510000000 implements MigrationInterfac
         career_id:
           s.career_id ??
           (s.source === 'legacy'
-            ? (careerIdOf(universityId ?? undefined, s.career) ?? null)
+            ? (careerIdOf(universityId, s.career) ?? null)
             : null),
         name_normalized: s.name_normalized ?? normalizeSubjectName(s.name),
       };
-      if (row.source === 'legacy' && row.status === 'active' && !s.referenced)
+      if (
+        row.source === 'legacy' &&
+        !s.reviewed &&
+        row.status === 'active' &&
+        !s.referenced
+      )
         row.status = 'hidden';
       next.set(s.id, row);
     }
@@ -258,7 +232,7 @@ export class CommunitySubjectsBackfill1790510000000 implements MigrationInterfac
         const base = dupe.name_normalized as string;
         // name_normalized is varchar(255): trim the base, never the suffix.
         const withSuffix = (suffix: string) =>
-          `${base.slice(0, 255 - suffix.length - 2)} #${suffix}`;
+          `${base.slice(0, 255 - suffix.length - 2)} ~${suffix}`;
         let candidate = withSuffix((dupe.code ?? dupe.id).trim().toLowerCase());
         if (usedKeys.has(`${dupe.university_id}|${candidate}`))
           candidate = withSuffix(dupe.id);
@@ -322,7 +296,8 @@ export class CommunitySubjectsBackfill1790510000000 implements MigrationInterfac
     ).length;
     console.log(
       `[CommunitySubjectsBackfill] universities +${newUniNames.length}, ` +
-        `careers candidates ${careerRows[0].length}, users mapped ${userUpdates[0].length}, ` +
+        `careers candidates ${careerRows[0].length}, ` +
+        `users mapped ${usersMapped.universitiesMapped} (careers ${usersMapped.careersMapped}), ` +
         `subjects updated ${changed.length} (hidden ${hidden}, merged ${merged}, ` +
         `disambiguated ${disambiguated.length})`,
     );
@@ -345,17 +320,16 @@ export class CommunitySubjectsBackfill1790510000000 implements MigrationInterfac
     );
   }
 
-  /** normalized key → university id (first by name if two collapse). */
+  /** universityKey(name) → university id (first by name if two collapse). */
   private async loadUniversities(
     queryRunner: QueryRunner,
-    uniKey: (raw: string) => string,
   ): Promise<Map<string, string>> {
     const rows: { id: string; name: string }[] = await queryRunner.query(
       `SELECT id, name FROM universities ORDER BY name`,
     );
     const map = new Map<string, string>();
     for (const r of rows) {
-      const key = uniKey(r.name);
+      const key = universityKey(r.name);
       if (key && !map.has(key)) map.set(key, r.id);
     }
     return map;
@@ -375,13 +349,10 @@ export class CommunitySubjectsBackfill1790510000000 implements MigrationInterfac
   }
 }
 
-/** Most used spelling; subjects' spelling wins over users', then A→Z. */
+/** Most used spelling, then A→Z. */
 function pickCanonical(variants: Counted[]): string {
   return [...variants].sort(
-    (a, b) =>
-      b.fromSubjects - a.fromSubjects ||
-      b.n - a.n ||
-      a.name.localeCompare(b.name),
+    (a, b) => b.n - a.n || a.name.localeCompare(b.name),
   )[0].name;
 }
 
