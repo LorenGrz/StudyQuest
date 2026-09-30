@@ -30,7 +30,9 @@
     "migrate:quizzes-dynamo": "ts-node -P tsconfig.seed.json src/database/scripts/migrate-quizzes-to-dynamo.ts",
     "dynamo:create-table": "ts-node -P tsconfig.seed.json src/database/scripts/create-dynamo-table.ts",
     "migration:run:prod": "typeorm migration:run -d dist/config/typeorm.config.js",
-    "careers:validate": "ts-node -P tsconfig.seed.json src/database/seeds/data/careers/validate-careers.ts"
+    "careers:validate": "ts-node -P tsconfig.seed.json src/database/seeds/data/careers/validate-careers.ts",
+    "careers:sync": "ts-node -P tsconfig.seed.json src/database/scripts/careers-sync.ts",
+    "subjects:seed-official": "ts-node -P tsconfig.seed.json src/database/scripts/seed-official-subjects.ts"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.1140.0",
