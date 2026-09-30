@@ -93,7 +93,7 @@ export class SubjectsService {
     );
     const career = resolved.kind === 'career' ? resolved.career : null;
     try {
-      return await this.subjectRepo.save(
+      const saved = await this.subjectRepo.save(
         this.subjectRepo.create({
           ...dto,
           source: 'official',
@@ -104,6 +104,10 @@ export class SubjectsService {
           careerId: career?.id ?? null,
         }),
       );
+      // save() hands back every column, including select:false moderation.
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { moderation, ...publicFields } = saved;
+      return publicFields as Subject;
     } catch (err) {
       // 23505: same code, or same normalized name in that university.
       if (

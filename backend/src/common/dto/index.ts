@@ -20,6 +20,10 @@ import { Transform, Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PLANS } from '../plans';
 import { toNormalizedUsername } from '../username';
+import {
+  SUBJECT_REPORT_REASONS,
+  type SubjectReportReason,
+} from '../../modules/subjects/subject-report-reasons';
 
 const trimString = ({ value }: { value: unknown }) =>
   typeof value === 'string' ? value.trim().replace(/\s+/g, ' ') : value;
@@ -206,6 +210,55 @@ export class SubjectQueryDto {
   @IsOptional() @IsNumber() @Min(1) @Max(7) year?: number;
   @IsOptional() @IsNumber() @Min(1) page?: number;
   @IsOptional() @IsNumber() @Min(1) @Max(50) limit?: number;
+}
+
+export class SuggestSubjectsQueryDto {
+  @ApiProperty({ example: 'analisis 1' })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(80)
+  q: string;
+
+  @ApiPropertyOptional({ minimum: 1, maximum: 20, default: 10 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(20)
+  limit?: number;
+}
+
+export class CreateCommunitySubjectDto {
+  /** Validated by the 3 layers in CommunitySubjectsService (3–80 chars there). */
+  @ApiProperty({ example: 'Taller de Tesis' })
+  @IsString()
+  @MaxLength(200)
+  name: string;
+
+  /** Career tag (active, of my university). Defaults to my career. */
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUUID()
+  careerId?: string;
+
+  /** Create even if "¿Quisiste decir…?" found something. Never skips validation. */
+  @ApiPropertyOptional({ default: false })
+  @IsOptional()
+  @IsBoolean()
+  force?: boolean;
+}
+
+export class ReportSubjectDto {
+  @ApiPropertyOptional({ enum: SUBJECT_REPORT_REASONS, default: 'other' })
+  @IsOptional()
+  @IsIn(SUBJECT_REPORT_REASONS)
+  reason?: SubjectReportReason;
+
+  @ApiPropertyOptional({ maxLength: 300 })
+  @IsOptional()
+  @Transform(trimString)
+  @IsString()
+  @MaxLength(300)
+  details?: string;
 }
 
 // ─── Universities / careers ───────────────────────────────────────────────────
