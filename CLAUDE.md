@@ -1,6 +1,6 @@
 # StudyQuest — Claude context
 
-Last validated against the code: 2026-09-30 (universities/careers catalog, R1 of the community-subjects plan). When this file and the code disagree, the code wins — then fix this file.
+Last validated against the code: 2026-09-30 (careers catalog + community subjects + admin panel deployed to prod). When this file and the code disagree, the code wins — then fix this file.
 `AGENTS.md` holds the longer operational notes for other agents; keep both in sync.
 
 **Active plans / handoff:** start a new session with `docs/plans/HANDOFF.md` (current state, pending work, how to resume) and the active plan in `docs/plans/` (2026-09: official careers catalog + community-created subjects).
@@ -25,8 +25,8 @@ pnpm workspace at the root (`pnpm-workspace.yaml`: backend, frontend), but each 
 
 ## Backend modules (`backend/src/modules`)
 
-`auth` (JWT) · `users` (profile, avatars, dashboard, recommendations, leaderboard by `university_id`) · `universities` (official universities/careers catalog, `GET /universities`, `GET /universities/:id/careers`, "Otra" `career_requests`, `mapUsersToCatalog`) · `subjects` (subjects, enrollment; `career_id` is only a tag — one subject per university + normalized name) · `parties` (study groups, rich chat: text/file/audio) · `quests` (upload → generate → play → results, daily retention job; quiz content in DynamoDB via `quiz-content/QuizContentRepository`) · `ai` (provider facade + Bedrock client + MarkItDown client) · `storage` (S3 `StorageService` + public `GET /api/v1/files/*key` → 302 presigned URL) · `skill-tree` · `tournaments` · `achievements` · `cosmetics` (avatar borders) · `search` (trigram) · `billing` (`free`/`pro` plans, promo codes, Mercado Pago payments in `billing/payments`) · `study-bot` (Pro chat grounded in the user's last 5 results).
-Shared: `src/common/plans.ts` is the single source of truth for per-plan limits; `common/pro-plan.guard.ts`; `common/leagues.ts`, `subject-name.ts` (`normalizeSubjectName`, dedup key), `university-name.ts` (`universityKey`, UTN alias), `cors.ts`, `upload.util.ts`.
+`auth` (JWT) · `users` (profile, avatars, dashboard, recommendations, leaderboard by `university_id`) · `universities` (official universities/careers catalog, `GET /universities`, `GET /universities/:id/careers`, "Otra" `career_requests`, `mapUsersToCatalog`) · `subjects` (subjects, enrollment; `career_id` is only a tag — one subject per university + normalized name; community subjects: `suggest`, `POST /subjects/community`, reports, 3-layer name validation) · `admin` (`/admin/*`, `Role.ADMIN`: career requests approve/reject, community subjects publish/rename/hide/merge) · `parties` (study groups, rich chat: text/file/audio) · `quests` (upload → generate → play → results, daily retention job; quiz content in DynamoDB via `quiz-content/QuizContentRepository`) · `ai` (provider facade + Bedrock client + MarkItDown client) · `storage` (S3 `StorageService` + public `GET /api/v1/files/*key` → 302 presigned URL) · `skill-tree` · `tournaments` · `achievements` · `cosmetics` (avatar borders) · `search` (trigram) · `billing` (`free`/`pro` plans, promo codes, Mercado Pago payments in `billing/payments`) · `study-bot` (Pro chat grounded in the user's last 5 results).
+Shared: `src/common/plans.ts` is the single source of truth for per-plan limits; `common/pro-plan.guard.ts`; `common/leagues.ts`, `subject-name.ts` (`normalizeSubjectName`, dedup key), `university-name.ts` (`universityKey`, UTN alias), `subject-name.validator.ts` + `profanity-es.ts` (layers 1–2 of subject-name validation), `cors.ts`, `upload.util.ts`.
 Realtime: one gateway `src/gateways/matchmaking/matchmaking.gateway.ts` (matchmaking, party presence, chat broadcast, tournament events).
 
 ## Key flows
@@ -36,6 +36,8 @@ Realtime: one gateway `src/gateways/matchmaking/matchmaking.gateway.ts` (matchma
 - **Quiz storage:** Postgres keeps `quests` (metadata + `question_count`) and `player_results`; questions/options live in DynamoDB `studyquest-quizzes` (one doc per quest, PK `questId`, stable question/option ids, TTL `expiresAt` = retention + 2 days). Legacy `quiz_questions`/`quiz_options` tables still exist but are unused (drop migration pending).
 - **Files:** uploads go to S3 `studyquest-files-493735739644` under `quests/`, `chat/<partyId>/`, `avatars/<userId>/`; DB stores `/api/v1/files/<key>`. The app IAM user has no `s3:ListBucket`, so a missing object is a 403 that the code maps to 404. Cosmetic borders are static files in `backend/static/borders` served at `/static/borders`.
 - **Payments (Mercado Pago Checkout Pro, `modules/billing/payments`):** `POST /payments/checkout` creates a `payments` row (`pending`; ARS = `PRO_USD_PRICE` × dolarapi.com oficial venta rounded up to 100, sanity band 0.5×–5× `PRO_PRICE_ARS_FALLBACK`, floor `PRO_PRICE_ARS_FLOOR`) and a 2 h MP preference with `external_reference` = payment id (a fresh unpaid one is reused on repeat clicks; permanent Pro → 409). MP calls `POST /payments/webhook` (public, HMAC `x-signature` with `MP_WEBHOOK_SECRET`, 24 h window). The MP API is the source of truth; grants are idempotent **per MP payment id** (`payment_grants` UNIQUE, row locks): each approved ARS payment ≥ the quote (and `live_mode` unless `MP_SANDBOX`) adds 30 days; refund/charge-back takes them back (`revoked_at`); refunded/charged_back never regress. Anything off is held with `needs_review_reason` (error log, UI shows support). Missed webhooks heal via `GET /payments/:id` (reconciles with MP, ≤ 1 lookup / 30 s, accepts MP's `payment_id` as a verified `hint`) and a 10-min cron over open payments < 7 days. Missing MP env → app boots, checkout 503. Back URL `/plan?pago=ok|pendiente|error`.
+- **Catalog:** universities + careers are curated JSON in `backend/src/database/seeds/data/careers/<slug>.json` (7 unis, `pnpm careers:validate`), applied by `careers:sync` (upsert, retires careers that left the source except admin-approved ones, then `mapUsersToCatalog` by name/acronym); `deploy.sh` runs it after migrations. Official informática subjects live in `seeds/data/official-subjects.ts` (`pnpm subjects:validate-official`), applied by `subjects:seed-official` (manual, `--dry-run` first; never touches active legacy rows or rows hidden by moderation). In prod both scripts run as `node dist/database/scripts/<name>.js`. Registration picks `universityId` + `careerId`, or `careerName` ("Otra") → pending `career_requests` (max 3 per user), resolved in `/admin`.
+- **Community subjects (`modules/subjects/community-subjects.*`):** create = normalize → exact match enrolls → similar (≥ 0.6) 409 → daily limit (10/24 h) → format + profanity → Bedrock classifier (`SUBJECT_CLASSIFIER_MODEL`, default Nova Lite, fail-closed, user text delimited as data) → private subject. Public at 3 enrolled users of that university; auto-hidden at 3 reports (never official ones). Results audited in `subjects.moderation` (`select:false`, strip it from responses). Visibility is enforced in one place (`resolveReadable`/`resolveAttachable`): other users' private and hidden subjects are 404 on read, parties, matchmaking and skill nodes; merged ids resolve to their target. `AI_PROVIDER=mock` skips the model locally.
 - **Chat:** history over REST, live over Socket.IO; files/audio uploaded via `POST /parties/:id/chat/{file,audio}` then broadcast.
 - **Retention:** `QuestRetentionService` (03:00 + on boot) deletes quests older than `QUEST_RETENTION_DAYS` (30) plus their Dynamo docs and S3 objects. S3 lifecycle (30 d on `quests/`/`chat/`) and Dynamo TTL are the safety net.
 
@@ -47,7 +49,7 @@ Realtime: one gateway `src/gateways/matchmaking/matchmaking.gateway.ts` (matchma
 - Global prefix `/api/v1` except `/health` and the socket.
 - **Rate limiting:** `default` throttler (100/min) runs everywhere; `strict` is opt-in per route via `@Throttle({ strict: … })` (`common/throttle.ts` `onlyWhereDeclared`). `trust proxy` is 1 (Caddy) so limits are per client. Never register a named throttler without a `skipIf`, or it applies to every route.
 - **Usernames** are stored lowercase without `@` (`common/username.ts` normalizes register/profile/friend lookup; migration `LowercaseUsernames`). The UI shows a fixed `@` prefix (`Input prefix`) and lowercases as you type (`frontend/src/utils/username.ts`).
-- **API errors in the UI:** `services/api.ts` rewrites 429/5xx/network errors into Spanish user-facing text (`utils/apiErrors.ts`); other statuses keep the backend `message`. University fields are selects fed by `GET /subjects/universities` (catalog names; W1 moves them to `GET /universities`).
+- **API errors in the UI:** `services/api.ts` rewrites 429/5xx/network errors into Spanish user-facing text (`utils/apiErrors.ts`); other statuses keep the backend `message`. University/career fields are selects fed by `GET /universities` and `GET /universities/:id/careers`.
 
 ## Branches & deploy
 
@@ -55,7 +57,7 @@ Realtime: one gateway `src/gateways/matchmaking/matchmaking.gateway.ts` (matchma
 - **Frontend:** GitHub Actions `.github/workflows/deploy-frontend.yml` → `gh-pages` → `https://lorengrz.github.io/StudyQuest/`. `VITE_API_URL` is set in that workflow; the CSP in `frontend/index.html` must list the API origin (`connect-src`, `media-src`) or the browser blocks it.
 - **Backend (AWS, us-east-1, account 493735739644):**
   - Lightsail instance `studyquest` (Ubuntu 24.04, 2 GB, static IP `54.156.9.166`, auto-snapshots 06:00 UTC) running `deploy/lightsail/docker-compose.prod.yml` from `/opt/studyquest`. API: `https://api-54-156-9-166.sslip.io` (Caddy + Let's Encrypt).
-  - Deploy = `ssh ubuntu@54.156.9.166 /opt/studyquest/deploy/lightsail/deploy.sh` (pull `dev`, rebuild, migrations). Not automatic on push.
+  - Deploy = `ssh -i ~/.ssh/studyquest-lightsail.pem ubuntu@54.156.9.166 /opt/studyquest/deploy/lightsail/deploy.sh` (pull `dev`, rebuild, migrations, `careers:sync`). Not automatic on push. Bash runs the pre-pull copy of `deploy.sh`, so a step added in the same deploy only runs from the next one.
   - Secrets only in `/opt/studyquest/deploy/lightsail/.env` (chmod 600). App IAM user `studyquest-app` + managed policy `studyquest-app-least-privilege` (Bedrock via the 3 `us.*` profiles, S3 object ops on the 3 prefixes + write-only `backups/`, Dynamo item ops on one table).
   - Postgres lives in the compose (`postgres_data` volume); `backup.sh` dumps to `s3://…/backups/` (14-day lifecycle).
   - Budget `monthly-cost-limit` USD 15 (credits excluded) with email alerts. Account is on the AWS Free plan: credits expire 2026-12-30 — upgrade before then.
@@ -69,6 +71,7 @@ cd backend && pnpm dynamo:create-table
 cd backend && pnpm migration:run       # existing local DB: BEFORE start:dev (see below)
 cd backend && pnpm start:dev           # API on :3000, swagger /docs
 cd backend && pnpm seed && pnpm seed:skill-tree
+cd backend && pnpm careers:sync && pnpm subjects:seed-official   # catalog (both accept --dry-run)
 cd frontend && pnpm dev                # :5173
 cd backend && pnpm test && pnpm build   # pnpm lint is broken: no eslint.config for ESLint 9
 cd frontend && pnpm test && pnpm build  # pnpm lint has ~87 pre-existing errors
@@ -82,7 +85,9 @@ Root `.env.example` (local) and `deploy/lightsail/.env.production.example` (prod
 
 ## Known issues
 
-- Backend has no ESLint 9 config; frontend lint has pre-existing errors (`react-hooks/set-state-in-effect`, `no-explicit-any`).
+- Backend has no ESLint 9 config; frontend lint has pre-existing errors (`react-hooks/set-state-in-effect`, `no-explicit-any`); the new data-fetching hooks follow the same pattern.
+- Any logged-in user can create skill nodes on a subject they can see (no admin check). The admin merge picker only lists subjects of the current tab.
+- Users with legacy career strings that aren't official (e.g. the 8 seed accounts, UNC "Ingeniería en Sistemas de Información") point at a `retired` career and must re-pick it in the profile.
 - `dashboard.tsx` and `HomeLeaderboardPreview.tsx` render `avatarUrl` without the media resolver, so uploaded avatars break there.
 - Legacy `quiz_questions`/`quiz_options` tables still exist (drop migration pending).
 - API domain is an sslip.io hostname; moving to a real domain means updating Caddy `API_DOMAIN`, the workflow `VITE_API_URL`, the CSP and `CORS_ALLOWED_ORIGINS`.
