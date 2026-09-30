@@ -24,6 +24,7 @@ import { memoryStorage } from 'multer';
 import { safeUploadFilename } from '../../common/upload.util';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PartiesService } from './parties.service';
+import { CommunitySubjectsService } from '../subjects/community-subjects.service';
 import { StorageService } from '../storage/storage.service';
 import {
   SendChatMessageDto,
@@ -63,6 +64,7 @@ export class PartiesController {
   constructor(
     private readonly partiesService: PartiesService,
     private readonly storageService: StorageService,
+    private readonly communitySubjects: CommunitySubjectsService,
   ) {}
 
   // ─── Rutas sin parámetro :id primero (evitar conflictos de orden) ────────────
@@ -80,10 +82,19 @@ export class PartiesController {
 
   @Post()
   @ApiOperation({ summary: 'Crear una party nueva (vos como líder)' })
-  createParty(@Request() req: any, @Body() dto: CreatePartyDto) {
+  async createParty(@Request() req: any, @Body() dto: CreatePartyDto) {
+    // A subject the user can't see is a 404; merged ids attach to the
+    // target. Without subjectId the service picks the first enrolled one.
+    const subjectId = dto.subjectId
+      ? await this.communitySubjects.resolveAttachable(
+          req.user.userId,
+          dto.subjectId,
+          { requireEnrollment: true },
+        )
+      : undefined;
     return this.partiesService.createForUser(
       req.user.userId,
-      dto.subjectId,
+      subjectId,
       dto.maxMembers ?? 4,
       dto.isPrivate ?? false,
     );

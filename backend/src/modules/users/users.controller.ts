@@ -14,6 +14,7 @@ import {
   ParseFilePipe,
   MaxFileSizeValidator,
   BadRequestException,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
@@ -26,6 +27,7 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UsersService } from './users.service';
+import { CommunitySubjectsService } from '../subjects/community-subjects.service';
 import { StorageService } from '../storage/storage.service';
 import { safeUploadFilename } from '../../common/upload.util';
 import {
@@ -62,6 +64,7 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly storageService: StorageService,
+    private readonly communitySubjects: CommunitySubjectsService,
   ) {}
 
   @Get('me')
@@ -189,16 +192,29 @@ export class UsersController {
   }
 
   @Get('leaderboard/:subjectId')
-  getLeaderboard(
-    @Param('subjectId') subjectId: string,
+  async getLeaderboard(
+    @Request() req: any,
+    @Param('subjectId', ParseUUIDPipe) subjectId: string,
     @Query() query: SubjectLeaderboardQueryDto,
   ) {
-    return this.usersService.getLeaderboard(subjectId, query.limit ?? 20);
+    // Same read rule as GET /subjects/:id: who is enrolled in a private or
+    // hidden subject is not public either.
+    const readableId = await this.communitySubjects.resolveReadable(
+      subjectId,
+      req.user,
+    );
+    return this.usersService.getLeaderboard(readableId, query.limit ?? 20);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findById(id);
+  async findOne(@Request() req: any, @Param('id') id: string) {
+    const user = await this.usersService.findById(id);
+    // Private community subjects are only visible to their creator.
+    if (id !== req.user.userId)
+      user.enrolledSubjects = user.enrolledSubjects.filter(
+        (s) => s.visibility !== 'private' || s.createdBy === req.user.userId,
+      );
+    return user;
   }
 
   @Get('me/stats')
@@ -242,8 +258,10 @@ export class UsersController {
   }
 
   @Post('me/subjects')
-  enroll(@Request() req: any, @Body() dto: EnrollSubjectDto) {
-    return this.usersService.enrollSubject(req.user.userId, dto.subjectId);
+  async enroll(@Request() req: any, @Body() dto: EnrollSubjectDto) {
+    // Visibility, hidden/merged and trust promotion live in the subjects module.
+    await this.communitySubjects.enroll(req.user.userId, dto.subjectId);
+    return this.usersService.findById(req.user.userId);
   }
 
   @Delete('me/subjects/:subjectId')

@@ -4,9 +4,10 @@ import { MatchmakingService } from './matchmaking.service';
 import { PartiesModule } from '../../modules/parties/parties.module';
 import { UsersModule } from '../../modules/users/users.module';
 import { AuthModule } from '../../modules/auth/auth.module';
+import { SubjectsModule } from '../../modules/subjects/subjects.module';
 
 @Module({
-  imports: [PartiesModule, UsersModule, AuthModule],
+  imports: [PartiesModule, UsersModule, AuthModule, SubjectsModule],
   providers: [MatchmakingGateway, MatchmakingService],
 })
 export class MatchmakingModule {}

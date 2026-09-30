@@ -590,34 +590,6 @@ export class UsersService {
     return this.findById(userId);
   }
 
-  async enrollSubject(userId: string, subjectId: string): Promise<User> {
-    const [user, subject] = await Promise.all([
-      this.userRepo.findOne({
-        where: { id: userId },
-        relations: ['enrolledSubjects'],
-      }),
-      this.subjectRepo.findOneBy({ id: subjectId }),
-    ]);
-    if (!user) throw new NotFoundException('Usuario no encontrado');
-    if (!subject) throw new NotFoundException('Materia no encontrada');
-
-    const alreadyEnrolled = user.enrolledSubjects.some(
-      (s) => s.id === subjectId,
-    );
-    if (alreadyEnrolled) return user;
-
-    await this.dataSource.transaction(async (em) => {
-      await em
-        .createQueryBuilder()
-        .relation(User, 'enrolledSubjects')
-        .of(userId)
-        .add(subjectId);
-      await em.increment(Subject, { id: subjectId }, 'enrolledCount', 1);
-    });
-
-    return this.findById(userId);
-  }
-
   async unenrollSubject(userId: string, subjectId: string): Promise<User> {
     await this.dataSource.transaction(async (em) => {
       // Only decrement when a row was really removed: unenrolling twice (or
