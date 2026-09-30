@@ -14,12 +14,20 @@ import {
   Min,
   Max,
   ValidateNested,
+  ValidateIf,
 } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { CAREERS } from '../careers';
 import { PLANS } from '../plans';
 import { toNormalizedUsername } from '../username';
+
+const trimString = ({ value }: { value: unknown }) =>
+  typeof value === 'string' ? value.trim().replace(/\s+/g, ' ') : value;
+
+/** "Otra" career typed by the user: letters/digits plus light punctuation. */
+const CAREER_NAME_PATTERN = /^[\p{L}\p{N}][\p{L}\p{N} .,:;()'’\-–/]*$/u;
+const CAREER_NAME_MESSAGE =
+  'El nombre de la carrera solo puede tener letras, números y puntuación simple';
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
@@ -46,13 +54,50 @@ export class RegisterDto {
   @MaxLength(60)
   displayName: string;
 
-  @ApiProperty({ example: 'Universidad de Buenos Aires' })
-  @IsString()
-  university: string;
+  @ApiPropertyOptional({ description: 'GET /universities id' })
+  @IsOptional()
+  @IsUUID()
+  universityId?: string;
 
-  @ApiProperty({ example: 'Ciencias de la Computación', enum: CAREERS })
-  @IsIn(CAREERS)
-  career: string;
+  @ApiPropertyOptional({
+    example: 'Universidad de Buenos Aires',
+    deprecated: true,
+    description: 'Legacy: university name; required only without universityId',
+  })
+  @ValidateIf((o: RegisterDto) => !o.universityId)
+  @IsString()
+  @MinLength(2)
+  @MaxLength(200)
+  university?: string;
+
+  @ApiPropertyOptional({ description: 'GET /universities/:id/careers id' })
+  @IsOptional()
+  @IsUUID()
+  careerId?: string;
+
+  @ApiPropertyOptional({
+    example: 'Licenciatura en Arte Digital',
+    description:
+      'Career not in the list ("Otra"): creates a pending career request',
+  })
+  @IsOptional()
+  @Transform(trimString)
+  @IsString()
+  @MinLength(3)
+  @MaxLength(120)
+  @Matches(CAREER_NAME_PATTERN, { message: CAREER_NAME_MESSAGE })
+  careerName?: string;
+
+  @ApiPropertyOptional({
+    example: 'Ciencias de la Computación',
+    deprecated: true,
+    description: 'Legacy: career name; required without careerId/careerName',
+  })
+  @ValidateIf((o: RegisterDto) => !o.careerId && !o.careerName)
+  @IsString()
+  @MinLength(2)
+  @MaxLength(200)
+  career?: string;
 
   @ApiProperty({
     example: 2,
@@ -97,8 +142,19 @@ export class UpdateProfileDto {
   @IsString()
   @Matches(/^\/api\/v1\/files\/avatars\/[\w-]+\/[\w.-]+$/)
   avatarUrl?: string;
-  @IsOptional() @IsString() university?: string;
-  @IsOptional() @IsIn(CAREERS) career?: string;
+  @IsOptional() @IsUUID() universityId?: string;
+  @IsOptional() @IsUUID() careerId?: string;
+  @IsOptional()
+  @Transform(trimString)
+  @IsString()
+  @MinLength(3)
+  @MaxLength(120)
+  @Matches(CAREER_NAME_PATTERN, { message: CAREER_NAME_MESSAGE })
+  careerName?: string;
+  /** Deprecated: catalog name, validated against the DB. */
+  @IsOptional() @IsString() @MaxLength(200) university?: string;
+  /** Deprecated: catalog name, validated against the DB. */
+  @IsOptional() @IsString() @MaxLength(200) career?: string;
   @IsOptional() @IsInt() @Min(1) @Max(7) year?: number;
   @IsOptional()
   @IsArray()
@@ -136,17 +192,34 @@ export class CreateSubjectDto {
   @IsString() @MinLength(2) @MaxLength(20) code: string;
   @IsOptional() @IsString() description?: string;
   @IsString() university: string;
-  @IsIn(CAREERS) career: string;
+  @IsString() @MaxLength(200) career: string;
   @IsInt() @Min(1) @Max(7) year: number;
 }
 
 export class SubjectQueryDto {
   @IsOptional() @IsString() search?: string;
-  @IsOptional() @IsString() university?: string;
-  @IsOptional() @IsIn(CAREERS) career?: string;
+  @IsOptional() @IsUUID() universityId?: string;
+  /** Deprecated: catalog name, resolved to universityId (UTN alias included). */
+  @IsOptional() @IsString() @MaxLength(200) university?: string;
+  /** Exact legacy career string (a tag; filter by university instead). */
+  @IsOptional() @IsString() @MaxLength(200) career?: string;
   @IsOptional() @IsNumber() @Min(1) @Max(7) year?: number;
   @IsOptional() @IsNumber() @Min(1) page?: number;
   @IsOptional() @IsNumber() @Min(1) @Max(50) limit?: number;
+}
+
+// ─── Universities / careers ───────────────────────────────────────────────────
+
+export class CreateCareerRequestDto {
+  @ApiProperty() @IsUUID() universityId: string;
+
+  @ApiProperty({ example: 'Licenciatura en Arte Digital' })
+  @Transform(trimString)
+  @IsString()
+  @MinLength(3)
+  @MaxLength(120)
+  @Matches(CAREER_NAME_PATTERN, { message: CAREER_NAME_MESSAGE })
+  name: string;
 }
 
 // ─── Matchmaking ──────────────────────────────────────────────────────────────
@@ -208,6 +281,8 @@ export class SubmitAnswerDto {
 
 export class GlobalLeaderboardQueryDto {
   @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100) limit?: number;
+  @IsOptional() @IsUUID() universityId?: string;
+  /** Deprecated: catalog name, resolved to universityId (UTN alias included). */
   @IsOptional() @IsString() @MaxLength(200) university?: string;
 }
 
@@ -216,6 +291,8 @@ export class SubjectLeaderboardQueryDto {
 }
 
 export class LeaderboardMeQueryDto {
+  @IsOptional() @IsUUID() universityId?: string;
+  /** Deprecated: catalog name, resolved to universityId (UTN alias included). */
   @IsOptional() @IsString() @MaxLength(200) university?: string;
   @IsOptional() @IsUUID() subjectId?: string;
 }

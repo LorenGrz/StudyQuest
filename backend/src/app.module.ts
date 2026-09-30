@@ -31,6 +31,7 @@ import { BillingModule } from './modules/billing/billing.module';
 import { StudyBotModule } from './modules/study-bot/study-bot.module';
 import { onlyWhereDeclared, THROTTLE_ERROR_MESSAGE } from './common/throttle';
 import { StorageModule } from './modules/storage/storage.module';
+import { UniversitiesModule } from './modules/universities/universities.module';
 
 @Module({
   controllers: [AppController],
@@ -135,6 +136,7 @@ import { StorageModule } from './modules/storage/storage.module';
     BillingModule,
     StudyBotModule,
     StorageModule,
+    UniversitiesModule,
   ],
 })
 export class AppModule {}

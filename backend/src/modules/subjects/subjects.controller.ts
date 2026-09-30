@@ -7,9 +7,10 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { SubjectsService } from './subjects.service';
+import { RolesGuard, Roles, Role } from '../../common/roles';
 import { CreateSubjectDto, SubjectQueryDto } from '../../common/dto';
 
 @ApiTags('subjects')
@@ -27,6 +28,8 @@ export class SubjectsController {
     return this.subjectsService.getUniversities(search);
   }
 
+  /** @deprecated use GET /universities/:id/careers */
+  @ApiOperation({ deprecated: true })
   @Get('careers')
   getCareers(@Query('university') university?: string) {
     return this.subjectsService.getCareers(university);
@@ -37,8 +40,10 @@ export class SubjectsController {
     return this.subjectsService.findById(id);
   }
 
+  /** Admin only; students create subjects via POST /subjects/community (R2). */
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Post()
   create(@Body() dto: CreateSubjectDto) {
     return this.subjectsService.create(dto);
