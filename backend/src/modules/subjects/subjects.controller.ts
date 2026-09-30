@@ -13,6 +13,7 @@ import {
 import { Throttle } from '@nestjs/throttler';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 import { SubjectsService } from './subjects.service';
 import { RolesGuard, Roles, Role } from '../../common/roles';
 import {
@@ -87,9 +88,20 @@ export class SubjectsController {
     return this.communitySubjects.report(req.user.userId, id, dto);
   }
 
+  /**
+   * Public, but viewer-aware (optional JWT): private subjects only for their
+   * owner/enrolled users, hidden ones only for admins, merged ones resolve to
+   * the subject they were merged into (the body is the target, so `id`
+   * differs from the requested one). Otherwise 404.
+   */
+  @UseGuards(OptionalJwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.subjectsService.findById(id);
+  async findOne(@Request() req: any, @Param('id', ParseUUIDPipe) id: string) {
+    const readableId = await this.communitySubjects.resolveReadable(
+      id,
+      req.user,
+    );
+    return this.subjectsService.findById(readableId);
   }
 
   /** Admin only; students create subjects via POST /subjects/community (R2). */

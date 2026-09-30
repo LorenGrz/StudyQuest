@@ -142,12 +142,13 @@ export class CommunitySubjectsStore {
     return row ?? null;
   }
 
+  /** `viewerId` null = anonymous (enrolledByViewer is then false). */
   async findById(
     id: string,
-    viewerId: string,
+    viewerId: string | null,
   ): Promise<CommunitySubjectRow | null> {
     const [row] = await this.rows<CommunitySubjectRow>(
-      `SELECT ${columns('$2')} FROM subjects s WHERE s.id = $1`,
+      `SELECT ${columns('$2::uuid')} FROM subjects s WHERE s.id = $1`,
       [id, viewerId],
     );
     return row ?? null;

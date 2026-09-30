@@ -395,6 +395,41 @@ export class CommunitySubjectsService {
     });
   }
 
+  // ── GET /subjects/:id, GET /users/leaderboard/:subjectId ────────────────
+
+  /**
+   * Id of the subject `viewer` may read by `subjectId`, or 404:
+   *  - merged → its target (followed up to 5 hops, then checked the same
+   *    way), so old links resolve to the surviving subject;
+   *  - hidden → admins only;
+   *  - private → admins, its creator and enrolled users;
+   *  - public → anyone, anonymous included.
+   * 404 (not 403) so private/hidden subjects don't reveal they exist.
+   */
+  async resolveReadable(
+    subjectId: string,
+    viewer?: { userId: string; role?: string } | null,
+  ): Promise<string> {
+    const viewerId = viewer?.userId ?? null;
+    const isAdmin = viewer?.role === 'ADMIN';
+    let row = await this.store.findById(subjectId, viewerId);
+    for (let hop = 0; row?.status === 'merged' && hop < 5; hop++)
+      row = row.mergedIntoId
+        ? await this.store.findById(row.mergedIntoId, viewerId)
+        : null;
+    if (!row || row.status === 'merged')
+      throw new NotFoundException('Materia no encontrada');
+    const isOwner =
+      viewerId !== null &&
+      (row.createdBy === viewerId || row.enrolledByViewer);
+    const readable =
+      isAdmin ||
+      (row.status !== 'hidden' &&
+        (row.visibility === 'university' || isOwner));
+    if (!readable) throw new NotFoundException('Materia no encontrada');
+    return row.id;
+  }
+
   // ── POST /subjects/:id/report ────────────────────────────────────────────
 
   async report(

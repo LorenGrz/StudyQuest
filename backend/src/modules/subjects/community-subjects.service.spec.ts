@@ -85,7 +85,7 @@ class FakeStore {
   lockUser = jest.fn(async () => undefined);
   getUser = async (id: string) => this.users.get(id) ?? null;
   findCareer = async () => null;
-  findById = async (id: string, viewer: string) => {
+  findById = async (id: string, viewer: string | null) => {
     const s = this.subjects.get(id);
     return s ? this.view(s, viewer) : null;
   };
@@ -726,6 +726,69 @@ describe('CommunitySubjectsService', () => {
       ).resolves.toMatchObject({
         status: 404,
       });
+    });
+  });
+
+  describe('resolveReadable (GET /subjects/:id, subject leaderboard)', () => {
+    const anon = null;
+    const ana = { userId: 'ana', role: 'USER' };
+    const beto = { userId: 'beto', role: 'USER' };
+    const admin = { userId: 'admin', role: 'ADMIN' };
+
+    it('public subjects are readable by anyone, anonymous included', async () => {
+      const s = store.addSubject({ name: 'Análisis I', visibility: 'university' });
+      await expect(service.resolveReadable(s.id, anon)).resolves.toBe(s.id);
+      await expect(service.resolveReadable(s.id, beto)).resolves.toBe(s.id);
+    });
+
+    it('private: creator, enrolled users and admins only; others get 404', async () => {
+      const s = store.addSubject({ name: 'Taller de Tesis', createdBy: 'ana' });
+      store.enrollments.add(`caro|${s.id}`);
+
+      await expect(service.resolveReadable(s.id, ana)).resolves.toBe(s.id);
+      await expect(
+        service.resolveReadable(s.id, { userId: 'caro' }),
+      ).resolves.toBe(s.id);
+      await expect(service.resolveReadable(s.id, admin)).resolves.toBe(s.id);
+      await expect(errorOf(service.resolveReadable(s.id, beto))).resolves.toMatchObject({ status: 404 });
+      await expect(errorOf(service.resolveReadable(s.id, anon))).resolves.toMatchObject({ status: 404 });
+    });
+
+    it('hidden: admins only, not even the creator', async () => {
+      const s = store.addSubject({
+        name: 'Taller de Tesis',
+        createdBy: 'ana',
+        visibility: 'university',
+        status: 'hidden',
+      });
+      await expect(errorOf(service.resolveReadable(s.id, ana))).resolves.toMatchObject({ status: 404 });
+      await expect(errorOf(service.resolveReadable(s.id, anon))).resolves.toMatchObject({ status: 404 });
+      await expect(service.resolveReadable(s.id, admin)).resolves.toBe(s.id);
+    });
+
+    it('merged resolves to the target, which is checked too', async () => {
+      const target = store.addSubject({ name: 'Física I', visibility: 'university' });
+      const merged = store.addSubject({
+        name: 'Fisica 1',
+        status: 'merged',
+        mergedIntoId: target.id,
+      });
+      await expect(service.resolveReadable(merged.id, anon)).resolves.toBe(target.id);
+
+      const privateTarget = store.addSubject({ name: 'Química', createdBy: 'ana' });
+      const mergedPrivate = store.addSubject({
+        name: 'Quimica',
+        status: 'merged',
+        mergedIntoId: privateTarget.id,
+      });
+      await expect(errorOf(service.resolveReadable(mergedPrivate.id, beto))).resolves.toMatchObject({ status: 404 });
+      await expect(service.resolveReadable(mergedPrivate.id, ana)).resolves.toBe(privateTarget.id);
+    });
+
+    it('404 for unknown ids and broken merges', async () => {
+      const broken = store.addSubject({ name: 'Rota', status: 'merged' });
+      await expect(errorOf(service.resolveReadable('nope', admin))).resolves.toMatchObject({ status: 404 });
+      await expect(errorOf(service.resolveReadable(broken.id, admin))).resolves.toMatchObject({ status: 404 });
     });
   });
 });

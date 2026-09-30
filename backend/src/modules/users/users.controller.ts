@@ -14,6 +14,7 @@ import {
   ParseFilePipe,
   MaxFileSizeValidator,
   BadRequestException,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
@@ -191,11 +192,18 @@ export class UsersController {
   }
 
   @Get('leaderboard/:subjectId')
-  getLeaderboard(
-    @Param('subjectId') subjectId: string,
+  async getLeaderboard(
+    @Request() req: any,
+    @Param('subjectId', ParseUUIDPipe) subjectId: string,
     @Query() query: SubjectLeaderboardQueryDto,
   ) {
-    return this.usersService.getLeaderboard(subjectId, query.limit ?? 20);
+    // Same read rule as GET /subjects/:id: who is enrolled in a private or
+    // hidden subject is not public either.
+    const readableId = await this.communitySubjects.resolveReadable(
+      subjectId,
+      req.user,
+    );
+    return this.usersService.getLeaderboard(readableId, query.limit ?? 20);
   }
 
   @Get(':id')
