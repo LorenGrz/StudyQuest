@@ -2,7 +2,8 @@ import { useState } from 'react'
 import { useAuth } from '../../hooks/useAuth'
 import { useUniversities, useUniversityCareers } from '../../hooks/useUniversities'
 import { normalizeUsernameInput } from '../../utils/username'
-import { OTHER_CAREER_LABEL, OTHER_CAREER_VALUE } from '../../utils/careers'
+import { OTHER_CAREER_VALUE } from '../../utils/careers'
+import { CareerCombobox } from '../CareerCombobox'
 import { Button, Input, Select } from '../UI'
 
 export function LoginForm() {
@@ -72,7 +73,7 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
     displayName: '',
     avatarUrl: '',
   })
-  const { groups: careerGroups } = useUniversityCareers(form.universityId || undefined)
+  const { careers } = useUniversityCareers(form.universityId || undefined)
   const [localError, setLocalError] = useState('')
 
   const set = (field: string, value: string | number) =>
@@ -168,31 +169,15 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
           <Select id="reg-uni" label="Universidad" value={form.universityId}
             onChange={(e) => setUniversityId(e.target.value)}
             options={universities.map((u) => ({ value: u.id, label: u.name }))} required />
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[13px] font-medium text-secondary" htmlFor="reg-career">Carrera</label>
-            <select
-              id="reg-career"
-              className="w-full min-h-11 px-3.5 py-3 bg-panel border border-[var(--overlay-border)] rounded-lg text-primary text-[15px] transition-[border-color,box-shadow] duration-200 outline-none appearance-none focus-visible:border-accent focus-visible:ring-2 focus-visible:ring-accent/30"
-              value={form.careerId}
-              onChange={(e) => setCareerId(e.target.value)}
-              disabled={!form.universityId}
-              required
-            >
-              <option value="">Seleccionar...</option>
-              {careerGroups.map((g) => (
-                <optgroup key={g.faculty} label={g.faculty}>
-                  {g.careers.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-              {form.universityId && (
-                <option value={OTHER_CAREER_VALUE}>{OTHER_CAREER_LABEL}</option>
-              )}
-            </select>
-          </div>
+          <CareerCombobox
+            id="reg-career"
+            label="Carrera"
+            careers={careers}
+            value={form.careerId}
+            onChange={setCareerId}
+            disabled={!form.universityId}
+            required
+          />
           {isOtherCareer && (
             <Input id="reg-career-name" label="Nombre de tu carrera" value={form.careerName}
               onChange={(e) => set('careerName', e.target.value)}

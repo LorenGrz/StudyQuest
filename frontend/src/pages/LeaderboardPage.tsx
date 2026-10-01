@@ -7,7 +7,7 @@ import { userService } from '../services/userService'
 import type { LeaderboardEntry, MyLeaderboardPosition } from '../services/userService'
 import { universityService } from '../services/universityService'
 import type { Career } from '../services/universityService'
-import { useLeaderboard, type LeaderboardScope } from '../hooks/useLeaderboard'
+import { useLeaderboard, leaderboardFilter, type LeaderboardScope } from '../hooks/useLeaderboard'
 
 import { getLeague, DEFAULT_ELO } from '../utils/leagues'
 import { AvatarWithBorder } from '../components/AvatarWithBorder'
@@ -100,14 +100,8 @@ export default function LeaderboardPage() {
       return
     }
     let cancelled = false
-    const params =
-      scope.type === 'university'
-        ? { university: scope.university }
-        : scope.type === 'career'
-          ? { careerId: scope.careerId }
-          : {}
     userService
-      .getMyLeaderboardPosition(params)
+      .getMyLeaderboardPosition(leaderboardFilter(scope))
       .then((pos) => { if (!cancelled) setMyPosition(pos) })
       .catch(() => { if (!cancelled) setMyPosition(null) })
     return () => { cancelled = true }

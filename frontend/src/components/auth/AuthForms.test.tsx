@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { RegisterForm } from './AuthForms'
-import { OTHER_CAREER_VALUE } from '../../utils/careers'
+import { OTHER_CAREER_LABEL } from '../../utils/careers'
 
 const registerMock = vi.fn()
 
@@ -63,7 +63,8 @@ describe('RegisterForm', () => {
 
     await fillStep1(user)
     await user.selectOptions(screen.getByLabelText('Universidad'), 'uni-uba')
-    await user.selectOptions(screen.getByLabelText('Carrera'), 'car-uba-1')
+    await user.type(screen.getByLabelText('Carrera'), 'informat')
+    await user.click(screen.getByRole('option', { name: /Ingeniería en Informática/ }))
     await user.click(screen.getByRole('button', { name: 'Siguiente →' }))
     await fillStep3(user)
 
@@ -82,7 +83,8 @@ describe('RegisterForm', () => {
 
     await fillStep1(user)
     await user.selectOptions(screen.getByLabelText('Universidad'), 'uni-uba')
-    await user.selectOptions(screen.getByLabelText('Carrera'), OTHER_CAREER_VALUE)
+    await user.click(screen.getByLabelText('Carrera'))
+    await user.click(screen.getByRole('option', { name: OTHER_CAREER_LABEL }))
     await user.type(screen.getByLabelText('Nombre de tu carrera'), 'Licenciatura en Arte Digital')
     await user.click(screen.getByRole('button', { name: 'Siguiente →' }))
     await fillStep3(user)
@@ -102,12 +104,29 @@ describe('RegisterForm', () => {
 
     await fillStep1(user)
     await user.selectOptions(screen.getByLabelText('Universidad'), 'uni-uba')
-    await user.selectOptions(screen.getByLabelText('Carrera'), 'car-uba-1')
-    expect(screen.getByLabelText('Carrera')).toHaveValue('car-uba-1')
+    await user.click(screen.getByLabelText('Carrera'))
+    await user.click(screen.getByRole('option', { name: /Ingeniería en Informática/ }))
+    expect(screen.getByLabelText('Carrera')).toHaveValue('Ingeniería en Informática')
 
     await user.selectOptions(screen.getByLabelText('Universidad'), 'uni-utn')
     expect(screen.getByLabelText('Carrera')).toHaveValue('')
-    expect(screen.queryByText('Ingeniería en Informática')).not.toBeInTheDocument()
-    expect(screen.getByText('Ingeniería en Sistemas de Información')).toBeInTheDocument()
+    await user.click(screen.getByLabelText('Carrera'))
+    expect(screen.queryByRole('option', { name: /Ingeniería en Informática/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('option', { name: /Ingeniería en Sistemas de Información/ })).toBeInTheDocument()
+  })
+
+  it('filters careers by name ignoring accents and keeps "Otra" available', async () => {
+    const user = userEvent.setup()
+    render(<RegisterForm onSwitchToLogin={() => {}} />)
+
+    await fillStep1(user)
+    await user.selectOptions(screen.getByLabelText('Universidad'), 'uni-uba')
+    await user.type(screen.getByLabelText('Carrera'), 'xyz')
+    expect(screen.queryByRole('option', { name: /Ingeniería en Informática/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('option', { name: OTHER_CAREER_LABEL })).toBeInTheDocument()
+
+    await user.clear(screen.getByLabelText('Carrera'))
+    await user.type(screen.getByLabelText('Carrera'), 'ingenieria')
+    expect(screen.getByRole('option', { name: /Ingeniería en Informática/ })).toBeInTheDocument()
   })
 })

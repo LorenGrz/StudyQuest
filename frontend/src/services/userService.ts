@@ -130,6 +130,14 @@ export interface LeaderboardEntry {
   elo: number
 }
 
+/** Leaderboard scope. `careerId` wins over the university; `universityId`
+ * wins over the deprecated `university` name. Empty = global. */
+export interface LeaderboardFilter {
+  universityId?: string
+  university?: string
+  careerId?: string
+}
+
 export interface MyLeaderboardPosition {
   rank: number
   elo: number
@@ -217,11 +225,10 @@ export const userService = {
 
   async getGlobalLeaderboard(
     limit = 20,
-    university?: string,
-    careerId?: string,
+    filter: LeaderboardFilter = {},
   ): Promise<LeaderboardEntry[]> {
     const { data } = await api.get<LeaderboardEntry[]>('/users/leaderboard/global', {
-      params: { limit, university, careerId },
+      params: { limit, ...filter },
     })
     return data
   },
@@ -232,7 +239,7 @@ export const userService = {
   },
 
   async getMyLeaderboardPosition(
-    params: { university?: string; careerId?: string } = {},
+    params: LeaderboardFilter = {},
   ): Promise<MyLeaderboardPosition> {
     const { data } = await api.get<MyLeaderboardPosition>('/users/leaderboard/me', {
       params,

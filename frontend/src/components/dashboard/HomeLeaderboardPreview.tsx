@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import { getLeague, DEFAULT_ELO } from '../../utils/leagues';
 import { useAuthStore } from '../../store/authStore';
@@ -25,12 +25,20 @@ export const HomeLeaderboardPreview = () => {
   const { user } = useAuthStore();
   const [selectedTab, setSelectedTab] = useState<TabValue>('global');
 
-  const scope: LeaderboardScope =
-    selectedTab === 'university' && user?.university
-      ? { type: 'university', university: user.university }
-      : selectedTab === 'career' && user?.careerId
-        ? { type: 'career', careerId: user.careerId }
-        : { type: 'global' };
+  // Prefer the catalog id: a legacy free-text `university` may not match the
+  // catalog name, which would show an empty ranking.
+  const hasUniversity = Boolean(user?.universityId || user?.university);
+  const scope: LeaderboardScope = useMemo(() => {
+    if (selectedTab === 'university' && hasUniversity) {
+      return user?.universityId
+        ? { type: 'university', universityId: user.universityId }
+        : { type: 'university', university: user?.university };
+    }
+    if (selectedTab === 'career' && user?.careerId) {
+      return { type: 'career', careerId: user.careerId };
+    }
+    return { type: 'global' };
+  }, [selectedTab, hasUniversity, user?.universityId, user?.university, user?.careerId]);
 
   const { data: entries, loading: isLoading, error } = useLeaderboard(scope, 5);
 
@@ -56,7 +64,7 @@ export const HomeLeaderboardPreview = () => {
         >
           🌎 Global
         </motion.button>
-        {user?.university && (
+        {hasUniversity && (
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
