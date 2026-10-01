@@ -14,7 +14,6 @@ import {
   ParseFilePipe,
   MaxFileSizeValidator,
   BadRequestException,
-  ParseUUIDPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
@@ -39,7 +38,6 @@ import {
   RecommendedQuestsResponseDto,
   RecommendedQuestDto,
   GlobalLeaderboardQueryDto,
-  SubjectLeaderboardQueryDto,
   LeaderboardMeQueryDto,
 } from '../../common/dto';
 
@@ -163,14 +161,12 @@ export class UsersController {
     return this.usersService.setActiveCosmetics(req.user.userId, dto);
   }
 
-  // Static leaderboard routes must be declared before the `:subjectId`
-  // wildcard below, or Nest would try to match "global"/"me"/"universities"
-  // as a subject id.
   @Get('leaderboard/global')
   getGlobalLeaderboard(@Query() query: GlobalLeaderboardQueryDto) {
     return this.usersService.getGlobalLeaderboard(query.limit ?? 20, {
       universityId: query.universityId,
       university: query.university,
+      careerId: query.careerId,
     });
   }
 
@@ -182,28 +178,13 @@ export class UsersController {
     return this.usersService.getMyLeaderboardPosition(req.user.userId, {
       universityId: query.universityId,
       university: query.university,
-      subjectId: query.subjectId,
+      careerId: query.careerId,
     });
   }
 
   @Get('leaderboard/universities')
   getLeaderboardUniversities() {
     return this.usersService.getLeaderboardUniversities();
-  }
-
-  @Get('leaderboard/:subjectId')
-  async getLeaderboard(
-    @Request() req: any,
-    @Param('subjectId', ParseUUIDPipe) subjectId: string,
-    @Query() query: SubjectLeaderboardQueryDto,
-  ) {
-    // Same read rule as GET /subjects/:id: who is enrolled in a private or
-    // hidden subject is not public either.
-    const readableId = await this.communitySubjects.resolveReadable(
-      subjectId,
-      req.user,
-    );
-    return this.usersService.getLeaderboard(readableId, query.limit ?? 20);
   }
 
   @Get(':id')

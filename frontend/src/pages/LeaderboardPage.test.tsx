@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import LeaderboardPage from './LeaderboardPage'
 import { userService } from '../services/userService'
+import { universityService } from '../services/universityService'
 import { useAuthStore } from '../store/authStore'
 
 // LeaderboardPage renders inside AppShell, which mounts the study-bot widget —
@@ -13,9 +14,14 @@ vi.mock('../services/billingService', () => ({
 vi.mock('../services/userService', () => ({
   userService: {
     getGlobalLeaderboard: vi.fn(),
-    getLeaderboard: vi.fn(),
     getLeaderboardUniversities: vi.fn(),
     getMyLeaderboardPosition: vi.fn(),
+  },
+}))
+
+vi.mock('../services/universityService', () => ({
+  universityService: {
+    getCareers: vi.fn(),
   },
 }))
 
@@ -26,10 +32,12 @@ const mockUser = {
   avatarUrl: null,
   university: 'Universidad de Buenos Aires',
   career: 'Ingeniería en Sistemas de Información',
+  universityId: 'uni-uba',
+  careerId: 'career-1',
   year: 3,
   email: 'test@studyquest.dev',
   availability: [],
-  enrolledSubjects: [{ id: 'subj-1', name: 'Álgebra', code: 'ALG1', career: 'Ingeniería', university: 'UBA', year: 1 }],
+  enrolledSubjects: [],
   stats: {
     xp: 0,
     level: 1,
@@ -73,9 +81,11 @@ describe('LeaderboardPage', () => {
       isAuthenticated: true,
     })
     vi.mocked(userService.getGlobalLeaderboard).mockResolvedValue(entries)
-    vi.mocked(userService.getLeaderboard).mockResolvedValue(entries)
     vi.mocked(userService.getLeaderboardUniversities).mockResolvedValue(['Universidad de Buenos Aires', 'UTN'])
     vi.mocked(userService.getMyLeaderboardPosition).mockResolvedValue({ rank: 12, elo: 1000, total: 40 })
+    vi.mocked(universityService.getCareers).mockResolvedValue([
+      { id: 'career-1', universityId: 'uni-uba', name: 'Ingeniería en Sistemas', faculty: null, level: 'grado' },
+    ])
   })
 
   it('loads the Global tab by default', async () => {
@@ -110,16 +120,34 @@ describe('LeaderboardPage', () => {
     })
   })
 
-  it('switches to Por materia and lists the enrolled subjects', async () => {
+  it('switches to Por carrera and defaults the selector to the user own career', async () => {
     renderPage()
     await screen.findByText('Top Player')
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Por materia' }))
+    fireEvent.click(screen.getByRole('tab', { name: 'Por carrera' }))
 
+    const select = await screen.findByLabelText('Carrera')
+    await waitFor(() => expect(select).toHaveValue('career-1'))
     await waitFor(() => {
-      expect(userService.getLeaderboard).toHaveBeenCalledWith('subj-1', 20)
+      expect(userService.getGlobalLeaderboard).toHaveBeenCalledWith(20, undefined, 'career-1')
     })
-    expect(screen.getByText('Álgebra')).toBeInTheDocument()
+  })
+
+  it('shows an empty state on Por carrera when the user has no career yet', async () => {
+    useAuthStore.setState({
+      user: { ...mockUser, careerId: null },
+      accessToken: 'token',
+      refreshToken: 'refresh',
+      isAuthenticated: true,
+    })
+    renderPage()
+    await screen.findByText('Top Player')
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Por carrera' }))
+
+    expect(
+      await screen.findByText('Elegí tu carrera en el perfil para ver este ranking.'),
+    ).toBeInTheDocument()
   })
 
   it("shows the caller's own position when they're outside the visible top", async () => {

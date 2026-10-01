@@ -215,16 +215,13 @@ export const userService = {
     await api.delete(`/users/me/subjects/${subjectId}`)
   },
 
-  async getLeaderboard(subjectId: string, limit = 20): Promise<LeaderboardEntry[]> {
-    const { data } = await api.get<LeaderboardEntry[]>(
-      `/users/leaderboard/${subjectId}?limit=${limit}`,
-    )
-    return data
-  },
-
-  async getGlobalLeaderboard(limit = 20, university?: string): Promise<LeaderboardEntry[]> {
+  async getGlobalLeaderboard(
+    limit = 20,
+    university?: string,
+    careerId?: string,
+  ): Promise<LeaderboardEntry[]> {
     const { data } = await api.get<LeaderboardEntry[]>('/users/leaderboard/global', {
-      params: { limit, university },
+      params: { limit, university, careerId },
     })
     return data
   },
@@ -235,7 +232,7 @@ export const userService = {
   },
 
   async getMyLeaderboardPosition(
-    params: { university?: string; subjectId?: string } = {},
+    params: { university?: string; careerId?: string } = {},
   ): Promise<MyLeaderboardPosition> {
     const { data } = await api.get<MyLeaderboardPosition>('/users/leaderboard/me', {
       params,

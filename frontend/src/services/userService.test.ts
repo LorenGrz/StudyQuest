@@ -14,7 +14,7 @@ describe('userService (leaderboard)', () => {
     vi.mocked(api.get).mockResolvedValue({ data: [] })
     await userService.getGlobalLeaderboard(20)
     expect(api.get).toHaveBeenCalledWith('/users/leaderboard/global', {
-      params: { limit: 20, university: undefined },
+      params: { limit: 20, university: undefined, careerId: undefined },
     })
   })
 
@@ -22,7 +22,15 @@ describe('userService (leaderboard)', () => {
     vi.mocked(api.get).mockResolvedValue({ data: [] })
     await userService.getGlobalLeaderboard(20, 'Universidad de Buenos Aires')
     expect(api.get).toHaveBeenCalledWith('/users/leaderboard/global', {
-      params: { limit: 20, university: 'Universidad de Buenos Aires' },
+      params: { limit: 20, university: 'Universidad de Buenos Aires', careerId: undefined },
+    })
+  })
+
+  it('getGlobalLeaderboard forwards the careerId filter when given', async () => {
+    vi.mocked(api.get).mockResolvedValue({ data: [] })
+    await userService.getGlobalLeaderboard(20, undefined, 'career-1')
+    expect(api.get).toHaveBeenCalledWith('/users/leaderboard/global', {
+      params: { limit: 20, university: undefined, careerId: 'career-1' },
     })
   })
 
@@ -40,11 +48,11 @@ describe('userService (leaderboard)', () => {
     expect(result).toEqual({ rank: 5, elo: 1200, total: 40 })
   })
 
-  it('getMyLeaderboardPosition forwards university and subjectId filters', async () => {
+  it('getMyLeaderboardPosition forwards university and careerId filters', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { rank: 1, elo: 1500, total: 3 } })
-    await userService.getMyLeaderboardPosition({ university: 'UBA', subjectId: 'subj-1' })
+    await userService.getMyLeaderboardPosition({ university: 'UBA', careerId: 'career-1' })
     expect(api.get).toHaveBeenCalledWith('/users/leaderboard/me', {
-      params: { university: 'UBA', subjectId: 'subj-1' },
+      params: { university: 'UBA', careerId: 'career-1' },
     })
   })
 })

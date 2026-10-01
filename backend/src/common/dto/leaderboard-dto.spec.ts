@@ -1,13 +1,9 @@
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import {
-  GlobalLeaderboardQueryDto,
-  SubjectLeaderboardQueryDto,
-  LeaderboardMeQueryDto,
-} from './index';
+import { GlobalLeaderboardQueryDto, LeaderboardMeQueryDto } from './index';
 
 describe('GlobalLeaderboardQueryDto', () => {
-  it('accepts an omitted limit and university', async () => {
+  it('accepts an omitted limit, university and careerId', async () => {
     const dto = plainToInstance(GlobalLeaderboardQueryDto, {});
     const errors = await validate(dto);
     expect(errors).toHaveLength(0);
@@ -39,35 +35,29 @@ describe('GlobalLeaderboardQueryDto', () => {
     const errors = await validate(dto);
     expect(errors.some((e) => e.property === 'university')).toBe(true);
   });
-});
 
-describe('SubjectLeaderboardQueryDto', () => {
-  it('accepts an omitted limit', async () => {
-    const dto = plainToInstance(SubjectLeaderboardQueryDto, {});
+  it('rejects a careerId that is not a uuid', async () => {
+    const dto = plainToInstance(GlobalLeaderboardQueryDto, {
+      careerId: 'not-a-uuid',
+    });
     const errors = await validate(dto);
-    expect(errors).toHaveLength(0);
-  });
-
-  it('rejects a limit above 100', async () => {
-    const dto = plainToInstance(SubjectLeaderboardQueryDto, { limit: '101' });
-    const errors = await validate(dto);
-    expect(errors.some((e) => e.property === 'limit')).toBe(true);
+    expect(errors.some((e) => e.property === 'careerId')).toBe(true);
   });
 });
 
 describe('LeaderboardMeQueryDto', () => {
-  it('accepts an omitted university and subjectId', async () => {
+  it('accepts an omitted university and careerId', async () => {
     const dto = plainToInstance(LeaderboardMeQueryDto, {});
     const errors = await validate(dto);
     expect(errors).toHaveLength(0);
   });
 
-  it('rejects a subjectId that is not a uuid', async () => {
+  it('rejects a careerId that is not a uuid', async () => {
     const dto = plainToInstance(LeaderboardMeQueryDto, {
-      subjectId: 'not-a-uuid',
+      careerId: 'not-a-uuid',
     });
     const errors = await validate(dto);
-    expect(errors.some((e) => e.property === 'subjectId')).toBe(true);
+    expect(errors.some((e) => e.property === 'careerId')).toBe(true);
   });
 
   it('rejects a university longer than 200 characters', async () => {

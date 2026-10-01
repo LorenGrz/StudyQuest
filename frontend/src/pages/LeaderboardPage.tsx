@@ -5,35 +5,46 @@ import { Spinner, Select } from '../components/UI'
 import { useAuthStore } from '../store/authStore'
 import { userService } from '../services/userService'
 import type { LeaderboardEntry, MyLeaderboardPosition } from '../services/userService'
+import { universityService } from '../services/universityService'
+import type { Career } from '../services/universityService'
 import { useLeaderboard, type LeaderboardScope } from '../hooks/useLeaderboard'
 
 import { getLeague, DEFAULT_ELO } from '../utils/leagues'
 import { AvatarWithBorder } from '../components/AvatarWithBorder'
 
-type TabType = 'global' | 'university' | 'subject'
+type TabType = 'global' | 'university' | 'career'
 
 const TAB_LABELS: Record<TabType, string> = {
   global: 'Global',
   university: 'Por universidad',
-  subject: 'Por materia',
+  career: 'Por carrera',
 }
 
 export default function LeaderboardPage() {
   const { user } = useAuthStore()
   const [activeTab, setActiveTab] = useState<TabType>('global')
-  const [selectedSubjectId, setSelectedSubjectId] = useState<string>('')
+  const [selectedCareerId, setSelectedCareerId] = useState<string>('')
+  const [careers, setCareers] = useState<Career[]>([])
   const [selectedUniversity, setSelectedUniversity] = useState<string>(user?.university ?? '')
   const [universities, setUniversities] = useState<string[]>([])
   const [myPosition, setMyPosition] = useState<MyLeaderboardPosition | null>(null)
 
-  const subjects = user?.enrolledSubjects ?? []
-
-  // Select first subject by default
+  // Default the career selector to the user's own career once it's known.
   useEffect(() => {
-    if (subjects.length > 0 && !selectedSubjectId) {
-      setSelectedSubjectId(subjects[0].id)
+    if (!selectedCareerId && user?.careerId) {
+      setSelectedCareerId(user.careerId)
     }
-  }, [subjects, selectedSubjectId])
+  }, [user, selectedCareerId])
+
+  useEffect(() => {
+    if (!user?.universityId) return
+    let cancelled = false
+    universityService
+      .getCareers(user.universityId)
+      .then((data) => { if (!cancelled) setCareers(data) })
+      .catch(() => { /* the selector still works with just the user's own career */ })
+    return () => { cancelled = true }
+  }, [user?.universityId])
 
   // Default the university selector to the user's own university once it's known.
   useEffect(() => {
@@ -61,13 +72,23 @@ export default function LeaderboardPage() {
     [selectedUniversity, universities],
   )
 
+  // The user's own career may be `retired` and so absent from the active
+  // catalog list — keep it selectable regardless, labeled with the legacy name.
+  const careerOptions = useMemo(() => {
+    const options = careers.map((c) => ({ value: c.id, label: c.name }))
+    if (selectedCareerId && !careers.some((c) => c.id === selectedCareerId)) {
+      return [{ value: selectedCareerId, label: user?.career ?? selectedCareerId }, ...options]
+    }
+    return options
+  }, [careers, selectedCareerId, user?.career])
+
   const scope: LeaderboardScope | null = useMemo(() => {
     if (activeTab === 'global') return { type: 'global' }
     if (activeTab === 'university') {
       return selectedUniversity ? { type: 'university', university: selectedUniversity } : null
     }
-    return selectedSubjectId ? { type: 'subject', subjectId: selectedSubjectId } : null
-  }, [activeTab, selectedUniversity, selectedSubjectId])
+    return selectedCareerId ? { type: 'career', careerId: selectedCareerId } : null
+  }, [activeTab, selectedUniversity, selectedCareerId])
 
   const { data: entries, loading: isLoading, error } = useLeaderboard(scope)
 
@@ -82,8 +103,8 @@ export default function LeaderboardPage() {
     const params =
       scope.type === 'university'
         ? { university: scope.university }
-        : scope.type === 'subject'
-          ? { subjectId: scope.subjectId }
+        : scope.type === 'career'
+          ? { careerId: scope.careerId }
           : {}
     userService
       .getMyLeaderboardPosition(params)
@@ -92,8 +113,8 @@ export default function LeaderboardPage() {
     return () => { cancelled = true }
   }, [scope, entries, isLoading, user?.id])
 
-  const showSubjectEmptyState = activeTab === 'subject' && subjects.length === 0
-  const showContent = !showSubjectEmptyState
+  const showCareerEmptyState = activeTab === 'career' && !user?.careerId
+  const showContent = !showCareerEmptyState
 
   return (
     <MobileLayout>
@@ -104,7 +125,7 @@ export default function LeaderboardPage() {
       >
         <div className="px-4 pt-5 pb-2">
           <h1 className="text-2xl font-extrabold pt-5 pb-2">🏆 Leaderboard</h1>
-          <p className="text-[13px] text-muted mt-0.5">Ranking global, por universidad y por materia</p>
+          <p className="text-[13px] text-muted mt-0.5">Ranking global, por universidad y por carrera</p>
         </div>
 
         {/* Main tabs */}
@@ -134,24 +155,21 @@ export default function LeaderboardPage() {
           </div>
         )}
 
-        {showSubjectEmptyState && (
+        {showCareerEmptyState && (
           <div className="text-center py-10 px-5">
-            <p className="text-sm font-semibold text-primary">Inscribite a materias para ver el leaderboard.</p>
+            <p className="text-sm font-semibold text-primary">Elegí tu carrera en el perfil para ver este ranking.</p>
           </div>
         )}
 
-        {activeTab === 'subject' && subjects.length > 0 && (
-          <div className="flex flex-wrap gap-2 px-4 pb-3">
-            {subjects.map(s => (
-              <button
-                key={s.id}
-                id={`lb-tab-${s.id}`}
-                className={`py-[7px] px-4 rounded-full border border-[var(--overlay-border)] bg-surface text-secondary text-[13px] font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer hover:border-accent hover:text-accent-light min-h-[44px] ${selectedSubjectId === s.id ? 'bg-accent border-accent text-on-accent shadow-[0_0_12px_rgba(124,58,237,0.4)]' : ''}`}
-                onClick={() => setSelectedSubjectId(s.id)}
-              >
-                {s.name}
-              </button>
-            ))}
+        {activeTab === 'career' && !showCareerEmptyState && (
+          <div className="px-4 pb-3 max-w-xs">
+            <Select
+              id="leaderboard-career"
+              label="Carrera"
+              value={selectedCareerId}
+              onChange={(e) => setSelectedCareerId(e.target.value)}
+              options={careerOptions}
+            />
           </div>
         )}
 
