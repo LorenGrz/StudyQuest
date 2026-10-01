@@ -217,7 +217,11 @@ describe('UsersService (leaderboard)', () => {
     qb = createLeaderboardQbMock();
     userRepo = { createQueryBuilder: jest.fn().mockReturnValue(qb) };
     resolveUniversityId = jest.fn(async (name: string) =>
-      /tecnol[oó]gica nacional/i.test(name) ? 'uni-utn' : name === 'UBA' ? 'uni-uba' : null,
+      /tecnol[oó]gica nacional/i.test(name)
+        ? 'uni-utn'
+        : name === 'UBA'
+          ? 'uni-uba'
+          : null,
     );
 
     const moduleRef = await Test.createTestingModule({
@@ -294,6 +298,18 @@ describe('UsersService (leaderboard)', () => {
       await service.getGlobalLeaderboard(20, { universityId: 'uni-uba' });
       expect(qb.where).toHaveBeenCalledWith('u.university_id = :universityId', {
         universityId: 'uni-uba',
+      });
+      expect(resolveUniversityId).not.toHaveBeenCalled();
+    });
+
+    it('filters by career_id when one is provided, ignoring university', async () => {
+      qb.getRawMany.mockResolvedValue([]);
+      await service.getGlobalLeaderboard(20, {
+        careerId: 'career-1',
+        university: 'UBA',
+      });
+      expect(qb.where).toHaveBeenCalledWith('u.career_id = :careerId', {
+        careerId: 'career-1',
       });
       expect(resolveUniversityId).not.toHaveBeenCalled();
     });
@@ -389,28 +405,27 @@ describe('UsersService (leaderboard)', () => {
       expect(qb.innerJoin).not.toHaveBeenCalled();
     });
 
-    it('scopes the count by subject enrollment when subjectId is given, ignoring university', async () => {
+    it('scopes the count by career when careerId is given, ignoring university', async () => {
       qb.getRawOne
         .mockResolvedValueOnce({ count: '8' })
         .mockResolvedValueOnce({ count: '0' });
 
       const result = await service.getMyLeaderboardPosition('u1', {
         university: 'UBA',
-        subjectId: 'subj-1',
+        careerId: 'career-1',
       });
 
       expect(result).toEqual({ rank: 1, elo: 1200, total: 8 });
-      expect(qb.innerJoin).toHaveBeenCalledWith(
-        'u.enrolledSubjects',
-        's',
-        's.id = :subjectId',
-        { subjectId: 'subj-1' },
-      );
-      expect(qb.where).not.toHaveBeenCalled();
+      expect(qb.where).toHaveBeenCalledWith('u.career_id = :careerId', {
+        careerId: 'career-1',
+      });
+      expect(resolveUniversityId).not.toHaveBeenCalled();
     });
 
     it('returns rank 1 and total 0 when the scope has no users', async () => {
-      qb.getRawOne.mockResolvedValueOnce(undefined).mockResolvedValueOnce(undefined);
+      qb.getRawOne
+        .mockResolvedValueOnce(undefined)
+        .mockResolvedValueOnce(undefined);
 
       const result = await service.getMyLeaderboardPosition('u1');
 

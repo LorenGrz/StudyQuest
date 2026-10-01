@@ -17,7 +17,6 @@ vi.mock('../services/userService', () => ({
     getQuestsToday: vi.fn().mockResolvedValue([]),
     getRecommendedQuests: vi.fn().mockResolvedValue({ items: [], total: 0, page: 1, limit: 5, totalPages: 1 }),
     getGlobalLeaderboard: vi.fn().mockResolvedValue([]),
-    getLeaderboard: vi.fn().mockResolvedValue([]),
   },
 }))
 

@@ -52,10 +52,12 @@ import {
 } from '../universities/universities.service';
 import { University } from '../universities/university.entity';
 
-/** Leaderboard scope: catalog id, or a deprecated name resolved to it. */
-export interface UniversityFilter {
+/** Leaderboard scope: catalog ids, or a deprecated university name resolved
+ * to one. `careerId` takes precedence over the university scope. */
+export interface LeaderboardFilter {
   universityId?: string;
   university?: string;
+  careerId?: string;
 }
 
 @Injectable()
@@ -375,11 +377,7 @@ export class UsersService {
     let requestedCareer: { universityId: string; name: string } | null = null;
     const academic = { universityId, university, careerId, careerName, career };
     if (Object.values(academic).some((v) => v !== undefined)) {
-      requestedCareer = await this.applyAcademicChange(
-        userId,
-        academic,
-        patch,
-      );
+      requestedCareer = await this.applyAcademicChange(userId, academic, patch);
     }
 
     // One transaction: the career change and its "Otra" request land together.
@@ -708,7 +706,7 @@ export class UsersService {
    * together.
    */
   private async resolveUniversityScope(
-    filter: UniversityFilter,
+    filter: LeaderboardFilter,
   ): Promise<string | null | undefined> {
     if (filter.universityId) return filter.universityId;
     if (!filter.university) return undefined;
@@ -717,7 +715,7 @@ export class UsersService {
 
   async getGlobalLeaderboard(
     limit = 20,
-    filter: UniversityFilter = {},
+    filter: LeaderboardFilter = {},
   ): Promise<
     {
       rank: number;
@@ -738,10 +736,14 @@ export class UsersService {
       .addSelect('u.active_cosmetics', 'activeCosmetics')
       .addSelect(`COALESCE((u.stats->>'elo')::int, ${DEFAULT_ELO})`, 'elo');
 
-    const universityId = await this.resolveUniversityScope(filter);
-    if (universityId === null) return [];
-    if (universityId) {
-      qb = qb.where('u.university_id = :universityId', { universityId });
+    if (filter.careerId) {
+      qb = qb.where('u.career_id = :careerId', { careerId: filter.careerId });
+    } else {
+      const universityId = await this.resolveUniversityScope(filter);
+      if (universityId === null) return [];
+      if (universityId) {
+        qb = qb.where('u.university_id = :universityId', { universityId });
+      }
     }
 
     const rows = await qb
@@ -775,21 +777,19 @@ export class UsersService {
 
   async getMyLeaderboardPosition(
     userId: string,
-    scope: UniversityFilter & { subjectId?: string } = {},
+    scope: LeaderboardFilter = {},
   ): Promise<{ rank: number; elo: number; total: number }> {
     const elo = await this.getElo(userId);
-    const { subjectId } = scope;
-    const universityId = subjectId
+    const { careerId } = scope;
+    const universityId = careerId
       ? undefined
       : await this.resolveUniversityScope(scope);
     if (universityId === null) return { rank: 1, elo, total: 0 };
 
     const scopedQuery = (): SelectQueryBuilder<User> => {
       let qb = this.userRepo.createQueryBuilder('u');
-      if (subjectId) {
-        qb = qb.innerJoin('u.enrolledSubjects', 's', 's.id = :subjectId', {
-          subjectId,
-        });
+      if (careerId) {
+        qb = qb.where('u.career_id = :careerId', { careerId });
       } else if (universityId) {
         qb = qb.where('u.university_id = :universityId', { universityId });
       }
@@ -811,43 +811,6 @@ export class UsersService {
       elo,
       total: parseInt(totalRow?.count ?? '0', 10),
     };
-  }
-
-  async getLeaderboard(
-    subjectId: string,
-    limit = 20,
-  ): Promise<
-    {
-      rank: number;
-      userId: string;
-      username: string;
-      displayName: string;
-      avatarUrl: string | null;
-      activeCosmetics: any;
-      elo: number;
-    }[]
-  > {
-    const rows = await this.userRepo
-      .createQueryBuilder('u')
-      .innerJoin('u.enrolledSubjects', 's', 's.id = :subjectId', { subjectId })
-      .select('u.id', 'userId')
-      .addSelect('u.username', 'username')
-      .addSelect('u.display_name', 'displayName')
-      .addSelect('u.avatar_url', 'avatarUrl')
-      .addSelect('u.active_cosmetics', 'activeCosmetics')
-      .addSelect(`COALESCE((u.stats->>'elo')::int, ${DEFAULT_ELO})`, 'elo')
-      .orderBy('elo', 'DESC')
-      .limit(limit)
-      .getRawMany<{
-        userId: string;
-        username: string;
-        displayName: string;
-        avatarUrl: string | null;
-        activeCosmetics: any;
-        elo: number;
-      }>();
-
-    return rows.map((row, index) => ({ rank: index + 1, ...row }));
   }
 
   async saveRefreshToken(userId: string, hashedToken: string): Promise<void> {

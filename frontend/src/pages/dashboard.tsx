@@ -539,7 +539,7 @@ const DashboardPage = () => {
                 </div>
               )}
 
-              <HomeLeaderboardPreview subjects={subjects} />
+              <HomeLeaderboardPreview />
             </div>
           </Reveal>
         </div>

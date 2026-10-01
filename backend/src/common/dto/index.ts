@@ -353,17 +353,16 @@ export class GlobalLeaderboardQueryDto {
   @IsOptional() @IsUUID() universityId?: string;
   /** Deprecated: catalog name, resolved to universityId (UTN alias included). */
   @IsOptional() @IsString() @MaxLength(200) university?: string;
-}
-
-export class SubjectLeaderboardQueryDto {
-  @IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100) limit?: number;
+  /** Catalog career id; takes precedence over the university scope. */
+  @IsOptional() @IsUUID() careerId?: string;
 }
 
 export class LeaderboardMeQueryDto {
   @IsOptional() @IsUUID() universityId?: string;
   /** Deprecated: catalog name, resolved to universityId (UTN alias included). */
   @IsOptional() @IsString() @MaxLength(200) university?: string;
-  @IsOptional() @IsUUID() subjectId?: string;
+  /** Catalog career id; takes precedence over the university scope. */
+  @IsOptional() @IsUUID() careerId?: string;
 }
 
 // ─── Recommendations ──────────────────────────────────────────────────────────

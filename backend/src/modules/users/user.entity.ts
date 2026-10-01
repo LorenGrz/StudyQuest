@@ -86,7 +86,12 @@ export class User {
   @Column({ length: 200 })
   career: string;
 
-  @Column({ name: 'university_id', type: 'uuid', nullable: true, default: null })
+  @Column({
+    name: 'university_id',
+    type: 'uuid',
+    nullable: true,
+    default: null,
+  })
   @Index('IDX_users_university_id')
   universityId: string | null;
 
@@ -98,6 +103,7 @@ export class User {
   universityRef: University | null;
 
   @Column({ name: 'career_id', type: 'uuid', nullable: true, default: null })
+  @Index('IDX_users_career_id')
   careerId: string | null;
 
   @ManyToOne(() => Career, { onDelete: 'SET NULL' })
