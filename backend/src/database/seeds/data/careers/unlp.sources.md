@@ -88,3 +88,49 @@ vigente de la misma facultad, verificado con `curl`)
 
 Todas las URLs de `unlp.json` se verificaron una por una con
 `curl -sL -o /dev/null -w "%{http_code}" -A "Mozilla/5.0"` (200 en todas).
+
+## 2026-10-01 — revisión trimestral: BLOQUEADA por egress de red
+
+Intento de revisión trimestral programada. El dominio `unlp.edu.ar` **y todos
+sus subdominios de facultad** (`www.info.unlp.edu.ar`, `ing.unlp.edu.ar`,
+`fba.unlp.edu.ar`, etc.) estaban bloqueados a nivel de proxy de salida de red
+de la sesión de este agente: toda solicitud, incluyendo la página de
+búsqueda de carreras (`unlp.edu.ar/?s=&post_type=carrera&...`) y páginas de
+carrera ya verificadas en 2026-09-29 (p. ej. `unlp.edu.ar/carrera/arquitectura/`,
+`www.info.unlp.edu.ar/analista-programador-universitario/`), devolvió
+`EGRESS_BLOCKED` ("Access to unlp.edu.ar is blocked by the network egress
+proxy") antes de llegar siquiera a hacer la petición HTTP. No fue un error
+puntual de una página (403/anti-bot/timeout) sino un bloqueo de dominio
+completo para esta sesión.
+
+Siguiendo la regla del proyecto de que un fetch fallido significa "no se
+pudo verificar" (nunca "discontinuada"), **no se modificó `unlp.json`**: no
+se agregó, renombró, movió, cambió de nivel ni retiró ninguna carrera, y no
+se corrigió ninguna `sourceUrl`, porque ninguna página pudo re-verificarse
+en esta sesión.
+
+Como chequeo secundario de menor confianza (no cuenta como evidencia válida
+para editar el catálogo, ya que no son páginas oficiales de unlp.edu.ar) se
+usó búsqueda web general:
+
+- No se encontró ninguna mención de una carrera nueva de Inteligencia
+  Artificial en la Facultad de Informática o de Ingeniería de la UNLP para
+  2026 (sí existen en otras universidades, p. ej. UNI Perú, UNL).
+- No se encontró ninguna mención de discontinuación/cierre de carreras de
+  la UNLP para 2025–2026.
+- Prensa (universidadeshoy.com.ar, 0221.com.ar, diariohoy.net, mid-2026)
+  reporta que la Facultad de Ciencias Médicas está **en proceso** de crear
+  una "Licenciatura en Enfermería", todavía sin acreditación CONEAU —
+  consistente con la regla de excluir carreras "próximamente"/sin título
+  aprobado. No se agrega hasta poder verificarla en una página oficial de
+  `med.unlp.edu.ar` y confirmar que ya está dictándose como carrera de grado
+  (no solo "en creación").
+
+Ninguna de las seis carreras referenciadas en `official-subjects.ts`
+("Analista Programador Universitario", "Analista en Tecnologías de la
+Información y la Comunicación", "Ciencia de Datos en Organizaciones",
+"Ingeniería en Computación", "Licenciatura en Informática", "Licenciatura en
+Sistemas") fue tocada.
+
+Pendiente: repetir esta revisión trimestral la próxima vez que el egress de
+red hacia `unlp.edu.ar` esté disponible para el agente.

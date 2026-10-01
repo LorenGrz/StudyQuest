@@ -83,3 +83,55 @@ nombre real de la carrera en el `<title>`.
 
 Todas las URLs de `unr.json` se verificaron una por una con
 `curl -sL -o /dev/null -w "%{http_code}" -A "Mozilla/5.0"` (200 en todas).
+
+## 2026-10-01 — revisión trimestral
+
+Intento de re-verificar `https://unr.edu.ar/buscador-de-carreras-y-diplomaturas/`
+y las 100 `sourceUrl` individuales de `unr.json`: **bloqueado a nivel de red**
+en este entorno. Tanto `curl` directo como la herramienta WebFetch devolvieron
+`EGRESS_BLOCKED` para `unr.edu.ar` y cualquier subdominio (`fceia.unr.edu.ar`,
+etc.); se confirmó que el bloqueo no es específico de UNR probando dominios
+no relacionados (`www.google.com`, `www.uba.ar`, `www.unlp.edu.ar`,
+`archive.org`), que fallaron igual — es un bloqueo de egress general de la
+sesión, no un 403/anti-bot propio de UNR. Por la regla del proyecto ("a
+page/step that fails to load means 'could not verify' — never mark something
+as discontinued just because a fetch failed"), **no se tocó ninguna fila por
+esta causa** y no se reemplazó ninguna `sourceUrl`.
+
+Como mitigación se usó búsqueda web (snippets de prensa y de las propias
+páginas de UNR indexadas) en vez de fetch directo, para cotejar lo que ya
+está en `unr.json` contra noticias oficiales/prensa recientes:
+
+- Las "seis nuevas carreras para 2026" anunciadas por la UNR (nota oficial
+  `unr.edu.ar/nueva-sesion-del-consejo-superior-3/` y cobertura de prensa:
+  La Capital, Rosario3, Infobae) son: Profesorado Universitario en Educación
+  Física, Licenciatura en Actividad Física y Deporte, Licenciatura en
+  Sistemas Integrales de Cuidado y Tecnicatura Universitaria en
+  Acompañamiento y Cuidado de las Personas Mayores (las 4 de la nueva
+  Facultad de Ciencias del Movimiento Humano y el Cuidado, con clases desde
+  abril 2026), más Tecnicatura Universitaria en Acompañamiento Terapéutico
+  (Facultad de Psicología) y Licenciatura en Terapia Ocupacional (Facultad
+  de Ciencias Médicas, carrera histórica suspendida desde 1977 que se
+  reabre). **Las 6 ya estaban presentes en `unr.json` con la misma facultad
+  y el mismo nombre** — no se agregó nada.
+- No se encontró ninguna mención de prensa ni de UNR sobre cierre/
+  discontinuación de carreras de grado/pregrado para 2025-2026.
+- Las 3 carreras referenciadas en `official-subjects.ts` ("Licenciatura en
+  Ciencia de Datos", "Licenciatura en Ciencias de la Computación",
+  "Tecnicatura Universitaria en Inteligencia Artificial") se cotejaron contra
+  páginas de FCEyE/FCEIA indexadas y notas de prensa (La Capital,
+  versionrosario.com.ar, FCEIA): mismo nombre, misma facultad que en
+  `unr.json`. **No se modificaron.**
+- URL de "Tecnicatura Universitaria en Inteligencia Artificial": un snippet
+  de búsqueda mostró una URL alternativa en `web.fceia.unr.edu.ar` con una
+  ruta distinta (`.../licenciatura-en-ciencias-de-la-computaci%C3%B3n/194-
+  grado/carreras-de-pregrado/2165-...html`) a la que está en `unr.json`
+  (`.../carreras/carreras-de-pregrado/2165-...html`). Ambas apuntan al mismo
+  ID de artículo de Joomla (2165) y podrían ser dos rutas de menú válidas
+  para la misma página; sin poder hacer `curl`/fetch para comprobar el
+  código HTTP de ninguna de las dos, **no se cambió** la URL existente
+  (regla: nunca reemplazar sin confirmar que la actual está rota).
+
+**Resultado: sin cambios en `unr.json`.** No se pudo hacer la verificación
+completa fila por fila de esta revisión por el bloqueo de red; queda
+pendiente para la próxima sesión en la que `unr.edu.ar` sea alcanzable.
