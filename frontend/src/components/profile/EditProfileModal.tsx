@@ -5,7 +5,8 @@ import { Button } from '../../components/UI'
 import { useUniversities, useUniversityCareers } from '../../hooks/useUniversities'
 import { userService, type User } from '../../services/userService'
 import { universityService } from '../../services/universityService'
-import { OTHER_CAREER_LABEL, OTHER_CAREER_VALUE } from '../../utils/careers'
+import { OTHER_CAREER_VALUE } from '../../utils/careers'
+import { CareerCombobox } from '../CareerCombobox'
 
 interface EditProfileModalProps {
   user: User
@@ -31,7 +32,7 @@ export function EditProfileModal({ user, onClose, onUpdate }: EditProfileModalPr
     careerName: '',
     year: user.year,
   })
-  const { groups: careerGroups } = useUniversityCareers(formData.universityId || undefined)
+  const { careers } = useUniversityCareers(formData.universityId || undefined)
   const [pendingCareerName, setPendingCareerName] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -147,30 +148,14 @@ export function EditProfileModal({ user, onClose, onUpdate }: EditProfileModalPr
               ))}
             </select>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-[13px] font-medium text-secondary" htmlFor="profile-career">Carrera</label>
-            <select
-              id="profile-career"
-              className="w-full px-3.5 py-3 bg-panel border border-[var(--overlay-border)] rounded-lg text-primary text-[15px] transition-[border-color,box-shadow] duration-200 outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(124,58,237,0.3)] min-h-[44px]"
-              value={formData.careerId}
-              onChange={(e) => setCareerId(e.target.value)}
-              disabled={!formData.universityId}
-            >
-              <option value="">Seleccionar...</option>
-              {careerGroups.map((g) => (
-                <optgroup key={g.faculty} label={g.faculty}>
-                  {g.careers.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
-              {formData.universityId && (
-                <option value={OTHER_CAREER_VALUE}>{OTHER_CAREER_LABEL}</option>
-              )}
-            </select>
-          </div>
+          <CareerCombobox
+            id="profile-career"
+            label="Carrera"
+            careers={careers}
+            value={formData.careerId}
+            onChange={setCareerId}
+            disabled={!formData.universityId}
+          />
           {isOtherCareer && (
             <div className="flex flex-col gap-1.5">
               <label className="text-[13px] font-medium text-secondary" htmlFor="profile-career-name">Nombre de tu carrera</label>

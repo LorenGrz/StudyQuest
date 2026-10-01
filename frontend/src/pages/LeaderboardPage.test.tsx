@@ -103,7 +103,7 @@ describe('LeaderboardPage', () => {
     const select = await screen.findByLabelText('Universidad')
     expect(select).toHaveValue('Universidad de Buenos Aires')
     await waitFor(() => {
-      expect(userService.getGlobalLeaderboard).toHaveBeenCalledWith(20, 'Universidad de Buenos Aires')
+      expect(userService.getGlobalLeaderboard).toHaveBeenCalledWith(20, { university: 'Universidad de Buenos Aires' })
     })
   })
 
@@ -116,7 +116,7 @@ describe('LeaderboardPage', () => {
     fireEvent.change(select, { target: { value: 'UTN' } })
 
     await waitFor(() => {
-      expect(userService.getGlobalLeaderboard).toHaveBeenCalledWith(20, 'UTN')
+      expect(userService.getGlobalLeaderboard).toHaveBeenCalledWith(20, { university: 'UTN' })
     })
   })
 
@@ -129,7 +129,7 @@ describe('LeaderboardPage', () => {
     const select = await screen.findByLabelText('Carrera')
     await waitFor(() => expect(select).toHaveValue('career-1'))
     await waitFor(() => {
-      expect(userService.getGlobalLeaderboard).toHaveBeenCalledWith(20, undefined, 'career-1')
+      expect(userService.getGlobalLeaderboard).toHaveBeenCalledWith(20, { careerId: 'career-1' })
     })
   })
 

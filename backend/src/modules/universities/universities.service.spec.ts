@@ -75,12 +75,29 @@ describe('UniversitiesService', () => {
     });
 
     it('resolves the legacy UTN spelling to the FRBA catalog entry', async () => {
-      const utn = { id: 'uni-utn', name: 'Universidad Tecnológica Nacional – FRBA' };
+      const utn = {
+        id: 'uni-utn',
+        name: 'Universidad Tecnológica Nacional – FRBA',
+      };
       universityRepo.find.mockResolvedValue([UBA, utn]);
       await expect(
         service.resolveUniversityId('Universidad Tecnológica Nacional'),
       ).resolves.toBe('uni-utn');
-      await expect(service.resolveUniversityId('Mi Uni Inventada')).resolves.toBeNull();
+      await expect(
+        service.resolveUniversityId('Mi Uni Inventada'),
+      ).resolves.toBeNull();
+    });
+
+    it('resolves a legacy acronym through the catalog shortName', async () => {
+      const unsam = {
+        id: 'uni-unsam',
+        name: 'Universidad Nacional de San Martín',
+        shortName: 'UNSAM',
+      };
+      universityRepo.find.mockResolvedValue([UBA, unsam]);
+      await expect(service.resolveUniversityId('unsam')).resolves.toBe(
+        'uni-unsam',
+      );
     });
 
     it('rejects an unknown university', async () => {

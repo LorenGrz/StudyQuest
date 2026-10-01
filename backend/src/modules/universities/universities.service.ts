@@ -261,6 +261,12 @@ export class UniversitiesService {
     const key = universityKey(name);
     if (!key) return null;
     const all = await this.universityRepo.find({ order: { name: 'ASC' } });
-    return all.find((u) => universityKey(u.name) === key) ?? null;
+    // Same rule as mapUsersToCatalog: full name first, then the acronym, so a
+    // legacy "UNSAM" resolves like the deploy-time mapping does.
+    return (
+      all.find((u) => universityKey(u.name) === key) ??
+      all.find((u) => u.shortName && universityKey(u.shortName) === key) ??
+      null
+    );
   }
 }

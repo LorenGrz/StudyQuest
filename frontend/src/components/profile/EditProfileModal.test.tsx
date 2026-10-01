@@ -89,7 +89,7 @@ describe('EditProfileModal', () => {
     render(<EditProfileModal user={baseUser} onClose={onClose} onUpdate={onUpdate} />)
 
     expect(screen.getByLabelText('Universidad')).toHaveValue('uni-uba')
-    expect(screen.getByLabelText('Carrera')).toHaveValue('car-uba-1')
+    expect(screen.getByLabelText('Carrera')).toHaveValue('Ingeniería en Informática')
 
     await user.click(screen.getByRole('button', { name: 'Guardar' }))
 
