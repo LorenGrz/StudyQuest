@@ -53,3 +53,5 @@ docker-data/
 .pnpm-store/
 frontend/.pnpm-store/
 backend/.pnpm-store/
+# Worktrees de agentes de Claude Code
+.claude/worktrees/
